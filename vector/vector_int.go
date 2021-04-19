@@ -20,7 +20,6 @@ const maxIntPrint = 5
 // integer is a structure, subsisting integer vectors
 type integer struct {
 	common
-
 	data []int
 }
 
@@ -112,6 +111,13 @@ func (v *integer) Clone() Vector {
 	}
 
 	return vec
+}
+
+func (v *integer) Refresh() {
+	v.common.Refresh()
+
+	data := make([]int, len(v.data))
+	copy(data, v.data)
 }
 
 // NewIntegerVector creates a new integer vector

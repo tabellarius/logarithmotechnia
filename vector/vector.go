@@ -3,17 +3,11 @@ package vector
 // Vector is an interface for a different vector types. This structure is similar to R-vectors: it starts from 1,
 // allows for an extensive indexing, supports NA-values and named variables
 type Vector interface {
-	Lengther
-	Nameable
-	NAble
-	Cloneable
-	Reportable
-	//	Idx(idx Idx) Vector
-	//	I(idx []int) Vector
-}
-
-type Lengther interface {
+	Clone() Vector
 	Length() int
+	ByIndex(indices []int) Vector
+	ByFromTo(from int, to int) Vector
+	IsEmpty() bool
 }
 
 type Nameable interface {
@@ -23,6 +17,7 @@ type Nameable interface {
 	SetNames(names []string) Vector
 	SetNamesMap(names map[int]string) Vector
 	IfNameFor(idx int) bool
+	ByNames(names []string) Vector
 }
 
 type NAble interface {
@@ -32,11 +27,7 @@ type NAble interface {
 	SetNAMap(na map[int]bool) Vector
 }
 
-type Cloneable interface {
-	Clone() Vector
-}
-
-type Reportable interface {
+type Reporter interface {
 	Report() Report
 }
 
@@ -56,23 +47,79 @@ type Stringable interface {
 	Strings() []string
 }
 
-type Idx struct {
-	From    int
-	To      int
-	ByIds   []int
-	ByNames []string
-}
-
 // common holds data and functions shared by all vectors
 type common struct {
-	length int
-	names  map[int]string
-	na     []bool
-	marked bool
-	report Report
+	length   int
+	names    map[int]string
+	na       []bool
+	marked   bool
+	report   Report
+	selected []int
+}
+
+func (v *common) IsEmpty() bool {
+	return v.length > 0
+}
+
+func (v *common) ByIndex(indices []int) Vector {
+	na := make([]bool, 0, v.length)
+	names := map[int]string{}
+	selected := []int{}
+
+	newIndex := 0
+	for _, index := range indices {
+		if index >= 1 && index <= v.length {
+			na = append(na, v.na[index])
+			selected = append(selected, index)
+			newIndex++
+		}
+		if name, ok := v.names[index]; ok {
+			names[newIndex] = name
+		}
+	}
+
+	vec := newCommon(len(na), Config{
+		NamesMap: names,
+		NA:       na,
+	})
+	vec.selected = selected
+
+	return &vec
+}
+
+func (v *common) ByNames(selectedNames []string) Vector {
+	na := make([]bool, 0, v.length)
+	names := map[int]string{}
+	selected := []int{}
+
+	newIndex := 0
+	for _, sName := range selectedNames {
+		for index, name := range v.names {
+			if sName == name {
+				na = append(na, na[index])
+				names[newIndex] = name
+				selected = append(selected, index)
+				newIndex++
+			}
+		}
+	}
+
+	vec := newCommon(len(na), Config{
+		NamesMap: names,
+		NA:       na,
+	})
+	vec.selected = selected
+
+	return &vec
+}
+
+func (v *common) ByFromTo(from int, to int) Vector {
+	panic("implement me")
 }
 
 func (v *common) Clone() Vector {
+	v.marked = true
+
 	return &common{
 		length: v.length,
 		names:  v.names,

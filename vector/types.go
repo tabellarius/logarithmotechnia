@@ -22,22 +22,22 @@ func (b ArrBool) All() bool {
 	return true
 }
 
-type Int struct {
+type IntNA struct {
 	Val int
 	NA  bool
 }
 
-type Float struct {
+type FloatNA struct {
 	Val float64
 	NA  bool
 }
 
-type Bool struct {
+type BoolNA struct {
 	Val bool
 	NA  bool
 }
 
-type String struct {
+type StringNA struct {
 	Val string
 	NA  bool
 }
