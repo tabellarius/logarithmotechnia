@@ -114,7 +114,17 @@ func (v *common) ByNames(selectedNames []string) Vector {
 }
 
 func (v *common) ByFromTo(from int, to int) Vector {
-	panic("implement me")
+	/* from and to have different signs */
+	if from*to < 0 {
+		emp := Empty()
+		emp.Report().AddError("")
+	}
+
+	reverse := false
+	if from > 0 && from < to {
+		reverse = true
+	}
+
 }
 
 func (v *common) Clone() Vector {

@@ -1,10 +1,18 @@
 package vector
 
-func Empty() Vector {
-	return &empty{}
+func Empty() EmptyVector {
+	return &empty{
+		report: Report{},
+	}
+}
+
+type EmptyVector interface {
+	Vector
+	Reporter
 }
 
 type empty struct {
+	report Report
 }
 
 func (v *empty) IsEmpty() bool {
@@ -25,4 +33,8 @@ func (v *empty) Clone() Vector {
 
 func (v *empty) Length() int {
 	return 0
+}
+
+func (v *empty) Report() Report {
+	return v.report
 }
