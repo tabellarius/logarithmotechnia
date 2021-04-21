@@ -10,16 +10,6 @@ type Vector interface {
 	IsEmpty() bool
 }
 
-type Nameable interface {
-	Names() []string
-	NamesMap() map[int]string
-	SetName(idx int, name string) Vector
-	SetNames(names []string) Vector
-	SetNamesMap(names map[int]string) Vector
-	IfNameFor(idx int) bool
-	ByNames(names []string) Vector
-}
-
 type NAble interface {
 	NA() []bool
 	NAMap() map[int]bool
