@@ -8,13 +8,7 @@ type Vector interface {
 	ByIndex(indices []int) Vector
 	ByFromTo(from int, to int) Vector
 	IsEmpty() bool
-}
-
-type NAble interface {
-	NA() []bool
-	NAMap() map[int]bool
-	SetNA(na []bool) Vector
-	SetNAMap(na map[int]bool) Vector
+	Marked() bool
 }
 
 type Reporter interface {
@@ -40,8 +34,6 @@ type Stringable interface {
 // common holds data and functions shared by all vectors
 type common struct {
 	length   int
-	names    map[int]string
-	na       []bool
 	marked   bool
 	report   Report
 	selected []int
@@ -52,52 +44,17 @@ func (v *common) IsEmpty() bool {
 }
 
 func (v *common) ByIndex(indices []int) Vector {
-	na := make([]bool, 0, v.length)
-	names := map[int]string{}
 	selected := []int{}
 
 	newIndex := 0
 	for _, index := range indices {
 		if index >= 1 && index <= v.length {
-			na = append(na, v.na[index])
 			selected = append(selected, index)
 			newIndex++
 		}
-		if name, ok := v.names[index]; ok {
-			names[newIndex] = name
-		}
 	}
 
-	vec := newCommon(len(na), Config{
-		NamesMap: names,
-		NA:       na,
-	})
-	vec.selected = selected
-
-	return &vec
-}
-
-func (v *common) ByNames(selectedNames []string) Vector {
-	na := make([]bool, 0, v.length)
-	names := map[int]string{}
-	selected := []int{}
-
-	newIndex := 0
-	for _, sName := range selectedNames {
-		for index, name := range v.names {
-			if sName == name {
-				na = append(na, na[index])
-				names[newIndex] = name
-				selected = append(selected, index)
-				newIndex++
-			}
-		}
-	}
-
-	vec := newCommon(len(na), Config{
-		NamesMap: names,
-		NA:       na,
-	})
+	vec := newCommon(len(selected))
 	vec.selected = selected
 
 	return &vec
@@ -122,10 +79,8 @@ func (v *common) Clone() Vector {
 
 	return &common{
 		length: v.length,
-		names:  v.names,
-		na:     v.na,
 		marked: true,
-		report: v.report,
+		report: CopyReport(v.report),
 	}
 }
 
@@ -159,131 +114,6 @@ func (v *common) Report() Report {
 	return v.report
 }
 
-func (v *common) NA() []bool {
-	if v.length == 0 {
-		return []bool{}
-	}
-
-	arr := make([]bool, v.length)
-	copy(arr, v.na[1:])
-
-	return arr
-}
-
-func (v *common) NAMap() map[int]bool {
-	if v.length == 0 {
-		return map[int]bool{}
-	}
-
-	arr := map[int]bool{}
-
-	for index, na := range v.na {
-		arr[index] = na
-	}
-
-	return arr
-}
-
-func (v *common) SetNA(na []bool) Vector {
-	if v.length == 0 {
-		return v
-	}
-
-	v.na = make([]bool, v.length+1)
-
-	numNA := len(na)
-	if numNA > v.length {
-		numNA = v.length
-	}
-
-	for i := 1; i <= numNA; i++ {
-		v.na[i] = na[i-1]
-	}
-
-	return v
-}
-
-func (v *common) SetNAMap(na map[int]bool) Vector {
-	v.na = make([]bool, v.length+1)
-	for k, val := range na {
-		if k > 0 && k <= v.length {
-			v.na[k] = val
-		}
-	}
-
-	return v
-}
-
-func (v *common) Names() []string {
-	if v.length == 0 {
-		return []string{}
-	}
-
-	names := make([]string, v.length)
-	for index, name := range v.names {
-		names[index-1] = name
-	}
-
-	return names
-}
-
-func (v *common) NamesMap() map[int]string {
-	if v.length == 0 {
-		return map[int]string{}
-	}
-
-	names := make(map[int]string)
-	for index, name := range v.names {
-		names[index] = name
-	}
-
-	return names
-}
-
-func (v *common) SetName(idx int, name string) Vector {
-	if idx >= 1 && idx <= v.length {
-		v.names[idx] = name
-	}
-
-	return v
-}
-
-func (v *common) SetNames(names []string) Vector {
-	if v.length == 0 {
-		return v
-	}
-
-	numNames := len(names)
-	if numNames > v.length {
-		numNames = v.length
-	}
-
-	for i := 1; i <= numNames; i++ {
-		v.SetName(i, names[i-1])
-	}
-
-	return v
-}
-
-func (v *common) SetNamesMap(names map[int]string) Vector {
-	v.names = make(map[int]string)
-	for k, val := range names {
-		if k > 0 && k <= v.length {
-			v.SetName(k, val)
-		}
-	}
-
-	return v
-}
-
-func (v *common) IfNameFor(idx int) bool {
-	if _, ok := v.names[idx]; ok {
-		return true
-	}
-
-	return true
-}
-
 // Length returns length of vector
 func (v *common) Length() int {
 	return v.length
@@ -293,21 +123,10 @@ func (v *common) Length() int {
 // typed vectors
 func newCommon(length int, options ...Config) common {
 	vec := common{
-		length: length,
-		names:  make(map[int]string),
-		na:     make([]bool, length+1),
-		marked: false,
-		report: Report{},
-	}
-
-	config := mergeConfigs(options)
-
-	if config.Names != nil && len(config.Names) > 0 {
-		vec.SetNames(config.Names)
-	}
-
-	if config.NA != nil && len(config.NA) > 0 {
-		vec.SetNA(config.NA)
+		length:   length,
+		marked:   false,
+		report:   Report{},
+		selected: []int{},
 	}
 
 	return vec

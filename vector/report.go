@@ -7,6 +7,15 @@ func NewReport() Report {
 	}
 }
 
+func CopyReport(report Report) Report {
+	newRep := Report{
+		Errors:   report.Errors,
+		Warnings: report.Warnings,
+	}
+
+	return newRep
+}
+
 type Report struct {
 	Errors   []string
 	Warnings []string
