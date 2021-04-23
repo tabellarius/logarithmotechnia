@@ -17,6 +17,18 @@ type DefaultNameable struct {
 	names map[string]int
 }
 
+func (n *DefaultNameable) Refresh() {
+	names := map[string]int{}
+
+	if len(names) > 0 {
+		for name, idx := range n.names {
+			names[name] = idx
+		}
+	}
+
+	n.names = names
+}
+
 func (n *DefaultNameable) Names() []string {
 	names := make([]string, n.vec.Length())
 

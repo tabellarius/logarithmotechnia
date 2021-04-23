@@ -8,7 +8,6 @@ type Vector interface {
 	ByIndex(indices []int) Vector
 	ByFromTo(from int, to int) Vector
 	IsEmpty() bool
-	Marked() bool
 }
 
 type Reporter interface {
@@ -31,8 +30,18 @@ type Stringable interface {
 	Strings() []string
 }
 
+type Markable interface {
+	Marked() bool
+	Mark()
+}
+
+type Refreshable interface {
+	Refresh()
+}
+
 // common holds data and functions shared by all vectors
 type common struct {
+	vec      Vector
 	length   int
 	marked   bool
 	report   Report
@@ -64,13 +73,44 @@ func (v *common) ByFromTo(from int, to int) Vector {
 	/* from and to have different signs */
 	if from*to < 0 {
 		emp := Empty()
-		emp.Report().AddError("")
+		emp.Report().AddError("From and to can not have different signs.")
+		return emp
 	}
 
-	reverse := false
 	if from > 0 && from < to {
-		reverse = true
+		return v.byFromToReverse(to, from)
 	}
+
+	if from < 0 && to < 0 {
+		return v.byFromToWithRemove(from, to)
+	}
+
+	return v.byFromToRegular(from, to)
+}
+
+func (v *common) byFromToRegular(from, to int) Vector {
+	if to > v.length {
+		to = v.length
+	}
+	if from < 1 {
+		from = 1
+	}
+
+	indices := make([]int, from-to+1)
+	index := 0
+	for idx := from; idx <= to; idx++ {
+		indices[index] = idx
+		index++
+	}
+
+	return v.vec.ByIndex(indices)
+}
+
+func (v *common) byFromToReverse(from, to int) Vector {
+
+}
+
+func (v *common) byFromToWithRemove(from, to int) Vector {
 
 }
 
@@ -88,8 +128,8 @@ func (v *common) Marked() bool {
 	return v.marked
 }
 
-func (v *common) SetMarked(marked bool) {
-	v.marked = marked
+func (v *common) Mark() {
+	v.marked = true
 }
 
 func (v *common) Refresh() {
@@ -97,16 +137,6 @@ func (v *common) Refresh() {
 		return
 	}
 
-	names := map[int]string{}
-	for k, v := range v.names {
-		names[k] = v
-	}
-
-	na := make([]bool, len(v.na))
-	copy(na, v.na)
-
-	v.names = names
-	v.na = na
 	v.marked = false
 }
 

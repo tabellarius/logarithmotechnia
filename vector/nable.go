@@ -13,6 +13,17 @@ type DefaultNAble struct {
 	na  []bool
 }
 
+func (n *DefaultNAble) Refresh() {
+	if len(n.na) == 0 {
+		return
+	}
+
+	na := make([]bool, len(n.na))
+	copy(na, n.na)
+
+	n.na = na
+}
+
 func (n *DefaultNAble) NA() []bool {
 	length := len(n.na)
 	na := make([]bool, length)
