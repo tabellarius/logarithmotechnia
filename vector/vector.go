@@ -5,7 +5,7 @@ package vector
 type Vector interface {
 	Clone() Vector
 	Length() int
-	ByIndex(indices []int) Vector
+	ByIndices(indices []int) Vector
 	ByFromTo(from int, to int) Vector
 	IsEmpty() bool
 }
@@ -52,7 +52,7 @@ func (v *common) IsEmpty() bool {
 	return v.length > 0
 }
 
-func (v *common) ByIndex(indices []int) Vector {
+func (v *common) ByIndices(indices []int) Vector {
 	selected := []int{}
 
 	newIndex := 0
@@ -82,6 +82,11 @@ func (v *common) ByFromTo(from int, to int) Vector {
 	}
 
 	if from < 0 && to < 0 {
+		from *= -1
+		to *= -1
+		if from > to {
+			from, to = to, from
+		}
 		return v.byFromToWithRemove(from, to)
 	}
 
@@ -89,12 +94,7 @@ func (v *common) ByFromTo(from int, to int) Vector {
 }
 
 func (v *common) byFromToRegular(from, to int) Vector {
-	if to > v.length {
-		to = v.length
-	}
-	if from < 1 {
-		from = 1
-	}
+	from, to = v.normalizeFromTo(from, to)
 
 	indices := make([]int, from-to+1)
 	index := 0
@@ -103,15 +103,48 @@ func (v *common) byFromToRegular(from, to int) Vector {
 		index++
 	}
 
-	return v.vec.ByIndex(indices)
+	return v.vec.ByIndices(indices)
 }
 
 func (v *common) byFromToReverse(from, to int) Vector {
+	from, to = v.normalizeFromTo(from, to)
 
+	indices := make([]int, from-to+1)
+	index := 0
+	for idx := to; idx <= from; idx-- {
+		indices[index] = idx
+		index++
+	}
+
+	return v.vec.ByIndices(indices)
 }
 
 func (v *common) byFromToWithRemove(from, to int) Vector {
+	from, to = v.normalizeFromTo(from, to)
 
+	indices := make([]int, from-1+v.length-to)
+	index := 0
+	for idx := 1; idx < from; idx++ {
+		indices[index] = idx
+		index++
+	}
+	for idx := to + 1; idx <= v.length; idx++ {
+		indices[index] = idx
+		index++
+	}
+
+	return v.vec.ByIndices(indices)
+}
+
+func (v *common) normalizeFromTo(from, to int) (int, int) {
+	if to > v.length {
+		to = v.length
+	}
+	if from < 1 {
+		from = 1
+	}
+
+	return from, to
 }
 
 func (v *common) Clone() Vector {
@@ -151,8 +184,9 @@ func (v *common) Length() int {
 
 // newCommon creates a common part of the future vector. This function is used by public function which create
 // typed vectors
-func newCommon(length int, options ...Config) common {
+func newCommon(length int) common {
 	vec := common{
+		vec:      nil,
 		length:   length,
 		marked:   false,
 		report:   Report{},
@@ -162,42 +196,30 @@ func newCommon(length int, options ...Config) common {
 	return vec
 }
 
-type Config struct {
-	Names    []string
-	NamesMap map[int]string
-	NA       []bool
-	NAMap    map[int]bool
-}
+func newNamesAndNAble(vec Vector, config Config) (DefNameable, DefNAble) {
+	nameable := DefNameable{
+		vec:   vec,
+		names: map[string]int{},
+	}
 
-func NA(na []bool) Config {
-	return Config{NA: na}
-}
-
-func Names(names []string) Config {
-	return Config{Names: names}
-}
-
-func NamesMap(namesMap map[int]string) Config {
-	return Config{NamesMap: namesMap}
-}
-
-func mergeConfigs(configs []Config) Config {
-	config := Config{}
-
-	for _, c := range configs {
-		if c.Names != nil {
-			config.Names = c.Names
-		}
-		if c.NamesMap != nil {
-			config.NamesMap = c.NamesMap
-		}
-		if c.NA != nil {
-			config.NA = c.NA
-		}
-		if c.NAMap != nil {
-			config.NAMap = c.NAMap
+	if config.NamesMap != nil && len(config.NamesMap) > 0 {
+		for name, idx := range config.NamesMap {
+			nameable.names[name] = idx
 		}
 	}
 
-	return config
+	na := DefNAble{
+		vec: vec,
+		na:  make([]bool, vec.Length()+1),
+	}
+
+	if config.NA != nil {
+		if len(config.NA) == vec.Length() {
+			copy(na.na[1:], config.NA)
+		} else if reporter, ok := vec.(Reporter); ok {
+			reporter.Report().AddWarning("Size of NA array must be equal to vector's length.")
+		}
+	}
+
+	return nameable, na
 }

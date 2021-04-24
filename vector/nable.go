@@ -8,13 +8,13 @@ type NAble interface {
 	WithoutNA() []int
 }
 
-type DefaultNAble struct {
+type DefNAble struct {
 	vec Vector
 	na  []bool
 }
 
-func (n *DefaultNAble) Refresh() {
-	if len(n.na) == 0 {
+func (n *DefNAble) Refresh() {
+	if n.vec.Length() == 0 {
 		return
 	}
 
@@ -24,14 +24,14 @@ func (n *DefaultNAble) Refresh() {
 	n.na = na
 }
 
-func (n *DefaultNAble) NA() []bool {
-	length := len(n.na)
+func (n *DefNAble) NA() []bool {
+	length := len(n.na) - 1
 	na := make([]bool, length)
-	copy(na, n.na)
+	copy(na, n.na[1:])
 	return na
 }
 
-func (n *DefaultNAble) IsNA(idx int) bool {
+func (n *DefNAble) IsNA(idx int) bool {
 	if idx >= 1 && idx <= len(n.na) {
 		return n.na[idx]
 	}
@@ -39,8 +39,8 @@ func (n *DefaultNAble) IsNA(idx int) bool {
 	return false
 }
 
-func (n *DefaultNAble) HasNA() bool {
-	for i := 1; i <= len(n.na); i++ {
+func (n *DefNAble) HasNA() bool {
+	for i := 1; i <= n.vec.Length(); i++ {
 		if n.na[i] == true {
 			return true
 		}
@@ -49,10 +49,10 @@ func (n *DefaultNAble) HasNA() bool {
 	return false
 }
 
-func (n *DefaultNAble) OnlyNA() []int {
+func (n *DefNAble) OnlyNA() []int {
 	naIndices := make([]int, 0)
 
-	for i := 1; i <= len(n.na); i++ {
+	for i := 1; i <= n.vec.Length(); i++ {
 		if n.na[i] == true {
 			naIndices = append(naIndices, i)
 		}
@@ -61,10 +61,10 @@ func (n *DefaultNAble) OnlyNA() []int {
 	return naIndices
 }
 
-func (n *DefaultNAble) WithoutNA() []int {
+func (n *DefNAble) WithoutNA() []int {
 	naIndices := make([]int, 0)
 
-	for i := 1; i <= len(n.na); i++ {
+	for i := 1; i <= n.vec.Length(); i++ {
 		if n.na[i] == false {
 			naIndices = append(naIndices, i)
 		}

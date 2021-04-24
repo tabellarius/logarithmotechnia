@@ -19,7 +19,7 @@ func (v *empty) IsEmpty() bool {
 	return true
 }
 
-func (v *empty) ByIndex([]int) Vector {
+func (v *empty) ByIndices([]int) Vector {
 	return Empty()
 }
 

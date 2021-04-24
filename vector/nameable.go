@@ -9,15 +9,32 @@ type Nameable interface {
 	SetName(name string, idx int) Vector
 	SetNames(names []string) Vector
 	SetNamesMap(names map[string]int) Vector
+	HasName(name string) bool
+	HasNameFor(idx int) bool
 	ByNames(names []string) Vector
 }
 
-type DefaultNameable struct {
+type DefNameable struct {
 	vec   Vector
 	names map[string]int
 }
 
-func (n *DefaultNameable) Refresh() {
+func (n *DefNameable) HasName(name string) bool {
+	_, exists := n.names[name]
+	return exists
+}
+
+func (n *DefNameable) HasNameFor(idx int) bool {
+	for _, index := range n.names {
+		if idx == index {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (n *DefNameable) Refresh() {
 	names := map[string]int{}
 
 	if len(names) > 0 {
@@ -29,7 +46,7 @@ func (n *DefaultNameable) Refresh() {
 	n.names = names
 }
 
-func (n *DefaultNameable) Names() []string {
+func (n *DefNameable) Names() []string {
 	names := make([]string, n.vec.Length())
 
 	for name, idx := range n.names {
@@ -39,7 +56,7 @@ func (n *DefaultNameable) Names() []string {
 	return names
 }
 
-func (n *DefaultNameable) NamesMap() map[string]int {
+func (n *DefNameable) NamesMap() map[string]int {
 	names := make(map[string]int)
 
 	for name, idx := range n.names {
@@ -49,7 +66,7 @@ func (n *DefaultNameable) NamesMap() map[string]int {
 	return names
 }
 
-func (n *DefaultNameable) InvertedNamesMap() map[int]string {
+func (n *DefNameable) InvertedNamesMap() map[int]string {
 	inverted := make(map[int]string)
 
 	for name, idx := range n.names {
@@ -59,7 +76,7 @@ func (n *DefaultNameable) InvertedNamesMap() map[int]string {
 	return inverted
 }
 
-func (n *DefaultNameable) Name(index int) string {
+func (n *DefNameable) Name(index int) string {
 	if index >= 1 && index <= n.vec.Length() {
 		for name, idx := range n.names {
 			if index == idx {
@@ -71,7 +88,7 @@ func (n *DefaultNameable) Name(index int) string {
 	return ""
 }
 
-func (n *DefaultNameable) Index(name string) int {
+func (n *DefNameable) Index(name string) int {
 	idx, ok := n.names[name]
 	if ok {
 		return idx
@@ -79,7 +96,7 @@ func (n *DefaultNameable) Index(name string) int {
 	return 0
 }
 
-func (n *DefaultNameable) SetName(name string, idx int) Vector {
+func (n *DefNameable) SetName(name string, idx int) Vector {
 	if name != "" && idx >= 1 && idx <= n.vec.Length() {
 		n.names[name] = idx
 	}
@@ -87,7 +104,7 @@ func (n *DefaultNameable) SetName(name string, idx int) Vector {
 	return n.vec
 }
 
-func (n *DefaultNameable) SetNames(names []string) Vector {
+func (n *DefNameable) SetNames(names []string) Vector {
 	length := len(names)
 	if length > n.vec.Length() {
 		length = n.vec.Length()
@@ -100,7 +117,7 @@ func (n *DefaultNameable) SetNames(names []string) Vector {
 	return n.vec
 }
 
-func (n *DefaultNameable) SetNamesMap(names map[string]int) Vector {
+func (n *DefNameable) SetNamesMap(names map[string]int) Vector {
 	n.names = make(map[string]int)
 	for name, idx := range names {
 		n.SetName(name, idx)
@@ -109,7 +126,7 @@ func (n *DefaultNameable) SetNamesMap(names map[string]int) Vector {
 	return n.vec
 }
 
-func (n *DefaultNameable) ByNames(names []string) Vector {
+func (n *DefNameable) ByNames(names []string) Vector {
 	indices := make([]int, 0)
 
 	for _, name := range names {
@@ -118,5 +135,5 @@ func (n *DefaultNameable) ByNames(names []string) Vector {
 		}
 	}
 
-	return n.vec.ByIndex(indices)
+	return n.vec.ByIndices(indices)
 }

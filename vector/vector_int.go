@@ -8,6 +8,8 @@ import (
 // IntegerVector is an integer vector
 type IntegerVector interface {
 	Vector
+	Nameable
+	NAble
 	Intable
 	Floatable
 	Booleable
@@ -20,6 +22,8 @@ const maxIntPrint = 5
 // integer is a structure, subsisting integer vectors
 type integer struct {
 	common
+	DefNameable
+	DefNAble
 	data []int
 }
 
@@ -76,31 +80,6 @@ func (v *integer) Strings() []string {
 	return arr
 }
 
-func (v *integer) String() string {
-	str := "["
-
-	if v.length > 0 {
-		str += strconv.Itoa(v.data[1])
-	}
-	if v.length > 1 {
-		for i := 2; i <= v.length; i++ {
-			if i <= maxIntPrint {
-				str += ", " + strconv.Itoa(v.data[i])
-				if _, ok := v.names[i]; ok {
-					str += " (" + v.names[i] + ")"
-				}
-			} else {
-				str += ", ..."
-				break
-			}
-		}
-	}
-
-	str += "]"
-
-	return str
-}
-
 func (v *integer) Clone() Vector {
 	com := v.common.Clone()
 	c := com.(*common)
@@ -120,13 +99,42 @@ func (v *integer) Refresh() {
 	copy(data, v.data)
 }
 
+func (v *integer) String() string {
+	str := "["
+
+	if v.length > 0 {
+		str += v.strForElem(1)
+	}
+	if v.length > 1 {
+		for i := 2; i <= v.length; i++ {
+			if i <= maxIntPrint {
+				str += ", " + v.strForElem(i)
+			} else {
+				str += ", ..."
+				break
+			}
+		}
+	}
+
+	str += "]"
+
+	return str
+}
+
+func (v *integer) strForElem(idx int) string {
+	str := strconv.Itoa(v.data[idx])
+	if v.DefNameable.HasNameFor(idx) {
+		str += " (" + v.DefNameable.Name(idx) + ")"
+	}
+	return str
+}
+
 // NewIntegerVector creates a new integer vector
 func NewIntegerVector(data []int, options ...Config) IntegerVector {
-	if data == nil {
-		data = make([]int, 0)
-	}
+	config := mergeConfigs(options)
+
 	length := len(data)
-	com := newCommon(length, options...)
+	com := newCommon(length)
 
 	vecData := make([]int, length+1)
 	if length > 0 {
@@ -137,6 +145,12 @@ func NewIntegerVector(data []int, options ...Config) IntegerVector {
 		common: com,
 		data:   vecData,
 	}
+
+	com.vec = vector
+
+	nameable, nable := newNamesAndNAble(vector, config)
+	vector.DefNameable = nameable
+	vector.DefNAble = nable
 
 	return vector
 }
