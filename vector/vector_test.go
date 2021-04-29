@@ -257,6 +257,66 @@ func TestCommon_ByFromTo(t *testing.T) {
 	}
 }
 
+func TestCommon_ByBool(t *testing.T) {
+	testData := []struct {
+		name     string
+		booleans []bool
+		length   int
+		selected []int
+		emptyVec bool
+	}{
+		{
+			name:     "full",
+			booleans: []bool{true, true, true, true, true},
+			length:   5,
+			selected: []int{1, 2, 3, 4, 5},
+			emptyVec: false,
+		},
+		{
+			name:     "partial",
+			booleans: []bool{false, true, false, true, false},
+			length:   2,
+			selected: []int{2, 4},
+			emptyVec: false,
+		},
+		{
+			name:     "none",
+			booleans: []bool{false, false, false, false, false},
+			length:   0,
+			selected: []int{},
+			emptyVec: false,
+		},
+		{
+			name:     "incorrect length",
+			booleans: []bool{true, true, true, true},
+			length:   0,
+			selected: []int{},
+			emptyVec: true,
+		},
+	}
+
+	vec := newCommon(5)
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			newVec := vec.ByBool(data.booleans)
+			if data.emptyVec {
+				if _, ok := newVec.(*empty); !ok {
+					t.Error("Returned vector is not empty type")
+				}
+			} else {
+				newCom := newVec.(*common)
+				if newCom.length != data.length {
+					t.Error(fmt.Sprintf("Output length (%d) is not %d", newCom.length, data.length))
+				}
+				if !reflect.DeepEqual(newCom.selected, data.selected) {
+					t.Error(fmt.Sprintf("newVec.selected (%v) is not equal to %v", newCom.selected,
+						data.selected))
+				}
+			}
+		})
+	}
+}
+
 func TestCommon_Clone(t *testing.T) {
 	vec := newCommon(10)
 	newVec := vec.Clone().(*common)
@@ -277,5 +337,21 @@ func TestCommon_Clone(t *testing.T) {
 }
 
 func TestCommon_Mark(t *testing.T) {
+	vec := newCommon(10)
+	vec.Mark()
+	if !vec.marked {
+		t.Error("vec.marked is not true")
+	}
+}
 
+func TestCommon_Marked(t *testing.T) {
+	vec := newCommon(10)
+	if vec.Marked() {
+		t.Error("vec.marked is true for new vector")
+	}
+
+	vec.Mark()
+	if !vec.Marked() {
+		t.Error("vec was not marked")
+	}
 }

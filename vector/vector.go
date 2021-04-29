@@ -7,6 +7,7 @@ type Vector interface {
 	Length() int
 	ByIndices(indices []int) Vector
 	ByFromTo(from int, to int) Vector
+	ByBool(booleans []bool) Vector
 	IsEmpty() bool
 }
 
@@ -67,6 +68,27 @@ func (v *common) ByIndices(indices []int) Vector {
 	vec.selected = selected
 
 	return &vec
+}
+
+func (v *common) ByBool(booleans []bool) Vector {
+	if len(booleans) != v.length {
+		emp := Empty()
+		emp.Report().AddError("ByBool: length of booleans must be equal to length of vector")
+		return emp
+	}
+
+	indices := []int{}
+	for index := 0; index < v.length; index++ {
+		if booleans[index] == true {
+			indices = append(indices, index+1)
+		}
+	}
+
+	if v.vec != nil {
+		return v.vec.ByIndices(indices)
+	} else {
+		return v.ByIndices(indices)
+	}
 }
 
 func (v *common) ByFromTo(from int, to int) Vector {

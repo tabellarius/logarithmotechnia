@@ -15,6 +15,10 @@ type empty struct {
 	report Report
 }
 
+func (v *empty) ByBool([]bool) Vector {
+	return Empty()
+}
+
 func (v *empty) IsEmpty() bool {
 	return true
 }
