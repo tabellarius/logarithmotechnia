@@ -49,7 +49,7 @@ type common struct {
 }
 
 func (v *common) IsEmpty() bool {
-	return v.length > 0
+	return v.length == 0
 }
 
 func (v *common) ByIndices(indices []int) Vector {
@@ -77,49 +77,56 @@ func (v *common) ByFromTo(from int, to int) Vector {
 		return emp
 	}
 
-	if from > 0 && from < to {
-		return v.byFromToReverse(to, from)
-	}
-
-	if from < 0 && to < 0 {
+	var indices []int
+	if from == 0 && to == 0 {
+		indices = []int{}
+	} else if from > 0 && from > to {
+		indices = v.byFromToReverse(to, from)
+	} else if from <= 0 && to <= 0 {
 		from *= -1
 		to *= -1
 		if from > to {
 			from, to = to, from
 		}
-		return v.byFromToWithRemove(from, to)
+		indices = v.byFromToWithRemove(from, to)
+	} else {
+		indices = v.byFromToRegular(from, to)
 	}
 
-	return v.byFromToRegular(from, to)
+	if v.vec != nil {
+		return v.vec.ByIndices(indices)
+	} else {
+		return v.ByIndices(indices)
+	}
 }
 
-func (v *common) byFromToRegular(from, to int) Vector {
+func (v *common) byFromToRegular(from, to int) []int {
 	from, to = v.normalizeFromTo(from, to)
 
-	indices := make([]int, from-to+1)
+	indices := make([]int, to-from+1)
 	index := 0
 	for idx := from; idx <= to; idx++ {
 		indices[index] = idx
 		index++
 	}
 
-	return v.vec.ByIndices(indices)
+	return indices
 }
 
-func (v *common) byFromToReverse(from, to int) Vector {
+func (v *common) byFromToReverse(from, to int) []int {
 	from, to = v.normalizeFromTo(from, to)
 
-	indices := make([]int, from-to+1)
+	indices := make([]int, to-from+1)
 	index := 0
-	for idx := to; idx <= from; idx-- {
+	for idx := to; idx >= from; idx-- {
 		indices[index] = idx
 		index++
 	}
 
-	return v.vec.ByIndices(indices)
+	return indices
 }
 
-func (v *common) byFromToWithRemove(from, to int) Vector {
+func (v *common) byFromToWithRemove(from, to int) []int {
 	from, to = v.normalizeFromTo(from, to)
 
 	indices := make([]int, from-1+v.length-to)
@@ -133,7 +140,7 @@ func (v *common) byFromToWithRemove(from, to int) Vector {
 		index++
 	}
 
-	return v.vec.ByIndices(indices)
+	return indices
 }
 
 func (v *common) normalizeFromTo(from, to int) (int, int) {
@@ -151,9 +158,11 @@ func (v *common) Clone() Vector {
 	v.marked = true
 
 	return &common{
-		length: v.length,
-		marked: true,
-		report: CopyReport(v.report),
+		vec:      nil,
+		length:   v.length,
+		marked:   true,
+		report:   CopyReport(v.report),
+		selected: v.selected,
 	}
 }
 
@@ -185,6 +194,10 @@ func (v *common) Length() int {
 // newCommon creates a common part of the future vector. This function is used by public function which create
 // typed vectors
 func newCommon(length int) common {
+	if length < 0 {
+		length = 0
+	}
+
 	vec := common{
 		vec:      nil,
 		length:   length,
