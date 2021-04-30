@@ -197,10 +197,6 @@ func (v *common) Mark() {
 }
 
 func (v *common) Refresh() {
-	if !v.marked || v.length == 0 {
-		return
-	}
-
 	v.marked = false
 }
 

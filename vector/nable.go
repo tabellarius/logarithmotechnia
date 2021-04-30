@@ -3,6 +3,7 @@ package vector
 type NAble interface {
 	NA() []bool
 	IsNA(idx int) bool
+	SetNA(na []bool) Vector
 	HasNA() bool
 	OnlyNA() []int
 	WithoutNA() []int
@@ -32,11 +33,24 @@ func (n *DefNAble) NA() []bool {
 }
 
 func (n *DefNAble) IsNA(idx int) bool {
-	if idx >= 1 && idx <= len(n.na) {
+	if idx >= 1 && idx < len(n.na) {
 		return n.na[idx]
 	}
 
 	return false
+}
+
+func (n *DefNAble) SetNA(na []bool) Vector {
+	if len(na) != n.vec.Length() {
+		if rep, ok := n.vec.(Reporter); ok {
+			rep.Report().AddWarning("SetNA(na []bool): length of na is not equal to vector's length")
+		}
+		return n.vec
+	}
+
+	n.na = make([]bool, n.vec.Length()+1)
+	copy(n.na[1:], na)
+	return n.vec
 }
 
 func (n *DefNAble) HasNA() bool {
@@ -71,4 +85,13 @@ func (n *DefNAble) WithoutNA() []int {
 	}
 
 	return naIndices
+}
+
+func newDefaultNAble(vec Vector) DefNAble {
+	nable := DefNAble{
+		vec: vec,
+		na:  make([]bool, vec.Length()+1),
+	}
+
+	return nable
 }
