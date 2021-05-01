@@ -350,7 +350,7 @@ func TestCommon_Marked(t *testing.T) {
 		t.Error("vec.marked is true for new vector")
 	}
 
-	vec.Mark()
+	vec.marked = true
 	if !vec.Marked() {
 		t.Error("vec was not marked")
 	}
@@ -367,6 +367,10 @@ func TestCommon_Refresh(t *testing.T) {
 
 func TestCommon_Report(t *testing.T) {
 	vec := newCommon(10)
+	vec.report = Report{
+		Errors:   []string{"Error"},
+		Warnings: []string{"Warning"},
+	}
 	if !reflect.DeepEqual(vec.report, vec.Report()) {
 		t.Error("Strange report")
 	}
