@@ -1,13 +1,13 @@
 package main
 
-import (
-	"fmt"
-	"logarithmotechnia.com/logarithmotechnia/vector"
-)
+import "fmt"
 
 func main() {
-	vec := vector.NewIntegerVector([]int{100, 200, 300, 400, 500})
-	vec.SetName("two", 2)
+	map1 := map[string]string{"one": "1", "two": "2"}
+	map2 := map1
+	fmt.Println(map1, map2)
 
-	fmt.Println(vec)
+	map1["one"] = "100"
+	fmt.Println(map1, map2)
+
 }

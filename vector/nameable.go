@@ -6,7 +6,7 @@ type Nameable interface {
 	InvertedNamesMap() map[int]string
 	Name(idx int) string
 	Index(name string) int
-	SetName(name string, idx int) Vector
+	SetName(idx int, name string) Vector
 	SetNames(names []string) Vector
 	SetNamesMap(names map[string]int) Vector
 	HasName(name string) bool
@@ -25,9 +25,11 @@ func (n *DefNameable) HasName(name string) bool {
 }
 
 func (n *DefNameable) HasNameFor(idx int) bool {
-	for _, index := range n.names {
-		if idx == index {
-			return true
+	if idx >= 1 && idx <= n.vec.Length() {
+		for _, index := range n.names {
+			if idx == index {
+				return true
+			}
 		}
 	}
 
@@ -50,7 +52,7 @@ func (n *DefNameable) Names() []string {
 	names := make([]string, n.vec.Length())
 
 	for name, idx := range n.names {
-		names[idx] = name
+		names[idx-1] = name
 	}
 
 	return names
@@ -96,7 +98,7 @@ func (n *DefNameable) Index(name string) int {
 	return 0
 }
 
-func (n *DefNameable) SetName(name string, idx int) Vector {
+func (n *DefNameable) SetName(idx int, name string) Vector {
 	if name != "" && idx >= 1 && idx <= n.vec.Length() {
 		n.names[name] = idx
 	}
@@ -108,10 +110,13 @@ func (n *DefNameable) SetNames(names []string) Vector {
 	length := len(names)
 	if length > n.vec.Length() {
 		length = n.vec.Length()
+		if rep, ok := n.vec.(Reporter); ok {
+			rep.Report().AddWarning("SetNames(): names []string is longer than vectors length")
+		}
 	}
 
 	for i := 1; i <= length; i++ {
-		n.SetName(names[i], i)
+		n.SetName(i, names[i-1])
 	}
 
 	return n.vec
@@ -120,7 +125,7 @@ func (n *DefNameable) SetNames(names []string) Vector {
 func (n *DefNameable) SetNamesMap(names map[string]int) Vector {
 	n.names = make(map[string]int)
 	for name, idx := range names {
-		n.SetName(name, idx)
+		n.SetName(idx, name)
 	}
 
 	return n.vec
@@ -136,4 +141,13 @@ func (n *DefNameable) ByNames(names []string) Vector {
 	}
 
 	return n.vec.ByIndices(indices)
+}
+
+func newDefNameable(vec Vector) DefNameable {
+	nameable := DefNameable{
+		vec:   vec,
+		names: map[string]int{},
+	}
+
+	return nameable
 }
