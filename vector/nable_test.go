@@ -206,3 +206,49 @@ func TestDefNAble_OnlyNA(t *testing.T) {
 		})
 	}
 }
+
+func TestDefNAble_WithoutNA(t *testing.T) {
+	testData := []struct {
+		name     string
+		na       []bool
+		expected []int
+	}{
+		{
+			name:     "without na",
+			na:       []bool{false, false, false, false, false},
+			expected: []int{1, 2, 3, 4, 5},
+		},
+		{
+			name:     "with na#1",
+			na:       []bool{true, false, true, false, true},
+			expected: []int{2, 4},
+		},
+		{
+			name:     "with na#2",
+			na:       []bool{false, false, false, true, true},
+			expected: []int{1, 2, 3},
+		},
+		{
+			name:     "with na#3",
+			na:       []bool{false, false, false, false, true},
+			expected: []int{1, 2, 3, 4},
+		},
+		{
+			name:     "all na",
+			na:       []bool{true, true, true, true, true},
+			expected: []int{},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			vec := newCommon(5)
+			nable := newDefaultNAble(&vec)
+			nable.SetNA(data.na)
+			if !reflect.DeepEqual(nable.WithoutNA(), data.expected) {
+				t.Error(fmt.Sprintf("nable.OnlyNa() %v is not equal to data.expected %v", nable.OnlyNA(),
+					data.expected))
+			}
+		})
+	}
+}

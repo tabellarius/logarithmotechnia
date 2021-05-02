@@ -39,7 +39,7 @@ func (n *DefNameable) HasNameFor(idx int) bool {
 func (n *DefNameable) Refresh() {
 	names := map[string]int{}
 
-	if len(names) > 0 {
+	if len(n.names) > 0 {
 		for name, idx := range n.names {
 			names[name] = idx
 		}

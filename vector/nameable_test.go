@@ -220,3 +220,149 @@ func TestDefNameable_NamesMap(t *testing.T) {
 		})
 	}
 }
+
+func TestDefNameable_ByNames(t *testing.T) {
+	namesMap := map[string]int{"one": 1, "three": 3, "five": 5}
+	testData := []struct {
+		name           string
+		names          []string
+		expectedLength int
+		selected       []int
+	}{
+		{
+			name:           "full",
+			names:          []string{"one", "three", "five"},
+			expectedLength: 3,
+			selected:       []int{1, 3, 5},
+		},
+		{
+			name:           "partial",
+			names:          []string{"one", "three"},
+			expectedLength: 2,
+			selected:       []int{1, 3},
+		},
+		{
+			name:           "with non-existant",
+			names:          []string{"two", "three", "four", "five"},
+			expectedLength: 2,
+			selected:       []int{3, 5},
+		},
+	}
+
+	vec := newCommon(5)
+	nameable := newDefNameable(&vec)
+	nameable.SetNamesMap(namesMap)
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			newVec := nameable.ByNames(data.names).(*common)
+			if newVec.Length() != data.expectedLength {
+				t.Error(fmt.Sprintf("newVec.Length (%d) is not equal to %d",
+					newVec.Length(), data.expectedLength))
+			}
+			if !reflect.DeepEqual(newVec.selected, data.selected) {
+				t.Error(fmt.Sprintf("newVec.Length (%d) is not equal to %d",
+					newVec.Length(), data.expectedLength))
+			}
+		})
+	}
+}
+
+func TestDefNameable_InvertedNamesMap(t *testing.T) {
+	testData := []struct {
+		name     string
+		namesMap map[string]int
+		expected map[int]string
+	}{
+		{
+			name:     "one to three",
+			namesMap: map[string]int{"one": 1, "two": 2, "three": 3},
+			expected: map[int]string{1: "one", 2: "two", 3: "three"},
+		},
+		{
+			name:     "two to four",
+			namesMap: map[string]int{"two": 2, "three": 3, "four": 4},
+			expected: map[int]string{2: "two", 3: "three", 4: "four"},
+		},
+		{
+			name:     "full",
+			namesMap: map[string]int{"one": 1, "two": 2, "three": 3, "four": 4, "five": 5},
+			expected: map[int]string{1: "one", 2: "two", 3: "three", 4: "four", 5: "five"},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			vec := newCommon(5)
+			nameable := newDefNameable(&vec)
+			nameable.names = data.namesMap
+			invertedMap := nameable.InvertedNamesMap()
+			if !reflect.DeepEqual(invertedMap, data.expected) {
+				t.Error(fmt.Sprintf("invectedMap (%v) is not equal to expected (%v)",
+					invertedMap, data.expected))
+			}
+		})
+	}
+}
+
+func TestDefNameable_Index(t *testing.T) {
+	vec := newCommon(5)
+	nameable := newDefNameable(&vec)
+	nameable.names = map[string]int{"two": 2, "three": 3, "four": 4}
+
+	testData := []struct {
+		name     string
+		expected int
+	}{
+		{"one", 0}, {"two", 2}, {"three", 3},
+		{"four", 4}, {"five", 0},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			idx := nameable.Index(data.name)
+			if idx != data.expected {
+				t.Error(fmt.Sprintf(`idx (%d) for name "%s" is not equal to expected (%d)`,
+					idx, data.name, data.expected))
+			}
+		})
+	}
+}
+
+func TestDefNameable_Name(t *testing.T) {
+	vec := newCommon(5)
+	nameable := newDefNameable(&vec)
+	nameable.names = map[string]int{"two": 2, "three": 3, "four": 4}
+
+	testData := []struct {
+		expected string
+		idx      int
+	}{
+		{"", 1}, {"two", 2}, {"three", 3},
+		{"four", 4}, {"", 5},
+	}
+
+	for _, data := range testData {
+		t.Run(fmt.Sprintf("Index_%d", data.idx), func(t *testing.T) {
+			name := nameable.Name(data.idx)
+			if name != data.expected {
+				t.Error(fmt.Sprintf(`idx (%d) returned "%s", expected "%s"`,
+					data.idx, name, data.expected))
+			}
+		})
+	}
+}
+
+func TestDefNameable_Refresh(t *testing.T) {
+	vec := newCommon(5)
+	nameable := newDefNameable(&vec)
+	namesMap := map[string]int{"two": 2, "three": 3, "four": 4}
+	nameable.names = namesMap
+	nameable.Refresh()
+	if reflect.ValueOf(nameable.names).Pointer() == reflect.ValueOf(namesMap).Pointer() {
+		t.Error("nameable was not refreshed")
+	}
+	if !reflect.DeepEqual(nameable.names, namesMap) {
+		t.Error(fmt.Sprintf("names map (%v) after refreshing is not equal to source map (%v)",
+			nameable.names, namesMap))
+	}
+}
