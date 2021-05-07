@@ -9,21 +9,21 @@ const maxIntPrint = 5
 // integer is a structure, subsisting integer vectors
 type integer struct {
 	length int
-	data []int
-	na []bool
+	data   []int
+	na     []bool
 }
 
-func (p *integer) Length() int {
+func (p *integer) Len() int {
 	return p.length
 }
 
-func (p *integer) NA() []bool {
+func (p *integer) NAP() []bool {
 	return p.na
 }
 
 func (p *integer) ByIndices(indices []int) Payload {
 	data := make([]int, 1, len(indices)+1)
-	na := make([]bool, 1, len(indices)+1))
+	na := make([]bool, 1, len(indices)+1)
 
 	for _, idx := range indices {
 		data = append(data, p.data[idx])
@@ -31,7 +31,7 @@ func (p *integer) ByIndices(indices []int) Payload {
 	}
 
 	return &integer{
-		length: len(data)-1,
+		length: len(data) - 1,
 		data:   data,
 		na:     na,
 	}
@@ -42,7 +42,7 @@ func (p *integer) SupportsFilter(selector interface{}) bool {
 		return true
 	}
 
-	if _, ok := selector.(func (int, int, bool) bool); ok {
+	if _, ok := selector.(func(int, int, bool) bool); ok {
 		return true
 	}
 
@@ -50,7 +50,7 @@ func (p *integer) SupportsFilter(selector interface{}) bool {
 }
 
 func (p *integer) Filter(filter interface{}) []bool {
-	if byFunc, ok := filter.(func (int, int, bool) bool); ok {
+	if byFunc, ok := filter.(func(int, int, bool) bool); ok {
 		return p.selectByFunc(byFunc)
 	}
 
@@ -69,7 +69,7 @@ func (p *integer) selectIndices(indices []int) []bool {
 	return booleans
 }
 
-func (p *integer) selectByFunc(byFunc func (int, int, bool) bool) []bool {
+func (p *integer) selectByFunc(byFunc func(int, int, bool) bool) []bool {
 	booleans := make([]bool, p.length)
 
 	for idx, val := range p.data {
@@ -89,7 +89,7 @@ func (p *integer) Integers() ([]int, []bool) {
 	data := make([]int, p.length)
 	copy(data, p.data[1:])
 
-	na := make([]bool, p.Length())
+	na := make([]bool, p.Len())
 	copy(na, p.na[1:])
 
 	return data, na
@@ -106,7 +106,7 @@ func (p *integer) Floats() ([]float64, []bool) {
 		data[i-1] = float64(p.data[i])
 	}
 
-	na := make([]bool, p.Length())
+	na := make([]bool, p.Len())
 	copy(na, p.na[1:])
 
 	return data, na
@@ -123,7 +123,7 @@ func (p *integer) Booleans() ([]bool, []bool) {
 		data[i-1] = p.data[i] != 0
 	}
 
-	na := make([]bool, p.Length())
+	na := make([]bool, p.Len())
 	copy(na, p.na[1:])
 
 	return data, na
@@ -140,44 +140,21 @@ func (p *integer) Strings() ([]string, []bool) {
 		data[i-1] = strconv.Itoa(p.data[i])
 	}
 
-	na := make([]bool, p.Length())
+	na := make([]bool, p.Len())
 	copy(na, p.na[1:])
 
 	return data, na
 }
 
-func (p *integer) String() string {
-	str := "["
-
-	if p.length > 0 {
-		str += p.strForElem(1)
-	}
-	if p.length > 1 {
-		for i := 2; i <= p.length; i++ {
-			if i <= maxIntPrint {
-				str += ", " + p.strForElem(i)
-			} else {
-				str += ", ..."
-				break
-			}
-		}
+func (p *integer) StrForElem(idx int) string {
+	if p.na[idx] {
+		return "NA"
 	}
 
-	str += "]"
-
-	return str
+	return strconv.Itoa(p.data[idx])
 }
 
-func (p *integer) strForElem(idx int) string {
-	str := strconv.Itoa(p.data[idx])
-	if p.DefNameable.HasNameFor(idx) {
-		str += " (" + p.DefNameable.Name(idx) + ")"
-	}
-	return str
-}
-
-// NewIntegerPayload creates a new integer vector
-func NewIntegerPayload(data []int, na []bool) Payload {
+func Integer(data []int, na []bool, options ...Config) Vector {
 	length := len(data)
 
 	vecData := make([]int, length+1)
@@ -186,15 +163,21 @@ func NewIntegerPayload(data []int, na []bool) Payload {
 	}
 
 	vecNA := make([]bool, length+1)
-	if len(na) == length {
-		copy(vecNA[1:], na)
+	if len(na) > 0 {
+		if len(na) == length {
+			copy(vecNA[1:], na)
+		} else {
+			emp := Empty()
+			emp.Report().AddError("integerPayload(): data length is not equal to na's length")
+			return emp
+		}
 	}
 
 	payload := &integer{
 		length: length,
 		data:   vecData,
-		na: vecNA,
+		na:     vecNA,
 	}
 
-	return payload
+	return New(payload, options...)
 }

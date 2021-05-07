@@ -1,9 +1,11 @@
 package vector
 
+import "fmt"
+
 // Vector is an interface for a different vector types. This structure is similar to R-vectors: it starts from 1,
-// allows for an extensive indexing, supports NA-values and named variables
+// allows for an extensive indexing, supports NAP-values and named variables
 type Vector interface {
-	Length() int
+	Len() int
 	Clone() Vector
 
 	ByIndices(indices []int) Vector
@@ -25,21 +27,23 @@ type Vector interface {
 	HasNameFor(idx int) bool
 	ByNames(names []string) Vector
 
-	NA() []bool
-	IsNA(idx int) bool
+	IsNA() []bool
+	NotNA() []bool
 	HasNA() bool
 	OnlyNA() []int
 	WithoutNA() []int
 
 	Report() Report
+	fmt.Stringer
 }
 
 type Payload interface {
-	Length() int
-	NA() []bool
+	Len() int
+	NAP() []bool
 	ByIndices(indices []int) Payload
 	SupportsFilter(selector interface{}) bool
 	Filter(filter interface{}) []bool
+	StrForElem(idx int) string
 }
 
 type Intable interface {
@@ -67,7 +71,7 @@ type vector struct {
 }
 
 // Length returns length of vector
-func (v *vector) Length() int {
+func (v *vector) Len() int {
 	return v.length
 }
 
@@ -99,8 +103,6 @@ func (v *vector) ByIndices(indices []int) Vector {
 	return vec
 }
 
-/* Selectors */
-
 func (v *vector) ByBool(booleans []bool) []int {
 	if len(booleans) != v.length {
 		v.Report().AddError("Number of booleans is not equal to vector's length.")
@@ -116,6 +118,8 @@ func (v *vector) ByBool(booleans []bool) []int {
 
 	return indices
 }
+
+/* Selectors */
 
 func (v *vector) ByFromTo(from int, to int) []int {
 	/* from and to have different signs */
@@ -198,7 +202,7 @@ func (v *vector) normalizeFromTo(from, to int) (int, int) {
 }
 
 func (v *vector) SupportsFilter(selector interface{}) bool {
-	if _, ok := selector.([]bool); ok {
+	if _, ok := selector.([]int); ok {
 		return true
 	}
 
@@ -239,8 +243,6 @@ func (v *vector) Names() []string {
 	return names
 }
 
-/* Names-related */
-
 func (v *vector) NamesMap() map[string]int {
 	names := make(map[string]int)
 
@@ -250,6 +252,8 @@ func (v *vector) NamesMap() map[string]int {
 
 	return names
 }
+
+/* Names-related */
 
 func (v *vector) InvertedNamesMap() map[int]string {
 	inverted := make(map[int]string)
@@ -358,25 +362,28 @@ func (v *vector) ByNames(names []string) Vector {
 	return v.ByIndices(indices)
 }
 
-func (v *vector) NA() []bool {
-	length := len(v.payload.NA()) - 1
-	na := make([]bool, length)
-	copy(na, v.payload.NA()[1:])
-	return na
+func (v *vector) IsNA() []bool {
+	isna := make([]bool, v.length)
+	copy(isna, v.payload.NAP()[1:])
+
+	return isna
+}
+
+func (v *vector) NotNA() []bool {
+	na := v.payload.NAP()
+	notna := make([]bool, v.length)
+
+	for i := 1; i < v.length; i++ {
+		na[i-1] = !na[i]
+	}
+
+	return notna
 }
 
 /* Not Applicable-related */
 
-func (v *vector) IsNA(idx int) bool {
-	if idx >= 1 && idx < len(v.payload.NA()) {
-		return v.payload.NA()[idx]
-	}
-
-	return false
-}
-
 func (v *vector) HasNA() bool {
-	na := v.payload.NA()
+	na := v.payload.NAP()
 	for i := 1; i <= v.length; i++ {
 		if na[i] == true {
 			return true
@@ -387,7 +394,7 @@ func (v *vector) HasNA() bool {
 }
 
 func (v *vector) OnlyNA() []int {
-	na := v.payload.NA()
+	na := v.payload.NAP()
 	naIndices := make([]int, 0)
 
 	for i := 1; i <= v.length; i++ {
@@ -400,7 +407,7 @@ func (v *vector) OnlyNA() []int {
 }
 
 func (v *vector) WithoutNA() []int {
-	na := v.payload.NA()
+	na := v.payload.NAP()
 	naIndices := make([]int, 0)
 
 	for i := 1; i <= v.length; i++ {
@@ -420,6 +427,38 @@ func (v *vector) Report() Report {
 	return v.report
 }
 
+func (v *vector) String() string {
+	str := "["
+
+	if v.length > 0 {
+		str += v.strForElem(1)
+	}
+	if v.length > 1 {
+		for i := 2; i <= v.length; i++ {
+			if i <= maxIntPrint {
+				str += ", " + v.strForElem(i)
+			} else {
+				str += ", ..."
+				break
+			}
+		}
+	}
+
+	str += "]"
+
+	return str
+}
+
+func (v *vector) strForElem(idx int) string {
+	str := v.payload.StrForElem(idx)
+
+	if v.HasNameFor(idx) {
+		str += " (" + v.Name(idx) + ")"
+	}
+
+	return str
+}
+
 /* Vector creation */
 
 // New creates a vector part of the future vector. This function is used by public function which create
@@ -428,7 +467,7 @@ func New(payload Payload, options ...Config) Vector {
 	config := mergeConfigs(options)
 
 	vec := vector{
-		length:  payload.Length(),
+		length:  payload.Len(),
 		names:   map[string]int{},
 		payload: payload,
 		report:  Report{},
@@ -449,7 +488,7 @@ func Empty() Vector {
 	return &vector{
 		length:  0,
 		names:   map[string]int{},
-		payload: NewEmptyPayload(),
+		payload: EmptyPayload(),
 		report:  Report{},
 	}
 }
