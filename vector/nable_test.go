@@ -7,8 +7,8 @@ import (
 )
 
 func TestDefNAble_Refresh(t *testing.T) {
-	vec1 := newCommon(5)
-	vec2 := newCommon(5)
+	vec1 := New(5)
+	vec2 := New(5)
 	nable1 := DefNAble{
 		vec: &vec1,
 		na:  []bool{false, true, false, false, false, true},
@@ -27,7 +27,7 @@ func TestDefNAble_Refresh(t *testing.T) {
 }
 
 func TestDefNAble_NA(t *testing.T) {
-	vec := newCommon(5)
+	vec := New(5)
 	nable := DefNAble{
 		vec: &vec,
 		na:  []bool{false, true, false, false, false, true},
@@ -45,7 +45,7 @@ func TestDefNAble_NA(t *testing.T) {
 }
 
 func TestDefNAble_IsNA(t *testing.T) {
-	vec := newCommon(5)
+	vec := New(5)
 	nable := DefNAble{
 		vec: &vec,
 		na:  []bool{true, true, false, false, false, true},
@@ -115,7 +115,7 @@ func TestDefNAble_SetNA(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			vec := newCommon(5)
+			vec := New(5)
 			nable := newDefaultNAble(&vec)
 			nable.SetNA(data.na)
 			if !reflect.DeepEqual(nable.na, data.expected) {
@@ -148,7 +148,7 @@ func TestDefNAble_HasNA(t *testing.T) {
 		},
 	}
 
-	vec := newCommon(5)
+	vec := New(5)
 	for index, data := range testData {
 		t.Run(fmt.Sprintf("Data %d", index), func(t *testing.T) {
 			nable := newDefaultNAble(&vec)
@@ -196,7 +196,7 @@ func TestDefNAble_OnlyNA(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			vec := newCommon(5)
+			vec := New(5)
 			nable := newDefaultNAble(&vec)
 			nable.SetNA(data.na)
 			if !reflect.DeepEqual(nable.OnlyNA(), data.expected) {
@@ -242,7 +242,7 @@ func TestDefNAble_WithoutNA(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			vec := newCommon(5)
+			vec := New(5)
 			nable := newDefaultNAble(&vec)
 			nable.SetNA(data.na)
 			if !reflect.DeepEqual(nable.WithoutNA(), data.expected) {

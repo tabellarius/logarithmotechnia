@@ -10,8 +10,19 @@ type NAble interface {
 }
 
 type DefNAble struct {
-	vec Vector
-	na  []bool
+	vec    Vector
+	na     []bool
+	marked bool
+}
+
+func (n *DefNAble) Clone() NAble {
+	n.marked = true
+
+	return &DefNAble{
+		vec:    n.vec,
+		na:     n.na,
+		marked: true,
+	}
 }
 
 func (n *DefNAble) Refresh() {
@@ -23,6 +34,7 @@ func (n *DefNAble) Refresh() {
 	copy(na, n.na)
 
 	n.na = na
+	n.marked = false
 }
 
 func (n *DefNAble) NA() []bool {
@@ -48,6 +60,7 @@ func (n *DefNAble) SetNA(na []bool) Vector {
 		return n.vec
 	}
 
+	n.marked = false
 	n.na = make([]bool, n.vec.Length()+1)
 	copy(n.na[1:], na)
 	return n.vec
@@ -89,8 +102,9 @@ func (n *DefNAble) WithoutNA() []int {
 
 func newDefaultNAble(vec Vector) DefNAble {
 	nable := DefNAble{
-		vec: vec,
-		na:  make([]bool, vec.Length()+1),
+		vec:    vec,
+		na:     make([]bool, vec.Length()+1),
+		marked: false,
 	}
 
 	return nable

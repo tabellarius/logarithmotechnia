@@ -6,6 +6,7 @@ type Nameable interface {
 	InvertedNamesMap() map[int]string
 	Name(idx int) string
 	Index(name string) int
+	NamesForIndices(indices []int) map[string]int
 	SetName(idx int, name string) Vector
 	SetNames(names []string) Vector
 	SetNamesMap(names map[string]int) Vector
@@ -17,6 +18,7 @@ type Nameable interface {
 type DefNameable struct {
 	vec   Vector
 	names map[string]int
+	marked bool
 }
 
 func (n *DefNameable) HasName(name string) bool {
@@ -36,13 +38,21 @@ func (n *DefNameable) HasNameFor(idx int) bool {
 	return false
 }
 
+func (n *DefNameable) Clone() Nameable {
+	n.marked = true
+
+	return &DefNameable{
+		vec:    n.vec,
+		names:  n.names,
+		marked: true,
+	}
+}
+
 func (n *DefNameable) Refresh() {
 	names := map[string]int{}
 
-	if len(n.names) > 0 {
-		for name, idx := range n.names {
-			names[name] = idx
-		}
+	for name, idx := range n.names {
+		names[name] = idx
 	}
 
 	n.names = names
@@ -98,7 +108,21 @@ func (n *DefNameable) Index(name string) int {
 	return 0
 }
 
+func (n *DefNameable) NamesForIndices(indices []int) map[string]int {
+	inverted := n.InvertedNamesMap()
+	names := map[string]int{}
+
+	for _, idx := indices {
+
+	}
+
+}
+
 func (n *DefNameable) SetName(idx int, name string) Vector {
+	if n.marked {
+		n.Refresh()
+	}
+
 	if name != "" && idx >= 1 && idx <= n.vec.Length() {
 		n.names[name] = idx
 	}
@@ -147,6 +171,7 @@ func newDefNameable(vec Vector) DefNameable {
 	nameable := DefNameable{
 		vec:   vec,
 		names: map[string]int{},
+		marked: false,
 	}
 
 	return nameable

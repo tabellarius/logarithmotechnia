@@ -22,7 +22,7 @@ func TestDefNameable_SetName(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(fmt.Sprintf(`[%d]"%s"`, data.idx, data.name), func(t *testing.T) {
-			vec := newCommon(5)
+			vec := New(5)
 			nm := newDefNameable(&vec)
 			nm.SetName(data.idx, data.name)
 			idx, ok := nm.names[data.name]
@@ -58,7 +58,7 @@ func TestDefNameable_SetNames(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			vec := newCommon(5)
+			vec := New(5)
 			nm := newDefNameable(&vec)
 			nm.SetNames(data.names)
 			for i := 1; i <= len(data.names); i++ {
@@ -101,7 +101,7 @@ func TestDefNameable_SetNamesMap(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			vec := newCommon(5)
+			vec := New(5)
 			nm := newDefNameable(&vec)
 			nm.SetNamesMap(data.namesMap)
 			if !reflect.DeepEqual(nm.names, data.expected) {
@@ -112,7 +112,7 @@ func TestDefNameable_SetNamesMap(t *testing.T) {
 }
 
 func TestDefNameable_HasName(t *testing.T) {
-	vec := newCommon(5)
+	vec := New(5)
 	nm := newDefNameable(&vec)
 	nm.names = map[string]int{"one": 1}
 	if !nm.HasName("one") {
@@ -124,7 +124,7 @@ func TestDefNameable_HasName(t *testing.T) {
 }
 
 func TestDefNameable_HasNameFor(t *testing.T) {
-	vec := newCommon(5)
+	vec := New(5)
 	nm := newDefNameable(&vec)
 	nm.names = map[string]int{"one": 1, "two": 2, "four": 4}
 	testData := []struct {
@@ -169,7 +169,7 @@ func TestDefNameable_Names(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			vec := newCommon(5)
+			vec := New(5)
 			nm := newDefNameable(&vec)
 			nm.names = data.namesMap
 			names := nm.Names()
@@ -206,7 +206,7 @@ func TestDefNameable_NamesMap(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			vec := newCommon(5)
+			vec := New(5)
 			nm := newDefNameable(&vec)
 			nm.names = data.namesMap
 			names := nm.NamesMap()
@@ -249,12 +249,12 @@ func TestDefNameable_ByNames(t *testing.T) {
 		},
 	}
 
-	vec := newCommon(5)
+	vec := New(5)
 	nameable := newDefNameable(&vec)
 	nameable.SetNamesMap(namesMap)
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			newVec := nameable.ByNames(data.names).(*common)
+			newVec := nameable.ByNames(data.names).(*vector)
 			if newVec.Length() != data.expectedLength {
 				t.Error(fmt.Sprintf("newVec.Length (%d) is not equal to %d",
 					newVec.Length(), data.expectedLength))
@@ -292,7 +292,7 @@ func TestDefNameable_InvertedNamesMap(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			vec := newCommon(5)
+			vec := New(5)
 			nameable := newDefNameable(&vec)
 			nameable.names = data.namesMap
 			invertedMap := nameable.InvertedNamesMap()
@@ -305,7 +305,7 @@ func TestDefNameable_InvertedNamesMap(t *testing.T) {
 }
 
 func TestDefNameable_Index(t *testing.T) {
-	vec := newCommon(5)
+	vec := New(5)
 	nameable := newDefNameable(&vec)
 	nameable.names = map[string]int{"two": 2, "three": 3, "four": 4}
 
@@ -329,7 +329,7 @@ func TestDefNameable_Index(t *testing.T) {
 }
 
 func TestDefNameable_Name(t *testing.T) {
-	vec := newCommon(5)
+	vec := New(5)
 	nameable := newDefNameable(&vec)
 	nameable.names = map[string]int{"two": 2, "three": 3, "four": 4}
 
@@ -353,7 +353,7 @@ func TestDefNameable_Name(t *testing.T) {
 }
 
 func TestDefNameable_Refresh(t *testing.T) {
-	vec := newCommon(5)
+	vec := New(5)
 	nameable := newDefNameable(&vec)
 	namesMap := map[string]int{"two": 2, "three": 3, "four": 4}
 	nameable.names = namesMap

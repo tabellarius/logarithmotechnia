@@ -1,21 +1,5 @@
 package vector
 
-func NewReport() Report {
-	return Report{
-		Errors:   make([]string, 0),
-		Warnings: make([]string, 0),
-	}
-}
-
-func CopyReport(report Report) Report {
-	newRep := Report{
-		Errors:   report.Errors,
-		Warnings: report.Warnings,
-	}
-
-	return newRep
-}
-
 type Report struct {
 	Errors   []string
 	Warnings []string
@@ -31,4 +15,23 @@ func (r Report) AddError(error string) {
 
 func (r Report) AddWarning(warning string) {
 	r.Warnings = append(r.Warnings, warning)
+}
+
+func NewReport() Report {
+	return Report{
+		Errors:   make([]string, 0),
+		Warnings: make([]string, 0),
+	}
+}
+
+func (r Report) Copy() Report {
+	newRep := Report{
+		Errors:   make([]string, len(r.Errors)),
+		Warnings: make([]string, len(r.Warnings)),
+	}
+
+	copy(newRep.Errors, r.Errors)
+	copy(newRep.Warnings, r.Warnings)
+
+	return newRep
 }

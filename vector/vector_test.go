@@ -7,40 +7,40 @@ import (
 )
 
 func TestCommon_newCommon(t *testing.T) {
-	vec := newCommon(5)
+	vec := New(5)
 	if vec.length != 5 {
-		t.Error(`newCommon(5): length is not 5`)
+		t.Error(`New(5): length is not 5`)
 	}
 
 	if vec.vec != nil {
-		t.Error(`newCommon(5): vec is not nil`)
+		t.Error(`New(5): vec is not nil`)
 	}
 
 	if vec.marked != false {
-		t.Error(`newCommon(5): marked is not false`)
+		t.Error(`New(5): marked is not false`)
 	}
 
 	if len(vec.report.Errors) != 0 {
-		t.Error(`newCommon(5): there are errors in the report`)
+		t.Error(`New(5): there are errors in the report`)
 	}
 
 	if len(vec.report.Warnings) != 0 {
-		t.Error(`newCommon(5): there are warnings in the report`)
+		t.Error(`New(5): there are warnings in the report`)
 	}
 
-	vec = newCommon(0)
+	vec = New(0)
 	if vec.length != 0 {
-		t.Error("newCommon(0): length is not zero")
+		t.Error("New(0): length is not zero")
 	}
 
-	vec = newCommon(0)
+	vec = New(0)
 	if vec.length != 0 {
-		t.Error("newCommon(0): length is not zero")
+		t.Error("New(0): length is not zero")
 	}
 
-	vec = newCommon(-1)
+	vec = New(-1)
 	if vec.length != 0 {
-		t.Error("newCommon(0): length is not zero")
+		t.Error("New(0): length is not zero")
 	}
 }
 
@@ -49,7 +49,7 @@ func TestCommon_Length(t *testing.T) {
 	lengthOut := []int{0, 0, 0, 1, 5, 12, 25, 100}
 
 	for i := 0; i < len(lengthIn); i++ {
-		vec := newCommon(lengthIn[i])
+		vec := New(lengthIn[i])
 		if vec.Length() != lengthOut[i] {
 			t.Error(fmt.Sprintf("In-length (%d) does not match out-length (%d)", lengthIn[i], lengthOut[i]))
 		}
@@ -61,7 +61,7 @@ func TestCommon_IsEmpty(t *testing.T) {
 	emptyness := []bool{true, true, true, false, false}
 
 	for i := 0; i < len(lengthIn); i++ {
-		vec := newCommon(lengthIn[i])
+		vec := New(lengthIn[i])
 		if vec.IsEmpty() != emptyness[i] {
 			t.Error(fmt.Sprintf("Emptyness of vec(%d) is wrong (%t instead of %t)", lengthIn[i],
 				vec.IsEmpty(), emptyness[i]))
@@ -116,8 +116,8 @@ func TestCommon_ByIndices(t *testing.T) {
 
 	for _, indicesData := range testData {
 		t.Run(indicesData.name, func(t *testing.T) {
-			vec := newCommon(indicesData.lengthSrc)
-			newVec := vec.ByIndices(indicesData.indicesIn).(*common)
+			vec := New(indicesData.lengthSrc)
+			newVec := vec.ByIndices(indicesData.indicesIn).(*vector)
 
 			if newVec.length != indicesData.lengthDst {
 				t.Error(fmt.Sprintf("newVec's length (%d) is not {%d}", newVec.length, indicesData.lengthDst))
@@ -237,8 +237,8 @@ func TestCommon_ByFromTo(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			vec := newCommon(data.lengthSrc)
-			newVec := vec.ByFromTo(data.from, data.to).(*common)
+			vec := New(data.lengthSrc)
+			newVec := vec.ByFromTo(data.from, data.to).(*vector)
 
 			if newVec.length != data.lengthDst {
 				t.Error(fmt.Sprintf("newVec's length (%d) is not {%d}", newVec.length, data.lengthDst))
@@ -295,7 +295,7 @@ func TestCommon_ByBool(t *testing.T) {
 		},
 	}
 
-	vec := newCommon(5)
+	vec := New(5)
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
 			newVec := vec.ByBool(data.booleans)
@@ -304,7 +304,7 @@ func TestCommon_ByBool(t *testing.T) {
 					t.Error("Returned vector is not empty type")
 				}
 			} else {
-				newCom := newVec.(*common)
+				newCom := newVec.(*vector)
 				if newCom.length != data.length {
 					t.Error(fmt.Sprintf("Output length (%d) is not %d", newCom.length, data.length))
 				}
@@ -318,8 +318,8 @@ func TestCommon_ByBool(t *testing.T) {
 }
 
 func TestCommon_Clone(t *testing.T) {
-	vec := newCommon(10)
-	newVec := vec.Clone().(*common)
+	vec := New(10)
+	newVec := vec.Clone().(*vector)
 
 	if newVec.vec != nil {
 		t.Error("newVec.vec is not nil")
@@ -337,7 +337,7 @@ func TestCommon_Clone(t *testing.T) {
 }
 
 func TestCommon_Mark(t *testing.T) {
-	vec := newCommon(10)
+	vec := New(10)
 	vec.Mark()
 	if !vec.marked {
 		t.Error("vec.marked is not true")
@@ -345,7 +345,7 @@ func TestCommon_Mark(t *testing.T) {
 }
 
 func TestCommon_Marked(t *testing.T) {
-	vec := newCommon(10)
+	vec := New(10)
 	if vec.Marked() {
 		t.Error("vec.marked is true for new vector")
 	}
@@ -357,7 +357,7 @@ func TestCommon_Marked(t *testing.T) {
 }
 
 func TestCommon_Refresh(t *testing.T) {
-	vec := newCommon(10)
+	vec := New(10)
 	vec.marked = true
 	vec.Refresh()
 	if vec.marked {
@@ -366,7 +366,7 @@ func TestCommon_Refresh(t *testing.T) {
 }
 
 func TestCommon_Report(t *testing.T) {
-	vec := newCommon(10)
+	vec := New(10)
 	vec.report = Report{
 		Errors:   []string{"Error"},
 		Warnings: []string{"Warning"},
