@@ -2,7 +2,9 @@ package vector
 
 import (
 	"fmt"
+	"math"
 	"reflect"
+	"strconv"
 	"testing"
 )
 
@@ -134,4 +136,196 @@ func TestInteger(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestInteger_Booleans(t *testing.T) {
+	testData := []struct {
+		in    []int
+		inNA  []bool
+		out   []bool
+		outNA []bool
+	}{
+		{
+			in:    []int{1, 3, 0, 100, 0},
+			inNA:  []bool{false, false, false, false, false},
+			out:   []bool{true, true, false, true, false},
+			outNA: []bool{false, false, false, false, false},
+		},
+		{
+			in:    []int{10, 0, 12, 14, 1110},
+			inNA:  []bool{false, false, false, true, true},
+			out:   []bool{true, false, true, false, false},
+			outNA: []bool{false, false, false, true, true},
+		},
+		{
+			in:    []int{1, 3, 0, 100, 0, -11, -10},
+			inNA:  []bool{false, false, false, false, false, false, true},
+			out:   []bool{true, true, false, true, false, true, false},
+			outNA: []bool{false, false, false, false, false, false, true},
+		},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			vec := Integer(data.in, data.inNA)
+			payload := vec.(*vector).payload.(*integer)
+
+			booleans, na := payload.Booleans()
+			if !reflect.DeepEqual(booleans, data.out) {
+				t.Error(fmt.Printf("Booleans (%v) are not equal to data.out (%v)\n", booleans, data.out))
+			}
+			if !reflect.DeepEqual(na, data.outNA) {
+				t.Error(fmt.Printf("NA (%v) are not equal to data.outNA (%v)\n", na, data.outNA))
+			}
+		})
+	}
+}
+
+func TestInteger_Integers(t *testing.T) {
+	testData := []struct {
+		in    []int
+		inNA  []bool
+		out   []int
+		outNA []bool
+	}{
+		{
+			in:    []int{1, 3, 0, 100, 0},
+			inNA:  []bool{false, false, false, false, false},
+			out:   []int{1, 3, 0, 100, 0},
+			outNA: []bool{false, false, false, false, false},
+		},
+		{
+			in:    []int{10, 0, 12, 14, 1110},
+			inNA:  []bool{false, false, false, true, true},
+			out:   []int{10, 0, 12, 0, 0},
+			outNA: []bool{false, false, false, true, true},
+		},
+		{
+			in:    []int{1, 3, 0, 100, 0, -11, -10},
+			inNA:  []bool{false, false, false, false, false, false, true},
+			out:   []int{1, 3, 0, 100, 0, -11, 0},
+			outNA: []bool{false, false, false, false, false, false, true},
+		},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			vec := Integer(data.in, data.inNA)
+			payload := vec.(*vector).payload.(*integer)
+
+			integers, na := payload.Integers()
+			if !reflect.DeepEqual(integers, data.out) {
+				t.Error(fmt.Printf("Integers (%v) are not equal to data.out (%v)\n", integers, data.out))
+			}
+			if !reflect.DeepEqual(na, data.outNA) {
+				t.Error(fmt.Printf("NA (%v) are not equal to data.outNA (%v)\n", na, data.outNA))
+			}
+		})
+	}
+}
+
+func TestInteger_Floats(t *testing.T) {
+	testData := []struct {
+		in    []int
+		inNA  []bool
+		out   []float64
+		outNA []bool
+	}{
+		{
+			in:    []int{1, 3, 0, 100, 0},
+			inNA:  []bool{false, false, false, false, false},
+			out:   []float64{1, 3, 0, 100, 0},
+			outNA: []bool{false, false, false, false, false},
+		},
+		{
+			in:    []int{10, 0, 12, 14, 1110},
+			inNA:  []bool{false, false, false, true, true},
+			out:   []float64{10, 0, 12, math.NaN(), math.NaN()},
+			outNA: []bool{false, false, false, true, true},
+		},
+		{
+			in:    []int{1, 3, 0, 100, 0, -11, -10},
+			inNA:  []bool{false, false, false, false, false, false, true},
+			out:   []float64{1, 3, 0, 100, 0, -11, math.NaN()},
+			outNA: []bool{false, false, false, false, false, false, true},
+		},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			vec := Integer(data.in, data.inNA)
+			payload := vec.(*vector).payload.(*integer)
+
+			floats, na := payload.Floats()
+			correct := true
+			for i := 0; i < len(floats); i++ {
+				if math.IsNaN(data.out[i]) {
+					if !math.IsNaN(floats[i]) {
+						correct = false
+					}
+				} else if floats[i] != data.out[i] {
+					correct = false
+				}
+			}
+			if !correct {
+				t.Error(fmt.Printf("Floats (%v) are not equal to data.out (%v)\n", floats, data.out))
+			}
+			if !reflect.DeepEqual(na, data.outNA) {
+				t.Error(fmt.Printf("NA (%v) are not equal to data.outNA (%v)\n", na, data.outNA))
+			}
+		})
+	}
+}
+
+func TestInteger_Strings(t *testing.T) {
+	testData := []struct {
+		in    []int
+		inNA  []bool
+		out   []string
+		outNA []bool
+	}{
+		{
+			in:    []int{1, 3, 0, 100, 0},
+			inNA:  []bool{false, false, false, false, false},
+			out:   []string{"1", "3", "0", "100", "0"},
+			outNA: []bool{false, false, false, false, false},
+		},
+		{
+			in:    []int{10, 0, 12, 14, 1110},
+			inNA:  []bool{false, false, false, true, true},
+			out:   []string{"10", "0", "12", "", ""},
+			outNA: []bool{false, false, false, true, true},
+		},
+		{
+			in:    []int{1, 3, 0, 100, 0, -11, -10},
+			inNA:  []bool{false, false, false, false, false, false, true},
+			out:   []string{"1", "3", "0", "100", "0", "-11", ""},
+			outNA: []bool{false, false, false, false, false, false, true},
+		},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			vec := Integer(data.in, data.inNA)
+			payload := vec.(*vector).payload.(*integer)
+
+			strings, na := payload.Strings()
+			if !reflect.DeepEqual(strings, data.out) {
+				t.Error(fmt.Printf("Integers (%v) are not equal to data.out (%v)\n", strings, data.out))
+			}
+			if !reflect.DeepEqual(na, data.outNA) {
+				t.Error(fmt.Printf("NA (%v) are not equal to data.outNA (%v)\n", na, data.outNA))
+			}
+		})
+	}
+}
+
+func TestInteger_ByIndices(t *testing.T) {
+	testData := []struct {
+		name string
+	}{
+		{},
+	}
+
+	_ = testData
 }

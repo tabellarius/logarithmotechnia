@@ -31,9 +31,14 @@ func (n DefNA) NotNA() []bool {
 }
 
 func (n DefNA) HasNA() bool {
+	if n.na[0] {
+		return true
+	}
+
 	length := len(n.na) - 1
 	for i := 1; i <= length; i++ {
 		if n.na[i] == true {
+			n.na[0] = true
 			return true
 		}
 	}

@@ -1,6 +1,7 @@
 package vector
 
 import (
+	"math"
 	"strconv"
 )
 
@@ -15,10 +16,6 @@ type integer struct {
 
 func (p *integer) Len() int {
 	return p.length
-}
-
-func (p *integer) NAP() []bool {
-	return p.na
 }
 
 func (p *integer) ByIndices(indices []int) Payload {
@@ -62,18 +59,6 @@ func (p *integer) Filter(filter interface{}) []bool {
 	return make([]bool, p.length)
 }
 
-func (p *integer) selectIndices(indices []int) []bool {
-	booleans := make([]bool, p.length)
-
-	for _, idx := range indices {
-		if idx >= 1 && idx <= p.length {
-			booleans[idx-1] = true
-		}
-	}
-
-	return booleans
-}
-
 func (p *integer) selectByFunc(byFunc func(int, int, bool) bool) []bool {
 	booleans := make([]bool, p.length)
 
@@ -92,7 +77,13 @@ func (p *integer) Integers() ([]int, []bool) {
 	}
 
 	data := make([]int, p.length)
-	copy(data, p.data[1:])
+	for i := 1; i <= p.length; i++ {
+		if p.na[i] {
+			data[i-1] = 0
+		} else {
+			data[i-1] = p.data[i]
+		}
+	}
 
 	na := make([]bool, p.Len())
 	copy(na, p.na[1:])
@@ -108,7 +99,11 @@ func (p *integer) Floats() ([]float64, []bool) {
 	data := make([]float64, p.length)
 
 	for i := 1; i <= p.length; i++ {
-		data[i-1] = float64(p.data[i])
+		if p.na[i] {
+			data[i-1] = math.NaN()
+		} else {
+			data[i-1] = float64(p.data[i])
+		}
 	}
 
 	na := make([]bool, p.Len())
@@ -125,7 +120,11 @@ func (p *integer) Booleans() ([]bool, []bool) {
 	data := make([]bool, p.length)
 
 	for i := 1; i <= p.length; i++ {
-		data[i-1] = p.data[i] != 0
+		if p.na[i] {
+			data[i-1] = false
+		} else {
+			data[i-1] = p.data[i] != 0
+		}
 	}
 
 	na := make([]bool, p.Len())
@@ -142,7 +141,11 @@ func (p *integer) Strings() ([]string, []bool) {
 	data := make([]string, p.length)
 
 	for i := 1; i <= p.length; i++ {
-		data[i-1] = strconv.Itoa(p.data[i])
+		if p.na[i] {
+			data[i-1] = ""
+		} else {
+			data[i-1] = strconv.Itoa(p.data[i])
+		}
 	}
 
 	na := make([]bool, p.Len())

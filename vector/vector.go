@@ -20,13 +20,17 @@ type Vector interface {
 	Nameable
 	NAble
 
+	Intable
+	Floatable
+	Booleable
+	Stringable
+
 	Report() Report
 	fmt.Stringer
 }
 
 type Payload interface {
 	Len() int
-	NAP() []bool
 	ByIndices(indices []int) Payload
 	SupportsFilter(selector interface{}) bool
 	Filter(filter interface{}) []bool
@@ -57,7 +61,7 @@ type vector struct {
 	report  Report
 }
 
-// Length returns length of vector
+// Len returns length of vector
 func (v *vector) Len() int {
 	return v.length
 }
@@ -75,7 +79,7 @@ func (v *vector) Clone() Vector {
 }
 
 func (v *vector) ByIndices(indices []int) Vector {
-	selected := []int{}
+	var selected []int
 
 	for _, index := range indices {
 		if index >= 1 && index <= v.length {
@@ -103,7 +107,7 @@ func (v *vector) ByBool(booleans []bool) []int {
 		return []int{}
 	}
 
-	indices := []int{}
+	var indices []int
 	for index := 0; index < v.length; index++ {
 		if booleans[index] == true {
 			indices = append(indices, index+1)
@@ -112,8 +116,6 @@ func (v *vector) ByBool(booleans []bool) []int {
 
 	return indices
 }
-
-/* Selectors */
 
 func (v *vector) ByFromTo(from int, to int) []int {
 	/* from and to have different signs */
@@ -140,6 +142,8 @@ func (v *vector) ByFromTo(from int, to int) []int {
 
 	return indices
 }
+
+/* Selectors */
 
 func (v *vector) byFromToRegular(from, to int) []int {
 	from, to = v.normalizeFromTo(from, to)
@@ -239,24 +243,27 @@ func (v *vector) selectIndices(indices []int) []bool {
 	return booleans
 }
 
-/* Not Applicable-related */
-
 func (v *vector) IsNA() []bool {
-	isna := make([]bool, v.length)
-	copy(isna, v.payload.NAP()[1:])
-
-	return isna
-}
-
-func (v *vector) NotNA() []bool {
-	na := v.payload.NAP()
-	notna := make([]bool, v.length)
-
-	for i := 1; i < v.length; i++ {
-		na[i-1] = !na[i]
+	if nable, ok := v.payload.(NAble); ok {
+		return nable.IsNA()
 	}
 
-	return notna
+	return make([]bool, v.length)
+}
+
+/* Not Applicable-related */
+
+func (v *vector) NotNA() []bool {
+	if nable, ok := v.payload.(NAble); ok {
+		return nable.IsNA()
+	}
+
+	notNA := make([]bool, v.length)
+	for i := 0; i < v.length; i++ {
+		notNA[i] = true
+	}
+
+	return notNA
 }
 
 func (v *vector) HasNA() bool {
@@ -323,9 +330,23 @@ func (v *vector) strForElem(idx int) string {
 	return str
 }
 
-/* Vector creation */
+func (v *vector) Strings() ([]string, []bool) {
+	panic("implement me")
+}
 
-// New creates a vector part of the future vector. This function is used by public function which create
+func (v *vector) Floats() ([]float64, []bool) {
+	panic("implement me")
+}
+
+func (v *vector) Booleans() ([]bool, []bool) {
+	panic("implement me")
+}
+
+func (v *vector) Integers() ([]int, []bool) {
+	panic("implement me")
+}
+
+// New creates a vector part of the future vector. This function is used by public functions which create
 // typed vectors
 func New(payload Payload, options ...Config) Vector {
 	config := mergeConfigs(options)
@@ -351,6 +372,7 @@ func New(payload Payload, options ...Config) Vector {
 	return &vec
 }
 
+//Empty creates an empty (zero-length) vector
 func Empty() Vector {
 	return &vector{
 		length: 0,
