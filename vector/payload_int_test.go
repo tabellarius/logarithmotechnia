@@ -101,6 +101,14 @@ func TestInteger(t *testing.T) {
 						t.Error(fmt.Printf("Payload data (%v) is not equal to correct data (%v)\n",
 							payload.data[1:], data.data))
 					}
+
+					if vv.length != vv.DefNameable.length || vv.length != payload.length ||
+						vv.length != payload.DefNA.length {
+						t.Error(fmt.Printf("Lengths are different: (vv.length - %d, "+
+							"vv.DefNameable.length - %d, payload.length - %d, "+
+							"payload.DefNA.length - %d",
+							vv.length, vv.DefNameable.length, payload.length, payload.DefNA.length))
+					}
 				}
 
 				if len(data.na) > 0 && len(data.na) == length {

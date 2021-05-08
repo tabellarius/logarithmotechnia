@@ -10,7 +10,7 @@ const maxIntPrint = 5
 type integer struct {
 	length int
 	data   []int
-	na     []bool
+	DefNA
 }
 
 func (p *integer) Len() int {
@@ -30,10 +30,15 @@ func (p *integer) ByIndices(indices []int) Payload {
 		na = append(na, p.na[idx])
 	}
 
+	length := len(data) - 1
+
 	return &integer{
-		length: len(data) - 1,
+		length: length,
 		data:   data,
-		na:     na,
+		DefNA: DefNA{
+			length: length,
+			na:     na,
+		},
 	}
 }
 
@@ -176,7 +181,10 @@ func Integer(data []int, na []bool, options ...Config) Vector {
 	payload := &integer{
 		length: length,
 		data:   vecData,
-		na:     vecNA,
+		DefNA: DefNA{
+			length: length,
+			na:     vecNA,
+		},
 	}
 
 	return New(payload, options...)

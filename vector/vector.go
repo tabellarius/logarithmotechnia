@@ -3,7 +3,7 @@ package vector
 import "fmt"
 
 // Vector is an interface for a different vector types. This structure is similar to R-vectors: it starts from 1,
-// allows for an extensive indexing, supports NAP-values and named variables
+// allows for an extensive indexing, supports NA-values and named variables
 type Vector interface {
 	Len() int
 	Clone() Vector
@@ -11,27 +11,14 @@ type Vector interface {
 	ByIndices(indices []int) Vector
 	ByFromTo(from int, to int) []int
 	ByBool(booleans []bool) []int
+	ByNames(names []string) Vector
 	SupportsFilter(selector interface{}) bool
 	Filter(filter interface{}) []bool
+
 	IsEmpty() bool
 
-	Names() []string
-	NamesMap() map[string]int
-	InvertedNamesMap() map[int]string
-	Name(idx int) string
-	Index(name string) int
-	NamesForIndices(indices []int) map[string]int
-	SetName(idx int, name string) Vector
-	SetNames(names []string) Vector
-	HasName(name string) bool
-	HasNameFor(idx int) bool
-	ByNames(names []string) Vector
-
-	IsNA() []bool
-	NotNA() []bool
-	HasNA() bool
-	OnlyNA() []int
-	WithoutNA() []int
+	Nameable
+	NAble
 
 	Report() Report
 	fmt.Stringer
@@ -64,8 +51,8 @@ type Stringable interface {
 
 // vector holds data and functions shared by all vectors
 type vector struct {
-	length  int
-	names   map[string]int
+	length int
+	DefNameable
 	payload Payload
 	report  Report
 }
@@ -77,8 +64,11 @@ func (v *vector) Len() int {
 
 func (v *vector) Clone() Vector {
 	return &vector{
-		length:  v.length,
-		names:   v.NamesMap(),
+		length: v.length,
+		DefNameable: DefNameable{
+			length: v.length,
+			names:  v.NamesMap(),
+		},
 		payload: v.payload,
 		report:  v.report.Copy(),
 	}
@@ -93,9 +83,13 @@ func (v *vector) ByIndices(indices []int) Vector {
 		}
 	}
 
+	newPayload := v.payload.ByIndices(selected)
 	vec := &vector{
-		length:  len(selected),
-		names:   v.NamesMap(),
+		length: newPayload.Len(),
+		DefNameable: DefNameable{
+			length: newPayload.Len(),
+			names:  v.NamesForIndices(selected),
+		},
 		payload: v.payload.ByIndices(selected),
 		report:  Report{},
 	}
@@ -201,6 +195,18 @@ func (v *vector) normalizeFromTo(from, to int) (int, int) {
 	return from, to
 }
 
+func (v *vector) ByNames(names []string) Vector {
+	indices := make([]int, 0)
+
+	for _, name := range names {
+		if idx, ok := v.names[name]; ok {
+			indices = append(indices, idx)
+		}
+	}
+
+	return v.ByIndices(indices)
+}
+
 func (v *vector) SupportsFilter(selector interface{}) bool {
 	if _, ok := selector.([]int); ok {
 		return true
@@ -233,134 +239,7 @@ func (v *vector) selectIndices(indices []int) []bool {
 	return booleans
 }
 
-func (v *vector) Names() []string {
-	names := make([]string, v.length)
-
-	for name, idx := range v.names {
-		names[idx-1] = name
-	}
-
-	return names
-}
-
-func (v *vector) NamesMap() map[string]int {
-	names := make(map[string]int)
-
-	for name, idx := range v.names {
-		names[name] = idx
-	}
-
-	return names
-}
-
-/* Names-related */
-
-func (v *vector) InvertedNamesMap() map[int]string {
-	inverted := make(map[int]string)
-
-	for name, idx := range v.names {
-		inverted[idx] = name
-	}
-
-	return inverted
-}
-
-func (v *vector) Name(index int) string {
-	if index >= 1 && index <= v.length {
-		for name, idx := range v.names {
-			if index == idx {
-				return name
-			}
-		}
-	}
-
-	return ""
-}
-
-func (v *vector) Index(name string) int {
-	idx, ok := v.names[name]
-	if ok {
-		return idx
-	}
-	return 0
-}
-
-func (v *vector) NamesForIndices(indices []int) map[string]int {
-	inverted := v.InvertedNamesMap()
-	names := map[string]int{}
-
-	for _, idx := range indices {
-		if name, ok := inverted[idx]; ok {
-			names[name] = idx
-		}
-	}
-
-	return names
-}
-
-func (v *vector) SetName(idx int, name string) Vector {
-	if name != "" && idx >= 1 && idx <= v.length {
-		v.names[name] = idx
-	}
-
-	return v
-}
-
-func (v *vector) SetNames(names []string) Vector {
-	length := len(names)
-
-	if length != v.length {
-		v.report.AddWarning("SetNames(): names []string is not equal to vector's length")
-	}
-
-	if length > v.length {
-		length = v.length
-	}
-
-	for i := 1; i <= length; i++ {
-		v.SetName(i, names[i-1])
-	}
-
-	return v
-}
-
-func (v *vector) SetNamesMap(names map[string]int) Vector {
-	v.names = make(map[string]int)
-	for name, idx := range names {
-		v.SetName(idx, name)
-	}
-
-	return v
-}
-
-func (v *vector) HasName(name string) bool {
-	_, exists := v.names[name]
-	return exists
-}
-
-func (v *vector) HasNameFor(idx int) bool {
-	if idx >= 1 && idx <= v.length {
-		for _, index := range v.names {
-			if idx == index {
-				return true
-			}
-		}
-	}
-
-	return false
-}
-
-func (v *vector) ByNames(names []string) Vector {
-	indices := make([]int, 0)
-
-	for _, name := range names {
-		if idx, ok := v.names[name]; ok {
-			indices = append(indices, idx)
-		}
-	}
-
-	return v.ByIndices(indices)
-}
+/* Not Applicable-related */
 
 func (v *vector) IsNA() []bool {
 	isna := make([]bool, v.length)
@@ -380,43 +259,28 @@ func (v *vector) NotNA() []bool {
 	return notna
 }
 
-/* Not Applicable-related */
-
 func (v *vector) HasNA() bool {
-	na := v.payload.NAP()
-	for i := 1; i <= v.length; i++ {
-		if na[i] == true {
-			return true
-		}
+	if nable, ok := v.payload.(NAble); ok {
+		return nable.HasNA()
 	}
 
 	return false
 }
 
-func (v *vector) OnlyNA() []int {
-	na := v.payload.NAP()
-	naIndices := make([]int, 0)
-
-	for i := 1; i <= v.length; i++ {
-		if na[i] == true {
-			naIndices = append(naIndices, i)
-		}
+func (v *vector) WithNA() []int {
+	if nable, ok := v.payload.(NAble); ok {
+		return nable.WithNA()
 	}
 
-	return naIndices
+	return []int{}
 }
 
 func (v *vector) WithoutNA() []int {
-	na := v.payload.NAP()
-	naIndices := make([]int, 0)
-
-	for i := 1; i <= v.length; i++ {
-		if na[i] == false {
-			naIndices = append(naIndices, i)
-		}
+	if nable, ok := v.payload.(NAble); ok {
+		return nable.WithoutNA()
 	}
 
-	return naIndices
+	return []int{}
 }
 
 func (v *vector) IsEmpty() bool {
@@ -467,8 +331,11 @@ func New(payload Payload, options ...Config) Vector {
 	config := mergeConfigs(options)
 
 	vec := vector{
-		length:  payload.Len(),
-		names:   map[string]int{},
+		length: payload.Len(),
+		DefNameable: DefNameable{
+			length: payload.Len(),
+			names:  map[string]int{},
+		},
 		payload: payload,
 		report:  Report{},
 	}
@@ -486,8 +353,11 @@ func New(payload Payload, options ...Config) Vector {
 
 func Empty() Vector {
 	return &vector{
-		length:  0,
-		names:   map[string]int{},
+		length: 0,
+		DefNameable: DefNameable{
+			length: 0,
+			names:  map[string]int{},
+		},
 		payload: EmptyPayload(),
 		report:  Report{},
 	}
