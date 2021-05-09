@@ -32,7 +32,7 @@ type Vector interface {
 type Payload interface {
 	Len() int
 	ByIndices(indices []int) Payload
-	SupportsFilter(selector interface{}) bool
+	SupportsFilter(filter interface{}) bool
 	Filter(filter interface{}) []bool
 	StrForElem(idx int) string
 }
@@ -211,17 +211,25 @@ func (v *vector) ByNames(names []string) Vector {
 	return v.ByIndices(indices)
 }
 
-func (v *vector) SupportsFilter(selector interface{}) bool {
-	if _, ok := selector.([]int); ok {
+func (v *vector) SupportsFilter(filter interface{}) bool {
+	if _, ok := filter.(int); ok {
 		return true
 	}
 
-	return v.payload.SupportsFilter(selector)
+	if _, ok := filter.([]int); ok {
+		return true
+	}
+
+	return v.payload.SupportsFilter(filter)
 }
 
 func (v *vector) Filter(filter interface{}) []bool {
+	if index, ok := filter.(int); ok {
+		return v.selectByIndices([]int{index})
+	}
+
 	if indices, ok := filter.([]int); ok {
-		return v.selectIndices(indices)
+		return v.selectByIndices(indices)
 	}
 
 	if v.payload.SupportsFilter(filter) {
@@ -231,7 +239,7 @@ func (v *vector) Filter(filter interface{}) []bool {
 	return []bool{}
 }
 
-func (v *vector) selectIndices(indices []int) []bool {
+func (v *vector) selectByIndices(indices []int) []bool {
 	booleans := make([]bool, v.length)
 
 	for _, idx := range indices {

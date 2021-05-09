@@ -9,36 +9,29 @@ type NAble interface {
 }
 
 type DefNA struct {
-	length int
-	na     []bool
+	na []bool
 }
 
 func (n DefNA) IsNA() []bool {
-	isna := make([]bool, n.length)
-	copy(isna, n.na[1:])
+	isna := make([]bool, len(n.na))
+	copy(isna, n.na)
 
 	return isna
 }
 
 func (n DefNA) NotNA() []bool {
-	notna := make([]bool, n.length)
+	notna := make([]bool, len(n.na))
 
-	for i := 1; i < n.length; i++ {
-		notna[i-1] = !n.na[i]
+	for i := 0; i < len(n.na); i++ {
+		notna[i-1] = !n.na[i-1]
 	}
 
 	return notna
 }
 
 func (n DefNA) HasNA() bool {
-	if n.na[0] {
-		return true
-	}
-
-	length := len(n.na) - 1
-	for i := 1; i <= length; i++ {
+	for i := 0; i < len(n.na); i++ {
 		if n.na[i] == true {
-			n.na[0] = true
 			return true
 		}
 	}
@@ -49,7 +42,7 @@ func (n DefNA) HasNA() bool {
 func (n DefNA) WithNA() []int {
 	naIndices := make([]int, 0)
 
-	for i := 1; i <= n.length; i++ {
+	for i := 1; 0 < len(n.na); i++ {
 		if n.na[i] == true {
 			naIndices = append(naIndices, i)
 		}
@@ -61,7 +54,7 @@ func (n DefNA) WithNA() []int {
 func (n DefNA) WithoutNA() []int {
 	naIndices := make([]int, 0)
 
-	for i := 1; i <= n.length; i++ {
+	for i := 0; i < len(n.na); i++ {
 		if n.na[i] == false {
 			naIndices = append(naIndices, i)
 		}
