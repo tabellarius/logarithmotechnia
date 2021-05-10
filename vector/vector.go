@@ -9,11 +9,10 @@ type Vector interface {
 	Clone() Vector
 
 	ByIndices(indices []int) Vector
-	ByFromTo(from int, to int) []int
-	ByBool(booleans []bool) []int
 	ByNames(names []string) Vector
-	SupportsFilter(selector interface{}) bool
-	Filter(filter interface{}) []bool
+	Filter(selector interface{}) Vector
+	SupportsSelector(selector interface{}) bool
+	Select(selector interface{}) []bool
 
 	IsEmpty() bool
 
@@ -32,9 +31,14 @@ type Vector interface {
 type Payload interface {
 	Len() int
 	ByIndices(indices []int) Payload
-	SupportsFilter(filter interface{}) bool
-	Filter(filter interface{}) []bool
+	SupportsSelector(filter interface{}) bool
+	Select(selector interface{}) []bool
 	StrForElem(idx int) string
+}
+
+type FromTo struct {
+	from int
+	to   int
 }
 
 type Intable interface {
@@ -101,7 +105,74 @@ func (v *vector) ByIndices(indices []int) Vector {
 	return vec
 }
 
-func (v *vector) ByBool(booleans []bool) []int {
+func (v *vector) normalizeFromTo(from, to int) (int, int) {
+	if to > v.length {
+		to = v.length
+	}
+	if from < 1 {
+		from = 1
+	}
+
+	return from, to
+}
+
+func (v *vector) ByNames(names []string) Vector {
+	indices := make([]int, 0)
+
+	for _, name := range names {
+		if idx, ok := v.names[name]; ok {
+			indices = append(indices, idx)
+		}
+	}
+
+	return v.ByIndices(indices)
+}
+
+func (v *vector) Filter(selector interface{}) Vector {
+	if index, ok := selector.(int); ok {
+		return v.ByIndices([]int{index})
+	}
+
+	if indices, ok := selector.([]int); ok {
+		return v.ByIndices(indices)
+	}
+
+	if fromTo, ok := selector.(*FromTo); ok {
+		return v.ByIndices(v.selectByFromTo(fromTo.from, fromTo.to))
+	}
+
+	if booleans, ok := selector.([]bool); ok {
+		return v.ByIndices(v.selectByBooleans(booleans))
+	}
+
+	if v.SupportsSelector(selector) {
+		return v.ByIndices(v.selectByBooleans(v.Select(selector)))
+	}
+
+	return Empty()
+}
+
+func (v *vector) SupportsSelector(selector interface{}) bool {
+	if _, ok := selector.(int); ok {
+		return true
+	}
+
+	if _, ok := selector.([]int); ok {
+		return true
+	}
+
+	return v.payload.SupportsSelector(selector)
+}
+
+func (v *vector) Select(selector interface{}) []bool {
+	if v.payload.SupportsSelector(selector) {
+		return v.payload.Select(selector)
+	}
+
+	return []bool{}
+}
+
+func (v *vector) selectByBooleans(booleans []bool) []int {
 	if len(booleans) != v.length {
 		v.Report().AddError("Number of booleans is not equal to vector's length.")
 		return []int{}
@@ -117,7 +188,7 @@ func (v *vector) ByBool(booleans []bool) []int {
 	return indices
 }
 
-func (v *vector) ByFromTo(from int, to int) []int {
+func (v *vector) selectByFromTo(from int, to int) []int {
 	/* from and to have different signs */
 	if from*to < 0 {
 		v.Report().AddError("From and to can not have different signs.")
@@ -142,8 +213,6 @@ func (v *vector) ByFromTo(from int, to int) []int {
 
 	return indices
 }
-
-/* Selectors */
 
 func (v *vector) byFromToRegular(from, to int) []int {
 	from, to = v.normalizeFromTo(from, to)
@@ -186,69 +255,6 @@ func (v *vector) byFromToWithRemove(from, to int) []int {
 	}
 
 	return indices
-}
-
-func (v *vector) normalizeFromTo(from, to int) (int, int) {
-	if to > v.length {
-		to = v.length
-	}
-	if from < 1 {
-		from = 1
-	}
-
-	return from, to
-}
-
-func (v *vector) ByNames(names []string) Vector {
-	indices := make([]int, 0)
-
-	for _, name := range names {
-		if idx, ok := v.names[name]; ok {
-			indices = append(indices, idx)
-		}
-	}
-
-	return v.ByIndices(indices)
-}
-
-func (v *vector) SupportsFilter(filter interface{}) bool {
-	if _, ok := filter.(int); ok {
-		return true
-	}
-
-	if _, ok := filter.([]int); ok {
-		return true
-	}
-
-	return v.payload.SupportsFilter(filter)
-}
-
-func (v *vector) Filter(filter interface{}) []bool {
-	if index, ok := filter.(int); ok {
-		return v.selectByIndices([]int{index})
-	}
-
-	if indices, ok := filter.([]int); ok {
-		return v.selectByIndices(indices)
-	}
-
-	if v.payload.SupportsFilter(filter) {
-		return v.payload.Filter(filter)
-	}
-
-	return []bool{}
-}
-
-func (v *vector) selectByIndices(indices []int) []bool {
-	booleans := make([]bool, v.length)
-
-	for _, idx := range indices {
-		if idx >= 1 && idx <= v.length {
-			booleans[idx-1] = true
-		}
-	}
-
-	return booleans
 }
 
 func (v *vector) IsNA() []bool {
@@ -313,7 +319,7 @@ func (v *vector) String() string {
 		str += v.strForElem(1)
 	}
 	if v.length > 1 {
-		for i := 2; i <= v.length; i++ {
+		for i := 1; i < v.length; i++ {
 			if i <= maxIntPrint {
 				str += ", " + v.strForElem(i)
 			} else {

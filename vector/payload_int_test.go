@@ -381,7 +381,7 @@ func TestInteger_ByIndices(t *testing.T) {
 	}
 }
 
-func TestInteger_SupportsFilter(t *testing.T) {
+func TestInteger_SupportsSelector(t *testing.T) {
 	testData := []struct {
 		name        string
 		filter      interface{}
@@ -401,8 +401,8 @@ func TestInteger_SupportsFilter(t *testing.T) {
 	payload := Integer([]int{1}, nil).(*vector).payload
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			if payload.SupportsFilter(data.filter) != data.isSupported {
-				t.Error("Filter's support is incorrect.")
+			if payload.SupportsSelector(data.filter) != data.isSupported {
+				t.Error("Select's support is incorrect.")
 			}
 		})
 	}
@@ -427,13 +427,78 @@ func TestInteger_Filter(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			filtered := payload.Filter(data.filter)
-			if !reflect.DeepEqual(payload.Filter(data.filter), data.out) {
-				t.Error(fmt.Sprintf("payload.Filter() (%v) is not equal to expected value (%v)",
+			filtered := payload.Select(data.filter)
+			if !reflect.DeepEqual(payload.Select(data.filter), data.out) {
+				t.Error(fmt.Sprintf("payload.Select() (%v) is not equal to expected value (%v)",
 					filtered, data.out))
 			}
 		})
 	}
+}
 
-	_ = testData
+func TestInteger_Select(t *testing.T) {
+	testData := []struct {
+		name string
+		fn   interface{}
+		out  []bool
+	}{
+		{
+			name: "Odd",
+			fn:   Odd(),
+			out:  []bool{true, false, true, false, true, false, true, false, true, false},
+		},
+		{
+			name: "Even",
+			fn:   Even(),
+			out:  []bool{false, true, false, true, false, true, false, true, false, true},
+		},
+		{
+			name: "Nth(3)",
+			fn:   Nth(3),
+			out:  []bool{false, false, true, false, false, true, false, false, true, false},
+		},
+		{
+			name: "Nth(4)",
+			fn:   Nth(4),
+			out:  []bool{false, false, false, true, false, false, false, true, false, false},
+		},
+		{
+			name: "Nth(5)",
+			fn:   Nth(5),
+			out:  []bool{false, false, false, false, true, false, false, false, false, true},
+		},
+		{
+			name: "Nth(10)",
+			fn:   Nth(10),
+			out:  []bool{false, false, false, false, false, false, false, false, false, true},
+		},
+		{
+			name: "func(_ int, val int, _ bool) bool {return val == 2}",
+			fn:   func(_ int, val int, _ bool) bool { return val == 2 },
+			out:  []bool{false, true, false, false, false, true, false, false, false, false},
+		},
+		{
+			name: "func() bool {return true}",
+			fn:   func() bool { return true },
+			out:  []bool{false, false, false, false, false, false, false, false, false, false},
+		},
+	}
+
+	payload := Integer([]int{1, 2, 39, 4, 56, 2, 45, 90, 4, 3}, nil).(*vector).payload
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			result := payload.Select(data.fn)
+			if !reflect.DeepEqual(result, data.out) {
+				t.Error(fmt.Sprintf("Result (%v) is not equal to expected (%v)", result, data.out))
+			}
+		})
+	}
+
+}
+
+func TestFilter(t *testing.T) {
+	vec := Integer([]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}, nil)
+	fmt.Println(vec)
+	fmt.Println(vec.Filter(Nth(5)))
 }

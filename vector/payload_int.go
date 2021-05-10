@@ -36,15 +36,15 @@ func (p *integer) ByIndices(indices []int) Payload {
 	}
 }
 
-func (p *integer) SupportsFilter(filter interface{}) bool {
-	if _, ok := filter.(func(int, int, bool) bool); ok {
+func (p *integer) SupportsSelector(selector interface{}) bool {
+	if _, ok := selector.(func(int, int, bool) bool); ok {
 		return true
 	}
 
 	return false
 }
 
-func (p *integer) Filter(filter interface{}) []bool {
+func (p *integer) Select(filter interface{}) []bool {
 	if byFunc, ok := filter.(func(int, int, bool) bool); ok {
 		return p.selectByFunc(byFunc)
 	}
@@ -148,11 +148,11 @@ func (p *integer) Strings() ([]string, []bool) {
 }
 
 func (p *integer) StrForElem(idx int) string {
-	if p.na[idx] {
+	if p.na[idx-1] {
 		return "NA"
 	}
 
-	return strconv.Itoa(p.data[idx])
+	return strconv.Itoa(p.data[idx-1])
 }
 
 func Integer(data []int, na []bool, options ...Config) Vector {

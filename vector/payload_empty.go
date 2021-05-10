@@ -3,15 +3,15 @@ package vector
 type emptyPayload struct {
 }
 
-func (e *emptyPayload) ByIndices([]int) Payload {
-	return &emptyPayload{}
-}
-
-func (e *emptyPayload) SupportsFilter(interface{}) bool {
+func (e *emptyPayload) SupportsSelector(interface{}) bool {
 	return false
 }
 
-func (e *emptyPayload) Filter(interface{}) []bool {
+func (e *emptyPayload) ByIndices([]int) Payload {
+	return EmptyPayload()
+}
+
+func (e *emptyPayload) Select(interface{}) []bool {
 	return []bool{}
 }
 
