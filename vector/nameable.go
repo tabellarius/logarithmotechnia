@@ -19,7 +19,7 @@ type DefNameable struct {
 	names  map[string]int
 }
 
-func (v DefNameable) Names() []string {
+func (v *DefNameable) Names() []string {
 	names := make([]string, v.length)
 
 	for name, idx := range v.names {
@@ -29,7 +29,7 @@ func (v DefNameable) Names() []string {
 	return names
 }
 
-func (v DefNameable) NamesMap() map[string]int {
+func (v *DefNameable) NamesMap() map[string]int {
 	names := make(map[string]int)
 
 	for name, idx := range v.names {
@@ -39,7 +39,7 @@ func (v DefNameable) NamesMap() map[string]int {
 	return names
 }
 
-func (v DefNameable) InvertedNamesMap() map[int]string {
+func (v *DefNameable) InvertedNamesMap() map[int]string {
 	inverted := make(map[int]string)
 
 	for name, idx := range v.names {
@@ -49,7 +49,7 @@ func (v DefNameable) InvertedNamesMap() map[int]string {
 	return inverted
 }
 
-func (v DefNameable) Name(index int) string {
+func (v *DefNameable) Name(index int) string {
 	if index >= 1 && index <= v.length {
 		for name, idx := range v.names {
 			if index == idx {
@@ -61,7 +61,7 @@ func (v DefNameable) Name(index int) string {
 	return ""
 }
 
-func (v DefNameable) Index(name string) int {
+func (v *DefNameable) Index(name string) int {
 	idx, ok := v.names[name]
 	if ok {
 		return idx
@@ -69,7 +69,7 @@ func (v DefNameable) Index(name string) int {
 	return 0
 }
 
-func (v DefNameable) NamesForIndices(indices []int) map[string]int {
+func (v *DefNameable) NamesForIndices(indices []int) map[string]int {
 	inverted := v.InvertedNamesMap()
 	names := map[string]int{}
 
@@ -82,13 +82,13 @@ func (v DefNameable) NamesForIndices(indices []int) map[string]int {
 	return names
 }
 
-func (v DefNameable) SetName(idx int, name string) {
+func (v *DefNameable) SetName(idx int, name string) {
 	if name != "" && idx >= 1 && idx <= v.length {
 		v.names[name] = idx
 	}
 }
 
-func (v DefNameable) SetNames(names []string) {
+func (v *DefNameable) SetNames(names []string) {
 	length := len(names)
 
 	/*
@@ -106,19 +106,20 @@ func (v DefNameable) SetNames(names []string) {
 	}
 }
 
-func (v DefNameable) SetNamesMap(names map[string]int) {
-	v.names = make(map[string]int)
+func (v *DefNameable) SetNamesMap(names map[string]int) {
+	v.names = map[string]int{}
+
 	for name, idx := range names {
 		v.SetName(idx, name)
 	}
 }
 
-func (v DefNameable) HasName(name string) bool {
+func (v *DefNameable) HasName(name string) bool {
 	_, exists := v.names[name]
 	return exists
 }
 
-func (v DefNameable) HasNameFor(idx int) bool {
+func (v *DefNameable) HasNameFor(idx int) bool {
 	if idx >= 1 && idx <= v.length {
 		for _, index := range v.names {
 			if idx == index {

@@ -498,7 +498,7 @@ func TestInteger_Select(t *testing.T) {
 }
 
 func TestFilter(t *testing.T) {
-	vec := Integer([]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}, nil)
-	fmt.Println(vec)
-	fmt.Println(vec.Filter(Nth(5)))
+	//	vec := Integer([]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}, nil)/
+	//	fmt.Println(vec)
+	//	fmt.Println(vec.Filter(Nth(5)))
 }
