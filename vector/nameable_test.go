@@ -119,7 +119,7 @@ func TestDefNameable_InvertedNamesMap(t *testing.T) {
 
 			invertedMap := nameable.InvertedNamesMap()
 			if !reflect.DeepEqual(invertedMap, data.expected) {
-				t.Error(fmt.Sprintf("invectedMap (%v) is not equal to expected (%v)",
+				t.Error(fmt.Sprintf("invectedMap (%v) is not equal to out (%v)",
 					invertedMap, data.expected))
 			}
 		})
@@ -144,7 +144,7 @@ func TestDefNameable_Name(t *testing.T) {
 		t.Run(fmt.Sprintf("Index_%d", data.idx), func(t *testing.T) {
 			name := nameable.Name(data.idx)
 			if name != data.expected {
-				t.Error(fmt.Sprintf(`idx (%d) returned "%s", expected "%s"`,
+				t.Error(fmt.Sprintf(`in (%d) returned "%s", out "%s"`,
 					data.idx, name, data.expected))
 			}
 		})
@@ -169,7 +169,7 @@ func TestDefNameable_Index(t *testing.T) {
 		t.Run(data.name, func(t *testing.T) {
 			idx := nameable.Index(data.name)
 			if idx != data.expected {
-				t.Error(fmt.Sprintf(`idx (%d) for name "%s" is not equal to expected (%d)`,
+				t.Error(fmt.Sprintf(`in (%d) for name "%s" is not equal to out (%d)`,
 					idx, data.name, data.expected))
 			}
 		})
@@ -213,7 +213,7 @@ func TestDefNameable_NamesForIndices(t *testing.T) {
 		t.Run(data.name, func(t *testing.T) {
 			names := nameable.NamesForIndices(data.indices)
 			if !reflect.DeepEqual(names, data.expected) {
-				t.Error(fmt.Sprintf("NamesForIndices(indices) (%v) is not equal to expected values (%v) ",
+				t.Error(fmt.Sprintf("NamesForIndices(indices) (%v) is not equal to out values (%v) ",
 					names, data.expected))
 			}
 		})

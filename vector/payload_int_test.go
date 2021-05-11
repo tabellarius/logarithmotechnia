@@ -126,7 +126,7 @@ func TestInteger(t *testing.T) {
 
 				if data.names != nil {
 					if !reflect.DeepEqual(vv.names, data.expectedNames) {
-						t.Error(fmt.Sprintf("Vector names (%v) is not equal to expected names (%v)",
+						t.Error(fmt.Sprintf("Vector names (%v) is not equal to out names (%v)",
 							vv.names, data.expectedNames))
 					}
 				}
@@ -151,7 +151,7 @@ func TestInteger_Len(t *testing.T) {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			payload := Integer(data.in, nil).(*vector).payload
 			if payload.Len() != data.outLength {
-				t.Error(fmt.Sprintf("Payloads's length (%d) is not equal to expected (%d)",
+				t.Error(fmt.Sprintf("Payloads's length (%d) is not equal to out (%d)",
 					payload.Len(), data.outLength))
 			}
 		})
@@ -195,7 +195,7 @@ func TestInteger_Booleans(t *testing.T) {
 				t.Error(fmt.Sprintf("Booleans (%v) are not equal to data.out (%v)\n", booleans, data.out))
 			}
 			if !reflect.DeepEqual(na, data.outNA) {
-				t.Error(fmt.Sprintf("NA (%v) are not equal to data.outNA (%v)\n", na, data.outNA))
+				t.Error(fmt.Sprintf("IsNA (%v) are not equal to data.outNA (%v)\n", na, data.outNA))
 			}
 		})
 	}
@@ -238,7 +238,7 @@ func TestInteger_Integers(t *testing.T) {
 				t.Error(fmt.Sprintf("Integers (%v) are not equal to data.out (%v)\n", integers, data.out))
 			}
 			if !reflect.DeepEqual(na, data.outNA) {
-				t.Error(fmt.Sprintf("NA (%v) are not equal to data.outNA (%v)\n", na, data.outNA))
+				t.Error(fmt.Sprintf("IsNA (%v) are not equal to data.outNA (%v)\n", na, data.outNA))
 			}
 		})
 	}
@@ -291,7 +291,7 @@ func TestInteger_Floats(t *testing.T) {
 				t.Error(fmt.Sprintf("Floats (%v) are not equal to data.out (%v)\n", floats, data.out))
 			}
 			if !reflect.DeepEqual(na, data.outNA) {
-				t.Error(fmt.Sprintf("NA (%v) are not equal to data.outNA (%v)\n", na, data.outNA))
+				t.Error(fmt.Sprintf("IsNA (%v) are not equal to data.outNA (%v)\n", na, data.outNA))
 			}
 		})
 	}
@@ -334,7 +334,7 @@ func TestInteger_Strings(t *testing.T) {
 				t.Error(fmt.Sprintf("Integers (%v) are not equal to data.out (%v)\n", strings, data.out))
 			}
 			if !reflect.DeepEqual(na, data.outNA) {
-				t.Error(fmt.Sprintf("NA (%v) are not equal to data.outNA (%v)\n", na, data.outNA))
+				t.Error(fmt.Sprintf("IsNA (%v) are not equal to data.outNA (%v)\n", na, data.outNA))
 			}
 		})
 	}
@@ -429,7 +429,7 @@ func TestInteger_Filter(t *testing.T) {
 		t.Run(data.name, func(t *testing.T) {
 			filtered := payload.Select(data.filter)
 			if !reflect.DeepEqual(payload.Select(data.filter), data.out) {
-				t.Error(fmt.Sprintf("payload.Select() (%v) is not equal to expected value (%v)",
+				t.Error(fmt.Sprintf("payload.Select() (%v) is not equal to out value (%v)",
 					filtered, data.out))
 			}
 		})
@@ -490,7 +490,7 @@ func TestInteger_Select(t *testing.T) {
 		t.Run(data.name, func(t *testing.T) {
 			result := payload.Select(data.fn)
 			if !reflect.DeepEqual(result, data.out) {
-				t.Error(fmt.Sprintf("Result (%v) is not equal to expected (%v)", result, data.out))
+				t.Error(fmt.Sprintf("Result (%v) is not equal to out (%v)", result, data.out))
 			}
 		})
 	}

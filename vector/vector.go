@@ -3,7 +3,7 @@ package vector
 import "fmt"
 
 // Vector is an interface for a different vector types. This structure is similar to R-vectors: it starts from 1,
-// allows for an extensive indexing, supports NA-values and named variables
+// allows for an extensive indexing, supports IsNA-values and named variables
 type Vector interface {
 	Len() int
 	Clone() Vector

@@ -11,7 +11,7 @@ const maxIntPrint = 5
 type integer struct {
 	length int
 	data   []int
-	DefNA
+	DefNAble
 }
 
 func (p *integer) Len() int {
@@ -30,7 +30,7 @@ func (p *integer) ByIndices(indices []int) Payload {
 	return &integer{
 		length: len(data),
 		data:   data,
-		DefNA: DefNA{
+		DefNAble: DefNAble{
 			na: na,
 		},
 	}
@@ -149,7 +149,7 @@ func (p *integer) Strings() ([]string, []bool) {
 
 func (p *integer) StrForElem(idx int) string {
 	if p.na[idx-1] {
-		return "NA"
+		return "IsNA"
 	}
 
 	return strconv.Itoa(p.data[idx-1])
@@ -177,7 +177,7 @@ func Integer(data []int, na []bool, options ...Config) Vector {
 	payload := &integer{
 		length: length,
 		data:   vecData,
-		DefNA: DefNA{
+		DefNAble: DefNAble{
 			na: vecNA,
 		},
 	}
