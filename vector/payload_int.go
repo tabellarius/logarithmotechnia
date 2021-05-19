@@ -105,6 +105,26 @@ func (p *integer) Floats() ([]float64, []bool) {
 	return data, na
 }
 
+func (p *integer) Complexes() ([]complex128, []bool) {
+	if p.length == 0 {
+		return []complex128{}, []bool{}
+	}
+
+	data := make([]complex128, p.length)
+	for i := 0; i < p.length; i++ {
+		if p.na[i] {
+			data[i] = 0
+		} else {
+			data[i] = complex(float64(p.data[i]), 0)
+		}
+	}
+
+	na := make([]bool, p.Len())
+	copy(na, p.na)
+
+	return data, na
+}
+
 func (p *integer) Booleans() ([]bool, []bool) {
 	if p.length == 0 {
 		return []bool{}, nil
@@ -120,7 +140,7 @@ func (p *integer) Booleans() ([]bool, []bool) {
 		}
 	}
 
-	na := make([]bool, p.Len())
+	na := make([]bool, p.length)
 	copy(na, p.na)
 
 	return data, na

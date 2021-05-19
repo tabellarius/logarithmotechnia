@@ -1,6 +1,9 @@
 package vector
 
-import "fmt"
+import (
+	"github.com/shopspring/decimal"
+	"time"
+)
 
 // Vector is an interface for a different vector types. This structure is similar to R-vectors: it starts from 1,
 // allows for an extensive indexing, supports IsNA-values and named variables
@@ -23,9 +26,11 @@ type Vector interface {
 	Floatable
 	Booleable
 	Stringable
+	Complexable
+	Decimable
+	Timeable
 
 	Report() Report
-	fmt.Stringer
 }
 
 type Payload interface {
@@ -55,6 +60,18 @@ type Booleable interface {
 
 type Stringable interface {
 	Strings() ([]string, []bool)
+}
+
+type Complexable interface {
+	Complexes() ([]complex128, []bool)
+}
+
+type Decimable interface {
+	Decimals() ([]decimal.Decimal, []bool)
+}
+
+type Timeable interface {
+	Times() ([]time.Time, []bool)
 }
 
 // vector holds data and functions shared by all vectors
@@ -345,19 +362,73 @@ func (v *vector) strForElem(idx int) string {
 }
 
 func (v *vector) Strings() ([]string, []bool) {
-	panic("implement me")
+	if payload, ok := v.payload.(Stringable); ok {
+		return payload.Strings()
+	}
+
+	return make([]string, v.length), v.naVector()
 }
 
 func (v *vector) Floats() ([]float64, []bool) {
-	panic("implement me")
+	if payload, ok := v.payload.(Floatable); ok {
+		return payload.Floats()
+	}
+
+	return make([]float64, v.length), v.naVector()
 }
 
 func (v *vector) Booleans() ([]bool, []bool) {
-	panic("implement me")
+	if payload, ok := v.payload.(Booleable); ok {
+		return payload.Booleans()
+	}
+
+	return make([]bool, v.length), v.naVector()
 }
 
 func (v *vector) Integers() ([]int, []bool) {
-	panic("implement me")
+	if payload, ok := v.payload.(Intable); ok {
+		return payload.Integers()
+	}
+
+	return make([]int, v.length), v.naVector()
+}
+
+func (v *vector) Complexes() ([]complex128, []bool) {
+	if payload, ok := v.payload.(Complexable); ok {
+		return payload.Complexes()
+	}
+
+	return make([]complex128, v.length), v.naVector()
+}
+
+func (v *vector) Decimals() ([]decimal.Decimal, []bool) {
+	if payload, ok := v.payload.(Decimable); ok {
+		return payload.Decimals()
+	}
+
+	decimals := make([]decimal.Decimal, v.length)
+	for i := 0; i < v.length; i++ {
+		decimals[i] = decimal.Zero
+	}
+
+	return decimals, v.naVector()
+}
+
+func (v *vector) Times() ([]time.Time, []bool) {
+	if payload, ok := v.payload.(Timeable); ok {
+		return payload.Times()
+	}
+
+	return make([]time.Time, v.length), v.naVector()
+}
+
+func (v *vector) naVector() []bool {
+	na := make([]bool, v.length)
+	for i := 0; i < v.length; i++ {
+		na[i] = true
+	}
+
+	return na
 }
 
 // New creates a vector part of the future vector. This function is used by public functions which create

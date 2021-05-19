@@ -297,6 +297,49 @@ func TestInteger_Floats(t *testing.T) {
 	}
 }
 
+func TestInteger_Complexes(t *testing.T) {
+	testData := []struct {
+		in    []int
+		inNA  []bool
+		out   []complex128
+		outNA []bool
+	}{
+		{
+			in:    []int{1, 3, 0, 100, 0},
+			inNA:  []bool{false, false, false, false, false},
+			out:   []complex128{1 + 0i, 3 + 0i, 0 + 0i, 100 + 0i, 0 + 0i},
+			outNA: []bool{false, false, false, false, false},
+		},
+		{
+			in:    []int{10, 0, 12, 14, 1110},
+			inNA:  []bool{false, false, false, true, true},
+			out:   []complex128{10 + 0i, 0 + 0i, 12 + 0i, 0 + 0i, 0 + 0i},
+			outNA: []bool{false, false, false, true, true},
+		},
+		{
+			in:    []int{1, 3, 0, 100, 0, -11, -10},
+			inNA:  []bool{false, false, false, false, false, false, true},
+			out:   []complex128{1 + 0i, 3 + 0i, 0 + 0i, 100 + 0i, 0 + 0i, -11 + 0i, 0 + 0i},
+			outNA: []bool{false, false, false, false, false, false, true},
+		},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			vec := Integer(data.in, data.inNA)
+			payload := vec.(*vector).payload.(*integer)
+
+			complexes, na := payload.Complexes()
+			if !reflect.DeepEqual(complexes, data.out) {
+				t.Error(fmt.Sprintf("Complexes (%v) are not equal to data.out (%v)\n", complexes, data.out))
+			}
+			if !reflect.DeepEqual(na, data.outNA) {
+				t.Error(fmt.Sprintf("IsNA (%v) are not equal to data.outNA (%v)\n", na, data.outNA))
+			}
+		})
+	}
+}
+
 func TestInteger_Strings(t *testing.T) {
 	testData := []struct {
 		in    []int
@@ -402,12 +445,10 @@ func TestInteger_SupportsSelector(t *testing.T) {
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
 			if payload.SupportsSelector(data.filter) != data.isSupported {
-				t.Error("Select's support is incorrect.")
+				t.Error("Selector's support is incorrect.")
 			}
 		})
 	}
-
-	_ = testData
 }
 
 func TestInteger_Filter(t *testing.T) {
