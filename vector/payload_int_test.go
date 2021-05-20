@@ -485,32 +485,32 @@ func TestInteger_Select(t *testing.T) {
 	}{
 		{
 			name: "Odd",
-			fn:   Odd(),
+			fn:   func(idx int, _ int, _ bool) bool { return idx%2 == 1 },
 			out:  []bool{true, false, true, false, true, false, true, false, true, false},
 		},
 		{
 			name: "Even",
-			fn:   Even(),
+			fn:   func(idx int, _ int, _ bool) bool { return idx%2 == 0 },
 			out:  []bool{false, true, false, true, false, true, false, true, false, true},
 		},
 		{
 			name: "Nth(3)",
-			fn:   Nth(3),
+			fn:   func(idx int, _ int, _ bool) bool { return idx%3 == 0 },
 			out:  []bool{false, false, true, false, false, true, false, false, true, false},
 		},
 		{
 			name: "Nth(4)",
-			fn:   Nth(4),
+			fn:   func(idx int, _ int, _ bool) bool { return idx%4 == 0 },
 			out:  []bool{false, false, false, true, false, false, false, true, false, false},
 		},
 		{
 			name: "Nth(5)",
-			fn:   Nth(5),
+			fn:   func(idx int, _ int, _ bool) bool { return idx%5 == 0 },
 			out:  []bool{false, false, false, false, true, false, false, false, false, true},
 		},
 		{
 			name: "Nth(10)",
-			fn:   Nth(10),
+			fn:   func(idx int, _ int, _ bool) bool { return idx%10 == 0 },
 			out:  []bool{false, false, false, false, false, false, false, false, false, true},
 		},
 		{

@@ -154,7 +154,7 @@ func (v *vector) Filter(selector interface{}) Vector {
 		return v.ByIndices(indices)
 	}
 
-	if fromTo, ok := selector.(*FromTo); ok {
+	if fromTo, ok := selector.(FromTo); ok {
 		return v.ByIndices(v.selectByFromTo(fromTo.from, fromTo.to))
 	}
 
