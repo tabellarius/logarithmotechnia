@@ -469,6 +469,20 @@ func TestVector_Filter(t *testing.T) {
 			length:   3,
 		},
 		{
+			name:     "string",
+			selector: "one",
+			out:      []int{1},
+			outNA:    []bool{false},
+			length:   1,
+		},
+		{
+			name:     "[]string",
+			selector: []string{"one", "three"},
+			out:      []int{1, 0},
+			outNA:    []bool{false, true},
+			length:   2,
+		},
+		{
 			name:     "byIntFunc",
 			selector: func(_ int, val int, na bool) bool { return !na && val >= 3 },
 			out:      []int{4, 5},
@@ -495,16 +509,284 @@ func TestVector_Filter(t *testing.T) {
 	}
 }
 
-func store(t *testing.T) {
+func TestVector_IsNA(t *testing.T) {
 	testData := []struct {
-		name string
+		name  string
+		vec   Vector
+		notNA []bool
 	}{
-		{},
+		{
+			name:  "with NA",
+			vec:   Integer([]int{1, 2, 3}, []bool{false, false, false}),
+			notNA: []bool{false, false, false},
+		},
+		{
+			name:  "without NA",
+			vec:   Integer([]int{1, 2, 3}, []bool{false, true, false}),
+			notNA: []bool{false, true, false},
+		},
+		{
+			name:  "empty",
+			vec:   Empty(),
+			notNA: []bool{},
+		},
 	}
 
-	for i, data := range testData {
-		t.Run(strconv.Itoa(i), func(t *testing.T) {
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
 			_ = data
 		})
 	}
+}
+
+func TestVector_NotNA(t *testing.T) {
+	testData := []struct {
+		name  string
+		vec   Vector
+		notNA []bool
+	}{
+		{
+			name:  "with NA",
+			vec:   Integer([]int{1, 2, 3}, []bool{false, false, false}),
+			notNA: []bool{true, true, true},
+		},
+		{
+			name:  "without NA",
+			vec:   Integer([]int{1, 2, 3}, []bool{false, true, false}),
+			notNA: []bool{true, false, true},
+		},
+		{
+			name:  "empty",
+			vec:   Empty(),
+			notNA: []bool{},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			_ = data
+		})
+	}
+}
+
+func TestVector_HasNA(t *testing.T) {
+	testData := []struct {
+		name  string
+		vec   Vector
+		hasNA bool
+	}{
+		{
+			name:  "regular with nil NA",
+			vec:   Integer([]int{1, 2, 3}, nil),
+			hasNA: false,
+		},
+		{
+			name:  "regular without NA",
+			vec:   Integer([]int{1, 2, 3}, []bool{false, false, false}),
+			hasNA: false,
+		},
+		{
+			name:  "regular with NA",
+			vec:   Integer([]int{1, 2, 3}, []bool{false, true, false}),
+			hasNA: true,
+		},
+		{
+			name:  "Empty",
+			vec:   Empty(),
+			hasNA: false,
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			if data.vec.HasNA() != data.hasNA {
+				t.Error(fmt.Sprintf("data.vec.HasNA() (%t) is not equal to data.hasNA (%t)",
+					data.vec.HasNA(), data.hasNA))
+			}
+		})
+	}
+}
+
+func TestVector_WithNA(t *testing.T) {
+	testData := []struct {
+		name   string
+		vec    Vector
+		withNA []int
+	}{
+		{
+			name:   "regular with nil NA",
+			vec:    Integer([]int{1, 2, 3}, nil),
+			withNA: []int{},
+		},
+		{
+			name:   "regular without NA",
+			vec:    Integer([]int{1, 2, 3}, []bool{false, false, false}),
+			withNA: []int{},
+		},
+		{
+			name:   "regular with NA",
+			vec:    Integer([]int{1, 2, 3}, []bool{false, true, true}),
+			withNA: []int{2, 3},
+		},
+		{
+			name:   "Empty",
+			vec:    Empty(),
+			withNA: []int{},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			if !reflect.DeepEqual(data.vec.WithNA(), data.withNA) {
+				t.Error(fmt.Sprintf("data.vec.WithNA() (%v) is not equal to data.WithNA (%v)",
+					data.vec.WithNA(), data.withNA))
+			}
+		})
+	}
+}
+
+func TestVector_WithoutNA(t *testing.T) {
+	testData := []struct {
+		name      string
+		vec       Vector
+		withoutNA []int
+	}{
+		{
+			name:      "regular with nil NA",
+			vec:       Integer([]int{1, 2, 3}, nil),
+			withoutNA: []int{1, 2, 3},
+		},
+		{
+			name:      "regular without NA",
+			vec:       Integer([]int{1, 2, 3}, []bool{false, false, false}),
+			withoutNA: []int{1, 2, 3},
+		},
+		{
+			name:      "regular with NA",
+			vec:       Integer([]int{1, 2, 3}, []bool{false, true, true}),
+			withoutNA: []int{1},
+		},
+		{
+			name:      "Empty",
+			vec:       Empty(),
+			withoutNA: []int{},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			if !reflect.DeepEqual(data.vec.WithoutNA(), data.withoutNA) {
+				t.Error(fmt.Sprintf("data.vec.WithoutNA() (%v) is not equal to data.WithoutNA (%v)",
+					data.vec.WithoutNA(), data.withoutNA))
+			}
+		})
+	}
+}
+
+func TestVector_IsEmpty(t *testing.T) {
+	testData := []struct {
+		name    string
+		vec     Vector
+		isEmpty bool
+	}{
+		{
+			name:    "zero integer vector",
+			vec:     Integer([]int{}, nil),
+			isEmpty: true,
+		},
+		{
+			name:    "non-zero integer vector",
+			vec:     Integer([]int{1, 2, 3}, nil),
+			isEmpty: false,
+		},
+		{
+			name:    "empty vector",
+			vec:     Integer([]int{}, nil),
+			isEmpty: true,
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			if data.vec.IsEmpty() != data.isEmpty {
+				t.Error(fmt.Sprintf("data.vec.IsEmpty() (%t) is not equal to data.isEmpty (%t)",
+					data.vec.IsEmpty(), data.isEmpty))
+			}
+		})
+	}
+}
+
+func TestVector_SupportsSelector(t *testing.T) {
+	testData := []struct {
+		name             string
+		vec              Vector
+		selector         interface{}
+		supportsSelector bool
+	}{
+		{
+			name:             "integer vector + valid selector",
+			vec:              Integer([]int{1, 2, 3}, nil),
+			selector:         func(_ int, val int, _ bool) bool { return val == 1 || val == 3 },
+			supportsSelector: true,
+		},
+		{
+			name:             "integer vector + invalid selector",
+			vec:              Integer([]int{1, 2, 3}, nil),
+			selector:         true,
+			supportsSelector: false,
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			supportsSelector := data.vec.SupportsSelector(data.selector)
+			if supportsSelector != data.supportsSelector {
+				t.Error(fmt.Sprintf("data.vec.Select() (%v) is not equal to data.selected (%v)",
+					supportsSelector, data.supportsSelector))
+			}
+		})
+	}
+}
+
+func TestVector_Select(t *testing.T) {
+	testData := []struct {
+		name     string
+		vec      Vector
+		selector interface{}
+		selected []bool
+	}{
+		{
+			name:     "integer vector + valid selector",
+			vec:      Integer([]int{1, 2, 3}, nil),
+			selector: func(_ int, val int, _ bool) bool { return val == 1 || val == 3 },
+			selected: []bool{true, false, true},
+		},
+		{
+			name:     "integer vector + invalid selector",
+			vec:      Integer([]int{1, 2, 3}, nil),
+			selector: true,
+			selected: []bool{false, false, false},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			selected := data.vec.Select(data.selector)
+			if !reflect.DeepEqual(selected, data.selected) {
+				t.Error(fmt.Sprintf("data.vec.Select() (%v) is not equal to data.selected (%v)",
+					selected, data.selected))
+			}
+		})
+	}
+}
+
+func TestVector_String(t *testing.T) {
+	vec := Integer([]int{1, 2, 3, 4, 5}, []bool{false, false, true, false, false})
+	newVec := vec.Filter([]int{1, 3, 5})
+	fmt.Println(vec)
+	fmt.Println(newVec)
+	integers, na := vec.Integers()
+	fmt.Println(integers, na)
+	integers, na = newVec.Integers()
+	fmt.Println(integers, na)
 }

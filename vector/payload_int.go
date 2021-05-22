@@ -169,7 +169,7 @@ func (p *integer) Strings() ([]string, []bool) {
 
 func (p *integer) StrForElem(idx int) string {
 	if p.na[idx-1] {
-		return "IsNA"
+		return "NA"
 	}
 
 	return strconv.Itoa(p.data[idx-1])

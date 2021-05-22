@@ -154,6 +154,14 @@ func (v *vector) Filter(selector interface{}) Vector {
 		return v.ByIndices(indices)
 	}
 
+	if name, ok := selector.(string); ok {
+		return v.ByNames([]string{name})
+	}
+
+	if names, ok := selector.([]string); ok {
+		return v.ByNames(names)
+	}
+
 	if fromTo, ok := selector.(FromTo); ok {
 		return v.ByIndices(v.selectByFromTo(fromTo.from, fromTo.to))
 	}
@@ -186,7 +194,7 @@ func (v *vector) Select(selector interface{}) []bool {
 		return v.payload.Select(selector)
 	}
 
-	return []bool{}
+	return make([]bool, v.length)
 }
 
 func (v *vector) selectByBooleans(booleans []bool) []int {
@@ -274,6 +282,8 @@ func (v *vector) byFromToWithRemove(from, to int) []int {
 	return indices
 }
 
+/* Not Applicable-related */
+
 func (v *vector) IsNA() []bool {
 	if nable, ok := v.payload.(NAble); ok {
 		return nable.IsNA()
@@ -282,11 +292,9 @@ func (v *vector) IsNA() []bool {
 	return make([]bool, v.length)
 }
 
-/* Not Applicable-related */
-
 func (v *vector) NotNA() []bool {
 	if nable, ok := v.payload.(NAble); ok {
-		return nable.IsNA()
+		return nable.NotNA()
 	}
 
 	notNA := make([]bool, v.length)
@@ -336,7 +344,7 @@ func (v *vector) String() string {
 		str += v.strForElem(1)
 	}
 	if v.length > 1 {
-		for i := 1; i < v.length; i++ {
+		for i := 2; i <= v.length; i++ {
 			if i <= maxIntPrint {
 				str += ", " + v.strForElem(i)
 			} else {
