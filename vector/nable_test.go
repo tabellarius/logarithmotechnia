@@ -3,123 +3,79 @@ package vector
 import (
 	"fmt"
 	"reflect"
+	"strconv"
 	"testing"
 )
 
-func TestDefNAble_Refresh(t *testing.T) {
-	vec1 := newCommon(5)
-	vec2 := newCommon(5)
-	nable1 := DefNAble{
-		vec: &vec1,
-		na:  []bool{false, true, false, false, false, true},
-	}
-	nable2 := DefNAble{
-		vec: &vec2,
-		na:  nable1.na,
-	}
-	nable2.Refresh()
-	if &nable1.na[0] == &nable2.na[0] {
-		t.Error("nable2 was not refreshed")
-	}
-	if !reflect.DeepEqual(nable1.na, nable2.na) {
-		t.Error("booleans are not equal for nable1 and nable2")
-	}
-}
-
 func TestDefNAble_NA(t *testing.T) {
-	vec := newCommon(5)
-	nable := DefNAble{
-		vec: &vec,
-		na:  []bool{false, true, false, false, false, true},
-	}
-	na := nable.NA()
-	if len(na) != vec.length {
-		t.Error("Output vector's length is wrong")
-	}
-	if &na[0] == &nable.na[1] {
-		t.Error("Output vector is not a copy")
-	}
-	if !reflect.DeepEqual(na, nable.na[1:]) {
-		t.Error("Output vector is not equal")
-	}
-}
-
-func TestDefNAble_IsNA(t *testing.T) {
-	vec := newCommon(5)
-	nable := DefNAble{
-		vec: &vec,
-		na:  []bool{true, true, false, false, false, true},
-	}
 	testData := []struct {
-		idx      int
-		expected bool
+		name string
+		in   []bool
+		out  []bool
 	}{
 		{
-			idx:      -1,
-			expected: false,
+			in:  []bool{true, true, false, false, false, true},
+			out: []bool{true, true, false, false, false, true},
 		},
 		{
-			idx:      0,
-			expected: false,
+			in:  []bool{true, true, false},
+			out: []bool{true, true, false},
 		},
 		{
-			idx:      1,
-			expected: true,
+			in:  []bool{},
+			out: []bool{},
 		},
 		{
-			idx:      3,
-			expected: false,
-		},
-		{
-			idx:      5,
-			expected: true,
-		},
-		{
-			idx:      6,
-			expected: false,
+			in:  nil,
+			out: []bool{},
 		},
 	}
 
-	for _, data := range testData {
-		t.Run(fmt.Sprintf("Index_%d", data.idx), func(t *testing.T) {
-			isNA := nable.IsNA(data.idx)
-			if isNA != data.expected {
-				t.Error(fmt.Sprintf("Value IsNA(%t) is not equal to expected(%t)", isNA, data.expected))
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			nable := DefNAble{
+				na: data.in,
+			}
+			na := nable.IsNA()
+			if !reflect.DeepEqual(na, data.out) {
+				t.Error(fmt.Sprintf("Value IsNA(%v) is not equal to out(%v)", na, data.out))
 			}
 		})
 	}
 }
 
-func TestDefNAble_SetNA(t *testing.T) {
+func TestDefNAble_NotNA(t *testing.T) {
 	testData := []struct {
-		name     string
-		na       []bool
-		expected []bool
+		name string
+		in   []bool
+		out  []bool
 	}{
 		{
-			name:     "without na",
-			na:       []bool{false, false, false, false, false},
-			expected: []bool{false, false, false, false, false, false},
+			in:  []bool{true, true, false, false, false, true},
+			out: []bool{false, false, true, true, true, false},
 		},
 		{
-			name:     "with na",
-			na:       []bool{true, false, true, false, true},
-			expected: []bool{false, true, false, true, false, true},
+			in:  []bool{true, true, false},
+			out: []bool{false, false, true},
 		},
 		{
-			name:     "incorrect size",
-			na:       []bool{true, false, true, false, true, false},
-			expected: []bool{false, false, false, false, false, false},
+			in:  []bool{},
+			out: []bool{},
+		},
+		{
+			in:  nil,
+			out: []bool{},
 		},
 	}
 
-	for _, data := range testData {
-		t.Run(data.name, func(t *testing.T) {
-			vec := newCommon(5)
-			nable := newDefaultNAble(&vec)
-			nable.SetNA(data.na)
-			if !reflect.DeepEqual(nable.na, data.expected) {
-				t.Error("nable.na is not equal to data.expected")
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			nable := DefNAble{
+				na: data.in,
+			}
+			na := nable.NotNA()
+			if !reflect.DeepEqual(na, data.out) {
+				t.Error(fmt.Sprintf("Value IsNA(%v) is not equal to out(%v)", na, data.out))
 			}
 		})
 	}
@@ -146,13 +102,18 @@ func TestDefNAble_HasNA(t *testing.T) {
 			na:       []bool{true, false, true, false, true},
 			expected: true,
 		},
+		{
+			name:     "empty",
+			na:       []bool{},
+			expected: false,
+		},
 	}
 
-	vec := newCommon(5)
 	for index, data := range testData {
 		t.Run(fmt.Sprintf("Data %d", index), func(t *testing.T) {
-			nable := newDefaultNAble(&vec)
-			nable.SetNA(data.na)
+			nable := DefNAble{
+				na: data.na,
+			}
 			if nable.HasNA() != data.expected {
 				t.Error(fmt.Sprintf("nable.HasNA() (%t) is not equal to data.expected (%t)", nable.HasNA(),
 					data.expected))
@@ -196,11 +157,12 @@ func TestDefNAble_OnlyNA(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			vec := newCommon(5)
-			nable := newDefaultNAble(&vec)
-			nable.SetNA(data.na)
-			if !reflect.DeepEqual(nable.OnlyNA(), data.expected) {
-				t.Error(fmt.Sprintf("nable.OnlyNa() %v is not equal to data.expected %v", nable.OnlyNA(),
+			nable := DefNAble{
+				na: data.na,
+			}
+			withNA := nable.WithNA()
+			if !reflect.DeepEqual(withNA, data.expected) {
+				t.Error(fmt.Sprintf("nable.OnlyNa() %v is not equal to data.expected %v", withNA,
 					data.expected))
 			}
 		})
@@ -242,11 +204,12 @@ func TestDefNAble_WithoutNA(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			vec := newCommon(5)
-			nable := newDefaultNAble(&vec)
-			nable.SetNA(data.na)
-			if !reflect.DeepEqual(nable.WithoutNA(), data.expected) {
-				t.Error(fmt.Sprintf("nable.OnlyNa() %v is not equal to data.expected %v", nable.OnlyNA(),
+			nable := DefNAble{
+				na: data.na,
+			}
+			withoutNA := nable.WithoutNA()
+			if !reflect.DeepEqual(withoutNA, data.expected) {
+				t.Error(fmt.Sprintf("nable.OnlyNa() %v is not equal to data.expected %v", withoutNA,
 					data.expected))
 			}
 		})

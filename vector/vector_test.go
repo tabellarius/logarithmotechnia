@@ -2,376 +2,791 @@ package vector
 
 import (
 	"fmt"
+	"github.com/shopspring/decimal"
+	"math"
 	"reflect"
+	"strconv"
 	"testing"
+	"time"
 )
 
-func TestCommon_newCommon(t *testing.T) {
-	vec := newCommon(5)
-	if vec.length != 5 {
-		t.Error(`newCommon(5): length is not 5`)
-	}
-
-	if vec.vec != nil {
-		t.Error(`newCommon(5): vec is not nil`)
-	}
-
-	if vec.marked != false {
-		t.Error(`newCommon(5): marked is not false`)
-	}
-
-	if len(vec.report.Errors) != 0 {
-		t.Error(`newCommon(5): there are errors in the report`)
-	}
-
-	if len(vec.report.Warnings) != 0 {
-		t.Error(`newCommon(5): there are warnings in the report`)
-	}
-
-	vec = newCommon(0)
-	if vec.length != 0 {
-		t.Error("newCommon(0): length is not zero")
-	}
-
-	vec = newCommon(0)
-	if vec.length != 0 {
-		t.Error("newCommon(0): length is not zero")
-	}
-
-	vec = newCommon(-1)
-	if vec.length != 0 {
-		t.Error("newCommon(0): length is not zero")
-	}
-}
-
-func TestCommon_Length(t *testing.T) {
-	lengthIn := []int{-10, -1, 0, 1, 5, 12, 25, 100}
-	lengthOut := []int{0, 0, 0, 1, 5, 12, 25, 100}
-
-	for i := 0; i < len(lengthIn); i++ {
-		vec := newCommon(lengthIn[i])
-		if vec.Length() != lengthOut[i] {
-			t.Error(fmt.Sprintf("In-length (%d) does not match out-length (%d)", lengthIn[i], lengthOut[i]))
-		}
-	}
-}
-
-func TestCommon_IsEmpty(t *testing.T) {
-	lengthIn := []int{-10, -1, 0, 1, 10}
-	emptyness := []bool{true, true, true, false, false}
-
-	for i := 0; i < len(lengthIn); i++ {
-		vec := newCommon(lengthIn[i])
-		if vec.IsEmpty() != emptyness[i] {
-			t.Error(fmt.Sprintf("Emptyness of vec(%d) is wrong (%t instead of %t)", lengthIn[i],
-				vec.IsEmpty(), emptyness[i]))
-		}
-	}
-}
-
-func TestCommon_ByIndices(t *testing.T) {
+func TestVector_Len(t *testing.T) {
 	testData := []struct {
-		name       string
-		indicesIn  []int
-		indicesOut []int
-		lengthSrc  int
-		lengthDst  int
+		in             []int
+		expectedLength int
 	}{
 		{
-			name:       "regular",
-			indicesIn:  []int{1, 5, 10},
-			indicesOut: []int{1, 5, 10},
-			lengthSrc:  10,
-			lengthDst:  3,
+			in:             []int{1, 2, 3, 4, 5},
+			expectedLength: 5,
 		},
 		{
-			name:       "regular reversed",
-			indicesIn:  []int{10, 5, 1},
-			indicesOut: []int{10, 5, 1},
-			lengthSrc:  10,
-			lengthDst:  3,
+			in:             []int{1, 2, 3},
+			expectedLength: 3,
 		},
 		{
-			name:       "with negative",
-			indicesIn:  []int{-1, 5, 1},
-			indicesOut: []int{5, 1},
-			lengthSrc:  10,
-			lengthDst:  2,
+			in:             []int{1},
+			expectedLength: 1,
 		},
 		{
-			name:       "with zero",
-			indicesIn:  []int{0, 2, 5, 1},
-			indicesOut: []int{2, 5, 1},
-			lengthSrc:  10,
-			lengthDst:  3,
+			in:             []int{},
+			expectedLength: 0,
 		},
 		{
-			name:       "out of bounds",
-			indicesIn:  []int{11, 2, 5, 1},
-			indicesOut: []int{2, 5, 1},
-			lengthSrc:  10,
-			lengthDst:  3,
+			in:             nil,
+			expectedLength: 0,
 		},
 	}
 
-	for _, indicesData := range testData {
-		t.Run(indicesData.name, func(t *testing.T) {
-			vec := newCommon(indicesData.lengthSrc)
-			newVec := vec.ByIndices(indicesData.indicesIn).(*common)
-
-			if newVec.length != indicesData.lengthDst {
-				t.Error(fmt.Sprintf("newVec's length (%d) is not {%d}", newVec.length, indicesData.lengthDst))
-			}
-
-			if len(newVec.selected) != indicesData.lengthDst {
-				t.Error(fmt.Sprintf("newVec.selected's length (%d) is not %d", len(newVec.selected),
-					indicesData.lengthDst))
-			}
-
-			if !reflect.DeepEqual(newVec.selected, indicesData.indicesOut) {
-				t.Error(fmt.Sprintf("newVec.selected (%v) is not equal to %v", newVec.selected,
-					indicesData.indicesOut))
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			vec := Integer(data.in, nil)
+			if vec.Len() != data.expectedLength {
+				t.Error(fmt.Sprintf("Length (%d) is not equal to expected (%d)",
+					vec.Len(), data.expectedLength))
 			}
 		})
 	}
 }
 
-func TestCommon_ByFromTo(t *testing.T) {
+func TestVector_Integers(t *testing.T) {
 	testData := []struct {
-		name      string
-		from      int
-		to        int
-		lengthSrc int
-		lengthDst int
-		selected  []int
+		vec       Vector
+		outValues []int
+		outNA     []bool
 	}{
 		{
-			name:      "full",
-			from:      1,
-			to:        10,
-			lengthSrc: 10,
-			lengthDst: 10,
-			selected:  []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
+			vec:       Integer([]int{1, 2, 3, 4, 5}, []bool{false, false, true, false, false}),
+			outValues: []int{1, 2, 0, 4, 5},
+			outNA:     []bool{false, false, true, false, false},
 		},
 		{
-			name:      "full reverse",
-			from:      10,
-			to:        1,
-			lengthSrc: 10,
-			lengthDst: 10,
-			selected:  []int{10, 9, 8, 7, 6, 5, 4, 3, 2, 1},
+			vec:       Empty(),
+			outValues: []int{},
+			outNA:     []bool{},
+		},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			integers, na := data.vec.Integers()
+			if !reflect.DeepEqual(integers, data.outValues) {
+				t.Error(fmt.Sprintf("Result (%v) is not equal to expected (%v)", integers, data.outValues))
+			}
+			if !reflect.DeepEqual(na, data.outNA) {
+				t.Error(fmt.Sprintf("Result (%v) is not equal to expected (%v)", na, data.outNA))
+			}
+		})
+	}
+}
+
+func TestVector_Floats(t *testing.T) {
+	testData := []struct {
+		vec       Vector
+		outValues []float64
+		outNA     []bool
+	}{
+		{
+			vec:       Integer([]int{1, 2, 3, 4, 5}, []bool{false, false, true, false, false}),
+			outValues: []float64{1, 2, math.NaN(), 4, 5},
+			outNA:     []bool{false, false, true, false, false},
 		},
 		{
-			name:      "full + out of bounds",
-			from:      1,
-			to:        12,
-			lengthSrc: 10,
-			lengthDst: 10,
-			selected:  []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10},
+			vec:       Empty(),
+			outValues: []float64{},
+			outNA:     []bool{},
+		},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			floats, na := data.vec.Floats()
+			err := false
+			for i, val := range floats {
+				if math.IsNaN(val) {
+					if !math.IsNaN(data.outValues[i]) {
+						err = true
+					}
+				} else if val != data.outValues[i] {
+					err = true
+				}
+			}
+			if err {
+				t.Error(fmt.Sprintf("Result (%v) is not equal to expected (%v)", floats, data.outValues))
+			}
+			if !reflect.DeepEqual(na, data.outNA) {
+				t.Error(fmt.Sprintf("Result (%v) is not equal to expected (%v)", na, data.outNA))
+			}
+		})
+	}
+}
+
+func TestVector_Complexes(t *testing.T) {
+	testData := []struct {
+		vec       Vector
+		outValues []complex128
+		outNA     []bool
+	}{
+		{
+			vec:       Integer([]int{1, 2, 3, 4, 5}, []bool{false, false, true, false, false}),
+			outValues: []complex128{1 + 0i, 2 + 0i, 0 + 0i, 4 + 0i, 5 + 0i},
+			outNA:     []bool{false, false, true, false, false},
 		},
 		{
-			name:      "full reverse + out of bounds",
-			from:      12,
-			to:        1,
-			lengthSrc: 10,
-			lengthDst: 10,
-			selected:  []int{10, 9, 8, 7, 6, 5, 4, 3, 2, 1},
+			vec:       Empty(),
+			outValues: []complex128{},
+			outNA:     []bool{},
+		},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			complexes, na := data.vec.Complexes()
+			if !reflect.DeepEqual(complexes, data.outValues) {
+				t.Error(fmt.Sprintf("Result (%v) is not equal to expected (%v)", complexes, data.outValues))
+			}
+			if !reflect.DeepEqual(na, data.outNA) {
+				t.Error(fmt.Sprintf("Result (%v) is not equal to expected (%v)", na, data.outNA))
+			}
+		})
+	}
+}
+
+func TestVector_Booleans(t *testing.T) {
+	testData := []struct {
+		vec       Vector
+		outValues []bool
+		outNA     []bool
+	}{
+		{
+			vec:       Integer([]int{0, 1, 2, 3, 4, 5}, []bool{false, false, false, true, false, false}),
+			outValues: []bool{false, true, true, false, true, true},
+			outNA:     []bool{false, false, false, true, false, false},
 		},
 		{
-			name:      "partial",
-			from:      3,
-			to:        5,
-			lengthSrc: 10,
-			lengthDst: 3,
-			selected:  []int{3, 4, 5},
+			vec:       Empty(),
+			outValues: []bool{},
+			outNA:     []bool{},
+		},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			booleans, na := data.vec.Booleans()
+			if !reflect.DeepEqual(booleans, data.outValues) {
+				t.Error(fmt.Sprintf("Result (%v) is not equal to expected (%v)", booleans, data.outValues))
+			}
+			if !reflect.DeepEqual(na, data.outNA) {
+				t.Error(fmt.Sprintf("Result (%v) is not equal to expected (%v)", na, data.outNA))
+			}
+		})
+	}
+}
+
+func TestVector_Strings(t *testing.T) {
+	testData := []struct {
+		vec       Vector
+		outValues []string
+		outNA     []bool
+	}{
+		{
+			vec:       Integer([]int{1, 2, 3, 4, 5}, []bool{false, false, true, false, false}),
+			outValues: []string{"1", "2", "", "4", "5"},
+			outNA:     []bool{false, false, true, false, false},
 		},
 		{
-			name:      "partial reverse",
-			from:      5,
-			to:        3,
-			lengthSrc: 10,
-			lengthDst: 3,
-			selected:  []int{5, 4, 3},
+			vec:       Empty(),
+			outValues: []string{},
+			outNA:     []bool{},
+		},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			strings, na := data.vec.Strings()
+			if !reflect.DeepEqual(strings, data.outValues) {
+				t.Error(fmt.Sprintf("Result (%v) is not equal to expected (%v)", strings, data.outValues))
+			}
+			if !reflect.DeepEqual(na, data.outNA) {
+				t.Error(fmt.Sprintf("Result (%v) is not equal to expected (%v)", na, data.outNA))
+			}
+		})
+	}
+}
+
+func TestVector_Decimals(t *testing.T) {
+	testData := []struct {
+		vec       Vector
+		outValues []decimal.Decimal
+		outNA     []bool
+	}{
+		{
+			vec:       Integer([]int{1, 2, 3, 4, 5}, []bool{false, false, true, false, false}),
+			outValues: []decimal.Decimal{decimal.Zero, decimal.Zero, decimal.Zero, decimal.Zero, decimal.Zero},
+			outNA:     []bool{true, true, true, true, true},
 		},
 		{
-			name:      "partial + removal",
-			from:      -4,
-			to:        -7,
-			lengthSrc: 10,
-			lengthDst: 6,
-			selected:  []int{1, 2, 3, 8, 9, 10},
+			vec:       Empty(),
+			outValues: []decimal.Decimal{},
+			outNA:     []bool{},
+		},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			decimals, na := data.vec.Decimals()
+			err := false
+			for i, val := range decimals {
+				if !val.Equals(data.outValues[i]) {
+					err = true
+				}
+			}
+			if err {
+				t.Error(fmt.Sprintf("Result (%v) is not equal to expected (%v)", decimals, data.outValues))
+			}
+			if !reflect.DeepEqual(na, data.outNA) {
+				t.Error(fmt.Sprintf("Result (%v) is not equal to expected (%v)", na, data.outNA))
+			}
+		})
+	}
+}
+
+func TestVector_Times(t *testing.T) {
+	testData := []struct {
+		vec       Vector
+		outValues []time.Time
+		outNA     []bool
+	}{
+		{
+			vec:       Integer([]int{1, 2, 3, 4, 5}, []bool{false, false, true, false, false}),
+			outValues: []time.Time{{}, {}, {}, {}, {}},
+			outNA:     []bool{true, true, true, true, true},
 		},
 		{
-			name:      "partial + removal reverse",
-			from:      -7,
-			to:        -4,
-			lengthSrc: 10,
-			lengthDst: 6,
-			selected:  []int{1, 2, 3, 8, 9, 10},
+			vec:       Empty(),
+			outValues: []time.Time{},
+			outNA:     []bool{},
+		},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			times, na := data.vec.Times()
+			if !reflect.DeepEqual(times, data.outValues) {
+				t.Error(fmt.Sprintf("Result (%v) is not equal to expected (%v)", times, data.outValues))
+			}
+			if !reflect.DeepEqual(na, data.outNA) {
+				t.Error(fmt.Sprintf("Result (%v) is not equal to expected (%v)", na, data.outNA))
+			}
+		})
+	}
+}
+
+func TestVector_ByIndices(t *testing.T) {
+	vec := Integer([]int{1, 2, 3, 4, 5}, []bool{false, false, true, false, false})
+	testData := []struct {
+		name    string
+		indices []int
+		out     []int
+		outNA   []bool
+		length  int
+	}{
+		{
+			name:    "normal",
+			indices: []int{-1, 0, 4, 3, 2, 6},
+			out:     []int{4, 0, 2},
+			outNA:   []bool{false, true, false},
+			length:  3,
 		},
 		{
-			name:      "partial + zero",
-			from:      0,
-			to:        5,
-			lengthSrc: 10,
-			lengthDst: 5,
-			selected:  []int{1, 2, 3, 4, 5},
-		},
-		{
-			name:      "partial + zero + removal reverse",
-			from:      -5,
-			to:        0,
-			lengthSrc: 10,
-			lengthDst: 5,
-			selected:  []int{6, 7, 8, 9, 10},
-		},
-		{
-			name:      "zero",
-			from:      0,
-			to:        0,
-			lengthSrc: 10,
-			lengthDst: 0,
-			selected:  []int{},
+			name:    "empty",
+			indices: []int{},
+			out:     []int{},
+			outNA:   []bool{},
+			length:  0,
 		},
 	}
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			vec := newCommon(data.lengthSrc)
-			newVec := vec.ByFromTo(data.from, data.to).(*common)
-
-			if newVec.length != data.lengthDst {
-				t.Error(fmt.Sprintf("newVec's length (%d) is not {%d}", newVec.length, data.lengthDst))
+			newVec := vec.ByIndices(data.indices)
+			integers, na := newVec.Integers()
+			if !reflect.DeepEqual(integers, data.out) {
+				t.Error(fmt.Sprintf("Result (%v) is not equal to expected (%v)", integers, data.out))
 			}
-
-			if len(newVec.selected) != data.lengthDst {
-				t.Error(fmt.Sprintf("newVec.selected's length (%d) is not %d", len(newVec.selected),
-					data.lengthDst))
+			if !reflect.DeepEqual(na, data.outNA) {
+				t.Error(fmt.Sprintf("Result NA (%v) is not equal to expected NA (%v)", na, data.outNA))
 			}
-
-			if !reflect.DeepEqual(newVec.selected, data.selected) {
-				t.Error(fmt.Sprintf("newVec.selected (%v) is not equal to vec.selected %v", newVec.selected,
-					data.selected))
+			if newVec.Len() != data.length {
+				t.Error(fmt.Sprintf("Result length (%d) is not equal to expected length (%d)",
+					newVec.Len(), data.length))
 			}
 		})
 	}
 }
 
-func TestCommon_ByBool(t *testing.T) {
+func TestVector_ByNames(t *testing.T) {
+	vec := Integer(
+		[]int{1, 2, 3, 4, 5},
+		[]bool{false, false, true, false, false},
+		OptionNamesMap(map[string]int{"one": 1, "three": 3, "five": 5}),
+	)
+	testData := []struct {
+		name   string
+		names  []string
+		out    []int
+		outNA  []bool
+		length int
+	}{
+		{
+			name:   "all",
+			names:  []string{"one", "three", "five"},
+			out:    []int{1, 0, 5},
+			outNA:  []bool{false, true, false},
+			length: 3,
+		},
+		{
+			name:   "with incorrect",
+			names:  []string{"zero", "three", "five"},
+			out:    []int{0, 5},
+			outNA:  []bool{true, false},
+			length: 2,
+		},
+		{
+			name:   "empty",
+			names:  []string{},
+			out:    []int{},
+			outNA:  []bool{},
+			length: 0,
+		},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			newVec := vec.ByNames(data.names)
+			integers, na := newVec.Integers()
+			if !reflect.DeepEqual(integers, data.out) {
+				t.Error(fmt.Sprintf("Result (%v) is not equal to expected (%v)", integers, data.out))
+			}
+			if !reflect.DeepEqual(na, data.outNA) {
+				t.Error(fmt.Sprintf("Result NA (%v) is not equal to expected NA (%v)", na, data.outNA))
+			}
+			if newVec.Len() != data.length {
+				t.Error(fmt.Sprintf("Result length (%d) is not equal to expected length (%d)",
+					newVec.Len(), data.length))
+			}
+		})
+	}
+}
+
+func TestVector_Filter(t *testing.T) {
+	vec := Integer(
+		[]int{1, 2, 3, 4, 5},
+		[]bool{false, false, true, false, false},
+		OptionNamesMap(map[string]int{"one": 1, "three": 3, "five": 5}),
+	)
 	testData := []struct {
 		name     string
-		booleans []bool
+		selector interface{}
+		out      []int
+		outNA    []bool
 		length   int
-		selected []int
-		emptyVec bool
 	}{
 		{
-			name:     "full",
-			booleans: []bool{true, true, true, true, true},
-			length:   5,
-			selected: []int{1, 2, 3, 4, 5},
-			emptyVec: false,
+			name:     "indices",
+			selector: []int{5, 3, 1},
+			out:      []int{5, 0, 1},
+			outNA:    []bool{false, true, false},
+			length:   3,
 		},
 		{
-			name:     "partial",
-			booleans: []bool{false, true, false, true, false},
+			name:     "idx",
+			selector: []int{1},
+			out:      []int{1},
+			outNA:    []bool{false},
+			length:   1,
+		},
+		{
+			name:     "FromTo straight",
+			selector: FromTo{2, 4},
+			out:      []int{2, 0, 4},
+			outNA:    []bool{false, true, false},
+			length:   3,
+		},
+		{
+			name:     "FromTo reverse",
+			selector: FromTo{4, 2},
+			out:      []int{4, 0, 2},
+			outNA:    []bool{false, true, false},
+			length:   3,
+		},
+		{
+			name:     "FromTo with remove straight",
+			selector: FromTo{-2, -4},
+			out:      []int{1, 5},
+			outNA:    []bool{false, false},
 			length:   2,
-			selected: []int{2, 4},
-			emptyVec: false,
 		},
 		{
-			name:     "none",
-			booleans: []bool{false, false, false, false, false},
-			length:   0,
-			selected: []int{},
-			emptyVec: false,
+			name:     "FromTo with remove reverse",
+			selector: FromTo{-4, -2},
+			out:      []int{1, 5},
+			outNA:    []bool{false, false},
+			length:   2,
 		},
 		{
-			name:     "incorrect length",
-			booleans: []bool{true, true, true, true},
+			name:     "FromTo straight with incorrect boundaries",
+			selector: FromTo{0, 7},
+			out:      []int{1, 2, 0, 4, 5},
+			outNA:    []bool{false, false, true, false, false},
+			length:   5,
+		},
+		{
+			name:     "FromTo full remove with incorrect boundaries",
+			selector: FromTo{0, -7},
+			out:      []int{},
+			outNA:    []bool{},
 			length:   0,
-			selected: []int{},
-			emptyVec: true,
+		},
+		{
+			name:     "FromTo different signs",
+			selector: FromTo{-2, 4},
+			out:      []int{},
+			outNA:    []bool{},
+			length:   0,
+		},
+		{
+			name:     "FromTo different signs reverse",
+			selector: FromTo{2, -4},
+			out:      []int{},
+			outNA:    []bool{},
+			length:   0,
+		},
+		{
+			name:     "boolean",
+			selector: []bool{true, false, true, false, true},
+			out:      []int{1, 0, 5},
+			outNA:    []bool{false, true, false},
+			length:   3,
+		},
+		{
+			name:     "string",
+			selector: "one",
+			out:      []int{1},
+			outNA:    []bool{false},
+			length:   1,
+		},
+		{
+			name:     "[]string",
+			selector: []string{"one", "three"},
+			out:      []int{1, 0},
+			outNA:    []bool{false, true},
+			length:   2,
+		},
+		{
+			name:     "byIntFunc",
+			selector: func(_ int, val int, na bool) bool { return !na && val >= 3 },
+			out:      []int{4, 5},
+			outNA:    []bool{false, false},
+			length:   2,
 		},
 	}
 
-	vec := newCommon(5)
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			newVec := vec.ByBool(data.booleans)
-			if data.emptyVec {
-				if _, ok := newVec.(*empty); !ok {
-					t.Error("Returned vector is not empty type")
-				}
-			} else {
-				newCom := newVec.(*common)
-				if newCom.length != data.length {
-					t.Error(fmt.Sprintf("Output length (%d) is not %d", newCom.length, data.length))
-				}
-				if !reflect.DeepEqual(newCom.selected, data.selected) {
-					t.Error(fmt.Sprintf("newVec.selected (%v) is not equal to %v", newCom.selected,
-						data.selected))
-				}
+			newVec := vec.Filter(data.selector)
+			integers, na := newVec.Integers()
+			if !reflect.DeepEqual(integers, data.out) {
+				t.Error(fmt.Sprintf("Result (%v) is not equal to expected (%v)", integers, data.out))
+			}
+			if !reflect.DeepEqual(na, data.outNA) {
+				t.Error(fmt.Sprintf("Result NA (%v) is not equal to expected NA (%v)", na, data.outNA))
+			}
+			if newVec.Len() != data.length {
+				t.Error(fmt.Sprintf("Result length (%d) is not equal to expected length (%d)",
+					newVec.Len(), data.length))
 			}
 		})
 	}
 }
 
-func TestCommon_Clone(t *testing.T) {
-	vec := newCommon(10)
-	newVec := vec.Clone().(*common)
+func TestVector_IsNA(t *testing.T) {
+	testData := []struct {
+		name  string
+		vec   Vector
+		notNA []bool
+	}{
+		{
+			name:  "with NA",
+			vec:   Integer([]int{1, 2, 3}, []bool{false, false, false}),
+			notNA: []bool{false, false, false},
+		},
+		{
+			name:  "without NA",
+			vec:   Integer([]int{1, 2, 3}, []bool{false, true, false}),
+			notNA: []bool{false, true, false},
+		},
+		{
+			name:  "empty",
+			vec:   Empty(),
+			notNA: []bool{},
+		},
+	}
 
-	if newVec.vec != nil {
-		t.Error("newVec.vec is not nil")
-	}
-	if newVec.marked == false {
-		t.Error("newVec.marked is false")
-	}
-	if newVec.length != vec.length {
-		t.Error("newVec.length is not equal to vec.length")
-	}
-	if !reflect.DeepEqual(newVec.selected, vec.selected) {
-		t.Error(fmt.Sprintf("newVec.selected (%v) is not equal to vec.selected %v", newVec.selected,
-			vec.selected))
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			_ = data
+		})
 	}
 }
 
-func TestCommon_Mark(t *testing.T) {
-	vec := newCommon(10)
-	vec.Mark()
-	if !vec.marked {
-		t.Error("vec.marked is not true")
+func TestVector_NotNA(t *testing.T) {
+	testData := []struct {
+		name  string
+		vec   Vector
+		notNA []bool
+	}{
+		{
+			name:  "with NA",
+			vec:   Integer([]int{1, 2, 3}, []bool{false, false, false}),
+			notNA: []bool{true, true, true},
+		},
+		{
+			name:  "without NA",
+			vec:   Integer([]int{1, 2, 3}, []bool{false, true, false}),
+			notNA: []bool{true, false, true},
+		},
+		{
+			name:  "empty",
+			vec:   Empty(),
+			notNA: []bool{},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			_ = data
+		})
 	}
 }
 
-func TestCommon_Marked(t *testing.T) {
-	vec := newCommon(10)
-	if vec.Marked() {
-		t.Error("vec.marked is true for new vector")
+func TestVector_HasNA(t *testing.T) {
+	testData := []struct {
+		name  string
+		vec   Vector
+		hasNA bool
+	}{
+		{
+			name:  "regular with nil NA",
+			vec:   Integer([]int{1, 2, 3}, nil),
+			hasNA: false,
+		},
+		{
+			name:  "regular without NA",
+			vec:   Integer([]int{1, 2, 3}, []bool{false, false, false}),
+			hasNA: false,
+		},
+		{
+			name:  "regular with NA",
+			vec:   Integer([]int{1, 2, 3}, []bool{false, true, false}),
+			hasNA: true,
+		},
+		{
+			name:  "Empty",
+			vec:   Empty(),
+			hasNA: false,
+		},
 	}
 
-	vec.marked = true
-	if !vec.Marked() {
-		t.Error("vec was not marked")
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			if data.vec.HasNA() != data.hasNA {
+				t.Error(fmt.Sprintf("data.vec.HasNA() (%t) is not equal to data.hasNA (%t)",
+					data.vec.HasNA(), data.hasNA))
+			}
+		})
 	}
 }
 
-func TestCommon_Refresh(t *testing.T) {
-	vec := newCommon(10)
-	vec.marked = true
-	vec.Refresh()
-	if vec.marked {
-		t.Error("vec.marked is not false")
+func TestVector_WithNA(t *testing.T) {
+	testData := []struct {
+		name   string
+		vec    Vector
+		withNA []int
+	}{
+		{
+			name:   "regular with nil NA",
+			vec:    Integer([]int{1, 2, 3}, nil),
+			withNA: []int{},
+		},
+		{
+			name:   "regular without NA",
+			vec:    Integer([]int{1, 2, 3}, []bool{false, false, false}),
+			withNA: []int{},
+		},
+		{
+			name:   "regular with NA",
+			vec:    Integer([]int{1, 2, 3}, []bool{false, true, true}),
+			withNA: []int{2, 3},
+		},
+		{
+			name:   "Empty",
+			vec:    Empty(),
+			withNA: []int{},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			if !reflect.DeepEqual(data.vec.WithNA(), data.withNA) {
+				t.Error(fmt.Sprintf("data.vec.WithNA() (%v) is not equal to data.WithNA (%v)",
+					data.vec.WithNA(), data.withNA))
+			}
+		})
 	}
 }
 
-func TestCommon_Report(t *testing.T) {
-	vec := newCommon(10)
-	vec.report = Report{
-		Errors:   []string{"Error"},
-		Warnings: []string{"Warning"},
+func TestVector_WithoutNA(t *testing.T) {
+	testData := []struct {
+		name      string
+		vec       Vector
+		withoutNA []int
+	}{
+		{
+			name:      "regular with nil NA",
+			vec:       Integer([]int{1, 2, 3}, nil),
+			withoutNA: []int{1, 2, 3},
+		},
+		{
+			name:      "regular without NA",
+			vec:       Integer([]int{1, 2, 3}, []bool{false, false, false}),
+			withoutNA: []int{1, 2, 3},
+		},
+		{
+			name:      "regular with NA",
+			vec:       Integer([]int{1, 2, 3}, []bool{false, true, true}),
+			withoutNA: []int{1},
+		},
+		{
+			name:      "Empty",
+			vec:       Empty(),
+			withoutNA: []int{},
+		},
 	}
-	if !reflect.DeepEqual(vec.report, vec.Report()) {
-		t.Error("Strange report")
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			if !reflect.DeepEqual(data.vec.WithoutNA(), data.withoutNA) {
+				t.Error(fmt.Sprintf("data.vec.WithoutNA() (%v) is not equal to data.WithoutNA (%v)",
+					data.vec.WithoutNA(), data.withoutNA))
+			}
+		})
 	}
+}
+
+func TestVector_IsEmpty(t *testing.T) {
+	testData := []struct {
+		name    string
+		vec     Vector
+		isEmpty bool
+	}{
+		{
+			name:    "zero integer vector",
+			vec:     Integer([]int{}, nil),
+			isEmpty: true,
+		},
+		{
+			name:    "non-zero integer vector",
+			vec:     Integer([]int{1, 2, 3}, nil),
+			isEmpty: false,
+		},
+		{
+			name:    "empty vector",
+			vec:     Integer([]int{}, nil),
+			isEmpty: true,
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			if data.vec.IsEmpty() != data.isEmpty {
+				t.Error(fmt.Sprintf("data.vec.IsEmpty() (%t) is not equal to data.isEmpty (%t)",
+					data.vec.IsEmpty(), data.isEmpty))
+			}
+		})
+	}
+}
+
+func TestVector_SupportsSelector(t *testing.T) {
+	testData := []struct {
+		name             string
+		vec              Vector
+		selector         interface{}
+		supportsSelector bool
+	}{
+		{
+			name:             "integer vector + valid selector",
+			vec:              Integer([]int{1, 2, 3}, nil),
+			selector:         func(_ int, val int, _ bool) bool { return val == 1 || val == 3 },
+			supportsSelector: true,
+		},
+		{
+			name:             "integer vector + invalid selector",
+			vec:              Integer([]int{1, 2, 3}, nil),
+			selector:         true,
+			supportsSelector: false,
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			supportsSelector := data.vec.SupportsSelector(data.selector)
+			if supportsSelector != data.supportsSelector {
+				t.Error(fmt.Sprintf("data.vec.Select() (%v) is not equal to data.selected (%v)",
+					supportsSelector, data.supportsSelector))
+			}
+		})
+	}
+}
+
+func TestVector_Select(t *testing.T) {
+	testData := []struct {
+		name     string
+		vec      Vector
+		selector interface{}
+		selected []bool
+	}{
+		{
+			name:     "integer vector + valid selector",
+			vec:      Integer([]int{1, 2, 3}, nil),
+			selector: func(_ int, val int, _ bool) bool { return val == 1 || val == 3 },
+			selected: []bool{true, false, true},
+		},
+		{
+			name:     "integer vector + invalid selector",
+			vec:      Integer([]int{1, 2, 3}, nil),
+			selector: true,
+			selected: []bool{false, false, false},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			selected := data.vec.Select(data.selector)
+			if !reflect.DeepEqual(selected, data.selected) {
+				t.Error(fmt.Sprintf("data.vec.Select() (%v) is not equal to data.selected (%v)",
+					selected, data.selected))
+			}
+		})
+	}
+}
+
+func TestVector_String(t *testing.T) {
+	vec := Integer([]int{1, 2, 3, 4, 5}, []bool{false, false, true, false, false})
+	newVec := vec.Filter([]int{1, 3, 5})
+	fmt.Println(vec)
+	fmt.Println(newVec)
+	integers, na := vec.Integers()
+	fmt.Println(integers, na)
+	integers, na = newVec.Integers()
+	fmt.Println(integers, na)
 }

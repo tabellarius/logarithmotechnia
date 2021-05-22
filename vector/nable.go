@@ -1,60 +1,36 @@
 package vector
 
 type NAble interface {
-	NA() []bool
-	IsNA(idx int) bool
-	SetNA(na []bool) Vector
+	IsNA() []bool
+	NotNA() []bool
 	HasNA() bool
-	OnlyNA() []int
+	WithNA() []int
 	WithoutNA() []int
 }
 
 type DefNAble struct {
-	vec Vector
-	na  []bool
+	na []bool
 }
 
-func (n *DefNAble) Refresh() {
-	if n.vec.Length() == 0 {
-		return
+func (n *DefNAble) IsNA() []bool {
+	isna := make([]bool, len(n.na))
+	copy(isna, n.na)
+
+	return isna
+}
+
+func (n *DefNAble) NotNA() []bool {
+	notna := make([]bool, len(n.na))
+
+	for i := 0; i < len(n.na); i++ {
+		notna[i] = !n.na[i]
 	}
 
-	na := make([]bool, len(n.na))
-	copy(na, n.na)
-
-	n.na = na
-}
-
-func (n *DefNAble) NA() []bool {
-	length := len(n.na) - 1
-	na := make([]bool, length)
-	copy(na, n.na[1:])
-	return na
-}
-
-func (n *DefNAble) IsNA(idx int) bool {
-	if idx >= 1 && idx < len(n.na) {
-		return n.na[idx]
-	}
-
-	return false
-}
-
-func (n *DefNAble) SetNA(na []bool) Vector {
-	if len(na) != n.vec.Length() {
-		if rep, ok := n.vec.(Reporter); ok {
-			rep.Report().AddWarning("SetNA(na []bool): length of na is not equal to vector's length")
-		}
-		return n.vec
-	}
-
-	n.na = make([]bool, n.vec.Length()+1)
-	copy(n.na[1:], na)
-	return n.vec
+	return notna
 }
 
 func (n *DefNAble) HasNA() bool {
-	for i := 1; i <= n.vec.Length(); i++ {
+	for i := 0; i < len(n.na); i++ {
 		if n.na[i] == true {
 			return true
 		}
@@ -63,12 +39,12 @@ func (n *DefNAble) HasNA() bool {
 	return false
 }
 
-func (n *DefNAble) OnlyNA() []int {
+func (n *DefNAble) WithNA() []int {
 	naIndices := make([]int, 0)
 
-	for i := 1; i <= n.vec.Length(); i++ {
+	for i := 0; i < len(n.na); i++ {
 		if n.na[i] == true {
-			naIndices = append(naIndices, i)
+			naIndices = append(naIndices, i+1)
 		}
 	}
 
@@ -78,20 +54,11 @@ func (n *DefNAble) OnlyNA() []int {
 func (n *DefNAble) WithoutNA() []int {
 	naIndices := make([]int, 0)
 
-	for i := 1; i <= n.vec.Length(); i++ {
+	for i := 0; i < len(n.na); i++ {
 		if n.na[i] == false {
-			naIndices = append(naIndices, i)
+			naIndices = append(naIndices, i+1)
 		}
 	}
 
 	return naIndices
-}
-
-func newDefaultNAble(vec Vector) DefNAble {
-	nable := DefNAble{
-		vec: vec,
-		na:  make([]bool, vec.Length()+1),
-	}
-
-	return nable
 }
