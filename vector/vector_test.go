@@ -779,14 +779,3 @@ func TestVector_Select(t *testing.T) {
 		})
 	}
 }
-
-func TestVector_String(t *testing.T) {
-	vec := Integer([]int{1, 2, 3, 4, 5}, []bool{false, false, true, false, false})
-	newVec := vec.Filter([]int{1, 3, 5})
-	fmt.Println(vec)
-	fmt.Println(newVec)
-	integers, na := vec.Integers()
-	fmt.Println(integers, na)
-	integers, na = newVec.Integers()
-	fmt.Println(integers, na)
-}

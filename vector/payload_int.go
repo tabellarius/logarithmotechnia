@@ -189,7 +189,7 @@ func Integer(data []int, na []bool, options ...Config) Vector {
 			copy(vecNA, na)
 		} else {
 			emp := Empty()
-			emp.Report().AddError("integerPayload(): data length is not equal to na's length")
+			emp.Report().AddError("Integer(): data length is not equal to na's length")
 			return emp
 		}
 	}
