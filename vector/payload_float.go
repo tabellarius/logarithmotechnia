@@ -2,6 +2,7 @@ package vector
 
 import (
 	"math"
+	"math/cmplx"
 	"strconv"
 )
 
@@ -110,9 +111,13 @@ func (p *float) Complexes() ([]complex128, []bool) {
 	data := make([]complex128, p.length)
 	for i := 0; i < p.length; i++ {
 		if p.na[i] {
-			data[i] = 0
+			data[i] = cmplx.NaN()
 		} else {
-			data[i] = complex(p.data[i], 0)
+			if math.IsNaN(p.data[i]) {
+				data[i] = cmplx.NaN()
+			} else {
+				data[i] = complex(p.data[i], 0)
+			}
 		}
 	}
 

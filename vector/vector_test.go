@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/shopspring/decimal"
 	"math"
+	"math/cmplx"
 	"reflect"
 	"strconv"
 	"testing"
@@ -128,7 +129,7 @@ func TestVector_Complexes(t *testing.T) {
 	}{
 		{
 			vec:       Integer([]int{1, 2, 3, 4, 5}, []bool{false, false, true, false, false}),
-			outValues: []complex128{1 + 0i, 2 + 0i, 0 + 0i, 4 + 0i, 5 + 0i},
+			outValues: []complex128{1 + 0i, 2 + 0i, cmplx.NaN(), 4 + 0i, 5 + 0i},
 			outNA:     []bool{false, false, true, false, false},
 		},
 		{
@@ -141,7 +142,17 @@ func TestVector_Complexes(t *testing.T) {
 	for i, data := range testData {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			complexes, na := data.vec.Complexes()
-			if !reflect.DeepEqual(complexes, data.outValues) {
+			correct := true
+			for i := 0; i < len(complexes); i++ {
+				if cmplx.IsNaN(data.outValues[i]) {
+					if !cmplx.IsNaN(complexes[i]) {
+						correct = false
+					}
+				} else if complexes[i] != data.outValues[i] {
+					correct = false
+				}
+			}
+			if !correct {
 				t.Error(fmt.Sprintf("Result (%v) is not equal to expected (%v)", complexes, data.outValues))
 			}
 			if !reflect.DeepEqual(na, data.outNA) {

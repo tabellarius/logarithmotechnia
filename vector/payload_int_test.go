@@ -3,6 +3,7 @@ package vector
 import (
 	"fmt"
 	"math"
+	"math/cmplx"
 	"reflect"
 	"strconv"
 	"testing"
@@ -313,13 +314,13 @@ func TestInteger_Complexes(t *testing.T) {
 		{
 			in:    []int{10, 0, 12, 14, 1110},
 			inNA:  []bool{false, false, false, true, true},
-			out:   []complex128{10 + 0i, 0 + 0i, 12 + 0i, 0 + 0i, 0 + 0i},
+			out:   []complex128{10 + 0i, 0 + 0i, 12 + 0i, cmplx.NaN(), cmplx.NaN()},
 			outNA: []bool{false, false, false, true, true},
 		},
 		{
 			in:    []int{1, 3, 0, 100, 0, -11, -10},
 			inNA:  []bool{false, false, false, false, false, false, true},
-			out:   []complex128{1 + 0i, 3 + 0i, 0 + 0i, 100 + 0i, 0 + 0i, -11 + 0i, 0 + 0i},
+			out:   []complex128{1 + 0i, 3 + 0i, 0 + 0i, 100 + 0i, 0 + 0i, -11 + 0i, cmplx.NaN()},
 			outNA: []bool{false, false, false, false, false, false, true},
 		},
 	}
@@ -330,7 +331,17 @@ func TestInteger_Complexes(t *testing.T) {
 			payload := vec.(*vector).payload.(*integer)
 
 			complexes, na := payload.Complexes()
-			if !reflect.DeepEqual(complexes, data.out) {
+			correct := true
+			for i := 0; i < len(complexes); i++ {
+				if cmplx.IsNaN(data.out[i]) {
+					if !cmplx.IsNaN(complexes[i]) {
+						correct = false
+					}
+				} else if complexes[i] != data.out[i] {
+					correct = false
+				}
+			}
+			if !correct {
 				t.Error(fmt.Sprintf("Complexes (%v) are not equal to data.out (%v)\n", complexes, data.out))
 			}
 			if !reflect.DeepEqual(na, data.outNA) {

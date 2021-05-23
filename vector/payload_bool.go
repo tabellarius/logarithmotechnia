@@ -1,10 +1,5 @@
 package vector
 
-import (
-	"github.com/shopspring/decimal"
-	"time"
-)
-
 type boolean struct {
 	length int
 	data   []bool
@@ -13,6 +8,18 @@ type boolean struct {
 
 func (p *boolean) Len() int {
 	return p.length
+}
+
+func (p *boolean) ByIndices(indices []int) Payload {
+	panic("implement me")
+}
+
+func (p *boolean) SupportsSelector(filter interface{}) bool {
+	panic("implement me")
+}
+
+func (p *boolean) Select(selector interface{}) []bool {
+	panic("implement me")
 }
 
 func (p *boolean) Integers() ([]int, []bool) {
@@ -32,26 +39,6 @@ func (p *boolean) Strings() ([]string, []bool) {
 }
 
 func (p *boolean) Complexes() ([]complex128, []bool) {
-	panic("implement me")
-}
-
-func (p *boolean) Decimals() ([]decimal.Decimal, []bool) {
-	panic("implement me")
-}
-
-func (p *boolean) Times() ([]time.Time, []bool) {
-	panic("implement me")
-}
-
-func (p *boolean) ByIndices(indices []int) Payload {
-	panic("implement me")
-}
-
-func (p *boolean) SupportsSelector(filter interface{}) bool {
-	panic("implement me")
-}
-
-func (p *boolean) Select(selector interface{}) []bool {
 	panic("implement me")
 }
 
