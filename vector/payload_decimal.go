@@ -2,7 +2,6 @@ package vector
 
 import (
 	"github.com/shopspring/decimal"
-	"time"
 )
 
 type decimalPayload struct {
@@ -36,10 +35,6 @@ func (p *decimalPayload) Complexes() ([]complex128, []bool) {
 }
 
 func (p *decimalPayload) Decimals() ([]decimal.Decimal, []bool) {
-	panic("implement me")
-}
-
-func (p *decimalPayload) Times() ([]time.Time, []bool) {
 	panic("implement me")
 }
 

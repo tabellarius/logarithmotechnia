@@ -6,13 +6,13 @@ import (
 	"strconv"
 )
 
-type float struct {
+type floatPayload struct {
 	length int
 	data   []float64
 	DefNAble
 }
 
-func (p *float) ByIndices(indices []int) Payload {
+func (p *floatPayload) ByIndices(indices []int) Payload {
 	data := make([]float64, 0, len(indices))
 	na := make([]bool, 0, len(indices))
 
@@ -21,7 +21,7 @@ func (p *float) ByIndices(indices []int) Payload {
 		na = append(na, p.na[idx-1])
 	}
 
-	return &float{
+	return &floatPayload{
 		length: len(data),
 		data:   data,
 		DefNAble: DefNAble{
@@ -30,7 +30,7 @@ func (p *float) ByIndices(indices []int) Payload {
 	}
 }
 
-func (p *float) SupportsSelector(selector interface{}) bool {
+func (p *floatPayload) SupportsSelector(selector interface{}) bool {
 	if _, ok := selector.(func(int, float64, bool) bool); ok {
 		return true
 	}
@@ -38,7 +38,7 @@ func (p *float) SupportsSelector(selector interface{}) bool {
 	return false
 }
 
-func (p *float) Select(selector interface{}) []bool {
+func (p *floatPayload) Select(selector interface{}) []bool {
 	if byFunc, ok := selector.(func(int, float64, bool) bool); ok {
 		return p.selectByFunc(byFunc)
 	}
@@ -46,7 +46,7 @@ func (p *float) Select(selector interface{}) []bool {
 	return make([]bool, p.length)
 }
 
-func (p *float) selectByFunc(byFunc func(int, float64, bool) bool) []bool {
+func (p *floatPayload) selectByFunc(byFunc func(int, float64, bool) bool) []bool {
 	booleans := make([]bool, p.length)
 
 	for idx, val := range p.data {
@@ -58,11 +58,11 @@ func (p *float) selectByFunc(byFunc func(int, float64, bool) bool) []bool {
 	return booleans
 }
 
-func (p *float) Len() int {
+func (p *floatPayload) Len() int {
 	return p.length
 }
 
-func (p *float) Integers() ([]int, []bool) {
+func (p *floatPayload) Integers() ([]int, []bool) {
 	if p.length == 0 {
 		return []int{}, []bool{}
 	}
@@ -82,7 +82,7 @@ func (p *float) Integers() ([]int, []bool) {
 	return data, na
 }
 
-func (p *float) Floats() ([]float64, []bool) {
+func (p *floatPayload) Floats() ([]float64, []bool) {
 	if p.length == 0 {
 		return []float64{}, nil
 	}
@@ -103,7 +103,7 @@ func (p *float) Floats() ([]float64, []bool) {
 	return data, na
 }
 
-func (p *float) Complexes() ([]complex128, []bool) {
+func (p *floatPayload) Complexes() ([]complex128, []bool) {
 	if p.length == 0 {
 		return []complex128{}, []bool{}
 	}
@@ -127,7 +127,7 @@ func (p *float) Complexes() ([]complex128, []bool) {
 	return data, na
 }
 
-func (p *float) Booleans() ([]bool, []bool) {
+func (p *floatPayload) Booleans() ([]bool, []bool) {
 	if p.length == 0 {
 		return []bool{}, nil
 	}
@@ -148,7 +148,7 @@ func (p *float) Booleans() ([]bool, []bool) {
 	return data, na
 }
 
-func (p *float) Strings() ([]string, []bool) {
+func (p *floatPayload) Strings() ([]string, []bool) {
 	if p.length == 0 {
 		return []string{}, nil
 	}
@@ -156,11 +156,7 @@ func (p *float) Strings() ([]string, []bool) {
 	data := make([]string, p.length)
 
 	for i := 0; i < p.length; i++ {
-		if p.na[i] {
-			data[i] = ""
-		} else {
-			data[i] = p.elemToStr(i)
-		}
+		data[i] = p.StrForElem(i + 1)
 	}
 
 	na := make([]bool, p.Len())
@@ -169,20 +165,26 @@ func (p *float) Strings() ([]string, []bool) {
 	return data, na
 }
 
-func (p *float) elemToStr(i int) string {
+func (p *floatPayload) StrForElem(idx int) string {
+	i := idx - 1
+
+	if p.na[i] {
+		return "NA"
+	}
+
+	if math.IsInf(p.data[i], +1) {
+		return "+Inf"
+	}
+
+	if math.IsInf(p.data[i], -1) {
+		return "-Inf"
+	}
+
 	if math.IsNaN(p.data[i]) {
 		return "NaN"
 	}
 
 	return strconv.FormatFloat(p.data[i], 'f', 3, 64)
-}
-
-func (p *float) StrForElem(idx int) string {
-	if p.na[idx-1] {
-		return "NA"
-	}
-
-	return p.elemToStr(idx - 1)
 }
 
 func Float(data []float64, na []bool, options ...Config) Vector {
@@ -204,7 +206,7 @@ func Float(data []float64, na []bool, options ...Config) Vector {
 		}
 	}
 
-	payload := &float{
+	payload := &floatPayload{
 		length: length,
 		data:   vecData,
 		DefNAble: DefNAble{

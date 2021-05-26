@@ -1,8 +1,9 @@
 package vector
 
 import (
-	"github.com/shopspring/decimal"
-	"time"
+	"math"
+	"math/cmplx"
+	"strconv"
 )
 
 type complexPayload struct {
@@ -15,46 +16,195 @@ func (p *complexPayload) Len() int {
 	return p.length
 }
 
-func (p *complexPayload) Integers() ([]int, []bool) {
-	panic("implement me")
-}
-
-func (p *complexPayload) Floats() ([]float64, []bool) {
-	panic("implement me")
-}
-
-func (p *complexPayload) Booleans() ([]bool, []bool) {
-	panic("implement me")
-}
-
-func (p *complexPayload) Strings() ([]string, []bool) {
-	panic("implement me")
-}
-
-func (p *complexPayload) Complexes() ([]complex128, []bool) {
-	panic("implement me")
-}
-
-func (p *complexPayload) Decimals() ([]decimal.Decimal, []bool) {
-	panic("implement me")
-}
-
-func (p *complexPayload) Times() ([]time.Time, []bool) {
-	panic("implement me")
-}
-
 func (p *complexPayload) ByIndices(indices []int) Payload {
-	panic("implement me")
+	data := make([]complex128, 0, len(indices))
+	na := make([]bool, 0, len(indices))
+
+	for _, idx := range indices {
+		data = append(data, p.data[idx-1])
+		na = append(na, p.na[idx-1])
+	}
+
+	return &complexPayload{
+		length: len(data),
+		data:   data,
+		DefNAble: DefNAble{
+			na: na,
+		},
+	}
 }
 
-func (p *complexPayload) SupportsSelector(filter interface{}) bool {
-	panic("implement me")
+func (p *complexPayload) SupportsSelector(selector interface{}) bool {
+	if _, ok := selector.(func(int, complex128, bool) bool); ok {
+		return true
+	}
+
+	return false
 }
 
 func (p *complexPayload) Select(selector interface{}) []bool {
-	panic("implement me")
+	if byFunc, ok := selector.(func(int, complex128, bool) bool); ok {
+		return p.selectByFunc(byFunc)
+	}
+
+	return make([]bool, p.length)
+}
+
+func (p *complexPayload) selectByFunc(byFunc func(int, complex128, bool) bool) []bool {
+	booleans := make([]bool, p.length)
+
+	for idx, val := range p.data {
+		if byFunc(idx+1, val, p.na[idx]) {
+			booleans[idx] = true
+		}
+	}
+
+	return booleans
+}
+
+func (p *complexPayload) Integers() ([]int, []bool) {
+	if p.length == 0 {
+		return []int{}, []bool{}
+	}
+
+	data := make([]int, p.length)
+	for i := 0; i < p.length; i++ {
+		if p.na[i] {
+			data[i] = 0
+		} else {
+			data[i] = int(real(p.data[i]))
+		}
+	}
+
+	na := make([]bool, p.Len())
+	copy(na, p.na)
+
+	return data, na
+}
+
+func (p *complexPayload) Floats() ([]float64, []bool) {
+	if p.length == 0 {
+		return []float64{}, nil
+	}
+
+	data := make([]float64, p.length)
+
+	for i := 0; i < p.length; i++ {
+		if p.na[i] {
+			data[i] = math.NaN()
+		} else {
+			data[i] = real(p.data[i])
+		}
+	}
+
+	na := make([]bool, p.Len())
+	copy(na, p.na)
+
+	return data, na
+}
+
+func (p *complexPayload) Complexes() ([]complex128, []bool) {
+	if p.length == 0 {
+		return []complex128{}, []bool{}
+	}
+
+	data := make([]complex128, p.length)
+	for i := 0; i < p.length; i++ {
+		if p.na[i] {
+			data[i] = cmplx.NaN()
+		} else {
+			data[i] = p.data[i]
+		}
+	}
+
+	na := make([]bool, p.Len())
+	copy(na, p.na)
+
+	return data, na
+}
+
+func (p *complexPayload) Booleans() ([]bool, []bool) {
+	if p.length == 0 {
+		return []bool{}, nil
+	}
+
+	data := make([]bool, p.length)
+
+	for i := 0; i < p.length; i++ {
+		if p.na[i] {
+			data[i] = false
+		} else {
+			data[i] = p.data[i] != 0
+		}
+	}
+
+	na := make([]bool, p.length)
+	copy(na, p.na)
+
+	return data, na
+}
+
+func (p *complexPayload) Strings() ([]string, []bool) {
+	if p.length == 0 {
+		return []string{}, nil
+	}
+
+	data := make([]string, p.length)
+
+	for i := 0; i < p.length; i++ {
+		data[i] = p.StrForElem(i + 1)
+	}
+
+	na := make([]bool, p.Len())
+	copy(na, p.na)
+
+	return data, na
 }
 
 func (p *complexPayload) StrForElem(idx int) string {
-	panic("implement me")
+	i := idx - 1
+
+	if p.na[i] {
+		return "NA"
+	}
+
+	if cmplx.IsInf(p.data[i]) {
+		return "Inf"
+	}
+
+	if cmplx.IsNaN(p.data[i]) {
+		return "NaN"
+	}
+
+	return strconv.FormatComplex(p.data[i], 'f', 3, 128)
+}
+
+func Complex(data []complex128, na []bool, options ...Config) Vector {
+	length := len(data)
+
+	vecData := make([]complex128, length)
+	if length > 0 {
+		copy(vecData, data)
+	}
+
+	vecNA := make([]bool, length)
+	if len(na) > 0 {
+		if len(na) == length {
+			copy(vecNA, na)
+		} else {
+			emp := Empty()
+			emp.Report().AddError("Complex(): data length is not equal to na's length")
+			return emp
+		}
+	}
+
+	payload := &complexPayload{
+		length: length,
+		data:   vecData,
+		DefNAble: DefNAble{
+			na: vecNA,
+		},
+	}
+
+	return New(payload, options...)
 }
