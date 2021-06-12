@@ -1,7 +1,7 @@
 package vector
 
 func And(booleans ...[]bool) []bool {
-	if booleans == nil || len(booleans) == 0 {
+	if len(booleans) == 0 {
 		return []bool{}
 	}
 
@@ -9,7 +9,7 @@ func And(booleans ...[]bool) []bool {
 }
 
 func Or(booleans ...[]bool) []bool {
-	if booleans == nil || len(booleans) == 0 {
+	if len(booleans) == 0 {
 		return []bool{}
 	}
 
@@ -17,7 +17,7 @@ func Or(booleans ...[]bool) []bool {
 }
 
 func Xor(booleans ...[]bool) []bool {
-	if booleans == nil || len(booleans) == 0 {
+	if len(booleans) == 0 {
 		return []bool{}
 	}
 

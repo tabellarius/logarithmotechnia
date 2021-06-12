@@ -71,13 +71,7 @@ func (p *integer) Integers() ([]int, []bool) {
 	}
 
 	data := make([]int, p.length)
-	for i := 0; i < p.length; i++ {
-		if p.na[i] {
-			data[i] = 0
-		} else {
-			data[i] = p.data[i]
-		}
-	}
+	copy(data, p.data)
 
 	na := make([]bool, p.Len())
 	copy(na, p.na)
@@ -181,11 +175,6 @@ func Integer(data []int, na []bool, options ...Config) Vector {
 
 	length := len(data)
 
-	vecData := make([]int, length)
-	if length > 0 {
-		copy(vecData, data)
-	}
-
 	vecNA := make([]bool, length)
 	if len(na) > 0 {
 		if len(na) == length {
@@ -194,6 +183,15 @@ func Integer(data []int, na []bool, options ...Config) Vector {
 			emp := Empty()
 			emp.Report().AddError("Integer(): data length is not equal to na's length")
 			return emp
+		}
+	}
+
+	vecData := make([]int, length)
+	for i := 0; i < length; i++ {
+		if vecNA[i] {
+			vecData[i] = 0
+		} else {
+			vecData[i] = data[i]
 		}
 	}
 

@@ -93,14 +93,7 @@ func (p *floatPayload) Floats() ([]float64, []bool) {
 	}
 
 	data := make([]float64, p.length)
-
-	for i := 0; i < p.length; i++ {
-		if p.na[i] {
-			data[i] = math.NaN()
-		} else {
-			data[i] = p.data[i]
-		}
-	}
+	copy(data, p.data)
 
 	na := make([]bool, p.Len())
 	copy(na, p.na)
@@ -197,11 +190,6 @@ func Float(data []float64, na []bool, options ...Config) Vector {
 
 	length := len(data)
 
-	vecData := make([]float64, length)
-	if length > 0 {
-		copy(vecData, data)
-	}
-
 	vecNA := make([]bool, length)
 	if len(na) > 0 {
 		if len(na) == length {
@@ -210,6 +198,15 @@ func Float(data []float64, na []bool, options ...Config) Vector {
 			emp := Empty()
 			emp.Report().AddError("Float(): data length is not equal to na's length")
 			return emp
+		}
+	}
+
+	vecData := make([]float64, length)
+	for i := 0; i < length; i++ {
+		if vecNA[i] {
+			vecData[i] = math.NaN()
+		} else {
+			vecData[i] = data[i]
 		}
 	}
 

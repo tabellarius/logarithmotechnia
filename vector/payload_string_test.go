@@ -16,14 +16,16 @@ func TestString(t *testing.T) {
 		name          string
 		data          []string
 		na            []bool
+		outData       []string
 		names         map[string]int
 		expectedNames map[string]int
 		isEmpty       bool
 	}{
 		{
-			name:    "normal + na",
+			name:    "normal + false na",
 			data:    []string{"one", "two", "three", "four", "five"},
 			na:      []bool{false, false, false, false, false},
+			outData: []string{"one", "two", "three", "four", "five"},
 			names:   nil,
 			isEmpty: false,
 		},
@@ -31,6 +33,7 @@ func TestString(t *testing.T) {
 			name:    "normal + empty na",
 			data:    []string{"one", "two", "three", "four", "five"},
 			na:      []bool{},
+			outData: []string{"one", "two", "three", "four", "five"},
 			names:   nil,
 			isEmpty: false,
 		},
@@ -38,13 +41,15 @@ func TestString(t *testing.T) {
 			name:    "normal + nil na",
 			data:    []string{"one", "two", "three", "four", "five"},
 			na:      nil,
+			outData: []string{"one", "two", "three", "four", "five"},
 			names:   nil,
 			isEmpty: false,
 		},
 		{
-			name:    "normal + na",
+			name:    "normal + mixed na",
 			data:    []string{"one", "two", "three", "four", "five"},
 			na:      []bool{false, true, true, true, false},
+			outData: []string{"one", "", "", "", "five"},
 			names:   nil,
 			isEmpty: false,
 		},
@@ -59,6 +64,7 @@ func TestString(t *testing.T) {
 			name:          "normal + names",
 			data:          []string{"one", "two", "three", "four", "five"},
 			na:            []bool{false, false, false, false, false},
+			outData:       []string{"one", "two", "three", "four", "five"},
 			names:         map[string]int{"one": 1, "three": 3, "five": 5},
 			expectedNames: map[string]int{"one": 1, "three": 3, "five": 5},
 			isEmpty:       false,
@@ -67,6 +73,7 @@ func TestString(t *testing.T) {
 			name:          "normal + incorrect names",
 			data:          []string{"one", "two", "three", "four", "five"},
 			na:            []bool{false, false, false, false, false},
+			outData:       []string{"one", "two", "three", "four", "five"},
 			names:         map[string]int{"zero": 0, "one": 1, "three": 3, "five": 5, "seven": 7},
 			expectedNames: map[string]int{"one": 1, "three": 3, "five": 5},
 			isEmpty:       false,
@@ -100,9 +107,9 @@ func TestString(t *testing.T) {
 				if !ok {
 					t.Error("Payload is not integer")
 				} else {
-					if !reflect.DeepEqual(payload.data, data.data) {
+					if !reflect.DeepEqual(payload.data, data.outData) {
 						t.Error(fmt.Sprintf("Payload data (%v) is not equal to correct data (%v)\n",
-							payload.data[1:], data.data))
+							payload.data, data.outData))
 					}
 
 					if vv.length != vv.DefNameable.length || vv.length != payload.length {
@@ -115,7 +122,7 @@ func TestString(t *testing.T) {
 				if len(data.na) > 0 && len(data.na) == length {
 					if !reflect.DeepEqual(payload.na, data.na) {
 						t.Error(fmt.Sprintf("Payload na (%v) is not equal to correct na (%v)\n",
-							payload.na[1:], data.na))
+							payload.na, data.na))
 					}
 				} else if len(data.na) == 0 {
 					if !reflect.DeepEqual(payload.na, emptyNA) {
@@ -383,6 +390,47 @@ func TestString_Strings(t *testing.T) {
 			}
 			if !reflect.DeepEqual(na, data.outNA) {
 				t.Error(fmt.Sprintf("IsNA (%v) are not equal to data.outNA (%v)\n", na, data.outNA))
+			}
+		})
+	}
+}
+
+func TestString_ByIndices(t *testing.T) {
+	vec := String([]string{"1", "2", "3", "4", "5"}, []bool{false, false, false, false, true})
+	testData := []struct {
+		name    string
+		indices []int
+		out     []string
+		outNA   []bool
+	}{
+		{
+			name:    "all",
+			indices: []int{1, 2, 3, 4, 5},
+			out:     []string{"1", "2", "3", "4", ""},
+			outNA:   []bool{false, false, false, false, true},
+		},
+		{
+			name:    "all reverse",
+			indices: []int{5, 4, 3, 2, 1},
+			out:     []string{"", "4", "3", "2", "1"},
+			outNA:   []bool{true, false, false, false, false},
+		},
+		{
+			name:    "some",
+			indices: []int{5, 1, 3},
+			out:     []string{"", "1", "3"},
+			outNA:   []bool{true, false, false},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			payload := vec.ByIndices(data.indices).(*vector).payload.(*str)
+			if !reflect.DeepEqual(payload.data, data.out) {
+				t.Error(fmt.Sprintf("payload.data (%v) is not equal to data.out (%v)", payload.data, data.out))
+			}
+			if !reflect.DeepEqual(payload.na, data.outNA) {
+				t.Error(fmt.Sprintf("payload.data (%v) is not equal to data.out (%v)", payload.data, data.out))
 			}
 		})
 	}

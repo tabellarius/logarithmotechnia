@@ -2,6 +2,7 @@ package vector
 
 import (
 	"fmt"
+	"logarithmotechnia.com/logarithmotechnia/util"
 	"math"
 	"math/cmplx"
 	"reflect"
@@ -16,14 +17,16 @@ func TestComplex(t *testing.T) {
 		name          string
 		data          []complex128
 		na            []bool
+		outData       []complex128
 		names         map[string]int
 		expectedNames map[string]int
 		isEmpty       bool
 	}{
 		{
-			name:    "normal + na",
+			name:    "normal + na false",
 			data:    []complex128{1.1 + 0i, 2.2 + 2.2i, 3.3 + 3.3i, 4.4 + 4.4i, 5.5 - 5.5i},
 			na:      []bool{false, false, false, false, false},
+			outData: []complex128{1.1 + 0i, 2.2 + 2.2i, 3.3 + 3.3i, 4.4 + 4.4i, 5.5 - 5.5i},
 			names:   nil,
 			isEmpty: false,
 		},
@@ -31,6 +34,7 @@ func TestComplex(t *testing.T) {
 			name:    "normal + empty na",
 			data:    []complex128{1.1 + 0i, 2.2 + 2.2i, 3.3 + 3.3i, 4.4 + 4.4i, 5.5 - 5.5i},
 			na:      []bool{},
+			outData: []complex128{1.1 + 0i, 2.2 + 2.2i, 3.3 + 3.3i, 4.4 + 4.4i, 5.5 - 5.5i},
 			names:   nil,
 			isEmpty: false,
 		},
@@ -38,13 +42,15 @@ func TestComplex(t *testing.T) {
 			name:    "normal + nil na",
 			data:    []complex128{1.1 + 0i, 2.2 + 2.2i, 3.3 + 3.3i, 4.4 + 4.4i, 5.5 - 5.5i},
 			na:      nil,
+			outData: []complex128{1.1 + 0i, 2.2 + 2.2i, 3.3 + 3.3i, 4.4 + 4.4i, 5.5 - 5.5i},
 			names:   nil,
 			isEmpty: false,
 		},
 		{
-			name:    "normal + na",
+			name:    "normal + na mixed",
 			data:    []complex128{1.1 + 0i, 2.2 + 2.2i, 3.3 + 3.3i, 4.4 + 4.4i, 5.5 - 5.5i},
 			na:      []bool{false, true, true, true, false},
+			outData: []complex128{1.1 + 0i, cmplx.NaN(), cmplx.NaN(), cmplx.NaN(), 5.5 - 5.5i},
 			names:   nil,
 			isEmpty: false,
 		},
@@ -59,6 +65,7 @@ func TestComplex(t *testing.T) {
 			name:          "normal + names",
 			data:          []complex128{1.1 + 0i, 2.2 + 2.2i, 3.3 + 3.3i, 4.4 + 4.4i, 5.5 - 5.5i},
 			na:            []bool{false, false, false, false, false},
+			outData:       []complex128{1.1 + 0i, 2.2 + 2.2i, 3.3 + 3.3i, 4.4 + 4.4i, 5.5 - 5.5i},
 			names:         map[string]int{"one": 1, "three": 3, "five": 5},
 			expectedNames: map[string]int{"one": 1, "three": 3, "five": 5},
 			isEmpty:       false,
@@ -67,6 +74,7 @@ func TestComplex(t *testing.T) {
 			name:          "normal + incorrect names",
 			data:          []complex128{1.1 + 0i, 2.2 + 2.2i, 3.3 + 3.3i, 4.4 + 4.4i, 5.5 - 5.5i},
 			na:            []bool{false, false, false, false, false},
+			outData:       []complex128{1.1 + 0i, 2.2 + 2.2i, 3.3 + 3.3i, 4.4 + 4.4i, 5.5 - 5.5i},
 			names:         map[string]int{"zero": 0, "one": 1, "three": 3, "five": 5, "seven": 7},
 			expectedNames: map[string]int{"one": 1, "three": 3, "five": 5},
 			isEmpty:       false,
@@ -100,9 +108,9 @@ func TestComplex(t *testing.T) {
 				if !ok {
 					t.Error("Payload is not complexPayload")
 				} else {
-					if !reflect.DeepEqual(payload.data, data.data) {
+					if !util.EqualComplexArrays(payload.data, data.outData) {
 						t.Error(fmt.Sprintf("Payload data (%v) is not equal to correct data (%v)\n",
-							payload.data[1:], data.data))
+							payload.data, data.outData))
 					}
 
 					if vv.length != vv.DefNameable.length || vv.length != payload.length {
@@ -115,7 +123,7 @@ func TestComplex(t *testing.T) {
 				if len(data.na) > 0 && len(data.na) == length {
 					if !reflect.DeepEqual(payload.na, data.na) {
 						t.Error(fmt.Sprintf("Payload na (%v) is not equal to correct na (%v)\n",
-							payload.na[1:], data.na))
+							payload.na, data.na))
 					}
 				} else if len(data.na) == 0 {
 					if !reflect.DeepEqual(payload.na, emptyNA) {
@@ -170,19 +178,19 @@ func TestComplex_ByIndices(t *testing.T) {
 		{
 			name:    "all",
 			indices: []int{1, 2, 3, 4, 5},
-			out:     []complex128{1, 2, 3, 4, 5},
+			out:     []complex128{1, 2, 3, 4, cmplx.NaN()},
 			outNA:   []bool{false, false, false, false, true},
 		},
 		{
 			name:    "all reverse",
 			indices: []int{5, 4, 3, 2, 1},
-			out:     []complex128{5, 4, 3, 2, 1},
+			out:     []complex128{cmplx.NaN(), 4, 3, 2, 1},
 			outNA:   []bool{true, false, false, false, false},
 		},
 		{
 			name:    "some",
 			indices: []int{5, 1, 3},
-			out:     []complex128{5, 1, 3},
+			out:     []complex128{cmplx.NaN(), 1, 3},
 			outNA:   []bool{true, false, false},
 		},
 	}
@@ -190,7 +198,7 @@ func TestComplex_ByIndices(t *testing.T) {
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
 			payload := vec.ByIndices(data.indices).(*vector).payload.(*complexPayload)
-			if !reflect.DeepEqual(payload.data, data.out) {
+			if !util.EqualComplexArrays(payload.data, data.out) {
 				t.Error(fmt.Sprintf("payload.data (%v) is not equal to data.out (%v)", payload.data, data.out))
 			}
 			if !reflect.DeepEqual(payload.na, data.outNA) {
@@ -387,17 +395,7 @@ func TestComplex_Floats(t *testing.T) {
 			payload := vec.(*vector).payload.(*complexPayload)
 
 			floats, na := payload.Floats()
-			correct := true
-			for i := 0; i < len(floats); i++ {
-				if math.IsNaN(data.out[i]) {
-					if !math.IsNaN(floats[i]) {
-						correct = false
-					}
-				} else if floats[i] != data.out[i] {
-					correct = false
-				}
-			}
-			if !correct {
+			if !util.EqualFloatArrays(floats, data.out) {
 				t.Error(fmt.Sprintf("Floats (%v) are not equal to data.out (%v)\n", floats, data.out))
 			}
 			if !reflect.DeepEqual(na, data.outNA) {
@@ -440,17 +438,7 @@ func TestComplex_Complexes(t *testing.T) {
 			payload := vec.(*vector).payload.(*complexPayload)
 
 			complexes, na := payload.Complexes()
-			correct := true
-			for i := 0; i < len(complexes); i++ {
-				if cmplx.IsNaN(data.out[i]) {
-					if !cmplx.IsNaN(complexes[i]) {
-						correct = false
-					}
-				} else if complexes[i] != data.out[i] {
-					correct = false
-				}
-			}
-			if !correct {
+			if !util.EqualComplexArrays(complexes, data.out) {
 				t.Error(fmt.Sprintf("Complexes (%v) are not equal to data.out (%v)\n", complexes, data.out))
 			}
 			if !reflect.DeepEqual(na, data.outNA) {

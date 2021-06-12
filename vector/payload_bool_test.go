@@ -16,14 +16,16 @@ func TestBoolean(t *testing.T) {
 		name          string
 		data          []bool
 		na            []bool
+		outData       []bool
 		names         map[string]int
 		expectedNames map[string]int
 		isEmpty       bool
 	}{
 		{
-			name:    "normal + na",
+			name:    "normal + na false",
 			data:    []bool{true, false, true, false, true},
 			na:      []bool{false, false, false, false, false},
+			outData: []bool{true, false, true, false, true},
 			names:   nil,
 			isEmpty: false,
 		},
@@ -31,6 +33,7 @@ func TestBoolean(t *testing.T) {
 			name:    "normal + empty na",
 			data:    []bool{true, false, true, false, true},
 			na:      []bool{},
+			outData: []bool{true, false, true, false, true},
 			names:   nil,
 			isEmpty: false,
 		},
@@ -38,13 +41,15 @@ func TestBoolean(t *testing.T) {
 			name:    "normal + nil na",
 			data:    []bool{true, false, true, false, true},
 			na:      nil,
+			outData: []bool{true, false, true, false, true},
 			names:   nil,
 			isEmpty: false,
 		},
 		{
-			name:    "normal + na",
+			name:    "normal + na mixed",
 			data:    []bool{true, false, true, false, true},
 			na:      []bool{false, true, true, true, false},
+			outData: []bool{true, false, false, false, true},
 			names:   nil,
 			isEmpty: false,
 		},
@@ -59,6 +64,7 @@ func TestBoolean(t *testing.T) {
 			name:          "normal + names",
 			data:          []bool{true, false, true, false, true},
 			na:            []bool{false, false, false, false, false},
+			outData:       []bool{true, false, true, false, true},
 			names:         map[string]int{"one": 1, "three": 3, "five": 5},
 			expectedNames: map[string]int{"one": 1, "three": 3, "five": 5},
 			isEmpty:       false,
@@ -67,6 +73,7 @@ func TestBoolean(t *testing.T) {
 			name:          "normal + incorrect names",
 			data:          []bool{true, false, true, false, true},
 			na:            []bool{false, false, false, false, false},
+			outData:       []bool{true, false, true, false, true},
 			names:         map[string]int{"zero": 0, "one": 1, "three": 3, "five": 5, "seven": 7},
 			expectedNames: map[string]int{"one": 1, "three": 3, "five": 5},
 			isEmpty:       false,
@@ -100,9 +107,9 @@ func TestBoolean(t *testing.T) {
 				if !ok {
 					t.Error("Payload is not boolean")
 				} else {
-					if !reflect.DeepEqual(payload.data, data.data) {
+					if !reflect.DeepEqual(payload.data, data.outData) {
 						t.Error(fmt.Sprintf("Payload data (%v) is not equal to correct data (%v)\n",
-							payload.data[1:], data.data))
+							payload.data, data.outData))
 					}
 
 					if vv.length != vv.DefNameable.length || vv.length != payload.length {
@@ -405,19 +412,19 @@ func TestBoolean_ByIndices(t *testing.T) {
 		{
 			name:    "all",
 			indices: []int{1, 2, 3, 4, 5},
-			out:     []bool{true, false, true, false, true},
+			out:     []bool{true, false, true, false, false},
 			outNA:   []bool{false, false, false, false, true},
 		},
 		{
 			name:    "all reverse",
 			indices: []int{5, 4, 3, 2, 1},
-			out:     []bool{true, false, true, false, true},
+			out:     []bool{false, false, true, false, true},
 			outNA:   []bool{true, false, false, false, false},
 		},
 		{
 			name:    "some",
 			indices: []int{5, 1, 3},
-			out:     []bool{true, true, true},
+			out:     []bool{false, true, true},
 			outNA:   []bool{true, false, false},
 		},
 	}

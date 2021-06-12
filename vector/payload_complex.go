@@ -109,13 +109,7 @@ func (p *complexPayload) Complexes() ([]complex128, []bool) {
 	}
 
 	data := make([]complex128, p.length)
-	for i := 0; i < p.length; i++ {
-		if p.na[i] {
-			data[i] = cmplx.NaN()
-		} else {
-			data[i] = p.data[i]
-		}
-	}
+	copy(data, p.data)
 
 	na := make([]bool, p.Len())
 	copy(na, p.na)
@@ -184,11 +178,6 @@ func Complex(data []complex128, na []bool, options ...Config) Vector {
 
 	length := len(data)
 
-	vecData := make([]complex128, length)
-	if length > 0 {
-		copy(vecData, data)
-	}
-
 	vecNA := make([]bool, length)
 	if len(na) > 0 {
 		if len(na) == length {
@@ -197,6 +186,15 @@ func Complex(data []complex128, na []bool, options ...Config) Vector {
 			emp := Empty()
 			emp.Report().AddError("Complex(): data length is not equal to na's length")
 			return emp
+		}
+	}
+
+	vecData := make([]complex128, length)
+	for i := 0; i < length; i++ {
+		if vecNA[i] {
+			vecData[i] = cmplx.NaN()
+		} else {
+			vecData[i] = data[i]
 		}
 	}
 

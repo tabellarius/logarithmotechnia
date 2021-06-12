@@ -140,14 +140,7 @@ func (p *boolean) Booleans() ([]bool, []bool) {
 	}
 
 	data := make([]bool, p.length)
-
-	for i := 0; i < p.length; i++ {
-		if p.na[i] {
-			data[i] = false
-		} else {
-			data[i] = p.data[i]
-		}
-	}
+	copy(data, p.data)
 
 	na := make([]bool, p.length)
 	copy(na, p.na)
@@ -189,11 +182,6 @@ func Boolean(data []bool, na []bool, options ...Config) Vector {
 
 	length := len(data)
 
-	vecData := make([]bool, length)
-	if length > 0 {
-		copy(vecData, data)
-	}
-
 	vecNA := make([]bool, length)
 	if len(na) > 0 {
 		if len(na) == length {
@@ -202,6 +190,15 @@ func Boolean(data []bool, na []bool, options ...Config) Vector {
 			emp := Empty()
 			emp.Report().AddError("Boolean(): data length is not equal to na's length")
 			return emp
+		}
+	}
+
+	vecData := make([]bool, length)
+	for i := 0; i < length; i++ {
+		if vecNA[i] {
+			vecData[i] = false
+		} else {
+			vecData[i] = data[i]
 		}
 	}
 

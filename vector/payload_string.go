@@ -165,14 +165,7 @@ func (p *str) Strings() ([]string, []bool) {
 	}
 
 	data := make([]string, p.length)
-
-	for i := 0; i < p.length; i++ {
-		if p.na[i] {
-			data[i] = ""
-		} else {
-			data[i] = p.data[i]
-		}
-	}
+	copy(data, p.data)
 
 	na := make([]bool, p.Len())
 	copy(na, p.na)
@@ -193,11 +186,6 @@ func String(data []string, na []bool, options ...Config) Vector {
 
 	length := len(data)
 
-	vecData := make([]string, length)
-	if length > 0 {
-		copy(vecData, data)
-	}
-
 	vecNA := make([]bool, length)
 	if len(na) > 0 {
 		if len(na) == length {
@@ -206,6 +194,15 @@ func String(data []string, na []bool, options ...Config) Vector {
 			emp := Empty()
 			emp.Report().AddError("String(): data length is not equal to na's length")
 			return emp
+		}
+	}
+
+	vecData := make([]string, length)
+	for i := 0; i < length; i++ {
+		if vecNA[i] {
+			vecData[i] = ""
+		} else {
+			vecData[i] = data[i]
 		}
 	}
 

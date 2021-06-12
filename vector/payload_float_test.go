@@ -2,6 +2,7 @@ package vector
 
 import (
 	"fmt"
+	"logarithmotechnia.com/logarithmotechnia/util"
 	"math"
 	"math/cmplx"
 	"reflect"
@@ -16,14 +17,16 @@ func TestFloat(t *testing.T) {
 		name          string
 		data          []float64
 		na            []bool
+		outData       []float64
 		names         map[string]int
 		expectedNames map[string]int
 		isEmpty       bool
 	}{
 		{
-			name:    "normal + na",
+			name:    "normal + na false",
 			data:    []float64{1.1, 2.2, 3.3, 4.4, 5.5},
 			na:      []bool{false, false, false, false, false},
+			outData: []float64{1.1, 2.2, 3.3, 4.4, 5.5},
 			names:   nil,
 			isEmpty: false,
 		},
@@ -31,6 +34,7 @@ func TestFloat(t *testing.T) {
 			name:    "normal + empty na",
 			data:    []float64{1.1, 2.2, 3.3, 4.4, 5.5},
 			na:      []bool{},
+			outData: []float64{1.1, 2.2, 3.3, 4.4, 5.5},
 			names:   nil,
 			isEmpty: false,
 		},
@@ -38,13 +42,15 @@ func TestFloat(t *testing.T) {
 			name:    "normal + nil na",
 			data:    []float64{1.1, 2.2, 3.3, 4.4, 5.5},
 			na:      nil,
+			outData: []float64{1.1, 2.2, 3.3, 4.4, 5.5},
 			names:   nil,
 			isEmpty: false,
 		},
 		{
-			name:    "normal + na",
+			name:    "normal + na mixed",
 			data:    []float64{1.1, 2.2, 3.3, 4.4, 5.5},
 			na:      []bool{false, true, true, true, false},
+			outData: []float64{1.1, math.NaN(), math.NaN(), math.NaN(), 5.5},
 			names:   nil,
 			isEmpty: false,
 		},
@@ -59,6 +65,7 @@ func TestFloat(t *testing.T) {
 			name:          "normal + names",
 			data:          []float64{1.1, 2.2, 3.3, 4.4, 5.5},
 			na:            []bool{false, false, false, false, false},
+			outData:       []float64{1.1, 2.2, 3.3, 4.4, 5.5},
 			names:         map[string]int{"one": 1, "three": 3, "five": 5},
 			expectedNames: map[string]int{"one": 1, "three": 3, "five": 5},
 			isEmpty:       false,
@@ -67,6 +74,7 @@ func TestFloat(t *testing.T) {
 			name:          "normal + incorrect names",
 			data:          []float64{1.1, 2.2, 3.3, 4.4, 5.5},
 			na:            []bool{false, false, false, false, false},
+			outData:       []float64{1.1, 2.2, 3.3, 4.4, 5.5},
 			names:         map[string]int{"zero": 0, "one": 1, "three": 3, "five": 5, "seven": 7},
 			expectedNames: map[string]int{"one": 1, "three": 3, "five": 5},
 			isEmpty:       false,
@@ -100,9 +108,9 @@ func TestFloat(t *testing.T) {
 				if !ok {
 					t.Error("Payload is not floatPayload")
 				} else {
-					if !reflect.DeepEqual(payload.data, data.data) {
+					if !util.EqualFloatArrays(payload.data, data.outData) {
 						t.Error(fmt.Sprintf("Payload data (%v) is not equal to correct data (%v)\n",
-							payload.data[1:], data.data))
+							payload.data, data.outData))
 					}
 
 					if vv.length != vv.DefNameable.length || vv.length != payload.length {
@@ -115,7 +123,7 @@ func TestFloat(t *testing.T) {
 				if len(data.na) > 0 && len(data.na) == length {
 					if !reflect.DeepEqual(payload.na, data.na) {
 						t.Error(fmt.Sprintf("Payload na (%v) is not equal to correct na (%v)\n",
-							payload.na[1:], data.na))
+							payload.na, data.na))
 					}
 				} else if len(data.na) == 0 {
 					if !reflect.DeepEqual(payload.na, emptyNA) {
@@ -278,17 +286,7 @@ func TestFloat_Floats(t *testing.T) {
 			payload := vec.(*vector).payload.(*floatPayload)
 
 			floats, na := payload.Floats()
-			correct := true
-			for i := 0; i < len(floats); i++ {
-				if math.IsNaN(data.out[i]) {
-					if !math.IsNaN(floats[i]) {
-						correct = false
-					}
-				} else if floats[i] != data.out[i] {
-					correct = false
-				}
-			}
-			if !correct {
+			if !util.EqualFloatArrays(floats, data.out) {
 				t.Error(fmt.Sprintf("Floats (%v) are not equal to data.out (%v)\n", floats, data.out))
 			}
 			if !reflect.DeepEqual(na, data.outNA) {
@@ -331,17 +329,7 @@ func TestFloat_Complexes(t *testing.T) {
 			payload := vec.(*vector).payload.(*floatPayload)
 
 			complexes, na := payload.Complexes()
-			correct := true
-			for i := 0; i < len(complexes); i++ {
-				if cmplx.IsNaN(data.out[i]) {
-					if !cmplx.IsNaN(complexes[i]) {
-						correct = false
-					}
-				} else if complexes[i] != data.out[i] {
-					correct = false
-				}
-			}
-			if !correct {
+			if !util.EqualComplexArrays(complexes, data.out) {
 				t.Error(fmt.Sprintf("Complexes (%v) are not equal to data.out (%v)\n", complexes, data.out))
 			}
 			if !reflect.DeepEqual(na, data.outNA) {
@@ -405,19 +393,19 @@ func TestFloat_ByIndices(t *testing.T) {
 		{
 			name:    "all",
 			indices: []int{1, 2, 3, 4, 5},
-			out:     []float64{1, 2, 3, 4, 5},
+			out:     []float64{1, 2, 3, 4, math.NaN()},
 			outNA:   []bool{false, false, false, false, true},
 		},
 		{
 			name:    "all reverse",
 			indices: []int{5, 4, 3, 2, 1},
-			out:     []float64{5, 4, 3, 2, 1},
+			out:     []float64{math.NaN(), 4, 3, 2, 1},
 			outNA:   []bool{true, false, false, false, false},
 		},
 		{
 			name:    "some",
 			indices: []int{5, 1, 3},
-			out:     []float64{5, 1, 3},
+			out:     []float64{math.NaN(), 1, 3},
 			outNA:   []bool{true, false, false},
 		},
 	}
@@ -425,7 +413,7 @@ func TestFloat_ByIndices(t *testing.T) {
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
 			payload := vec.ByIndices(data.indices).(*vector).payload.(*floatPayload)
-			if !reflect.DeepEqual(payload.data, data.out) {
+			if !util.EqualFloatArrays(payload.data, data.out) {
 				t.Error(fmt.Sprintf("payload.data (%v) is not equal to data.out (%v)", payload.data, data.out))
 			}
 			if !reflect.DeepEqual(payload.na, data.outNA) {
