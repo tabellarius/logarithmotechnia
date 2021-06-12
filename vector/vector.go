@@ -1,7 +1,8 @@
 package vector
 
 import (
-	"github.com/shopspring/decimal"
+	"math"
+	"math/cmplx"
 	"time"
 )
 
@@ -27,7 +28,6 @@ type Vector interface {
 	Booleable
 	Stringable
 	Complexable
-	Decimable
 	Timeable
 
 	Report() Report
@@ -64,10 +64,6 @@ type Stringable interface {
 
 type Complexable interface {
 	Complexes() ([]complex128, []bool)
-}
-
-type Decimable interface {
-	Decimals() ([]decimal.Decimal, []bool)
 }
 
 type Timeable interface {
@@ -382,7 +378,25 @@ func (v *vector) Floats() ([]float64, []bool) {
 		return payload.Floats()
 	}
 
-	return make([]float64, v.length), v.naVector()
+	floats := make([]float64, v.length)
+	for i := 0; i < v.length; i++ {
+		floats[i] = math.NaN()
+	}
+
+	return floats, v.naVector()
+}
+
+func (v *vector) Complexes() ([]complex128, []bool) {
+	if payload, ok := v.payload.(Complexable); ok {
+		return payload.Complexes()
+	}
+
+	complexes := make([]complex128, v.length)
+	for i := 0; i < v.length; i++ {
+		complexes[i] = cmplx.NaN()
+	}
+
+	return complexes, v.naVector()
 }
 
 func (v *vector) Booleans() ([]bool, []bool) {
@@ -399,27 +413,6 @@ func (v *vector) Integers() ([]int, []bool) {
 	}
 
 	return make([]int, v.length), v.naVector()
-}
-
-func (v *vector) Complexes() ([]complex128, []bool) {
-	if payload, ok := v.payload.(Complexable); ok {
-		return payload.Complexes()
-	}
-
-	return make([]complex128, v.length), v.naVector()
-}
-
-func (v *vector) Decimals() ([]decimal.Decimal, []bool) {
-	if payload, ok := v.payload.(Decimable); ok {
-		return payload.Decimals()
-	}
-
-	decimals := make([]decimal.Decimal, v.length)
-	for i := 0; i < v.length; i++ {
-		decimals[i] = decimal.Zero
-	}
-
-	return decimals, v.naVector()
 }
 
 func (v *vector) Times() ([]time.Time, []bool) {
@@ -441,9 +434,7 @@ func (v *vector) naVector() []bool {
 
 // New creates a vector part of the future vector. This function is used by public functions which create
 // typed vectors
-func New(payload Payload, options ...Config) Vector {
-	config := mergeConfigs(options)
-
+func New(payload Payload, config Config) Vector {
 	vec := vector{
 		length: payload.Len(),
 		DefNameable: DefNameable{

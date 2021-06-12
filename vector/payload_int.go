@@ -2,6 +2,7 @@ package vector
 
 import (
 	"math"
+	"math/cmplx"
 	"strconv"
 )
 
@@ -44,8 +45,8 @@ func (p *integer) SupportsSelector(selector interface{}) bool {
 	return false
 }
 
-func (p *integer) Select(filter interface{}) []bool {
-	if byFunc, ok := filter.(func(int, int, bool) bool); ok {
+func (p *integer) Select(selector interface{}) []bool {
+	if byFunc, ok := selector.(func(int, int, bool) bool); ok {
 		return p.selectByFunc(byFunc)
 	}
 
@@ -113,7 +114,7 @@ func (p *integer) Complexes() ([]complex128, []bool) {
 	data := make([]complex128, p.length)
 	for i := 0; i < p.length; i++ {
 		if p.na[i] {
-			data[i] = 0
+			data[i] = cmplx.NaN()
 		} else {
 			data[i] = complex(float64(p.data[i]), 0)
 		}
@@ -176,6 +177,8 @@ func (p *integer) StrForElem(idx int) string {
 }
 
 func Integer(data []int, na []bool, options ...Config) Vector {
+	config := mergeConfigs(options)
+
 	length := len(data)
 
 	vecData := make([]int, length)
@@ -202,5 +205,5 @@ func Integer(data []int, na []bool, options ...Config) Vector {
 		},
 	}
 
-	return New(payload, options...)
+	return New(payload, config)
 }
