@@ -92,14 +92,7 @@ func (p *timePayload) Times() ([]time.Time, []bool) {
 	}
 
 	data := make([]time.Time, p.length)
-
-	for i := 0; i < p.length; i++ {
-		if p.na[i] {
-			data[i] = time.Time{}
-		} else {
-			data[i] = p.data[i]
-		}
-	}
+	copy(data, p.data)
 
 	na := make([]bool, p.Len())
 	copy(na, p.na)
@@ -116,11 +109,6 @@ func Time(data []time.Time, na []bool, options ...Config) Vector {
 
 	length := len(data)
 
-	vecData := make([]time.Time, length)
-	if length > 0 {
-		copy(vecData, data)
-	}
-
 	vecNA := make([]bool, length)
 	if len(na) > 0 {
 		if len(na) == length {
@@ -129,6 +117,15 @@ func Time(data []time.Time, na []bool, options ...Config) Vector {
 			emp := Empty()
 			emp.Report().AddError("Float(): data length is not equal to na's length")
 			return emp
+		}
+	}
+
+	vecData := make([]time.Time, length)
+	for i := 0; i < length; i++ {
+		if vecNA[i] {
+			vecData[i] = time.Time{}
+		} else {
+			vecData[i] = data[i]
 		}
 	}
 

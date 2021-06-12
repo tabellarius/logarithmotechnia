@@ -15,14 +15,16 @@ func TestTime(t *testing.T) {
 		name          string
 		data          []string
 		na            []bool
+		outData       []string
 		names         map[string]int
 		expectedNames map[string]int
 		isEmpty       bool
 	}{
 		{
-			name:    "normal + na",
+			name:    "normal + false na",
 			data:    []string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z"},
 			na:      []bool{false, false, false},
+			outData: []string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z"},
 			names:   nil,
 			isEmpty: false,
 		},
@@ -30,6 +32,7 @@ func TestTime(t *testing.T) {
 			name:    "normal + empty na",
 			data:    []string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z"},
 			na:      []bool{},
+			outData: []string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z"},
 			names:   nil,
 			isEmpty: false,
 		},
@@ -37,13 +40,15 @@ func TestTime(t *testing.T) {
 			name:    "normal + nil na",
 			data:    []string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z"},
 			na:      nil,
+			outData: []string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z"},
 			names:   nil,
 			isEmpty: false,
 		},
 		{
-			name:    "normal + na",
+			name:    "normal + mixed na",
 			data:    []string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z"},
 			na:      []bool{false, false, true},
+			outData: []string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "0001-01-01T00:00:00Z"},
 			names:   nil,
 			isEmpty: false,
 		},
@@ -58,6 +63,7 @@ func TestTime(t *testing.T) {
 			name:          "normal + names",
 			data:          []string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z"},
 			na:            []bool{false, false, false},
+			outData:       []string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z"},
 			names:         map[string]int{"one": 1, "three": 3},
 			expectedNames: map[string]int{"one": 1, "three": 3},
 			isEmpty:       false,
@@ -66,6 +72,7 @@ func TestTime(t *testing.T) {
 			name:          "normal + incorrect names",
 			data:          []string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z"},
 			na:            []bool{false, false, false},
+			outData:       []string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z"},
 			names:         map[string]int{"zero": 0, "one": 1, "three": 3, "five": 5},
 			expectedNames: map[string]int{"one": 1, "three": 3},
 			isEmpty:       false,
@@ -77,6 +84,7 @@ func TestTime(t *testing.T) {
 			var v Vector
 
 			timeData := toTimeData(data.data)
+			outTimeData := toTimeData(data.outData)
 
 			if data.names == nil {
 				v = Time(timeData, data.na)
@@ -102,7 +110,7 @@ func TestTime(t *testing.T) {
 				if !ok {
 					t.Error("Payload is not floatPayload")
 				} else {
-					if !reflect.DeepEqual(payload.data, timeData) {
+					if !reflect.DeepEqual(payload.data, outTimeData) {
 						t.Error(fmt.Sprintf("Payload data (%v) is not equal to correct data (%v)\n",
 							payload.data[1:], timeData))
 					}
@@ -262,19 +270,19 @@ func TestTimePayload_ByIndices(t *testing.T) {
 		{
 			name:    "all",
 			indices: []int{1, 2, 3},
-			out:     toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z"}),
+			out:     toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "0001-01-01T00:00:00Z"}),
 			outNA:   []bool{false, false, true},
 		},
 		{
 			name:    "all reverse",
 			indices: []int{3, 2, 1},
-			out:     toTimeData([]string{"1800-06-10T11:00:00Z", "2021-01-01T12:30:00+03:00", "2006-01-02T15:04:05+07:00"}),
+			out:     toTimeData([]string{"0001-01-01T00:00:00Z", "2021-01-01T12:30:00+03:00", "2006-01-02T15:04:05+07:00"}),
 			outNA:   []bool{true, false, false},
 		},
 		{
 			name:    "some",
 			indices: []int{3, 1},
-			out:     toTimeData([]string{"1800-06-10T11:00:00Z", "2006-01-02T15:04:05+07:00"}),
+			out:     toTimeData([]string{"0001-01-01T00:00:00Z", "2006-01-02T15:04:05+07:00"}),
 			outNA:   []bool{true, false},
 		},
 	}

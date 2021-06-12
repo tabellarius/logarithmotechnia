@@ -2,6 +2,7 @@ package vector
 
 import (
 	"fmt"
+	"logarithmotechnia.com/logarithmotechnia/util"
 	"math"
 	"math/cmplx"
 	"reflect"
@@ -16,14 +17,16 @@ func TestInteger(t *testing.T) {
 		name          string
 		data          []int
 		na            []bool
+		outData       []int
 		names         map[string]int
 		expectedNames map[string]int
 		isEmpty       bool
 	}{
 		{
-			name:    "normal + na",
+			name:    "normal + false na",
 			data:    []int{1, 2, 3, 4, 5},
 			na:      []bool{false, false, false, false, false},
+			outData: []int{1, 2, 3, 4, 5},
 			names:   nil,
 			isEmpty: false,
 		},
@@ -31,6 +34,7 @@ func TestInteger(t *testing.T) {
 			name:    "normal + empty na",
 			data:    []int{1, 2, 3, 4, 5},
 			na:      []bool{},
+			outData: []int{1, 2, 3, 4, 5},
 			names:   nil,
 			isEmpty: false,
 		},
@@ -38,13 +42,15 @@ func TestInteger(t *testing.T) {
 			name:    "normal + nil na",
 			data:    []int{1, 2, 3, 4, 5},
 			na:      nil,
+			outData: []int{1, 2, 3, 4, 5},
 			names:   nil,
 			isEmpty: false,
 		},
 		{
-			name:    "normal + na",
+			name:    "normal + mixed na",
 			data:    []int{1, 2, 3, 4, 5},
 			na:      []bool{false, true, true, true, false},
+			outData: []int{1, 0, 0, 0, 5},
 			names:   nil,
 			isEmpty: false,
 		},
@@ -52,6 +58,7 @@ func TestInteger(t *testing.T) {
 			name:    "normal + incorrect sized na",
 			data:    []int{1, 2, 3, 4, 5},
 			na:      []bool{false, false, false, false},
+			outData: []int{1, 2, 3, 4, 5},
 			names:   nil,
 			isEmpty: true,
 		},
@@ -59,6 +66,7 @@ func TestInteger(t *testing.T) {
 			name:          "normal + names",
 			data:          []int{1, 2, 3, 4, 5},
 			na:            []bool{false, false, false, false, false},
+			outData:       []int{1, 2, 3, 4, 5},
 			names:         map[string]int{"one": 1, "three": 3, "five": 5},
 			expectedNames: map[string]int{"one": 1, "three": 3, "five": 5},
 			isEmpty:       false,
@@ -67,6 +75,7 @@ func TestInteger(t *testing.T) {
 			name:          "normal + incorrect names",
 			data:          []int{1, 2, 3, 4, 5},
 			na:            []bool{false, false, false, false, false},
+			outData:       []int{1, 2, 3, 4, 5},
 			names:         map[string]int{"zero": 0, "one": 1, "three": 3, "five": 5, "seven": 7},
 			expectedNames: map[string]int{"one": 1, "three": 3, "five": 5},
 			isEmpty:       false,
@@ -100,9 +109,9 @@ func TestInteger(t *testing.T) {
 				if !ok {
 					t.Error("Payload is not integer")
 				} else {
-					if !reflect.DeepEqual(payload.data, data.data) {
+					if !reflect.DeepEqual(payload.data, data.outData) {
 						t.Error(fmt.Sprintf("Payload data (%v) is not equal to correct data (%v)\n",
-							payload.data[1:], data.data))
+							payload.data, data.data))
 					}
 
 					if vv.length != vv.DefNameable.length || vv.length != payload.length {
@@ -115,7 +124,7 @@ func TestInteger(t *testing.T) {
 				if len(data.na) > 0 && len(data.na) == length {
 					if !reflect.DeepEqual(payload.na, data.na) {
 						t.Error(fmt.Sprintf("Payload na (%v) is not equal to correct na (%v)\n",
-							payload.na[1:], data.na))
+							payload.na, data.na))
 					}
 				} else if len(data.na) == 0 {
 					if !reflect.DeepEqual(payload.na, emptyNA) {
@@ -278,17 +287,7 @@ func TestInteger_Floats(t *testing.T) {
 			payload := vec.(*vector).payload.(*integer)
 
 			floats, na := payload.Floats()
-			correct := true
-			for i := 0; i < len(floats); i++ {
-				if math.IsNaN(data.out[i]) {
-					if !math.IsNaN(floats[i]) {
-						correct = false
-					}
-				} else if floats[i] != data.out[i] {
-					correct = false
-				}
-			}
-			if !correct {
+			if !util.EqualFloatArrays(floats, data.out) {
 				t.Error(fmt.Sprintf("Floats (%v) are not equal to data.out (%v)\n", floats, data.out))
 			}
 			if !reflect.DeepEqual(na, data.outNA) {
@@ -331,17 +330,7 @@ func TestInteger_Complexes(t *testing.T) {
 			payload := vec.(*vector).payload.(*integer)
 
 			complexes, na := payload.Complexes()
-			correct := true
-			for i := 0; i < len(complexes); i++ {
-				if cmplx.IsNaN(data.out[i]) {
-					if !cmplx.IsNaN(complexes[i]) {
-						correct = false
-					}
-				} else if complexes[i] != data.out[i] {
-					correct = false
-				}
-			}
-			if !correct {
+			if !util.EqualComplexArrays(complexes, data.out) {
 				t.Error(fmt.Sprintf("Complexes (%v) are not equal to data.out (%v)\n", complexes, data.out))
 			}
 			if !reflect.DeepEqual(na, data.outNA) {
@@ -405,19 +394,19 @@ func TestInteger_ByIndices(t *testing.T) {
 		{
 			name:    "all",
 			indices: []int{1, 2, 3, 4, 5},
-			out:     []int{1, 2, 3, 4, 5},
+			out:     []int{1, 2, 3, 4, 0},
 			outNA:   []bool{false, false, false, false, true},
 		},
 		{
 			name:    "all reverse",
 			indices: []int{5, 4, 3, 2, 1},
-			out:     []int{5, 4, 3, 2, 1},
+			out:     []int{0, 4, 3, 2, 1},
 			outNA:   []bool{true, false, false, false, false},
 		},
 		{
 			name:    "some",
 			indices: []int{5, 1, 3},
-			out:     []int{5, 1, 3},
+			out:     []int{0, 1, 3},
 			outNA:   []bool{true, false, false},
 		},
 	}
