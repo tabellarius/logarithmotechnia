@@ -463,32 +463,6 @@ func TestInteger_SupportsSelector(t *testing.T) {
 	}
 }
 
-func TestInteger_Filter(t *testing.T) {
-	testData := []struct {
-		name   string
-		filter interface{}
-		out    []bool
-	}{
-		{
-			name:   "func(int, int, bool) bool",
-			filter: func(idx int, val int, na bool) bool { return idx == 1 || val == 3 || na == true },
-			out:    []bool{true, false, true, false, true},
-		},
-	}
-
-	payload := Integer([]int{5, 4, 3, 2, 1}, []bool{false, false, false, false, true}).(*vector).payload
-
-	for _, data := range testData {
-		t.Run(data.name, func(t *testing.T) {
-			filtered := payload.Select(data.filter)
-			if !reflect.DeepEqual(payload.Select(data.filter), data.out) {
-				t.Error(fmt.Sprintf("payload.Select() (%v) is not equal to out value (%v)",
-					filtered, data.out))
-			}
-		})
-	}
-}
-
 func TestInteger_Select(t *testing.T) {
 	testData := []struct {
 		name string

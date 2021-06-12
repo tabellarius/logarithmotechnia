@@ -6,10 +6,19 @@ import (
 	"strconv"
 )
 
+type FloatPrinter struct {
+	Precision int
+}
+
 type floatPayload struct {
-	length int
-	data   []float64
+	length  int
+	data    []float64
+	printer FloatPrinter
 	DefNAble
+}
+
+func (p *floatPayload) Len() int {
+	return p.length
 }
 
 func (p *floatPayload) ByIndices(indices []int) Payload {
@@ -56,10 +65,6 @@ func (p *floatPayload) selectByFunc(byFunc func(int, float64, bool) bool) []bool
 	}
 
 	return booleans
-}
-
-func (p *floatPayload) Len() int {
-	return p.length
 }
 
 func (p *floatPayload) Integers() ([]int, []bool) {
@@ -184,10 +189,12 @@ func (p *floatPayload) StrForElem(idx int) string {
 		return "NaN"
 	}
 
-	return strconv.FormatFloat(p.data[i], 'f', 3, 64)
+	return strconv.FormatFloat(p.data[i], 'f', p.printer.Precision, 64)
 }
 
 func Float(data []float64, na []bool, options ...Config) Vector {
+	config := mergeConfigs(options)
+
 	length := len(data)
 
 	vecData := make([]float64, length)
@@ -206,13 +213,19 @@ func Float(data []float64, na []bool, options ...Config) Vector {
 		}
 	}
 
+	printer := FloatPrinter{Precision: 3}
+	if config.FloatPrinter != nil {
+		printer = *config.FloatPrinter
+	}
+
 	payload := &floatPayload{
-		length: length,
-		data:   vecData,
+		length:  length,
+		data:    vecData,
+		printer: printer,
 		DefNAble: DefNAble{
 			na: vecNA,
 		},
 	}
 
-	return New(payload, options...)
+	return New(payload, config)
 }

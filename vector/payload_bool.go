@@ -185,6 +185,8 @@ func (p *boolean) StrForElem(idx int) string {
 }
 
 func Boolean(data []bool, na []bool, options ...Config) Vector {
+	config := mergeConfigs(options)
+
 	length := len(data)
 
 	vecData := make([]bool, length)
@@ -211,5 +213,5 @@ func Boolean(data []bool, na []bool, options ...Config) Vector {
 		},
 	}
 
-	return New(payload, options...)
+	return New(payload, config)
 }

@@ -180,6 +180,8 @@ func (p *complexPayload) StrForElem(idx int) string {
 }
 
 func Complex(data []complex128, na []bool, options ...Config) Vector {
+	config := mergeConfigs(options)
+
 	length := len(data)
 
 	vecData := make([]complex128, length)
@@ -206,5 +208,5 @@ func Complex(data []complex128, na []bool, options ...Config) Vector {
 		},
 	}
 
-	return New(payload, options...)
+	return New(payload, config)
 }

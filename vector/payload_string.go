@@ -189,6 +189,8 @@ func (p *str) StrForElem(idx int) string {
 }
 
 func String(data []string, na []bool, options ...Config) Vector {
+	config := mergeConfigs(options)
+
 	length := len(data)
 
 	vecData := make([]string, length)
@@ -215,5 +217,5 @@ func String(data []string, na []bool, options ...Config) Vector {
 		},
 	}
 
-	return New(payload, options...)
+	return New(payload, config)
 }

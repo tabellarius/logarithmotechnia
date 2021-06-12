@@ -463,32 +463,6 @@ func TestBoolean_SupportsSelector(t *testing.T) {
 	}
 }
 
-func TestBoolean_Filter(t *testing.T) {
-	testData := []struct {
-		name   string
-		filter interface{}
-		out    []bool
-	}{
-		{
-			name:   "func(int, bool, bool) bool",
-			filter: func(idx int, val bool, na bool) bool { return idx == 1 || val == true || na == true },
-			out:    []bool{true, false, true, false, true},
-		},
-	}
-
-	payload := Boolean([]bool{false, false, true, false, false}, []bool{false, false, false, false, true}).(*vector).payload
-
-	for _, data := range testData {
-		t.Run(data.name, func(t *testing.T) {
-			filtered := payload.Select(data.filter)
-			if !reflect.DeepEqual(payload.Select(data.filter), data.out) {
-				t.Error(fmt.Sprintf("payload.Select() (%v) is not equal to out value (%v)",
-					filtered, data.out))
-			}
-		})
-	}
-}
-
 func TestBoolean_Select(t *testing.T) {
 	testData := []struct {
 		name string

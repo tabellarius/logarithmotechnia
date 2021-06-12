@@ -2,7 +2,6 @@ package vector
 
 import (
 	"fmt"
-	"github.com/shopspring/decimal"
 	"math"
 	"math/cmplx"
 	"reflect"
@@ -216,43 +215,6 @@ func TestVector_Strings(t *testing.T) {
 			strings, na := data.vec.Strings()
 			if !reflect.DeepEqual(strings, data.outValues) {
 				t.Error(fmt.Sprintf("Result (%v) is not equal to expected (%v)", strings, data.outValues))
-			}
-			if !reflect.DeepEqual(na, data.outNA) {
-				t.Error(fmt.Sprintf("Result (%v) is not equal to expected (%v)", na, data.outNA))
-			}
-		})
-	}
-}
-
-func TestVector_Decimals(t *testing.T) {
-	testData := []struct {
-		vec       Vector
-		outValues []decimal.Decimal
-		outNA     []bool
-	}{
-		{
-			vec:       Integer([]int{1, 2, 3, 4, 5}, []bool{false, false, true, false, false}),
-			outValues: []decimal.Decimal{decimal.Zero, decimal.Zero, decimal.Zero, decimal.Zero, decimal.Zero},
-			outNA:     []bool{true, true, true, true, true},
-		},
-		{
-			vec:       Empty(),
-			outValues: []decimal.Decimal{},
-			outNA:     []bool{},
-		},
-	}
-
-	for i, data := range testData {
-		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			decimals, na := data.vec.Decimals()
-			err := false
-			for i, val := range decimals {
-				if !val.Equals(data.outValues[i]) {
-					err = true
-				}
-			}
-			if err {
-				t.Error(fmt.Sprintf("Result (%v) is not equal to expected (%v)", decimals, data.outValues))
 			}
 			if !reflect.DeepEqual(na, data.outNA) {
 				t.Error(fmt.Sprintf("Result (%v) is not equal to expected (%v)", na, data.outNA))
