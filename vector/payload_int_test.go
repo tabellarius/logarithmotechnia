@@ -105,9 +105,9 @@ func TestInteger(t *testing.T) {
 					t.Error(fmt.Sprintf("Vector length (%d) is not equal to data length (%d)\n", vv.length, length))
 				}
 
-				payload, ok := vv.payload.(*integer)
+				payload, ok := vv.payload.(*integerPayload)
 				if !ok {
-					t.Error("Payload is not integer")
+					t.Error("Payload is not integerPayload")
 				} else {
 					if !reflect.DeepEqual(payload.data, data.outData) {
 						t.Error(fmt.Sprintf("Payload data (%v) is not equal to correct data (%v)\n",
@@ -198,7 +198,7 @@ func TestInteger_Booleans(t *testing.T) {
 	for i, data := range testData {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			vec := Integer(data.in, data.inNA)
-			payload := vec.(*vector).payload.(*integer)
+			payload := vec.(*vector).payload.(*integerPayload)
 
 			booleans, na := payload.Booleans()
 			if !reflect.DeepEqual(booleans, data.out) {
@@ -241,7 +241,7 @@ func TestInteger_Integers(t *testing.T) {
 	for i, data := range testData {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			vec := Integer(data.in, data.inNA)
-			payload := vec.(*vector).payload.(*integer)
+			payload := vec.(*vector).payload.(*integerPayload)
 
 			integers, na := payload.Integers()
 			if !reflect.DeepEqual(integers, data.out) {
@@ -284,7 +284,7 @@ func TestInteger_Floats(t *testing.T) {
 	for i, data := range testData {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			vec := Integer(data.in, data.inNA)
-			payload := vec.(*vector).payload.(*integer)
+			payload := vec.(*vector).payload.(*integerPayload)
 
 			floats, na := payload.Floats()
 			if !util.EqualFloatArrays(floats, data.out) {
@@ -327,7 +327,7 @@ func TestInteger_Complexes(t *testing.T) {
 	for i, data := range testData {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			vec := Integer(data.in, data.inNA)
-			payload := vec.(*vector).payload.(*integer)
+			payload := vec.(*vector).payload.(*integerPayload)
 
 			complexes, na := payload.Complexes()
 			if !util.EqualComplexArrays(complexes, data.out) {
@@ -370,7 +370,7 @@ func TestInteger_Strings(t *testing.T) {
 	for i, data := range testData {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			vec := Integer(data.in, data.inNA)
-			payload := vec.(*vector).payload.(*integer)
+			payload := vec.(*vector).payload.(*integerPayload)
 
 			strings, na := payload.Strings()
 			if !reflect.DeepEqual(strings, data.out) {
@@ -413,7 +413,7 @@ func TestInteger_ByIndices(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			payload := vec.ByIndices(data.indices).(*vector).payload.(*integer)
+			payload := vec.ByIndices(data.indices).(*vector).payload.(*integerPayload)
 			if !reflect.DeepEqual(payload.data, data.out) {
 				t.Error(fmt.Sprintf("payload.data (%v) is not equal to data.out (%v)", payload.data, data.out))
 			}
@@ -442,7 +442,7 @@ func TestInteger_SupportsSelector(t *testing.T) {
 		},
 	}
 
-	payload := Integer([]int{1}, nil).(*vector).payload
+	payload := Integer([]int{1}, nil).(*vector).payload.(Selectable)
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
 			if payload.SupportsSelector(data.filter) != data.isSupported {
@@ -452,7 +452,7 @@ func TestInteger_SupportsSelector(t *testing.T) {
 	}
 }
 
-func TestInteger_Select(t *testing.T) {
+func TestIntegerPayload_Select(t *testing.T) {
 	testData := []struct {
 		name string
 		fn   interface{}
@@ -500,13 +500,41 @@ func TestInteger_Select(t *testing.T) {
 		},
 	}
 
-	payload := Integer([]int{1, 2, 39, 4, 56, 2, 45, 90, 4, 3}, nil).(*vector).payload
+	payload := Integer([]int{1, 2, 39, 4, 56, 2, 45, 90, 4, 3}, nil).(*vector).payload.(Selectable)
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
 			result := payload.Select(data.fn)
 			if !reflect.DeepEqual(result, data.out) {
 				t.Error(fmt.Sprintf("Result (%v) is not equal to out (%v)", result, data.out))
+			}
+		})
+	}
+}
+
+func TestIntegerPayload_SupportsApplier(t *testing.T) {
+	testData := []struct {
+		name        string
+		applier     interface{}
+		isSupported bool
+	}{
+		{
+			name:        "func(int, int, bool) (int, bool)",
+			applier:     func(int, int, bool) (int, bool) { return 0, true },
+			isSupported: true,
+		},
+		{
+			name:        "func(int, float64, bool) bool",
+			applier:     func(int, int, bool) bool { return true },
+			isSupported: false,
+		},
+	}
+
+	payload := Integer([]int{1}, nil).(*vector).payload.(Appliable)
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			if payload.SupportsApplier(data.applier) != data.isSupported {
+				t.Error("Selector's support is incorrect.")
 			}
 		})
 	}

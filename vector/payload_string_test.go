@@ -105,7 +105,7 @@ func TestString(t *testing.T) {
 
 				payload, ok := vv.payload.(*str)
 				if !ok {
-					t.Error("Payload is not integer")
+					t.Error("Payload is not integerPayload")
 				} else {
 					if !reflect.DeepEqual(payload.data, data.outData) {
 						t.Error(fmt.Sprintf("Payload data (%v) is not equal to correct data (%v)\n",
@@ -454,7 +454,7 @@ func TestString_SupportsSelector(t *testing.T) {
 		},
 	}
 
-	payload := String([]string{"one"}, nil).(*vector).payload
+	payload := String([]string{"one"}, nil).(*vector).payload.(Selectable)
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
 			if payload.SupportsSelector(data.filter) != data.isSupported {
@@ -492,7 +492,7 @@ func TestString_Select(t *testing.T) {
 		},
 	}
 
-	payload := String([]string{"1", "2", "39", "4", "56", "2", "45", "90", "4", "3"}, nil).(*vector).payload
+	payload := String([]string{"1", "2", "39", "4", "56", "2", "45", "90", "4", "3"}, nil).(*vector).payload.(Selectable)
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {

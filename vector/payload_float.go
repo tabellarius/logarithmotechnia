@@ -185,6 +185,24 @@ func (p *floatPayload) StrForElem(idx int) string {
 	return strconv.FormatFloat(p.data[i], 'f', p.printer.Precision, 64)
 }
 
+func (p *floatPayload) NAPayload() Payload {
+	data := make([]float64, p.length)
+	na := make([]bool, p.length)
+	for i := 0; i < p.length; i++ {
+		data[i] = math.NaN()
+		na[i] = true
+	}
+
+	return &floatPayload{
+		length:  p.length,
+		data:    data,
+		printer: p.printer,
+		DefNAble: DefNAble{
+			na: na,
+		},
+	}
+}
+
 func Float(data []float64, na []bool, options ...Config) Vector {
 	config := mergeConfigs(options)
 

@@ -663,12 +663,12 @@ func TestVector_IsEmpty(t *testing.T) {
 		isEmpty bool
 	}{
 		{
-			name:    "zero integer vector",
+			name:    "zero integerPayload vector",
 			vec:     Integer([]int{}, nil),
 			isEmpty: true,
 		},
 		{
-			name:    "non-zero integer vector",
+			name:    "non-zero integerPayload vector",
 			vec:     Integer([]int{1, 2, 3}, nil),
 			isEmpty: false,
 		},
@@ -697,13 +697,13 @@ func TestVector_SupportsSelector(t *testing.T) {
 		supportsSelector bool
 	}{
 		{
-			name:             "integer vector + valid selector",
+			name:             "integerPayload vector + valid selector",
 			vec:              Integer([]int{1, 2, 3}, nil),
 			selector:         func(_ int, val int, _ bool) bool { return val == 1 || val == 3 },
 			supportsSelector: true,
 		},
 		{
-			name:             "integer vector + invalid selector",
+			name:             "integerPayload vector + invalid selector",
 			vec:              Integer([]int{1, 2, 3}, nil),
 			selector:         true,
 			supportsSelector: false,
@@ -729,13 +729,13 @@ func TestVector_Select(t *testing.T) {
 		selected []bool
 	}{
 		{
-			name:     "integer vector + valid selector",
+			name:     "integerPayload vector + valid selector",
 			vec:      Integer([]int{1, 2, 3}, nil),
 			selector: func(_ int, val int, _ bool) bool { return val == 1 || val == 3 },
 			selected: []bool{true, false, true},
 		},
 		{
-			name:     "integer vector + invalid selector",
+			name:     "integerPayload vector + invalid selector",
 			vec:      Integer([]int{1, 2, 3}, nil),
 			selector: true,
 			selected: []bool{false, false, false},

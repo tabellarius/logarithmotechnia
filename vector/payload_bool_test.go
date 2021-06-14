@@ -460,7 +460,7 @@ func TestBoolean_SupportsSelector(t *testing.T) {
 		},
 	}
 
-	payload := Boolean([]bool{true}, nil).(*vector).payload
+	payload := Boolean([]bool{true}, nil).(*vector).payload.(Selectable)
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
 			if payload.SupportsSelector(data.filter) != data.isSupported {
@@ -498,7 +498,7 @@ func TestBoolean_Select(t *testing.T) {
 		},
 	}
 
-	payload := Boolean([]bool{true, false, true, false, true, false, true, false, true, false}, nil).(*vector).payload
+	payload := Boolean([]bool{true, false, true, false, true, false, true, false, true, false}, nil).(*vector).payload.(Selectable)
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {

@@ -177,6 +177,22 @@ func (p *boolean) StrForElem(idx int) string {
 	return "false"
 }
 
+func (p *boolean) NAPayload() Payload {
+	data := make([]bool, p.length)
+	na := make([]bool, p.length)
+	for i := 0; i < p.length; i++ {
+		na[i] = true
+	}
+
+	return &boolean{
+		length: p.length,
+		data:   data,
+		DefNAble: DefNAble{
+			na: na,
+		},
+	}
+}
+
 func Boolean(data []bool, na []bool, options ...Config) Vector {
 	config := mergeConfigs(options)
 

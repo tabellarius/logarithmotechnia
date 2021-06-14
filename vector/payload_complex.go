@@ -173,6 +173,23 @@ func (p *complexPayload) StrForElem(idx int) string {
 	return strconv.FormatComplex(p.data[i], 'f', 3, 128)
 }
 
+func (p *complexPayload) NAPayload() Payload {
+	data := make([]complex128, p.length)
+	na := make([]bool, p.length)
+	for i := 0; i < p.length; i++ {
+		data[i] = cmplx.NaN()
+		na[i] = true
+	}
+
+	return &complexPayload{
+		length: p.length,
+		data:   data,
+		DefNAble: DefNAble{
+			na: na,
+		},
+	}
+}
+
 func Complex(data []complex128, na []bool, options ...Config) Vector {
 	config := mergeConfigs(options)
 

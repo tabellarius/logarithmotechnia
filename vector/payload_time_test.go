@@ -318,7 +318,7 @@ func TestTimePayload_SupportsSelector(t *testing.T) {
 		},
 	}
 
-	payload := Time([]time.Time{}, nil).(*vector).payload
+	payload := Time([]time.Time{}, nil).(*vector).payload.(Selectable)
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
 			if payload.SupportsSelector(data.filter) != data.isSupported {
@@ -347,7 +347,7 @@ func TestTimePayload_Select(t *testing.T) {
 	}
 
 	payload := Time(toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z"}),
-		[]bool{false, false, true}).(*vector).payload
+		[]bool{false, false, true}).(*vector).payload.(Selectable)
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {

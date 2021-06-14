@@ -226,7 +226,7 @@ func TestComplex_SupportsSelector(t *testing.T) {
 		},
 	}
 
-	payload := Complex([]complex128{1}, nil).(*vector).payload
+	payload := Complex([]complex128{1}, nil).(*vector).payload.(Selectable)
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
 			if payload.SupportsSelector(data.filter) != data.isSupported {
@@ -264,7 +264,7 @@ func TestComplex_Select(t *testing.T) {
 		},
 	}
 
-	payload := Complex([]complex128{1, 2, 39, 4, 56, 2, 45, 90, 4, 3}, nil).(*vector).payload
+	payload := Complex([]complex128{1, 2, 39, 4, 56, 2, 45, 90, 4, 3}, nil).(*vector).payload.(Selectable)
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {

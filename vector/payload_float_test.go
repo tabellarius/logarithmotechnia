@@ -441,7 +441,7 @@ func TestFloat_SupportsSelector(t *testing.T) {
 		},
 	}
 
-	payload := Float([]float64{1}, nil).(*vector).payload
+	payload := Float([]float64{1}, nil).(*vector).payload.(Selectable)
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
 			if payload.SupportsSelector(data.filter) != data.isSupported {
@@ -479,7 +479,7 @@ func TestFloat_Select(t *testing.T) {
 		},
 	}
 
-	payload := Float([]float64{1, 2, 39, 4, 56, 2, 45, 90, 4, 3}, nil).(*vector).payload
+	payload := Float([]float64{1, 2, 39, 4, 56, 2, 45, 90, 4, 3}, nil).(*vector).payload.(Selectable)
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {

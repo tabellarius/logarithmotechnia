@@ -8,18 +8,18 @@ import (
 
 const maxIntPrint = 5
 
-// integer is a structure, subsisting Integer vectors
-type integer struct {
+// integerPayload is a structure, subsisting Integer vectors
+type integerPayload struct {
 	length int
 	data   []int
 	DefNAble
 }
 
-func (p *integer) Len() int {
+func (p *integerPayload) Len() int {
 	return p.length
 }
 
-func (p *integer) ByIndices(indices []int) Payload {
+func (p *integerPayload) ByIndices(indices []int) Payload {
 	data := make([]int, 0, len(indices))
 	na := make([]bool, 0, len(indices))
 
@@ -28,7 +28,7 @@ func (p *integer) ByIndices(indices []int) Payload {
 		na = append(na, p.na[idx-1])
 	}
 
-	return &integer{
+	return &integerPayload{
 		length: len(data),
 		data:   data,
 		DefNAble: DefNAble{
@@ -37,7 +37,7 @@ func (p *integer) ByIndices(indices []int) Payload {
 	}
 }
 
-func (p *integer) SupportsSelector(selector interface{}) bool {
+func (p *integerPayload) SupportsSelector(selector interface{}) bool {
 	if _, ok := selector.(func(int, int, bool) bool); ok {
 		return true
 	}
@@ -45,7 +45,7 @@ func (p *integer) SupportsSelector(selector interface{}) bool {
 	return false
 }
 
-func (p *integer) Select(selector interface{}) []bool {
+func (p *integerPayload) Select(selector interface{}) []bool {
 	if byFunc, ok := selector.(func(int, int, bool) bool); ok {
 		return p.selectByFunc(byFunc)
 	}
@@ -53,7 +53,7 @@ func (p *integer) Select(selector interface{}) []bool {
 	return make([]bool, p.length)
 }
 
-func (p *integer) selectByFunc(byFunc func(int, int, bool) bool) []bool {
+func (p *integerPayload) selectByFunc(byFunc func(int, int, bool) bool) []bool {
 	booleans := make([]bool, p.length)
 
 	for idx, val := range p.data {
@@ -65,7 +65,50 @@ func (p *integer) selectByFunc(byFunc func(int, int, bool) bool) []bool {
 	return booleans
 }
 
-func (p *integer) Integers() ([]int, []bool) {
+func (p *integerPayload) SupportsApplier(applier interface{}) bool {
+	if _, ok := applier.(func(int, int, bool) (int, bool)); ok {
+		return true
+	}
+
+	return false
+}
+
+func (p *integerPayload) Apply(applier interface{}) Payload {
+	var data []int
+	var na []bool
+
+	if applyFunc, ok := applier.(func(int, int, bool) (int, bool)); ok {
+		data, na = p.applyByFunc(applyFunc)
+	} else {
+		return p.NAPayload()
+	}
+
+	return &integerPayload{
+		length: p.length,
+		data:   data,
+		DefNAble: DefNAble{
+			na: na,
+		},
+	}
+}
+
+func (p *integerPayload) applyByFunc(applyFunc func(int, int, bool) (int, bool)) ([]int, []bool) {
+	data := make([]int, p.length)
+	na := make([]bool, p.length)
+
+	for i := 0; i < p.length; i++ {
+		dataVal, naVal := applyFunc(i+1, p.data[i], p.na[i])
+		if naVal {
+			dataVal = 0
+		}
+		data[i] = dataVal
+		na[i] = naVal
+	}
+
+	return data, na
+}
+
+func (p *integerPayload) Integers() ([]int, []bool) {
 	if p.length == 0 {
 		return []int{}, []bool{}
 	}
@@ -79,7 +122,7 @@ func (p *integer) Integers() ([]int, []bool) {
 	return data, na
 }
 
-func (p *integer) Floats() ([]float64, []bool) {
+func (p *integerPayload) Floats() ([]float64, []bool) {
 	if p.length == 0 {
 		return []float64{}, nil
 	}
@@ -100,7 +143,7 @@ func (p *integer) Floats() ([]float64, []bool) {
 	return data, na
 }
 
-func (p *integer) Complexes() ([]complex128, []bool) {
+func (p *integerPayload) Complexes() ([]complex128, []bool) {
 	if p.length == 0 {
 		return []complex128{}, []bool{}
 	}
@@ -120,7 +163,7 @@ func (p *integer) Complexes() ([]complex128, []bool) {
 	return data, na
 }
 
-func (p *integer) Booleans() ([]bool, []bool) {
+func (p *integerPayload) Booleans() ([]bool, []bool) {
 	if p.length == 0 {
 		return []bool{}, nil
 	}
@@ -141,7 +184,7 @@ func (p *integer) Booleans() ([]bool, []bool) {
 	return data, na
 }
 
-func (p *integer) Strings() ([]string, []bool) {
+func (p *integerPayload) Strings() ([]string, []bool) {
 	if p.length == 0 {
 		return []string{}, nil
 	}
@@ -162,12 +205,28 @@ func (p *integer) Strings() ([]string, []bool) {
 	return data, na
 }
 
-func (p *integer) StrForElem(idx int) string {
+func (p *integerPayload) StrForElem(idx int) string {
 	if p.na[idx-1] {
 		return "NA"
 	}
 
 	return strconv.Itoa(p.data[idx-1])
+}
+
+func (p *integerPayload) NAPayload() Payload {
+	data := make([]int, p.length)
+	na := make([]bool, p.length)
+	for i := 0; i < p.length; i++ {
+		na[i] = true
+	}
+
+	return &integerPayload{
+		length: p.length,
+		data:   data,
+		DefNAble: DefNAble{
+			na: na,
+		},
+	}
 }
 
 func Integer(data []int, na []bool, options ...Config) Vector {
@@ -195,7 +254,7 @@ func Integer(data []int, na []bool, options ...Config) Vector {
 		}
 	}
 
-	payload := &integer{
+	payload := &integerPayload{
 		length: length,
 		data:   vecData,
 		DefNAble: DefNAble{

@@ -17,6 +17,8 @@ type Vector interface {
 	Filter(selector interface{}) Vector
 	SupportsSelector(selector interface{}) bool
 	Select(selector interface{}) []bool
+	SupportsApplier(applier interface{}) bool
+	Apply(applier interface{}) Vector
 
 	IsEmpty() bool
 
@@ -36,14 +38,23 @@ type Vector interface {
 type Payload interface {
 	Len() int
 	ByIndices(indices []int) Payload
-	SupportsSelector(filter interface{}) bool
-	Select(selector interface{}) []bool
 	StrForElem(idx int) string
+	NAPayload() Payload
 }
 
 type FromTo struct {
 	from int
 	to   int
+}
+
+type Selectable interface {
+	SupportsSelector(filter interface{}) bool
+	Select(selector interface{}) []bool
+}
+
+type Appliable interface {
+	SupportsApplier(applier interface{}) bool
+	Apply(applier interface{}) Payload
 }
 
 type Intable interface {
@@ -159,41 +170,47 @@ func (v *vector) Filter(selector interface{}) Vector {
 	}
 
 	if fromTo, ok := selector.(FromTo); ok {
-		return v.ByIndices(v.selectByFromTo(fromTo.from, fromTo.to))
+		return v.ByIndices(v.filterByFromTo(fromTo.from, fromTo.to))
 	}
 
 	if booleans, ok := selector.([]bool); ok {
-		return v.ByIndices(v.selectByBooleans(booleans))
+		return v.ByIndices(v.filterByBooleans(booleans))
 	}
 
 	if v.SupportsSelector(selector) {
-		return v.ByIndices(v.selectByBooleans(v.Select(selector)))
+		return v.ByIndices(v.filterByBooleans(v.Select(selector)))
 	}
 
 	return Empty()
 }
 
 func (v *vector) SupportsSelector(selector interface{}) bool {
-	if _, ok := selector.(int); ok {
-		return true
+	payload, ok := v.payload.(Selectable)
+	if ok {
+		return payload.SupportsSelector(selector)
 	}
 
-	if _, ok := selector.([]int); ok {
-		return true
-	}
-
-	return v.payload.SupportsSelector(selector)
+	return false
 }
 
 func (v *vector) Select(selector interface{}) []bool {
-	if v.payload.SupportsSelector(selector) {
-		return v.payload.Select(selector)
+	payload, ok := v.payload.(Selectable)
+	if ok && payload.SupportsSelector(selector) {
+		return payload.Select(selector)
 	}
 
 	return make([]bool, v.length)
 }
 
-func (v *vector) selectByBooleans(booleans []bool) []int {
+func (v *vector) SupportsApplier(applier interface{}) bool {
+	panic("implement me")
+}
+
+func (v *vector) Apply(applier interface{}) Vector {
+	panic("implement me")
+}
+
+func (v *vector) filterByBooleans(booleans []bool) []int {
 	if len(booleans) != v.length {
 		v.Report().AddError("Number of booleans is not equal to vector's length.")
 		return []int{}
@@ -209,7 +226,7 @@ func (v *vector) selectByBooleans(booleans []bool) []int {
 	return indices
 }
 
-func (v *vector) selectByFromTo(from int, to int) []int {
+func (v *vector) filterByFromTo(from int, to int) []int {
 	/* from and to have different signs */
 	if from*to < 0 {
 		v.Report().AddError("From and to can not have different signs.")

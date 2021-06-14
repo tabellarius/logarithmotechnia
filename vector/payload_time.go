@@ -104,6 +104,23 @@ func (p *timePayload) StrForElem(idx int) string {
 	return p.data[idx-1].Format(p.printer.Format)
 }
 
+func (p *timePayload) NAPayload() Payload {
+	data := make([]string, p.length)
+	na := make([]bool, p.length)
+	for i := 0; i < p.length; i++ {
+		data[i] = ""
+		na[i] = true
+	}
+
+	return &str{
+		length: p.length,
+		data:   data,
+		DefNAble: DefNAble{
+			na: na,
+		},
+	}
+}
+
 func Time(data []time.Time, na []bool, options ...Config) Vector {
 	config := mergeConfigs(options)
 
