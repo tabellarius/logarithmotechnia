@@ -103,9 +103,9 @@ func TestBoolean(t *testing.T) {
 					t.Error(fmt.Sprintf("Vector length (%d) is not equal to data length (%d)\n", vv.length, length))
 				}
 
-				payload, ok := vv.payload.(*boolean)
+				payload, ok := vv.payload.(*booleanPayload)
 				if !ok {
-					t.Error("Payload is not boolean")
+					t.Error("Payload is not booleanPayload")
 				} else {
 					if !reflect.DeepEqual(payload.data, data.outData) {
 						t.Error(fmt.Sprintf("Payload data (%v) is not equal to correct data (%v)\n",
@@ -196,7 +196,7 @@ func TestBoolean_Booleans(t *testing.T) {
 	for i, data := range testData {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			vec := Boolean(data.in, data.inNA)
-			payload := vec.(*vector).payload.(*boolean)
+			payload := vec.(*vector).payload.(*booleanPayload)
 
 			booleans, na := payload.Booleans()
 			if !reflect.DeepEqual(booleans, data.out) {
@@ -239,7 +239,7 @@ func TestBoolean_Integers(t *testing.T) {
 	for i, data := range testData {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			vec := Boolean(data.in, data.inNA)
-			payload := vec.(*vector).payload.(*boolean)
+			payload := vec.(*vector).payload.(*booleanPayload)
 
 			integers, na := payload.Integers()
 			if !reflect.DeepEqual(integers, data.out) {
@@ -282,7 +282,7 @@ func TestBoolean_Floats(t *testing.T) {
 	for i, data := range testData {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			vec := Boolean(data.in, data.inNA)
-			payload := vec.(*vector).payload.(*boolean)
+			payload := vec.(*vector).payload.(*booleanPayload)
 
 			floats, na := payload.Floats()
 			correct := true
@@ -335,7 +335,7 @@ func TestBoolean_Complexes(t *testing.T) {
 	for i, data := range testData {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			vec := Boolean(data.in, data.inNA)
-			payload := vec.(*vector).payload.(*boolean)
+			payload := vec.(*vector).payload.(*booleanPayload)
 
 			complexes, na := payload.Complexes()
 			correct := true
@@ -388,7 +388,7 @@ func TestBoolean_Strings(t *testing.T) {
 	for i, data := range testData {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			vec := Boolean(data.in, data.inNA)
-			payload := vec.(*vector).payload.(*boolean)
+			payload := vec.(*vector).payload.(*booleanPayload)
 
 			strings, na := payload.Strings()
 			if !reflect.DeepEqual(strings, data.out) {
@@ -431,7 +431,7 @@ func TestBoolean_ByIndices(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			payload := vec.ByIndices(data.indices).(*vector).payload.(*boolean)
+			payload := vec.ByIndices(data.indices).(*vector).payload.(*booleanPayload)
 			if !reflect.DeepEqual(payload.data, data.out) {
 				t.Error(fmt.Sprintf("payload.data (%v) is not equal to data.out (%v)", payload.data, data.out))
 			}

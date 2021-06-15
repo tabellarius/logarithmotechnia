@@ -435,7 +435,7 @@ func TestVector_Filter(t *testing.T) {
 			length:   0,
 		},
 		{
-			name:     "boolean",
+			name:     "booleanPayload",
 			selector: []bool{true, false, true, false, true},
 			out:      []int{1, 0, 5},
 			outNA:    []bool{false, true, false},
