@@ -67,6 +67,50 @@ func (p *floatPayload) selectByFunc(byFunc func(int, float64, bool) bool) []bool
 	return booleans
 }
 
+func (p *floatPayload) SupportsApplier(applier interface{}) bool {
+	if _, ok := applier.(func(int, float64, bool) (float64, bool)); ok {
+		return true
+	}
+
+	return false
+}
+
+func (p *floatPayload) Apply(applier interface{}) Payload {
+	var data []float64
+	var na []bool
+
+	if applyFunc, ok := applier.(func(int, float64, bool) (float64, bool)); ok {
+		data, na = p.applyByFunc(applyFunc)
+	} else {
+		return p.NAPayload()
+	}
+
+	return &floatPayload{
+		length:  p.length,
+		data:    data,
+		printer: p.printer,
+		DefNAble: DefNAble{
+			na: na,
+		},
+	}
+}
+
+func (p *floatPayload) applyByFunc(applyFunc func(int, float64, bool) (float64, bool)) ([]float64, []bool) {
+	data := make([]float64, p.length)
+	na := make([]bool, p.length)
+
+	for i := 0; i < p.length; i++ {
+		dataVal, naVal := applyFunc(i+1, p.data[i], p.na[i])
+		if naVal {
+			dataVal = math.NaN()
+		}
+		data[i] = dataVal
+		na[i] = naVal
+	}
+
+	return data, na
+}
+
 func (p *floatPayload) Integers() ([]int, []bool) {
 	if p.length == 0 {
 		return []int{}, []bool{}

@@ -276,6 +276,93 @@ func TestComplex_Select(t *testing.T) {
 	}
 }
 
+func TestComplexPayload_SupportsApplier(t *testing.T) {
+	testData := []struct {
+		name        string
+		applier     interface{}
+		isSupported bool
+	}{
+		{
+			name:        "func(int, complex128, bool) (complex128, bool)",
+			applier:     func(int, complex128, bool) (complex128, bool) { return 0, true },
+			isSupported: true,
+		},
+		{
+			name:        "func(int, complex128, bool) bool",
+			applier:     func(int, complex128, bool) bool { return true },
+			isSupported: false,
+		},
+	}
+
+	payload := Complex([]complex128{}, nil).(*vector).payload.(Appliable)
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			if payload.SupportsApplier(data.applier) != data.isSupported {
+				t.Error("Applier's support is incorrect.")
+			}
+		})
+	}
+}
+
+func TestComplexPayload_Apply(t *testing.T) {
+	testData := []struct {
+		name    string
+		applier interface{}
+		dataIn  []complex128
+		naIn    []bool
+		dataOut []complex128
+		naOut   []bool
+	}{
+		{
+			name: "regular",
+			applier: func(_ int, val complex128, na bool) (complex128, bool) {
+				return val * 2, na
+			},
+			dataIn:  []complex128{1, 9, 3, 5, 7},
+			naIn:    []bool{false, true, false, true, false},
+			dataOut: []complex128{2, cmplx.NaN(), 6, cmplx.NaN(), 14},
+			naOut:   []bool{false, true, false, true, false},
+		},
+		{
+			name: "manipulate na",
+			applier: func(idx int, val complex128, na bool) (complex128, bool) {
+				if idx == 5 {
+					return cmplx.NaN(), true
+				}
+				return val, na
+			},
+			dataIn:  []complex128{1, 2, 3, 4, 5},
+			naIn:    []bool{false, false, true, false, false},
+			dataOut: []complex128{1, 2, cmplx.NaN(), 4, cmplx.NaN()},
+			naOut:   []bool{false, false, true, false, true},
+		},
+		{
+			name:    "incorrect applier",
+			applier: func(int, complex128, bool) bool { return true },
+			dataIn:  []complex128{1, 9, 3, 5, 7},
+			naIn:    []bool{false, true, false, true, false},
+			dataOut: []complex128{cmplx.NaN(), cmplx.NaN(), cmplx.NaN(), cmplx.NaN(), cmplx.NaN()},
+			naOut:   []bool{true, true, true, true, true},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			payload := Complex(data.dataIn, data.naIn).(*vector).payload
+			payloadOut := payload.(Appliable).Apply(data.applier).(*complexPayload)
+
+			if !util.EqualComplexArrays(data.dataOut, payloadOut.data) {
+				t.Error(fmt.Sprintf("Output data (%v) does not match expected (%v)",
+					payloadOut.data, data.dataOut))
+			}
+			if !reflect.DeepEqual(data.naOut, payloadOut.na) {
+				t.Error(fmt.Sprintf("Output NA (%v) does not match expected (%v)",
+					payloadOut.na, data.naOut))
+			}
+		})
+	}
+}
+
 func TestComplex_Booleans(t *testing.T) {
 	testData := []struct {
 		in    []complex128

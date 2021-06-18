@@ -112,7 +112,7 @@ func (p *timePayload) NAPayload() Payload {
 		na[i] = true
 	}
 
-	return &str{
+	return &stringPayload{
 		length: p.length,
 		data:   data,
 		DefNAble: DefNAble{

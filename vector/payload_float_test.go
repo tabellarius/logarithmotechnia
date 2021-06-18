@@ -490,3 +490,90 @@ func TestFloat_Select(t *testing.T) {
 		})
 	}
 }
+
+func TestFloatPayload_SupportsApplier(t *testing.T) {
+	testData := []struct {
+		name        string
+		applier     interface{}
+		isSupported bool
+	}{
+		{
+			name:        "func(int, float64, bool) (float64, bool)",
+			applier:     func(int, float64, bool) (float64, bool) { return 0, true },
+			isSupported: true,
+		},
+		{
+			name:        "func(int, float64, bool) bool",
+			applier:     func(int, float64, bool) bool { return true },
+			isSupported: false,
+		},
+	}
+
+	payload := Float([]float64{1}, nil).(*vector).payload.(Appliable)
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			if payload.SupportsApplier(data.applier) != data.isSupported {
+				t.Error("Applier's support is incorrect.")
+			}
+		})
+	}
+}
+
+func TestFloatPayload_Apply(t *testing.T) {
+	testData := []struct {
+		name    string
+		applier interface{}
+		dataIn  []float64
+		naIn    []bool
+		dataOut []float64
+		naOut   []bool
+	}{
+		{
+			name: "regular",
+			applier: func(_ int, val float64, na bool) (float64, bool) {
+				return val * 2, na
+			},
+			dataIn:  []float64{1, 9, 3, 5, 7},
+			naIn:    []bool{false, true, false, true, false},
+			dataOut: []float64{2, math.NaN(), 6, math.NaN(), 14},
+			naOut:   []bool{false, true, false, true, false},
+		},
+		{
+			name: "manipulate na",
+			applier: func(idx int, val float64, na bool) (float64, bool) {
+				if idx == 5 {
+					return 0, true
+				}
+				return val, na
+			},
+			dataIn:  []float64{1, 2, 3, 4, 5},
+			naIn:    []bool{false, false, true, false, false},
+			dataOut: []float64{1, 2, math.NaN(), 4, math.NaN()},
+			naOut:   []bool{false, false, true, false, true},
+		},
+		{
+			name:    "incorrect applier",
+			applier: func(int, float64, bool) bool { return true },
+			dataIn:  []float64{1, 9, 3, 5, 7},
+			naIn:    []bool{false, true, false, true, false},
+			dataOut: []float64{math.NaN(), math.NaN(), math.NaN(), math.NaN(), math.NaN()},
+			naOut:   []bool{true, true, true, true, true},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			payload := Float(data.dataIn, data.naIn).(*vector).payload
+			payloadOut := payload.(Appliable).Apply(data.applier).(*floatPayload)
+
+			if !util.EqualFloatArrays(data.dataOut, payloadOut.data) {
+				t.Error(fmt.Sprintf("Output data (%v) does not match expected (%v)",
+					payloadOut.data, data.dataOut))
+			}
+			if !reflect.DeepEqual(data.naOut, payloadOut.na) {
+				t.Error(fmt.Sprintf("Output NA (%v) does not match expected (%v)",
+					payloadOut.na, data.naOut))
+			}
+		})
+	}
+}
