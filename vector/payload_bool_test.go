@@ -509,3 +509,94 @@ func TestBoolean_Select(t *testing.T) {
 		})
 	}
 }
+
+func TestBooleanPayload_SupportsApplier(t *testing.T) {
+	testData := []struct {
+		name        string
+		applier     interface{}
+		isSupported bool
+	}{
+		{
+			name:        "func(int, bool, bool) (bool, bool)",
+			applier:     func(int, bool, bool) (bool, bool) { return true, true },
+			isSupported: true,
+		},
+		{
+			name:        "func(int, float64, bool) bool",
+			applier:     func(int, int, bool) bool { return true },
+			isSupported: false,
+		},
+	}
+
+	payload := Boolean([]bool{}, nil).(*vector).payload.(Appliable)
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			if payload.SupportsApplier(data.applier) != data.isSupported {
+				t.Error("Applier's support is incorrect.")
+			}
+		})
+	}
+}
+
+func TestBooleanPayload_Apply(t *testing.T) {
+	testData := []struct {
+		name    string
+		applier interface{}
+		dataIn  []bool
+		naIn    []bool
+		dataOut []bool
+		naOut   []bool
+	}{
+		{
+			name: "regular",
+			applier: func(idx int, val bool, na bool) (bool, bool) {
+				if idx == 5 {
+					return true, na
+				}
+				return val, na
+			},
+			dataIn:  []bool{true, true, true, false, false},
+			naIn:    []bool{false, true, false, true, false},
+			dataOut: []bool{true, false, true, false, true},
+			naOut:   []bool{false, true, false, true, false},
+		},
+		{
+			name: "manipulate na",
+			applier: func(idx int, val bool, na bool) (bool, bool) {
+				newNA := na
+				if idx == 5 {
+					newNA = true
+				}
+				return val, newNA
+			},
+			dataIn:  []bool{true, true, false, false, true},
+			naIn:    []bool{false, true, false, true, false},
+			dataOut: []bool{true, false, false, false, false},
+			naOut:   []bool{false, true, false, true, true},
+		},
+		{
+			name:    "incorrect applier",
+			applier: func(int, int, bool) bool { return true },
+			dataIn:  []bool{true, true, false, false, true},
+			naIn:    []bool{false, true, false, true, false},
+			dataOut: []bool{false, false, false, false, false},
+			naOut:   []bool{true, true, true, true, true},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			payload := Boolean(data.dataIn, data.naIn).(*vector).payload
+			payloadOut := payload.(Appliable).Apply(data.applier).(*booleanPayload)
+
+			if !reflect.DeepEqual(data.dataOut, payloadOut.data) {
+				t.Error(fmt.Sprintf("Output data (%v) does not match expected (%v)",
+					data.dataOut, payloadOut.data))
+			}
+			if !reflect.DeepEqual(data.naOut, payloadOut.na) {
+				t.Error(fmt.Sprintf("Output NA (%v) does not match expected (%v)",
+					data.naOut, payloadOut.na))
+			}
+		})
+	}
+}

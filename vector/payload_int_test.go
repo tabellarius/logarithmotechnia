@@ -534,7 +534,7 @@ func TestIntegerPayload_SupportsApplier(t *testing.T) {
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
 			if payload.SupportsApplier(data.applier) != data.isSupported {
-				t.Error("Selector's support is incorrect.")
+				t.Error("Applier's support is incorrect.")
 			}
 		})
 	}
