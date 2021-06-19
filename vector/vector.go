@@ -203,11 +203,27 @@ func (v *vector) Select(selector interface{}) []bool {
 }
 
 func (v *vector) SupportsApplier(applier interface{}) bool {
-	panic("implement me")
+	payload, ok := v.payload.(Appliable)
+	if ok {
+		return payload.SupportsApplier(applier)
+	}
+
+	return false
 }
 
 func (v *vector) Apply(applier interface{}) Vector {
-	panic("implement me")
+	payload, ok := v.payload.(Appliable)
+	var newP Payload
+	if ok && payload.SupportsApplier(applier) {
+		newP = payload.Apply(applier)
+	} else {
+		newP = v.payload.NAPayload()
+	}
+
+	newV := v.Clone().(*vector)
+	newV.payload = newP
+
+	return newV
 }
 
 func (v *vector) filterByBooleans(booleans []bool) []int {

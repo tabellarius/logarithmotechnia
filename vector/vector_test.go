@@ -689,6 +689,33 @@ func TestVector_IsEmpty(t *testing.T) {
 	}
 }
 
+func TestVector_Clone(t *testing.T) {
+	vec := Integer([]int{1, 2, 3, 4, 5}, []bool{false, true, false, true, false}).(*vector)
+	newVec := vec.Clone().(*vector)
+
+	if vec.length != newVec.length {
+		t.Error(fmt.Sprintf("vec.length (%d) is not equal to newVec.length (%d)", vec.length, newVec.length))
+	}
+
+	if !reflect.DeepEqual(vec.names, newVec.names) {
+		t.Error(fmt.Sprintf("vec.names (%v) is not equal to newVec.names (%v)", vec.names, newVec.names))
+	}
+
+	srcAddr := &(vec.payload.(*integerPayload).data[0])
+	newAddr := &(newVec.payload.(*integerPayload).data[0])
+
+	if srcAddr != newAddr {
+		t.Error("Payload data was not cloned")
+	}
+
+	srcAddrNA := &(vec.payload.(*integerPayload).na[0])
+	newAddrNA := &(newVec.payload.(*integerPayload).na[0])
+
+	if srcAddrNA != newAddrNA {
+		t.Error("Payload NA data was not cloned")
+	}
+}
+
 func TestVector_SupportsSelector(t *testing.T) {
 	testData := []struct {
 		name             string
@@ -748,6 +775,83 @@ func TestVector_Select(t *testing.T) {
 			if !reflect.DeepEqual(selected, data.selected) {
 				t.Error(fmt.Sprintf("data.vec.Select() (%v) is not equal to data.selected (%v)",
 					selected, data.selected))
+			}
+		})
+	}
+}
+
+func TestVector_SupportsApplier(t *testing.T) {
+	testData := []struct {
+		name            string
+		vec             Vector
+		selector        interface{}
+		supportsApplier bool
+	}{
+		{
+			name:            "integerPayload vector + valid applier",
+			vec:             Integer([]int{1, 2, 3}, nil),
+			selector:        func(_ int, val int, na bool) (int, bool) { return 10 * val, na },
+			supportsApplier: true,
+		},
+		{
+			name:            "integerPayload vector + invalid applier",
+			vec:             Integer([]int{1, 2, 3}, nil),
+			selector:        true,
+			supportsApplier: false,
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			supportsApplier := data.vec.SupportsApplier(data.selector)
+			if supportsApplier != data.supportsApplier {
+				t.Error(fmt.Sprintf("Applier's support (%v) is not equal to expected (%v)",
+					supportsApplier, data.supportsApplier))
+			}
+		})
+	}
+}
+
+func TestVector_Apply(t *testing.T) {
+	testData := []struct {
+		name    string
+		vec     Vector
+		applier interface{}
+		dataOut []int
+		NAOut   []bool
+	}{
+		{
+			name: "integerPayload vector + valid applier",
+			vec:  Integer([]int{1, 2, 3, 4, 5}, nil),
+			applier: func(idx int, val int, na bool) (int, bool) {
+				if idx == 5 {
+					return val, true
+				}
+				return 10 * val, na
+			},
+			dataOut: []int{10, 20, 30, 40, 0},
+			NAOut:   []bool{false, false, false, false, true},
+		},
+		{
+			name:    "integerPayload vector + invalid applier",
+			vec:     Integer([]int{1, 2, 3, 4, 5}, nil),
+			applier: true,
+			dataOut: []int{0, 0, 0, 0, 0},
+			NAOut:   []bool{true, true, true, true, true},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			newVec := data.vec.Apply(data.applier)
+			integers, na := newVec.Integers()
+			if !reflect.DeepEqual(integers, data.dataOut) {
+				t.Error(fmt.Sprintf("Integers (%v) is not equal to expected (%v)",
+					integers, data.dataOut))
+			}
+			if !reflect.DeepEqual(na, data.NAOut) {
+				t.Error(fmt.Sprintf("NA (%v) is not equal to expected (%v)",
+					na, data.NAOut))
 			}
 		})
 	}
