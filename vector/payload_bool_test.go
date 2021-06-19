@@ -103,9 +103,9 @@ func TestBoolean(t *testing.T) {
 					t.Error(fmt.Sprintf("Vector length (%d) is not equal to data length (%d)\n", vv.length, length))
 				}
 
-				payload, ok := vv.payload.(*boolean)
+				payload, ok := vv.payload.(*booleanPayload)
 				if !ok {
-					t.Error("Payload is not boolean")
+					t.Error("Payload is not booleanPayload")
 				} else {
 					if !reflect.DeepEqual(payload.data, data.outData) {
 						t.Error(fmt.Sprintf("Payload data (%v) is not equal to correct data (%v)\n",
@@ -196,7 +196,7 @@ func TestBoolean_Booleans(t *testing.T) {
 	for i, data := range testData {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			vec := Boolean(data.in, data.inNA)
-			payload := vec.(*vector).payload.(*boolean)
+			payload := vec.(*vector).payload.(*booleanPayload)
 
 			booleans, na := payload.Booleans()
 			if !reflect.DeepEqual(booleans, data.out) {
@@ -239,7 +239,7 @@ func TestBoolean_Integers(t *testing.T) {
 	for i, data := range testData {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			vec := Boolean(data.in, data.inNA)
-			payload := vec.(*vector).payload.(*boolean)
+			payload := vec.(*vector).payload.(*booleanPayload)
 
 			integers, na := payload.Integers()
 			if !reflect.DeepEqual(integers, data.out) {
@@ -282,7 +282,7 @@ func TestBoolean_Floats(t *testing.T) {
 	for i, data := range testData {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			vec := Boolean(data.in, data.inNA)
-			payload := vec.(*vector).payload.(*boolean)
+			payload := vec.(*vector).payload.(*booleanPayload)
 
 			floats, na := payload.Floats()
 			correct := true
@@ -335,7 +335,7 @@ func TestBoolean_Complexes(t *testing.T) {
 	for i, data := range testData {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			vec := Boolean(data.in, data.inNA)
-			payload := vec.(*vector).payload.(*boolean)
+			payload := vec.(*vector).payload.(*booleanPayload)
 
 			complexes, na := payload.Complexes()
 			correct := true
@@ -388,7 +388,7 @@ func TestBoolean_Strings(t *testing.T) {
 	for i, data := range testData {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			vec := Boolean(data.in, data.inNA)
-			payload := vec.(*vector).payload.(*boolean)
+			payload := vec.(*vector).payload.(*booleanPayload)
 
 			strings, na := payload.Strings()
 			if !reflect.DeepEqual(strings, data.out) {
@@ -431,7 +431,7 @@ func TestBoolean_ByIndices(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			payload := vec.ByIndices(data.indices).(*vector).payload.(*boolean)
+			payload := vec.ByIndices(data.indices).(*vector).payload.(*booleanPayload)
 			if !reflect.DeepEqual(payload.data, data.out) {
 				t.Error(fmt.Sprintf("payload.data (%v) is not equal to data.out (%v)", payload.data, data.out))
 			}
@@ -460,7 +460,7 @@ func TestBoolean_SupportsSelector(t *testing.T) {
 		},
 	}
 
-	payload := Boolean([]bool{true}, nil).(*vector).payload
+	payload := Boolean([]bool{true}, nil).(*vector).payload.(Selectable)
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
 			if payload.SupportsSelector(data.filter) != data.isSupported {
@@ -498,13 +498,104 @@ func TestBoolean_Select(t *testing.T) {
 		},
 	}
 
-	payload := Boolean([]bool{true, false, true, false, true, false, true, false, true, false}, nil).(*vector).payload
+	payload := Boolean([]bool{true, false, true, false, true, false, true, false, true, false}, nil).(*vector).payload.(Selectable)
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
 			result := payload.Select(data.fn)
 			if !reflect.DeepEqual(result, data.out) {
 				t.Error(fmt.Sprintf("Result (%v) is not equal to out (%v)", result, data.out))
+			}
+		})
+	}
+}
+
+func TestBooleanPayload_SupportsApplier(t *testing.T) {
+	testData := []struct {
+		name        string
+		applier     interface{}
+		isSupported bool
+	}{
+		{
+			name:        "func(int, bool, bool) (bool, bool)",
+			applier:     func(int, bool, bool) (bool, bool) { return true, true },
+			isSupported: true,
+		},
+		{
+			name:        "func(int, float64, bool) bool",
+			applier:     func(int, int, bool) bool { return true },
+			isSupported: false,
+		},
+	}
+
+	payload := Boolean([]bool{}, nil).(*vector).payload.(Appliable)
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			if payload.SupportsApplier(data.applier) != data.isSupported {
+				t.Error("Applier's support is incorrect.")
+			}
+		})
+	}
+}
+
+func TestBooleanPayload_Apply(t *testing.T) {
+	testData := []struct {
+		name    string
+		applier interface{}
+		dataIn  []bool
+		naIn    []bool
+		dataOut []bool
+		naOut   []bool
+	}{
+		{
+			name: "regular",
+			applier: func(idx int, val bool, na bool) (bool, bool) {
+				if idx == 5 {
+					return true, na
+				}
+				return val, na
+			},
+			dataIn:  []bool{true, true, true, false, false},
+			naIn:    []bool{false, true, false, true, false},
+			dataOut: []bool{true, false, true, false, true},
+			naOut:   []bool{false, true, false, true, false},
+		},
+		{
+			name: "manipulate na",
+			applier: func(idx int, val bool, na bool) (bool, bool) {
+				newNA := na
+				if idx == 5 {
+					newNA = true
+				}
+				return val, newNA
+			},
+			dataIn:  []bool{true, true, false, false, true},
+			naIn:    []bool{false, true, false, true, false},
+			dataOut: []bool{true, false, false, false, false},
+			naOut:   []bool{false, true, false, true, true},
+		},
+		{
+			name:    "incorrect applier",
+			applier: func(int, int, bool) bool { return true },
+			dataIn:  []bool{true, true, false, false, true},
+			naIn:    []bool{false, true, false, true, false},
+			dataOut: []bool{false, false, false, false, false},
+			naOut:   []bool{true, true, true, true, true},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			payload := Boolean(data.dataIn, data.naIn).(*vector).payload
+			payloadOut := payload.(Appliable).Apply(data.applier).(*booleanPayload)
+
+			if !reflect.DeepEqual(data.dataOut, payloadOut.data) {
+				t.Error(fmt.Sprintf("Output data (%v) does not match expected (%v)",
+					data.dataOut, payloadOut.data))
+			}
+			if !reflect.DeepEqual(data.naOut, payloadOut.na) {
+				t.Error(fmt.Sprintf("Output NA (%v) does not match expected (%v)",
+					data.naOut, payloadOut.na))
 			}
 		})
 	}

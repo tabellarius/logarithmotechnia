@@ -6,17 +6,17 @@ import (
 	"strconv"
 )
 
-type str struct {
+type stringPayload struct {
 	length int
 	data   []string
 	DefNAble
 }
 
-func (p *str) Len() int {
+func (p *stringPayload) Len() int {
 	return p.length
 }
 
-func (p *str) ByIndices(indices []int) Payload {
+func (p *stringPayload) ByIndices(indices []int) Payload {
 	data := make([]string, 0, len(indices))
 	na := make([]bool, 0, len(indices))
 
@@ -25,7 +25,7 @@ func (p *str) ByIndices(indices []int) Payload {
 		na = append(na, p.na[idx-1])
 	}
 
-	return &str{
+	return &stringPayload{
 		length: len(data),
 		data:   data,
 		DefNAble: DefNAble{
@@ -34,7 +34,7 @@ func (p *str) ByIndices(indices []int) Payload {
 	}
 }
 
-func (p *str) SupportsSelector(selector interface{}) bool {
+func (p *stringPayload) SupportsSelector(selector interface{}) bool {
 	if _, ok := selector.(func(int, string, bool) bool); ok {
 		return true
 	}
@@ -42,7 +42,7 @@ func (p *str) SupportsSelector(selector interface{}) bool {
 	return false
 }
 
-func (p *str) Select(selector interface{}) []bool {
+func (p *stringPayload) Select(selector interface{}) []bool {
 	if byFunc, ok := selector.(func(int, string, bool) bool); ok {
 		return p.selectByFunc(byFunc)
 	}
@@ -50,7 +50,7 @@ func (p *str) Select(selector interface{}) []bool {
 	return make([]bool, p.length)
 }
 
-func (p *str) selectByFunc(byFunc func(int, string, bool) bool) []bool {
+func (p *stringPayload) selectByFunc(byFunc func(int, string, bool) bool) []bool {
 	booleans := make([]bool, p.length)
 
 	for idx, val := range p.data {
@@ -62,7 +62,50 @@ func (p *str) selectByFunc(byFunc func(int, string, bool) bool) []bool {
 	return booleans
 }
 
-func (p *str) Integers() ([]int, []bool) {
+func (p *stringPayload) SupportsApplier(applier interface{}) bool {
+	if _, ok := applier.(func(int, string, bool) (string, bool)); ok {
+		return true
+	}
+
+	return false
+}
+
+func (p *stringPayload) Apply(applier interface{}) Payload {
+	var data []string
+	var na []bool
+
+	if applyFunc, ok := applier.(func(int, string, bool) (string, bool)); ok {
+		data, na = p.applyByFunc(applyFunc)
+	} else {
+		return p.NAPayload()
+	}
+
+	return &stringPayload{
+		length: p.length,
+		data:   data,
+		DefNAble: DefNAble{
+			na: na,
+		},
+	}
+}
+
+func (p *stringPayload) applyByFunc(applyFunc func(int, string, bool) (string, bool)) ([]string, []bool) {
+	data := make([]string, p.length)
+	na := make([]bool, p.length)
+
+	for i := 0; i < p.length; i++ {
+		dataVal, naVal := applyFunc(i+1, p.data[i], p.na[i])
+		if naVal {
+			dataVal = ""
+		}
+		data[i] = dataVal
+		na[i] = naVal
+	}
+
+	return data, na
+}
+
+func (p *stringPayload) Integers() ([]int, []bool) {
 	if p.length == 0 {
 		return []int{}, []bool{}
 	}
@@ -87,7 +130,7 @@ func (p *str) Integers() ([]int, []bool) {
 	return data, na
 }
 
-func (p *str) Floats() ([]float64, []bool) {
+func (p *stringPayload) Floats() ([]float64, []bool) {
 	if p.length == 0 {
 		return []float64{}, nil
 	}
@@ -113,7 +156,7 @@ func (p *str) Floats() ([]float64, []bool) {
 	return data, na
 }
 
-func (p *str) Complexes() ([]complex128, []bool) {
+func (p *stringPayload) Complexes() ([]complex128, []bool) {
 	if p.length == 0 {
 		return []complex128{}, []bool{}
 	}
@@ -138,7 +181,7 @@ func (p *str) Complexes() ([]complex128, []bool) {
 	return data, na
 }
 
-func (p *str) Booleans() ([]bool, []bool) {
+func (p *stringPayload) Booleans() ([]bool, []bool) {
 	if p.length == 0 {
 		return []bool{}, nil
 	}
@@ -159,7 +202,7 @@ func (p *str) Booleans() ([]bool, []bool) {
 	return data, na
 }
 
-func (p *str) Strings() ([]string, []bool) {
+func (p *stringPayload) Strings() ([]string, []bool) {
 	if p.length == 0 {
 		return []string{}, nil
 	}
@@ -173,12 +216,29 @@ func (p *str) Strings() ([]string, []bool) {
 	return data, na
 }
 
-func (p *str) StrForElem(idx int) string {
+func (p *stringPayload) StrForElem(idx int) string {
 	if p.na[idx-1] {
 		return "NA"
 	}
 
 	return p.data[idx-1]
+}
+
+func (p *stringPayload) NAPayload() Payload {
+	data := make([]string, p.length)
+	na := make([]bool, p.length)
+	for i := 0; i < p.length; i++ {
+		data[i] = ""
+		na[i] = true
+	}
+
+	return &stringPayload{
+		length: p.length,
+		data:   data,
+		DefNAble: DefNAble{
+			na: na,
+		},
+	}
 }
 
 func String(data []string, na []bool, options ...Config) Vector {
@@ -206,7 +266,7 @@ func String(data []string, na []bool, options ...Config) Vector {
 		}
 	}
 
-	payload := &str{
+	payload := &stringPayload{
 		length: length,
 		data:   vecData,
 		DefNAble: DefNAble{

@@ -62,6 +62,49 @@ func (p *complexPayload) selectByFunc(byFunc func(int, complex128, bool) bool) [
 	return booleans
 }
 
+func (p *complexPayload) SupportsApplier(applier interface{}) bool {
+	if _, ok := applier.(func(int, complex128, bool) (complex128, bool)); ok {
+		return true
+	}
+
+	return false
+}
+
+func (p *complexPayload) Apply(applier interface{}) Payload {
+	var data []complex128
+	var na []bool
+
+	if applyFunc, ok := applier.(func(int, complex128, bool) (complex128, bool)); ok {
+		data, na = p.applyByFunc(applyFunc)
+	} else {
+		return p.NAPayload()
+	}
+
+	return &complexPayload{
+		length: p.length,
+		data:   data,
+		DefNAble: DefNAble{
+			na: na,
+		},
+	}
+}
+
+func (p *complexPayload) applyByFunc(applyFunc func(int, complex128, bool) (complex128, bool)) ([]complex128, []bool) {
+	data := make([]complex128, p.length)
+	na := make([]bool, p.length)
+
+	for i := 0; i < p.length; i++ {
+		dataVal, naVal := applyFunc(i+1, p.data[i], p.na[i])
+		if naVal {
+			dataVal = cmplx.NaN()
+		}
+		data[i] = dataVal
+		na[i] = naVal
+	}
+
+	return data, na
+}
+
 func (p *complexPayload) Integers() ([]int, []bool) {
 	if p.length == 0 {
 		return []int{}, []bool{}
@@ -171,6 +214,23 @@ func (p *complexPayload) StrForElem(idx int) string {
 	}
 
 	return strconv.FormatComplex(p.data[i], 'f', 3, 128)
+}
+
+func (p *complexPayload) NAPayload() Payload {
+	data := make([]complex128, p.length)
+	na := make([]bool, p.length)
+	for i := 0; i < p.length; i++ {
+		data[i] = cmplx.NaN()
+		na[i] = true
+	}
+
+	return &complexPayload{
+		length: p.length,
+		data:   data,
+		DefNAble: DefNAble{
+			na: na,
+		},
+	}
 }
 
 func Complex(data []complex128, na []bool, options ...Config) Vector {

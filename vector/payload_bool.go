@@ -5,17 +5,17 @@ import (
 	"math/cmplx"
 )
 
-type boolean struct {
+type booleanPayload struct {
 	length int
 	data   []bool
 	DefNAble
 }
 
-func (p *boolean) Len() int {
+func (p *booleanPayload) Len() int {
 	return p.length
 }
 
-func (p *boolean) ByIndices(indices []int) Payload {
+func (p *booleanPayload) ByIndices(indices []int) Payload {
 	data := make([]bool, 0, len(indices))
 	na := make([]bool, 0, len(indices))
 
@@ -24,7 +24,7 @@ func (p *boolean) ByIndices(indices []int) Payload {
 		na = append(na, p.na[idx-1])
 	}
 
-	return &boolean{
+	return &booleanPayload{
 		length: len(data),
 		data:   data,
 		DefNAble: DefNAble{
@@ -33,7 +33,7 @@ func (p *boolean) ByIndices(indices []int) Payload {
 	}
 }
 
-func (p *boolean) SupportsSelector(selector interface{}) bool {
+func (p *booleanPayload) SupportsSelector(selector interface{}) bool {
 	if _, ok := selector.(func(int, bool, bool) bool); ok {
 		return true
 	}
@@ -41,7 +41,7 @@ func (p *boolean) SupportsSelector(selector interface{}) bool {
 	return false
 }
 
-func (p *boolean) Select(selector interface{}) []bool {
+func (p *booleanPayload) Select(selector interface{}) []bool {
 	if byFunc, ok := selector.(func(int, bool, bool) bool); ok {
 		return p.selectByFunc(byFunc)
 	}
@@ -49,7 +49,7 @@ func (p *boolean) Select(selector interface{}) []bool {
 	return make([]bool, p.length)
 }
 
-func (p *boolean) selectByFunc(byFunc func(int, bool, bool) bool) []bool {
+func (p *booleanPayload) selectByFunc(byFunc func(int, bool, bool) bool) []bool {
 	booleans := make([]bool, p.length)
 
 	for idx, val := range p.data {
@@ -61,7 +61,50 @@ func (p *boolean) selectByFunc(byFunc func(int, bool, bool) bool) []bool {
 	return booleans
 }
 
-func (p *boolean) Integers() ([]int, []bool) {
+func (p *booleanPayload) SupportsApplier(applier interface{}) bool {
+	if _, ok := applier.(func(int, bool, bool) (bool, bool)); ok {
+		return true
+	}
+
+	return false
+}
+
+func (p *booleanPayload) Apply(applier interface{}) Payload {
+	var data []bool
+	var na []bool
+
+	if applyFunc, ok := applier.(func(int, bool, bool) (bool, bool)); ok {
+		data, na = p.applyByFunc(applyFunc)
+	} else {
+		return p.NAPayload()
+	}
+
+	return &booleanPayload{
+		length: p.length,
+		data:   data,
+		DefNAble: DefNAble{
+			na: na,
+		},
+	}
+}
+
+func (p *booleanPayload) applyByFunc(applyFunc func(int, bool, bool) (bool, bool)) ([]bool, []bool) {
+	data := make([]bool, p.length)
+	na := make([]bool, p.length)
+
+	for i := 0; i < p.length; i++ {
+		dataVal, naVal := applyFunc(i+1, p.data[i], p.na[i])
+		if naVal {
+			dataVal = false
+		}
+		data[i] = dataVal
+		na[i] = naVal
+	}
+
+	return data, na
+}
+
+func (p *booleanPayload) Integers() ([]int, []bool) {
 	if p.length == 0 {
 		return []int{}, []bool{}
 	}
@@ -85,7 +128,7 @@ func (p *boolean) Integers() ([]int, []bool) {
 	return data, na
 }
 
-func (p *boolean) Floats() ([]float64, []bool) {
+func (p *booleanPayload) Floats() ([]float64, []bool) {
 	if p.length == 0 {
 		return []float64{}, nil
 	}
@@ -110,7 +153,7 @@ func (p *boolean) Floats() ([]float64, []bool) {
 	return data, na
 }
 
-func (p *boolean) Complexes() ([]complex128, []bool) {
+func (p *booleanPayload) Complexes() ([]complex128, []bool) {
 	if p.length == 0 {
 		return []complex128{}, []bool{}
 	}
@@ -134,7 +177,7 @@ func (p *boolean) Complexes() ([]complex128, []bool) {
 	return data, na
 }
 
-func (p *boolean) Booleans() ([]bool, []bool) {
+func (p *booleanPayload) Booleans() ([]bool, []bool) {
 	if p.length == 0 {
 		return []bool{}, nil
 	}
@@ -148,7 +191,7 @@ func (p *boolean) Booleans() ([]bool, []bool) {
 	return data, na
 }
 
-func (p *boolean) Strings() ([]string, []bool) {
+func (p *booleanPayload) Strings() ([]string, []bool) {
 	if p.length == 0 {
 		return []string{}, nil
 	}
@@ -165,7 +208,7 @@ func (p *boolean) Strings() ([]string, []bool) {
 	return data, na
 }
 
-func (p *boolean) StrForElem(idx int) string {
+func (p *booleanPayload) StrForElem(idx int) string {
 	if p.na[idx-1] {
 		return "NA"
 	}
@@ -175,6 +218,22 @@ func (p *boolean) StrForElem(idx int) string {
 	}
 
 	return "false"
+}
+
+func (p *booleanPayload) NAPayload() Payload {
+	data := make([]bool, p.length)
+	na := make([]bool, p.length)
+	for i := 0; i < p.length; i++ {
+		na[i] = true
+	}
+
+	return &booleanPayload{
+		length: p.length,
+		data:   data,
+		DefNAble: DefNAble{
+			na: na,
+		},
+	}
 }
 
 func Boolean(data []bool, na []bool, options ...Config) Vector {
@@ -202,7 +261,7 @@ func Boolean(data []bool, na []bool, options ...Config) Vector {
 		}
 	}
 
-	payload := &boolean{
+	payload := &booleanPayload{
 		length: length,
 		data:   vecData,
 		DefNAble: DefNAble{

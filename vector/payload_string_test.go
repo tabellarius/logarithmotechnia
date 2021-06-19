@@ -103,9 +103,9 @@ func TestString(t *testing.T) {
 					t.Error(fmt.Sprintf("Vector length (%d) is not equal to data length (%d)\n", vv.length, length))
 				}
 
-				payload, ok := vv.payload.(*str)
+				payload, ok := vv.payload.(*stringPayload)
 				if !ok {
-					t.Error("Payload is not integer")
+					t.Error("Payload is not integerPayload")
 				} else {
 					if !reflect.DeepEqual(payload.data, data.outData) {
 						t.Error(fmt.Sprintf("Payload data (%v) is not equal to correct data (%v)\n",
@@ -196,7 +196,7 @@ func TestString_Booleans(t *testing.T) {
 	for i, data := range testData {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			vec := String(data.in, data.inNA)
-			payload := vec.(*vector).payload.(*str)
+			payload := vec.(*vector).payload.(*stringPayload)
 
 			booleans, na := payload.Booleans()
 			if !reflect.DeepEqual(booleans, data.out) {
@@ -239,7 +239,7 @@ func TestString_Integers(t *testing.T) {
 	for i, data := range testData {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			vec := String(data.in, data.inNA)
-			payload := vec.(*vector).payload.(*str)
+			payload := vec.(*vector).payload.(*stringPayload)
 
 			integers, na := payload.Integers()
 			if !reflect.DeepEqual(integers, data.out) {
@@ -282,7 +282,7 @@ func TestString_Floats(t *testing.T) {
 	for i, data := range testData {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			vec := String(data.in, data.inNA)
-			payload := vec.(*vector).payload.(*str)
+			payload := vec.(*vector).payload.(*stringPayload)
 
 			floats, na := payload.Floats()
 			correct := true
@@ -329,7 +329,7 @@ func TestString_Complexes(t *testing.T) {
 	for i, data := range testData {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			vec := String(data.in, data.inNA)
-			payload := vec.(*vector).payload.(*str)
+			payload := vec.(*vector).payload.(*stringPayload)
 
 			complexes, na := payload.Complexes()
 			correct := true
@@ -382,7 +382,7 @@ func TestString_Strings(t *testing.T) {
 	for i, data := range testData {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			vec := String(data.in, data.inNA)
-			payload := vec.(*vector).payload.(*str)
+			payload := vec.(*vector).payload.(*stringPayload)
 
 			strings, na := payload.Strings()
 			if !reflect.DeepEqual(strings, data.out) {
@@ -425,7 +425,7 @@ func TestString_ByIndices(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			payload := vec.ByIndices(data.indices).(*vector).payload.(*str)
+			payload := vec.ByIndices(data.indices).(*vector).payload.(*stringPayload)
 			if !reflect.DeepEqual(payload.data, data.out) {
 				t.Error(fmt.Sprintf("payload.data (%v) is not equal to data.out (%v)", payload.data, data.out))
 			}
@@ -454,7 +454,7 @@ func TestString_SupportsSelector(t *testing.T) {
 		},
 	}
 
-	payload := String([]string{"one"}, nil).(*vector).payload
+	payload := String([]string{"one"}, nil).(*vector).payload.(Selectable)
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
 			if payload.SupportsSelector(data.filter) != data.isSupported {
@@ -492,13 +492,100 @@ func TestString_Select(t *testing.T) {
 		},
 	}
 
-	payload := String([]string{"1", "2", "39", "4", "56", "2", "45", "90", "4", "3"}, nil).(*vector).payload
+	payload := String([]string{"1", "2", "39", "4", "56", "2", "45", "90", "4", "3"}, nil).(*vector).payload.(Selectable)
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
 			result := payload.Select(data.fn)
 			if !reflect.DeepEqual(result, data.out) {
 				t.Error(fmt.Sprintf("Result (%v) is not equal to out (%v)", result, data.out))
+			}
+		})
+	}
+}
+
+func TestStringPayload_SupportsApplier(t *testing.T) {
+	testData := []struct {
+		name        string
+		applier     interface{}
+		isSupported bool
+	}{
+		{
+			name:        "func(int, string, bool) (string, bool)",
+			applier:     func(int, string, bool) (string, bool) { return "", true },
+			isSupported: true,
+		},
+		{
+			name:        "func(int, string, bool) bool",
+			applier:     func(int, string, bool) bool { return true },
+			isSupported: false,
+		},
+	}
+
+	payload := String([]string{}, nil).(*vector).payload.(Appliable)
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			if payload.SupportsApplier(data.applier) != data.isSupported {
+				t.Error("Applier's support is incorrect.")
+			}
+		})
+	}
+}
+
+func TestStringPayload_Apply(t *testing.T) {
+	testData := []struct {
+		name    string
+		applier interface{}
+		dataIn  []string
+		naIn    []bool
+		dataOut []string
+		naOut   []bool
+	}{
+		{
+			name: "regular",
+			applier: func(_ int, val string, na bool) (string, bool) {
+				return fmt.Sprintf("%s.%s", val, val), na
+			},
+			dataIn:  []string{"1", "9", "3", "5", "7"},
+			naIn:    []bool{false, true, false, true, false},
+			dataOut: []string{"1.1", "", "3.3", "", "7.7"},
+			naOut:   []bool{false, true, false, true, false},
+		},
+		{
+			name: "manipulate na",
+			applier: func(idx int, val string, na bool) (string, bool) {
+				if idx == 5 {
+					return "1", true
+				}
+				return val, na
+			},
+			dataIn:  []string{"1", "2", "3", "4", "5"},
+			naIn:    []bool{false, false, true, false, false},
+			dataOut: []string{"1", "2", "", "4", ""},
+			naOut:   []bool{false, false, true, false, true},
+		},
+		{
+			name:    "incorrect applier",
+			applier: func(int, string, bool) bool { return true },
+			dataIn:  []string{"1", "9", "3", "5", "7"},
+			naIn:    []bool{false, true, false, true, false},
+			dataOut: []string{"", "", "", "", ""},
+			naOut:   []bool{true, true, true, true, true},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			payload := String(data.dataIn, data.naIn).(*vector).payload
+			payloadOut := payload.(Appliable).Apply(data.applier).(*stringPayload)
+
+			if !reflect.DeepEqual(data.dataOut, payloadOut.data) {
+				t.Error(fmt.Sprintf("Output data (%v) does not match expected (%v)",
+					payloadOut.data, data.dataOut))
+			}
+			if !reflect.DeepEqual(data.naOut, payloadOut.na) {
+				t.Error(fmt.Sprintf("Output NA (%v) does not match expected (%v)",
+					payloadOut.na, data.naOut))
 			}
 		})
 	}

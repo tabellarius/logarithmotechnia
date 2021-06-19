@@ -65,6 +65,50 @@ func (p *timePayload) selectByFunc(byFunc func(int, time.Time, bool) bool) []boo
 	return booleans
 }
 
+func (p *timePayload) SupportsApplier(applier interface{}) bool {
+	if _, ok := applier.(func(int, time.Time, bool) (time.Time, bool)); ok {
+		return true
+	}
+
+	return false
+}
+
+func (p *timePayload) Apply(applier interface{}) Payload {
+	var data []time.Time
+	var na []bool
+
+	if applyFunc, ok := applier.(func(int, time.Time, bool) (time.Time, bool)); ok {
+		data, na = p.applyByFunc(applyFunc)
+	} else {
+		return p.NAPayload()
+	}
+
+	return &timePayload{
+		length:  p.length,
+		data:    data,
+		printer: p.printer,
+		DefNAble: DefNAble{
+			na: na,
+		},
+	}
+}
+
+func (p *timePayload) applyByFunc(applyFunc func(int, time.Time, bool) (time.Time, bool)) ([]time.Time, []bool) {
+	data := make([]time.Time, p.length)
+	na := make([]bool, p.length)
+
+	for i := 0; i < p.length; i++ {
+		dataVal, naVal := applyFunc(i+1, p.data[i], p.na[i])
+		if naVal {
+			dataVal = time.Time{}
+		}
+		data[i] = dataVal
+		na[i] = naVal
+	}
+
+	return data, na
+}
+
 func (p *timePayload) Strings() ([]string, []bool) {
 	if p.length == 0 {
 		return []string{}, nil
@@ -102,6 +146,23 @@ func (p *timePayload) Times() ([]time.Time, []bool) {
 
 func (p *timePayload) StrForElem(idx int) string {
 	return p.data[idx-1].Format(p.printer.Format)
+}
+
+func (p *timePayload) NAPayload() Payload {
+	data := make([]time.Time, p.length)
+	na := make([]bool, p.length)
+	for i := 0; i < p.length; i++ {
+		na[i] = true
+	}
+
+	return &timePayload{
+		length:  p.length,
+		data:    data,
+		printer: p.printer,
+		DefNAble: DefNAble{
+			na: na,
+		},
+	}
 }
 
 func Time(data []time.Time, na []bool, options ...Config) Vector {
