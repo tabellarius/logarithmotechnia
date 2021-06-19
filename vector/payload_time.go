@@ -15,6 +15,10 @@ type timePayload struct {
 	DefNAble
 }
 
+func (p *timePayload) Type() string {
+	return "time"
+}
+
 func (p *timePayload) Len() int {
 	return p.length
 }

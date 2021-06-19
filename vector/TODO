@@ -1,6 +1,9 @@
 Vector. + Payload.Type()
 Select -> Whicher
-Convertable
+Convertable + Convert()
 Payload Interface
 Payload NA + remove NAVector()
 vector -> DefVector
+Test for empty
+Summarizable + Summarize()
++ Options() (сбор опций с Payload и Vector для лёгкого создания векторов)

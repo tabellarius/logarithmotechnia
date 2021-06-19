@@ -9,6 +9,7 @@ import (
 // Vector is an interface for a different vector types. This structure is similar to R-vectors: it starts from 1,
 // allows for an extensive indexing, supports IsNA-values and named variables
 type Vector interface {
+	Type() string
 	Len() int
 	Clone() Vector
 
@@ -36,6 +37,7 @@ type Vector interface {
 }
 
 type Payload interface {
+	Type() string
 	Len() int
 	ByIndices(indices []int) Payload
 	StrForElem(idx int) string
@@ -87,6 +89,10 @@ type vector struct {
 	DefNameable
 	payload Payload
 	report  Report
+}
+
+func (v *vector) Type() string {
+	return v.payload.Type()
 }
 
 // Len returns length of vector

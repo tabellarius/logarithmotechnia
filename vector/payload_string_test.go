@@ -144,7 +144,14 @@ func TestString(t *testing.T) {
 	}
 }
 
-func TestString_Len(t *testing.T) {
+func TestStringPayload_Type(t *testing.T) {
+	vec := String([]string{}, nil)
+	if vec.Type() != "string" {
+		t.Error("Type is incorrect.")
+	}
+}
+
+func TestStringPayload_Len(t *testing.T) {
 	testData := []struct {
 		in        []string
 		outLength int
@@ -166,7 +173,7 @@ func TestString_Len(t *testing.T) {
 	}
 }
 
-func TestString_Booleans(t *testing.T) {
+func TestStringPayload_Booleans(t *testing.T) {
 	testData := []struct {
 		in    []string
 		inNA  []bool
@@ -209,7 +216,7 @@ func TestString_Booleans(t *testing.T) {
 	}
 }
 
-func TestString_Integers(t *testing.T) {
+func TestStringPayload_Integers(t *testing.T) {
 	testData := []struct {
 		in    []string
 		inNA  []bool
@@ -252,7 +259,7 @@ func TestString_Integers(t *testing.T) {
 	}
 }
 
-func TestString_Floats(t *testing.T) {
+func TestStringPayload_Floats(t *testing.T) {
 	testData := []struct {
 		in    []string
 		inNA  []bool
@@ -305,7 +312,7 @@ func TestString_Floats(t *testing.T) {
 	}
 }
 
-func TestString_Complexes(t *testing.T) {
+func TestStringPayload_Complexes(t *testing.T) {
 	testData := []struct {
 		in    []string
 		inNA  []bool
@@ -352,7 +359,7 @@ func TestString_Complexes(t *testing.T) {
 	}
 }
 
-func TestString_Strings(t *testing.T) {
+func TestStringPayload_Strings(t *testing.T) {
 	testData := []struct {
 		in    []string
 		inNA  []bool
@@ -395,7 +402,7 @@ func TestString_Strings(t *testing.T) {
 	}
 }
 
-func TestString_ByIndices(t *testing.T) {
+func TestStringPayload_ByIndices(t *testing.T) {
 	vec := String([]string{"1", "2", "3", "4", "5"}, []bool{false, false, false, false, true})
 	testData := []struct {
 		name    string
@@ -436,7 +443,7 @@ func TestString_ByIndices(t *testing.T) {
 	}
 }
 
-func TestString_SupportsSelector(t *testing.T) {
+func TestStringPayload_SupportsSelector(t *testing.T) {
 	testData := []struct {
 		name        string
 		filter      interface{}
@@ -464,7 +471,7 @@ func TestString_SupportsSelector(t *testing.T) {
 	}
 }
 
-func TestString_Select(t *testing.T) {
+func TestStringPayload_Select(t *testing.T) {
 	testData := []struct {
 		name string
 		fn   interface{}
