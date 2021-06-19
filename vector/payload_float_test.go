@@ -145,7 +145,14 @@ func TestFloat(t *testing.T) {
 	}
 }
 
-func TestFloat_Len(t *testing.T) {
+func TestFloatPayload_Type(t *testing.T) {
+	vec := Float([]float64{}, nil)
+	if vec.Type() != "float" {
+		t.Error("Type is incorrect.")
+	}
+}
+
+func TestFloatPayload_Len(t *testing.T) {
 	testData := []struct {
 		in        []float64
 		outLength int
@@ -167,7 +174,7 @@ func TestFloat_Len(t *testing.T) {
 	}
 }
 
-func TestFloat_Booleans(t *testing.T) {
+func TestFloatPayload_Booleans(t *testing.T) {
 	testData := []struct {
 		in    []float64
 		inNA  []bool
@@ -210,7 +217,7 @@ func TestFloat_Booleans(t *testing.T) {
 	}
 }
 
-func TestFloat_Integers(t *testing.T) {
+func TestFloatPayload_Integers(t *testing.T) {
 	testData := []struct {
 		in    []float64
 		inNA  []bool
@@ -253,7 +260,7 @@ func TestFloat_Integers(t *testing.T) {
 	}
 }
 
-func TestFloat_Floats(t *testing.T) {
+func TestFloatPayload_Floats(t *testing.T) {
 	testData := []struct {
 		in    []float64
 		inNA  []bool
@@ -296,7 +303,7 @@ func TestFloat_Floats(t *testing.T) {
 	}
 }
 
-func TestFloat_Complexes(t *testing.T) {
+func TestFloatPayload_Complexes(t *testing.T) {
 	testData := []struct {
 		in    []float64
 		inNA  []bool
@@ -339,7 +346,7 @@ func TestFloat_Complexes(t *testing.T) {
 	}
 }
 
-func TestFloat_Strings(t *testing.T) {
+func TestFloatPayload_Strings(t *testing.T) {
 	testData := []struct {
 		in    []float64
 		inNA  []bool
@@ -382,7 +389,7 @@ func TestFloat_Strings(t *testing.T) {
 	}
 }
 
-func TestFloat_ByIndices(t *testing.T) {
+func TestFloatPayload_ByIndices(t *testing.T) {
 	vec := Float([]float64{1, 2, 3, 4, 5}, []bool{false, false, false, false, true})
 	testData := []struct {
 		name    string
@@ -423,7 +430,7 @@ func TestFloat_ByIndices(t *testing.T) {
 	}
 }
 
-func TestFloat_SupportsSelector(t *testing.T) {
+func TestFloatPayload_SupportsSelector(t *testing.T) {
 	testData := []struct {
 		name        string
 		filter      interface{}
@@ -451,7 +458,7 @@ func TestFloat_SupportsSelector(t *testing.T) {
 	}
 }
 
-func TestFloat_Select(t *testing.T) {
+func TestFloatPayload_Select(t *testing.T) {
 	testData := []struct {
 		name string
 		fn   interface{}

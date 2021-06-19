@@ -3,6 +3,10 @@ package vector
 type emptyPayload struct {
 }
 
+func (e *emptyPayload) Type() string {
+	return "empty"
+}
+
 func (e *emptyPayload) Len() int {
 	return 0
 }

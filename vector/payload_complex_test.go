@@ -145,7 +145,14 @@ func TestComplex(t *testing.T) {
 	}
 }
 
-func TestComplex_Len(t *testing.T) {
+func TestComplexPayload_Type(t *testing.T) {
+	vec := Complex([]complex128{}, nil)
+	if vec.Type() != "complex" {
+		t.Error("Type is incorrect.")
+	}
+}
+
+func TestComplexPayload_Len(t *testing.T) {
 	testData := []struct {
 		in        []float64
 		outLength int
@@ -167,7 +174,7 @@ func TestComplex_Len(t *testing.T) {
 	}
 }
 
-func TestComplex_ByIndices(t *testing.T) {
+func TestComplexPayload_ByIndices(t *testing.T) {
 	vec := Complex([]complex128{1, 2, 3, 4, 5}, []bool{false, false, false, false, true})
 	testData := []struct {
 		name    string
@@ -208,7 +215,7 @@ func TestComplex_ByIndices(t *testing.T) {
 	}
 }
 
-func TestComplex_SupportsSelector(t *testing.T) {
+func TestComplexPayload_SupportsSelector(t *testing.T) {
 	testData := []struct {
 		name        string
 		filter      interface{}
@@ -236,7 +243,7 @@ func TestComplex_SupportsSelector(t *testing.T) {
 	}
 }
 
-func TestComplex_Select(t *testing.T) {
+func TestComplexPayload_Select(t *testing.T) {
 	testData := []struct {
 		name string
 		fn   interface{}
@@ -363,7 +370,7 @@ func TestComplexPayload_Apply(t *testing.T) {
 	}
 }
 
-func TestComplex_Booleans(t *testing.T) {
+func TestComplexPayload_Booleans(t *testing.T) {
 	testData := []struct {
 		in    []complex128
 		inNA  []bool
@@ -406,7 +413,7 @@ func TestComplex_Booleans(t *testing.T) {
 	}
 }
 
-func TestComplex_Integers(t *testing.T) {
+func TestComplexPayload_Integers(t *testing.T) {
 	testData := []struct {
 		in    []complex128
 		inNA  []bool
@@ -449,7 +456,7 @@ func TestComplex_Integers(t *testing.T) {
 	}
 }
 
-func TestComplex_Floats(t *testing.T) {
+func TestComplexPayload_Floats(t *testing.T) {
 	testData := []struct {
 		in    []complex128
 		inNA  []bool
@@ -492,7 +499,7 @@ func TestComplex_Floats(t *testing.T) {
 	}
 }
 
-func TestComplex_Complexes(t *testing.T) {
+func TestComplexPayload_Complexes(t *testing.T) {
 	testData := []struct {
 		in    []complex128
 		inNA  []bool
@@ -535,7 +542,7 @@ func TestComplex_Complexes(t *testing.T) {
 	}
 }
 
-func TestComplex_Strings(t *testing.T) {
+func TestComplexPayload_Strings(t *testing.T) {
 	testData := []struct {
 		in    []complex128
 		inNA  []bool

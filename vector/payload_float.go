@@ -17,6 +17,10 @@ type floatPayload struct {
 	DefNAble
 }
 
+func (p *floatPayload) Type() string {
+	return "float"
+}
+
 func (p *floatPayload) Len() int {
 	return p.length
 }

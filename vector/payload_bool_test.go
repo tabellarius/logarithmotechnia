@@ -144,7 +144,14 @@ func TestBoolean(t *testing.T) {
 	}
 }
 
-func TestBoolean_Len(t *testing.T) {
+func TestBooleanPayload_Type(t *testing.T) {
+	vec := Boolean([]bool{}, nil)
+	if vec.Type() != "boolean" {
+		t.Error("Type is incorrect.")
+	}
+}
+
+func TestBooleanPayload_Len(t *testing.T) {
 	testData := []struct {
 		in        []bool
 		outLength int
@@ -166,7 +173,7 @@ func TestBoolean_Len(t *testing.T) {
 	}
 }
 
-func TestBoolean_Booleans(t *testing.T) {
+func TestBooleanPayload_Booleans(t *testing.T) {
 	testData := []struct {
 		in    []bool
 		inNA  []bool
@@ -209,7 +216,7 @@ func TestBoolean_Booleans(t *testing.T) {
 	}
 }
 
-func TestBoolean_Integers(t *testing.T) {
+func TestBooleanPayload_Integers(t *testing.T) {
 	testData := []struct {
 		in    []bool
 		inNA  []bool
@@ -252,7 +259,7 @@ func TestBoolean_Integers(t *testing.T) {
 	}
 }
 
-func TestBoolean_Floats(t *testing.T) {
+func TestBooleanPayload_Floats(t *testing.T) {
 	testData := []struct {
 		in    []bool
 		inNA  []bool
@@ -305,7 +312,7 @@ func TestBoolean_Floats(t *testing.T) {
 	}
 }
 
-func TestBoolean_Complexes(t *testing.T) {
+func TestBooleanPayload_Complexes(t *testing.T) {
 	testData := []struct {
 		in    []bool
 		inNA  []bool
@@ -358,7 +365,7 @@ func TestBoolean_Complexes(t *testing.T) {
 	}
 }
 
-func TestBoolean_Strings(t *testing.T) {
+func TestBooleanPayload_Strings(t *testing.T) {
 	testData := []struct {
 		in    []bool
 		inNA  []bool
@@ -401,7 +408,7 @@ func TestBoolean_Strings(t *testing.T) {
 	}
 }
 
-func TestBoolean_ByIndices(t *testing.T) {
+func TestBooleanPayload_ByIndices(t *testing.T) {
 	vec := Boolean([]bool{true, false, true, false, true}, []bool{false, false, false, false, true})
 	testData := []struct {
 		name    string
@@ -442,7 +449,7 @@ func TestBoolean_ByIndices(t *testing.T) {
 	}
 }
 
-func TestBoolean_SupportsSelector(t *testing.T) {
+func TestBooleanPayload_SupportsSelector(t *testing.T) {
 	testData := []struct {
 		name        string
 		filter      interface{}
@@ -470,7 +477,7 @@ func TestBoolean_SupportsSelector(t *testing.T) {
 	}
 }
 
-func TestBoolean_Select(t *testing.T) {
+func TestBooleanPayload_Select(t *testing.T) {
 	testData := []struct {
 		name string
 		fn   interface{}

@@ -12,6 +12,10 @@ type complexPayload struct {
 	DefNAble
 }
 
+func (p *complexPayload) Type() string {
+	return "complex"
+}
+
 func (p *complexPayload) Len() int {
 	return p.length
 }

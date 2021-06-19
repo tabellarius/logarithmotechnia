@@ -147,6 +147,13 @@ func TestTime(t *testing.T) {
 	}
 }
 
+func TestTimePayload_Type(t *testing.T) {
+	vec := Time([]time.Time{}, nil)
+	if vec.Type() != "time" {
+		t.Error("Type is incorrect.")
+	}
+}
+
 func TestTimePayload_Len(t *testing.T) {
 	testData := []struct {
 		in        []string
@@ -181,7 +188,7 @@ func TestTimePayload_Len(t *testing.T) {
 	}
 }
 
-func TestTime_Strings(t *testing.T) {
+func TestTimePayload_Strings(t *testing.T) {
 	testData := []struct {
 		in    []string
 		inNA  []bool

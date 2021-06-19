@@ -146,7 +146,14 @@ func TestInteger(t *testing.T) {
 	}
 }
 
-func TestInteger_Len(t *testing.T) {
+func TestIntegerPayload_Type(t *testing.T) {
+	vec := Integer([]int{}, nil)
+	if vec.Type() != "integer" {
+		t.Error("Type is incorrect.")
+	}
+}
+
+func TestIntegerPayload_Len(t *testing.T) {
 	testData := []struct {
 		in        []int
 		outLength int
@@ -168,7 +175,7 @@ func TestInteger_Len(t *testing.T) {
 	}
 }
 
-func TestInteger_Booleans(t *testing.T) {
+func TestIntegerPayload_Booleans(t *testing.T) {
 	testData := []struct {
 		in    []int
 		inNA  []bool
@@ -211,7 +218,7 @@ func TestInteger_Booleans(t *testing.T) {
 	}
 }
 
-func TestInteger_Integers(t *testing.T) {
+func TestIntegerPayload_Integers(t *testing.T) {
 	testData := []struct {
 		in    []int
 		inNA  []bool
@@ -254,7 +261,7 @@ func TestInteger_Integers(t *testing.T) {
 	}
 }
 
-func TestInteger_Floats(t *testing.T) {
+func TestIntegerPayload_Floats(t *testing.T) {
 	testData := []struct {
 		in    []int
 		inNA  []bool
@@ -297,7 +304,7 @@ func TestInteger_Floats(t *testing.T) {
 	}
 }
 
-func TestInteger_Complexes(t *testing.T) {
+func TestIntegerPayload_Complexes(t *testing.T) {
 	testData := []struct {
 		in    []int
 		inNA  []bool
@@ -340,7 +347,7 @@ func TestInteger_Complexes(t *testing.T) {
 	}
 }
 
-func TestInteger_Strings(t *testing.T) {
+func TestIntegerPayload_Strings(t *testing.T) {
 	testData := []struct {
 		in    []int
 		inNA  []bool
@@ -383,7 +390,7 @@ func TestInteger_Strings(t *testing.T) {
 	}
 }
 
-func TestInteger_ByIndices(t *testing.T) {
+func TestIntegerPayload_ByIndices(t *testing.T) {
 	vec := Integer([]int{1, 2, 3, 4, 5}, []bool{false, false, false, false, true})
 	testData := []struct {
 		name    string
@@ -424,7 +431,7 @@ func TestInteger_ByIndices(t *testing.T) {
 	}
 }
 
-func TestInteger_SupportsSelector(t *testing.T) {
+func TestIntegerPayload_SupportsSelector(t *testing.T) {
 	testData := []struct {
 		name        string
 		filter      interface{}

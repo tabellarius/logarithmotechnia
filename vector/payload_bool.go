@@ -11,6 +11,10 @@ type booleanPayload struct {
 	DefNAble
 }
 
+func (p *booleanPayload) Type() string {
+	return "boolean"
+}
+
 func (p *booleanPayload) Len() int {
 	return p.length
 }

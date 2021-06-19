@@ -12,6 +12,10 @@ type stringPayload struct {
 	DefNAble
 }
 
+func (p *stringPayload) Type() string {
+	return "string"
+}
+
 func (p *stringPayload) Len() int {
 	return p.length
 }
