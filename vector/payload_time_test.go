@@ -360,6 +360,93 @@ func TestTimePayload_Select(t *testing.T) {
 	}
 }
 
+func TestTimePayload_SupportsApplier(t *testing.T) {
+	testData := []struct {
+		name        string
+		applier     interface{}
+		isSupported bool
+	}{
+		{
+			name:        "func(int, time.Time, bool) (time.Time, bool)",
+			applier:     func(int, time.Time, bool) (time.Time, bool) { return time.Time{}, true },
+			isSupported: true,
+		},
+		{
+			name:        "func(int, time.Time, bool) bool",
+			applier:     func(int, time.Time, bool) bool { return true },
+			isSupported: false,
+		},
+	}
+
+	payload := Time([]time.Time{}, nil).(*vector).payload.(Appliable)
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			if payload.SupportsApplier(data.applier) != data.isSupported {
+				t.Error("Applier's support is incorrect.")
+			}
+		})
+	}
+}
+
+func TestTimePayload_Apply(t *testing.T) {
+	testData := []struct {
+		name    string
+		applier interface{}
+		dataIn  []time.Time
+		naIn    []bool
+		dataOut []time.Time
+		naOut   []bool
+	}{
+		{
+			name: "regular",
+			applier: func(_ int, val time.Time, na bool) (time.Time, bool) {
+				return val.Add(24 * time.Hour), na
+			},
+			dataIn:  toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z"}),
+			naIn:    []bool{false, true, false},
+			dataOut: toTimeData([]string{"2006-01-03T15:04:05+07:00", "0001-01-01T00:00:00Z", "1800-06-11T11:00:00Z"}),
+			naOut:   []bool{false, true, false},
+		},
+		{
+			name: "manipulate na",
+			applier: func(idx int, val time.Time, na bool) (time.Time, bool) {
+				if idx == 3 {
+					return time.Time{}, true
+				}
+				return val, na
+			},
+			dataIn:  toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z"}),
+			naIn:    []bool{false, false, false},
+			dataOut: toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "0001-01-01T00:00:00Z"}),
+			naOut:   []bool{false, false, true},
+		},
+		{
+			name:    "incorrect applier",
+			applier: func(int, string, bool) bool { return true },
+			dataIn:  toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z"}),
+			naIn:    []bool{false, false, false},
+			dataOut: toTimeData([]string{"0001-01-01T00:00:00Z", "0001-01-01T00:00:00Z", "0001-01-01T00:00:00Z"}),
+			naOut:   []bool{true, true, true},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			payload := Time(data.dataIn, data.naIn).(*vector).payload
+			payloadOut := payload.(Appliable).Apply(data.applier).(*timePayload)
+
+			if !reflect.DeepEqual(data.dataOut, payloadOut.data) {
+				t.Error(fmt.Sprintf("Output data (%v) does not match expected (%v)",
+					payloadOut.data, data.dataOut))
+			}
+			if !reflect.DeepEqual(data.naOut, payloadOut.na) {
+				t.Error(fmt.Sprintf("Output NA (%v) does not match expected (%v)",
+					payloadOut.na, data.naOut))
+			}
+		})
+	}
+}
+
 func toTimeData(times []string) []time.Time {
 	timeData := make([]time.Time, len(times))
 
