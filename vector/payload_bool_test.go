@@ -467,10 +467,10 @@ func TestBooleanPayload_SupportsSelector(t *testing.T) {
 		},
 	}
 
-	payload := Boolean([]bool{true}, nil).(*vector).payload.(Selectable)
+	payload := Boolean([]bool{true}, nil).(*vector).payload.(Whichable)
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			if payload.SupportsSelector(data.filter) != data.isSupported {
+			if payload.SupportsWhicher(data.filter) != data.isSupported {
 				t.Error("Selector's support is incorrect.")
 			}
 		})
@@ -505,11 +505,11 @@ func TestBooleanPayload_Select(t *testing.T) {
 		},
 	}
 
-	payload := Boolean([]bool{true, false, true, false, true, false, true, false, true, false}, nil).(*vector).payload.(Selectable)
+	payload := Boolean([]bool{true, false, true, false, true, false, true, false, true, false}, nil).(*vector).payload.(Whichable)
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			result := payload.Select(data.fn)
+			result := payload.Which(data.fn)
 			if !reflect.DeepEqual(result, data.out) {
 				t.Error(fmt.Sprintf("Result (%v) is not equal to out (%v)", result, data.out))
 			}

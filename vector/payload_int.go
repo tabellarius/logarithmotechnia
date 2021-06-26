@@ -41,16 +41,16 @@ func (p *integerPayload) ByIndices(indices []int) Payload {
 	}
 }
 
-func (p *integerPayload) SupportsSelector(selector interface{}) bool {
-	if _, ok := selector.(func(int, int, bool) bool); ok {
+func (p *integerPayload) SupportsWhicher(whicher interface{}) bool {
+	if _, ok := whicher.(func(int, int, bool) bool); ok {
 		return true
 	}
 
 	return false
 }
 
-func (p *integerPayload) Select(selector interface{}) []bool {
-	if byFunc, ok := selector.(func(int, int, bool) bool); ok {
+func (p *integerPayload) Which(whicher interface{}) []bool {
+	if byFunc, ok := whicher.(func(int, int, bool) bool); ok {
 		return p.selectByFunc(byFunc)
 	}
 

@@ -38,16 +38,16 @@ func (p *complexPayload) ByIndices(indices []int) Payload {
 	}
 }
 
-func (p *complexPayload) SupportsSelector(selector interface{}) bool {
-	if _, ok := selector.(func(int, complex128, bool) bool); ok {
+func (p *complexPayload) SupportsWhicher(whicher interface{}) bool {
+	if _, ok := whicher.(func(int, complex128, bool) bool); ok {
 		return true
 	}
 
 	return false
 }
 
-func (p *complexPayload) Select(selector interface{}) []bool {
-	if byFunc, ok := selector.(func(int, complex128, bool) bool); ok {
+func (p *complexPayload) Which(whicher interface{}) []bool {
+	if byFunc, ok := whicher.(func(int, complex128, bool) bool); ok {
 		return p.selectByFunc(byFunc)
 	}
 

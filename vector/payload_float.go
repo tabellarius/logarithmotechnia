@@ -43,16 +43,16 @@ func (p *floatPayload) ByIndices(indices []int) Payload {
 	}
 }
 
-func (p *floatPayload) SupportsSelector(selector interface{}) bool {
-	if _, ok := selector.(func(int, float64, bool) bool); ok {
+func (p *floatPayload) SupportsWhicher(whicher interface{}) bool {
+	if _, ok := whicher.(func(int, float64, bool) bool); ok {
 		return true
 	}
 
 	return false
 }
 
-func (p *floatPayload) Select(selector interface{}) []bool {
-	if byFunc, ok := selector.(func(int, float64, bool) bool); ok {
+func (p *floatPayload) Which(whicher interface{}) []bool {
+	if byFunc, ok := whicher.(func(int, float64, bool) bool); ok {
 		return p.selectByFunc(byFunc)
 	}
 

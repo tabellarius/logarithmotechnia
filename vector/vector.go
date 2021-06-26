@@ -15,9 +15,9 @@ type Vector interface {
 
 	ByIndices(indices []int) Vector
 	ByNames(names []string) Vector
-	Filter(selector interface{}) Vector
-	SupportsSelector(selector interface{}) bool
-	Select(selector interface{}) []bool
+	Filter(whicher interface{}) Vector
+	SupportsWhicher(whicher interface{}) bool
+	Which(whicher interface{}) []bool
 	SupportsApplier(applier interface{}) bool
 	Apply(applier interface{}) Vector
 
@@ -49,9 +49,9 @@ type FromTo struct {
 	to   int
 }
 
-type Selectable interface {
-	SupportsSelector(filter interface{}) bool
-	Select(selector interface{}) []bool
+type Whichable interface {
+	SupportsWhicher(whicher interface{}) bool
+	Which(which interface{}) []bool
 }
 
 type Appliable interface {
@@ -158,51 +158,51 @@ func (v *vector) ByNames(names []string) Vector {
 	return v.ByIndices(indices)
 }
 
-func (v *vector) Filter(selector interface{}) Vector {
-	if index, ok := selector.(int); ok {
+func (v *vector) Filter(whicher interface{}) Vector {
+	if index, ok := whicher.(int); ok {
 		return v.ByIndices([]int{index})
 	}
 
-	if indices, ok := selector.([]int); ok {
+	if indices, ok := whicher.([]int); ok {
 		return v.ByIndices(indices)
 	}
 
-	if name, ok := selector.(string); ok {
+	if name, ok := whicher.(string); ok {
 		return v.ByNames([]string{name})
 	}
 
-	if names, ok := selector.([]string); ok {
+	if names, ok := whicher.([]string); ok {
 		return v.ByNames(names)
 	}
 
-	if fromTo, ok := selector.(FromTo); ok {
+	if fromTo, ok := whicher.(FromTo); ok {
 		return v.ByIndices(v.filterByFromTo(fromTo.from, fromTo.to))
 	}
 
-	if booleans, ok := selector.([]bool); ok {
+	if booleans, ok := whicher.([]bool); ok {
 		return v.ByIndices(v.filterByBooleans(booleans))
 	}
 
-	if v.SupportsSelector(selector) {
-		return v.ByIndices(v.filterByBooleans(v.Select(selector)))
+	if v.SupportsWhicher(whicher) {
+		return v.ByIndices(v.filterByBooleans(v.Which(whicher)))
 	}
 
 	return Empty()
 }
 
-func (v *vector) SupportsSelector(selector interface{}) bool {
-	payload, ok := v.payload.(Selectable)
+func (v *vector) SupportsWhicher(whicher interface{}) bool {
+	payload, ok := v.payload.(Whichable)
 	if ok {
-		return payload.SupportsSelector(selector)
+		return payload.SupportsWhicher(whicher)
 	}
 
 	return false
 }
 
-func (v *vector) Select(selector interface{}) []bool {
-	payload, ok := v.payload.(Selectable)
-	if ok && payload.SupportsSelector(selector) {
-		return payload.Select(selector)
+func (v *vector) Which(whicher interface{}) []bool {
+	payload, ok := v.payload.(Whichable)
+	if ok && payload.SupportsWhicher(whicher) {
+		return payload.Which(whicher)
 	}
 
 	return make([]bool, v.length)

@@ -358,115 +358,115 @@ func TestVector_Filter(t *testing.T) {
 		OptionNamesMap(map[string]int{"one": 1, "three": 3, "five": 5}),
 	)
 	testData := []struct {
-		name     string
-		selector interface{}
-		out      []int
-		outNA    []bool
-		length   int
+		name    string
+		whicher interface{}
+		out     []int
+		outNA   []bool
+		length  int
 	}{
 		{
-			name:     "indices",
-			selector: []int{5, 3, 1},
-			out:      []int{5, 0, 1},
-			outNA:    []bool{false, true, false},
-			length:   3,
+			name:    "indices",
+			whicher: []int{5, 3, 1},
+			out:     []int{5, 0, 1},
+			outNA:   []bool{false, true, false},
+			length:  3,
 		},
 		{
-			name:     "idx",
-			selector: []int{1},
-			out:      []int{1},
-			outNA:    []bool{false},
-			length:   1,
+			name:    "idx",
+			whicher: []int{1},
+			out:     []int{1},
+			outNA:   []bool{false},
+			length:  1,
 		},
 		{
-			name:     "FromTo straight",
-			selector: FromTo{2, 4},
-			out:      []int{2, 0, 4},
-			outNA:    []bool{false, true, false},
-			length:   3,
+			name:    "FromTo straight",
+			whicher: FromTo{2, 4},
+			out:     []int{2, 0, 4},
+			outNA:   []bool{false, true, false},
+			length:  3,
 		},
 		{
-			name:     "FromTo reverse",
-			selector: FromTo{4, 2},
-			out:      []int{4, 0, 2},
-			outNA:    []bool{false, true, false},
-			length:   3,
+			name:    "FromTo reverse",
+			whicher: FromTo{4, 2},
+			out:     []int{4, 0, 2},
+			outNA:   []bool{false, true, false},
+			length:  3,
 		},
 		{
-			name:     "FromTo with remove straight",
-			selector: FromTo{-2, -4},
-			out:      []int{1, 5},
-			outNA:    []bool{false, false},
-			length:   2,
+			name:    "FromTo with remove straight",
+			whicher: FromTo{-2, -4},
+			out:     []int{1, 5},
+			outNA:   []bool{false, false},
+			length:  2,
 		},
 		{
-			name:     "FromTo with remove reverse",
-			selector: FromTo{-4, -2},
-			out:      []int{1, 5},
-			outNA:    []bool{false, false},
-			length:   2,
+			name:    "FromTo with remove reverse",
+			whicher: FromTo{-4, -2},
+			out:     []int{1, 5},
+			outNA:   []bool{false, false},
+			length:  2,
 		},
 		{
-			name:     "FromTo straight with incorrect boundaries",
-			selector: FromTo{0, 7},
-			out:      []int{1, 2, 0, 4, 5},
-			outNA:    []bool{false, false, true, false, false},
-			length:   5,
+			name:    "FromTo straight with incorrect boundaries",
+			whicher: FromTo{0, 7},
+			out:     []int{1, 2, 0, 4, 5},
+			outNA:   []bool{false, false, true, false, false},
+			length:  5,
 		},
 		{
-			name:     "FromTo full remove with incorrect boundaries",
-			selector: FromTo{0, -7},
-			out:      []int{},
-			outNA:    []bool{},
-			length:   0,
+			name:    "FromTo full remove with incorrect boundaries",
+			whicher: FromTo{0, -7},
+			out:     []int{},
+			outNA:   []bool{},
+			length:  0,
 		},
 		{
-			name:     "FromTo different signs",
-			selector: FromTo{-2, 4},
-			out:      []int{},
-			outNA:    []bool{},
-			length:   0,
+			name:    "FromTo different signs",
+			whicher: FromTo{-2, 4},
+			out:     []int{},
+			outNA:   []bool{},
+			length:  0,
 		},
 		{
-			name:     "FromTo different signs reverse",
-			selector: FromTo{2, -4},
-			out:      []int{},
-			outNA:    []bool{},
-			length:   0,
+			name:    "FromTo different signs reverse",
+			whicher: FromTo{2, -4},
+			out:     []int{},
+			outNA:   []bool{},
+			length:  0,
 		},
 		{
-			name:     "booleanPayload",
-			selector: []bool{true, false, true, false, true},
-			out:      []int{1, 0, 5},
-			outNA:    []bool{false, true, false},
-			length:   3,
+			name:    "booleanPayload",
+			whicher: []bool{true, false, true, false, true},
+			out:     []int{1, 0, 5},
+			outNA:   []bool{false, true, false},
+			length:  3,
 		},
 		{
-			name:     "string",
-			selector: "one",
-			out:      []int{1},
-			outNA:    []bool{false},
-			length:   1,
+			name:    "string",
+			whicher: "one",
+			out:     []int{1},
+			outNA:   []bool{false},
+			length:  1,
 		},
 		{
-			name:     "[]string",
-			selector: []string{"one", "three"},
-			out:      []int{1, 0},
-			outNA:    []bool{false, true},
-			length:   2,
+			name:    "[]string",
+			whicher: []string{"one", "three"},
+			out:     []int{1, 0},
+			outNA:   []bool{false, true},
+			length:  2,
 		},
 		{
-			name:     "byIntFunc",
-			selector: func(_ int, val int, na bool) bool { return !na && val >= 3 },
-			out:      []int{4, 5},
-			outNA:    []bool{false, false},
-			length:   2,
+			name:    "byIntFunc",
+			whicher: func(_ int, val int, na bool) bool { return !na && val >= 3 },
+			out:     []int{4, 5},
+			outNA:   []bool{false, false},
+			length:  2,
 		},
 	}
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			newVec := vec.Filter(data.selector)
+			newVec := vec.Filter(data.whicher)
 			integers, na := newVec.Integers()
 			if !reflect.DeepEqual(integers, data.out) {
 				t.Error(fmt.Sprintf("Result (%v) is not equal to expected (%v)", integers, data.out))
@@ -716,33 +716,33 @@ func TestVector_Clone(t *testing.T) {
 	}
 }
 
-func TestVector_SupportsSelector(t *testing.T) {
+func TestVector_Supportswhicher(t *testing.T) {
 	testData := []struct {
-		name             string
-		vec              Vector
-		selector         interface{}
-		supportsSelector bool
+		name            string
+		vec             Vector
+		whicher         interface{}
+		supportswhicher bool
 	}{
 		{
-			name:             "integerPayload vector + valid selector",
-			vec:              Integer([]int{1, 2, 3}, nil),
-			selector:         func(_ int, val int, _ bool) bool { return val == 1 || val == 3 },
-			supportsSelector: true,
+			name:            "integerPayload vector + valid whicher",
+			vec:             Integer([]int{1, 2, 3}, nil),
+			whicher:         func(_ int, val int, _ bool) bool { return val == 1 || val == 3 },
+			supportswhicher: true,
 		},
 		{
-			name:             "integerPayload vector + invalid selector",
-			vec:              Integer([]int{1, 2, 3}, nil),
-			selector:         true,
-			supportsSelector: false,
+			name:            "integerPayload vector + invalid whicher",
+			vec:             Integer([]int{1, 2, 3}, nil),
+			whicher:         true,
+			supportswhicher: false,
 		},
 	}
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			supportsSelector := data.vec.SupportsSelector(data.selector)
-			if supportsSelector != data.supportsSelector {
-				t.Error(fmt.Sprintf("data.vec.Select() (%v) is not equal to data.selected (%v)",
-					supportsSelector, data.supportsSelector))
+			supportswhicher := data.vec.SupportsWhicher(data.whicher)
+			if supportswhicher != data.supportswhicher {
+				t.Error(fmt.Sprintf("data.vec.Which() (%v) is not equal to data.selected (%v)",
+					supportswhicher, data.supportswhicher))
 			}
 		})
 	}
@@ -752,28 +752,28 @@ func TestVector_Select(t *testing.T) {
 	testData := []struct {
 		name     string
 		vec      Vector
-		selector interface{}
+		whicher  interface{}
 		selected []bool
 	}{
 		{
-			name:     "integerPayload vector + valid selector",
+			name:     "integerPayload vector + valid whicher",
 			vec:      Integer([]int{1, 2, 3}, nil),
-			selector: func(_ int, val int, _ bool) bool { return val == 1 || val == 3 },
+			whicher:  func(_ int, val int, _ bool) bool { return val == 1 || val == 3 },
 			selected: []bool{true, false, true},
 		},
 		{
-			name:     "integerPayload vector + invalid selector",
+			name:     "integerPayload vector + invalid whicher",
 			vec:      Integer([]int{1, 2, 3}, nil),
-			selector: true,
+			whicher:  true,
 			selected: []bool{false, false, false},
 		},
 	}
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			selected := data.vec.Select(data.selector)
+			selected := data.vec.Which(data.whicher)
 			if !reflect.DeepEqual(selected, data.selected) {
-				t.Error(fmt.Sprintf("data.vec.Select() (%v) is not equal to data.selected (%v)",
+				t.Error(fmt.Sprintf("data.vec.Which() (%v) is not equal to data.selected (%v)",
 					selected, data.selected))
 			}
 		})
@@ -784,26 +784,26 @@ func TestVector_SupportsApplier(t *testing.T) {
 	testData := []struct {
 		name            string
 		vec             Vector
-		selector        interface{}
+		whicher         interface{}
 		supportsApplier bool
 	}{
 		{
 			name:            "integerPayload vector + valid applier",
 			vec:             Integer([]int{1, 2, 3}, nil),
-			selector:        func(_ int, val int, na bool) (int, bool) { return 10 * val, na },
+			whicher:         func(_ int, val int, na bool) (int, bool) { return 10 * val, na },
 			supportsApplier: true,
 		},
 		{
 			name:            "integerPayload vector + invalid applier",
 			vec:             Integer([]int{1, 2, 3}, nil),
-			selector:        true,
+			whicher:         true,
 			supportsApplier: false,
 		},
 	}
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			supportsApplier := data.vec.SupportsApplier(data.selector)
+			supportsApplier := data.vec.SupportsApplier(data.whicher)
 			if supportsApplier != data.supportsApplier {
 				t.Error(fmt.Sprintf("Applier's support (%v) is not equal to expected (%v)",
 					supportsApplier, data.supportsApplier))

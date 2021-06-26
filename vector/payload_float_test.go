@@ -430,7 +430,7 @@ func TestFloatPayload_ByIndices(t *testing.T) {
 	}
 }
 
-func TestFloatPayload_SupportsSelector(t *testing.T) {
+func TestFloatPayload_Supportswhicher(t *testing.T) {
 	testData := []struct {
 		name        string
 		filter      interface{}
@@ -448,11 +448,11 @@ func TestFloatPayload_SupportsSelector(t *testing.T) {
 		},
 	}
 
-	payload := Float([]float64{1}, nil).(*vector).payload.(Selectable)
+	payload := Float([]float64{1}, nil).(*vector).payload.(Whichable)
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			if payload.SupportsSelector(data.filter) != data.isSupported {
-				t.Error("Selector's support is incorrect.")
+			if payload.SupportsWhicher(data.filter) != data.isSupported {
+				t.Error("whicher's support is incorrect.")
 			}
 		})
 	}
@@ -486,11 +486,11 @@ func TestFloatPayload_Select(t *testing.T) {
 		},
 	}
 
-	payload := Float([]float64{1, 2, 39, 4, 56, 2, 45, 90, 4, 3}, nil).(*vector).payload.(Selectable)
+	payload := Float([]float64{1, 2, 39, 4, 56, 2, 45, 90, 4, 3}, nil).(*vector).payload.(Whichable)
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			result := payload.Select(data.fn)
+			result := payload.Which(data.fn)
 			if !reflect.DeepEqual(result, data.out) {
 				t.Error(fmt.Sprintf("Result (%v) is not equal to out (%v)", result, data.out))
 			}

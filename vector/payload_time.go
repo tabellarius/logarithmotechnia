@@ -41,16 +41,16 @@ func (p *timePayload) ByIndices(indices []int) Payload {
 	}
 }
 
-func (p *timePayload) SupportsSelector(selector interface{}) bool {
-	if _, ok := selector.(func(int, time.Time, bool) bool); ok {
+func (p *timePayload) SupportsWhicher(whicher interface{}) bool {
+	if _, ok := whicher.(func(int, time.Time, bool) bool); ok {
 		return true
 	}
 
 	return false
 }
 
-func (p *timePayload) Select(selector interface{}) []bool {
-	if byFunc, ok := selector.(func(int, time.Time, bool) bool); ok {
+func (p *timePayload) Which(whicher interface{}) []bool {
+	if byFunc, ok := whicher.(func(int, time.Time, bool) bool); ok {
 		return p.selectByFunc(byFunc)
 	}
 
