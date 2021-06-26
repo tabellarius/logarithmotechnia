@@ -33,8 +33,9 @@ func (p *timePayload) ByIndices(indices []int) Payload {
 	}
 
 	return &timePayload{
-		length: len(data),
-		data:   data,
+		length:  len(data),
+		data:    data,
+		printer: p.printer,
 		DefNAble: DefNAble{
 			na: na,
 		},

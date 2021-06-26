@@ -35,8 +35,9 @@ func (p *floatPayload) ByIndices(indices []int) Payload {
 	}
 
 	return &floatPayload{
-		length: len(data),
-		data:   data,
+		length:  len(data),
+		data:    data,
+		printer: p.printer,
 		DefNAble: DefNAble{
 			na: na,
 		},
