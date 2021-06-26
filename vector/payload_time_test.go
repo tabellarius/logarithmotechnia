@@ -325,10 +325,10 @@ func TestTimePayload_SupportsSelector(t *testing.T) {
 		},
 	}
 
-	payload := Time([]time.Time{}, nil).(*vector).payload.(Selectable)
+	payload := Time([]time.Time{}, nil).(*vector).payload.(Whichable)
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			if payload.SupportsSelector(data.filter) != data.isSupported {
+			if payload.SupportsWhicher(data.filter) != data.isSupported {
 				t.Error("Selector's support is incorrect.")
 			}
 		})
@@ -354,13 +354,13 @@ func TestTimePayload_Select(t *testing.T) {
 	}
 
 	payload := Time(toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z"}),
-		[]bool{false, false, true}).(*vector).payload.(Selectable)
+		[]bool{false, false, true}).(*vector).payload.(Whichable)
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			filtered := payload.Select(data.filter)
-			if !reflect.DeepEqual(payload.Select(data.filter), data.out) {
-				t.Error(fmt.Sprintf("payload.Select() (%v) is not equal to out value (%v)",
+			filtered := payload.Which(data.filter)
+			if !reflect.DeepEqual(payload.Which(data.filter), data.out) {
+				t.Error(fmt.Sprintf("payload.Which() (%v) is not equal to out value (%v)",
 					filtered, data.out))
 			}
 		})
