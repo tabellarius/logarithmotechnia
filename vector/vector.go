@@ -51,7 +51,7 @@ type FromTo struct {
 
 type Whichable interface {
 	SupportsWhicher(whicher interface{}) bool
-	Which(which interface{}) []bool
+	Which(whicher interface{}) []bool
 }
 
 type Appliable interface {

@@ -243,7 +243,7 @@ func TestComplexPayload_Supportswhicher(t *testing.T) {
 	}
 }
 
-func TestComplexPayload_Select(t *testing.T) {
+func TestComplexPayload_Whicher(t *testing.T) {
 	testData := []struct {
 		name string
 		fn   interface{}

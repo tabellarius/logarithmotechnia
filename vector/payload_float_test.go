@@ -458,7 +458,7 @@ func TestFloatPayload_Supportswhicher(t *testing.T) {
 	}
 }
 
-func TestFloatPayload_Select(t *testing.T) {
+func TestFloatPayload_Whicher(t *testing.T) {
 	testData := []struct {
 		name string
 		fn   interface{}
