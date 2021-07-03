@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"logarithmotechnia.com/logarithmotechnia/util"
 	"math"
+	"math/cmplx"
 	"reflect"
 	"strconv"
 	"testing"
+	"time"
 )
 
 func TestInterface(t *testing.T) {
@@ -437,6 +439,270 @@ func TestInterfacePayload_Floats(t *testing.T) {
 			floats, na := payload.Floats()
 			if !util.EqualFloatArrays(floats, data.dataOut) {
 				t.Error(fmt.Sprintf("Result data (%v) is not equal to expected (%v)", floats, data.dataOut))
+			}
+			if !reflect.DeepEqual(na, data.naOut) {
+				t.Error(fmt.Sprintf("Result na (%v) is not equal to expected (%v)", na, data.naOut))
+			}
+		})
+	}
+}
+
+func TestInterfacePayload_Complex(t *testing.T) {
+	convertor := func(idx int, val interface{}, na bool) (complex128, bool) {
+		if na {
+			return cmplx.NaN(), true
+		}
+
+		switch v := val.(type) {
+		case complex128:
+			return v, false
+		case float64:
+			return complex(v, 0), false
+		case int:
+			return complex(float64(v), 0), false
+		default:
+			return cmplx.NaN(), true
+		}
+	}
+
+	testData := []struct {
+		name      string
+		dataIn    []interface{}
+		naIn      []bool
+		convertor func(idx int, val interface{}, na bool) (complex128, bool)
+		dataOut   []complex128
+		naOut     []bool
+	}{
+		{
+			name:      "regular",
+			dataIn:    []interface{}{1, 2.5, "three", 4 + 3i, 5, 0},
+			naIn:      []bool{false, false, false, false, true, false},
+			convertor: convertor,
+			dataOut:   []complex128{1, 2.5, cmplx.NaN(), 4 + 3i, cmplx.NaN(), 0},
+			naOut:     []bool{false, false, true, false, true, false},
+		},
+		{
+			name:      "without converter",
+			dataIn:    []interface{}{1, 2.5, "three", 4 + 3i, 5, 0},
+			naIn:      []bool{false, false, false, false, true, false},
+			convertor: nil,
+			dataOut:   []complex128{cmplx.NaN(), cmplx.NaN(), cmplx.NaN(), cmplx.NaN(), cmplx.NaN(), cmplx.NaN()},
+			naOut:     []bool{true, true, true, true, true, true},
+		},
+		{
+			name:      "empty",
+			dataIn:    []interface{}{},
+			naIn:      []bool{},
+			convertor: convertor,
+			dataOut:   []complex128{},
+			naOut:     []bool{},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			vec := Interface(data.dataIn, data.naIn, OptionConvertors(InterfaceConvertors{Complexabler: data.convertor}))
+			payload := vec.(*vector).payload.(*interfacePayload)
+
+			complexes, na := payload.Complexes()
+			if !util.EqualComplexArrays(complexes, data.dataOut) {
+				t.Error(fmt.Sprintf("Result data (%v) is not equal to expected (%v)", complexes, data.dataOut))
+			}
+			if !reflect.DeepEqual(na, data.naOut) {
+				t.Error(fmt.Sprintf("Result na (%v) is not equal to expected (%v)", na, data.naOut))
+			}
+		})
+	}
+}
+
+func TestInterfacePayload_Booleans(t *testing.T) {
+	convertor := func(idx int, val interface{}, na bool) (bool, bool) {
+		if na {
+			return false, true
+		}
+
+		switch v := val.(type) {
+		case bool:
+			return v, false
+		case int:
+			return v > 0, false
+		default:
+			return false, true
+		}
+	}
+
+	testData := []struct {
+		name      string
+		dataIn    []interface{}
+		naIn      []bool
+		convertor func(idx int, val interface{}, na bool) (bool, bool)
+		dataOut   []bool
+		naOut     []bool
+	}{
+		{
+			name:      "regular",
+			dataIn:    []interface{}{1, -2, "three", true, 5, 0},
+			naIn:      []bool{false, false, false, false, true, false},
+			convertor: convertor,
+			dataOut:   []bool{true, false, false, true, false, false},
+			naOut:     []bool{false, false, true, false, true, false},
+		},
+		{
+			name:      "without converter",
+			dataIn:    []interface{}{1, -2, "three", 4 + 3i, 5, 0},
+			naIn:      []bool{false, false, false, false, true, false},
+			convertor: nil,
+			dataOut:   []bool{false, false, false, false, false, false},
+			naOut:     []bool{true, true, true, true, true, true},
+		},
+		{
+			name:      "empty",
+			dataIn:    []interface{}{},
+			naIn:      []bool{},
+			convertor: convertor,
+			dataOut:   []bool{},
+			naOut:     []bool{},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			vec := Interface(data.dataIn, data.naIn, OptionConvertors(InterfaceConvertors{Boolabler: data.convertor}))
+			payload := vec.(*vector).payload.(*interfacePayload)
+
+			bools, na := payload.Booleans()
+			if !reflect.DeepEqual(bools, data.dataOut) {
+				t.Error(fmt.Sprintf("Result data (%v) is not equal to expected (%v)", bools, data.dataOut))
+			}
+			if !reflect.DeepEqual(na, data.naOut) {
+				t.Error(fmt.Sprintf("Result na (%v) is not equal to expected (%v)", na, data.naOut))
+			}
+		})
+	}
+}
+
+func TestInterfacePayload_Strings(t *testing.T) {
+	convertor := func(idx int, val interface{}, na bool) (string, bool) {
+		if na {
+			return "", true
+		}
+
+		switch v := val.(type) {
+		case string:
+			return v, false
+		case int:
+			return strconv.Itoa(v), false
+		default:
+			return "", true
+		}
+	}
+
+	testData := []struct {
+		name      string
+		dataIn    []interface{}
+		naIn      []bool
+		convertor func(idx int, val interface{}, na bool) (string, bool)
+		dataOut   []string
+		naOut     []bool
+	}{
+		{
+			name:      "regular",
+			dataIn:    []interface{}{1, 2.5, "three", 4 + 3i, 5, 0},
+			naIn:      []bool{false, false, false, false, true, false},
+			convertor: convertor,
+			dataOut:   []string{"1", "", "three", "", "", "0"},
+			naOut:     []bool{false, true, false, true, true, false},
+		},
+		{
+			name:      "without converter",
+			dataIn:    []interface{}{1, 2.5, "three", 4 + 3i, 5, 0},
+			naIn:      []bool{false, false, false, false, true, false},
+			convertor: nil,
+			dataOut:   []string{"", "", "", "", "", ""},
+			naOut:     []bool{true, true, true, true, true, true},
+		},
+		{
+			name:      "empty",
+			dataIn:    []interface{}{},
+			naIn:      []bool{},
+			convertor: convertor,
+			dataOut:   []string{},
+			naOut:     []bool{},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			vec := Interface(data.dataIn, data.naIn, OptionConvertors(InterfaceConvertors{Stringabler: data.convertor}))
+			payload := vec.(*vector).payload.(*interfacePayload)
+
+			strings, na := payload.Strings()
+			if !reflect.DeepEqual(strings, data.dataOut) {
+				t.Error(fmt.Sprintf("Result data (%v) is not equal to expected (%v)", strings, data.dataOut))
+			}
+			if !reflect.DeepEqual(na, data.naOut) {
+				t.Error(fmt.Sprintf("Result na (%v) is not equal to expected (%v)", na, data.naOut))
+			}
+		})
+	}
+}
+
+func TestInterfacePayload_Times(t *testing.T) {
+	convertor := func(idx int, val interface{}, na bool) (time.Time, bool) {
+		if na {
+			return time.Time{}, true
+		}
+
+		switch v := val.(type) {
+		case int:
+			return time.Unix(int64(v), 0), false
+		default:
+			return time.Time{}, true
+		}
+	}
+
+	testData := []struct {
+		name      string
+		dataIn    []interface{}
+		naIn      []bool
+		convertor func(idx int, val interface{}, na bool) (time.Time, bool)
+		dataOut   []time.Time
+		naOut     []bool
+	}{
+		{
+			name:      "regular",
+			dataIn:    []interface{}{1625270725, "three", 1625270725},
+			naIn:      []bool{false, false, true},
+			convertor: convertor,
+			dataOut:   toTimeData([]string{"2021-07-03T03:05:25+03:00", "0001-01-01T00:00:00Z", "0001-01-01T00:00:00Z"}),
+			naOut:     []bool{false, true, true},
+		},
+		{
+			name:      "without converter",
+			dataIn:    []interface{}{1625270725, "three", 1625270725},
+			naIn:      []bool{false, false, true},
+			convertor: nil,
+			dataOut:   toTimeData([]string{"0001-01-01T00:00:00Z", "0001-01-01T00:00:00Z", "0001-01-01T00:00:00Z"}),
+			naOut:     []bool{true, true, true},
+		},
+		{
+			name:      "empty",
+			dataIn:    []interface{}{},
+			naIn:      []bool{},
+			convertor: convertor,
+			dataOut:   []time.Time{},
+			naOut:     []bool{},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			vec := Interface(data.dataIn, data.naIn, OptionConvertors(InterfaceConvertors{Timeabler: data.convertor}))
+			payload := vec.(*vector).payload.(*interfacePayload)
+
+			times, na := payload.Times()
+			if !reflect.DeepEqual(times, data.dataOut) {
+				t.Error(fmt.Sprintf("Result data (%v) is not equal to expected (%v)", times, data.dataOut))
 			}
 			if !reflect.DeepEqual(na, data.naOut) {
 				t.Error(fmt.Sprintf("Result na (%v) is not equal to expected (%v)", na, data.naOut))
