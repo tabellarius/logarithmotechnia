@@ -443,7 +443,7 @@ func TestStringPayload_ByIndices(t *testing.T) {
 	}
 }
 
-func TestStringPayload_SupportsSelector(t *testing.T) {
+func TestStringPayload_SupportsWhicher(t *testing.T) {
 	testData := []struct {
 		name        string
 		filter      interface{}
@@ -471,7 +471,7 @@ func TestStringPayload_SupportsSelector(t *testing.T) {
 	}
 }
 
-func TestStringPayload_Select(t *testing.T) {
+func TestStringPayload_Whicher(t *testing.T) {
 	testData := []struct {
 		name string
 		fn   interface{}

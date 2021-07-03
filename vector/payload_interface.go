@@ -19,7 +19,7 @@ type interfacePayload struct {
 	length     int
 	data       []interface{}
 	printer    func(payload interface{}) string
-	convertors InterfaceConvertors
+	convertors *InterfaceConvertors
 	DefNAble
 }
 
@@ -143,7 +143,7 @@ func (p *interfacePayload) applyByFunc(applyFunc func(int, interface{}, bool) (i
 	for i := 0; i < p.length; i++ {
 		dataVal, naVal := applyFunc(i+1, p.data[i], p.na[i])
 		if naVal {
-			dataVal = math.NaN()
+			dataVal = nil
 		}
 		data[i] = dataVal
 		na[i] = naVal
@@ -162,7 +162,7 @@ func (p *interfacePayload) Integers() ([]int, []bool) {
 
 	for i := 0; i < p.length; i++ {
 		val, naVal := 0, true
-		if p.convertors.Intabler != nil {
+		if p.convertors != nil && p.convertors.Intabler != nil {
 			val, naVal = p.convertors.Intabler(i+1, p.data[i], p.na[i])
 		}
 		data[i] = val
@@ -182,7 +182,7 @@ func (p *interfacePayload) Floats() ([]float64, []bool) {
 
 	for i := 0; i < p.length; i++ {
 		val, naVal := math.NaN(), true
-		if p.convertors.Floatabler != nil {
+		if p.convertors != nil && p.convertors.Floatabler != nil {
 			val, naVal = p.convertors.Floatabler(i+1, p.data[i], p.na[i])
 		}
 		data[i] = val
@@ -202,7 +202,7 @@ func (p *interfacePayload) Complexes() ([]complex128, []bool) {
 
 	for i := 0; i < p.length; i++ {
 		val, naVal := cmplx.NaN(), true
-		if p.convertors.Complexabler != nil {
+		if p.convertors != nil && p.convertors.Complexabler != nil {
 			val, naVal = p.convertors.Complexabler(i+1, p.data[i], p.na[i])
 		}
 		data[i] = val
@@ -222,7 +222,7 @@ func (p *interfacePayload) Booleans() ([]bool, []bool) {
 
 	for i := 0; i < p.length; i++ {
 		val, naVal := false, true
-		if p.convertors.Boolabler != nil {
+		if p.convertors != nil && p.convertors.Boolabler != nil {
 			val, naVal = p.convertors.Boolabler(i+1, p.data[i], p.na[i])
 		}
 		data[i] = val
@@ -242,7 +242,7 @@ func (p *interfacePayload) Strings() ([]string, []bool) {
 
 	for i := 0; i < p.length; i++ {
 		val, naVal := "", true
-		if p.convertors.Stringabler != nil {
+		if p.convertors != nil && p.convertors.Stringabler != nil {
 			val, naVal = p.convertors.Stringabler(i+1, p.data[i], p.na[i])
 		}
 		data[i] = val
@@ -262,7 +262,7 @@ func (p *interfacePayload) Times() ([]time.Time, []bool) {
 
 	for i := 0; i < p.length; i++ {
 		val, naVal := time.Time{}, true
-		if p.convertors.Timeabler != nil {
+		if p.convertors != nil && p.convertors.Timeabler != nil {
 			val, naVal = p.convertors.Timeabler(i+1, p.data[i], p.na[i])
 		}
 		data[i] = val
@@ -270,4 +270,42 @@ func (p *interfacePayload) Times() ([]time.Time, []bool) {
 	}
 
 	return data, na
+}
+
+func Interface(data []interface{}, na []bool, options ...Config) Vector {
+	config := mergeConfigs(options)
+
+	length := len(data)
+
+	vecNA := make([]bool, length)
+	if len(na) > 0 {
+		if len(na) == length {
+			copy(vecNA, na)
+		} else {
+			emp := Empty()
+			emp.Report().AddError("Integer(): data length is not equal to na's length")
+			return emp
+		}
+	}
+
+	vecData := make([]interface{}, length)
+	for i := 0; i < length; i++ {
+		if vecNA[i] {
+			vecData[i] = nil
+		} else {
+			vecData[i] = data[i]
+		}
+	}
+
+	payload := &interfacePayload{
+		length:     length,
+		data:       vecData,
+		printer:    config.InterfacePrinter,
+		convertors: config.Convertors,
+		DefNAble: DefNAble{
+			na: vecNA,
+		},
+	}
+
+	return New(payload, config)
 }

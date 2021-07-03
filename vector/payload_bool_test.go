@@ -449,7 +449,7 @@ func TestBooleanPayload_ByIndices(t *testing.T) {
 	}
 }
 
-func TestBooleanPayload_SupportsSelector(t *testing.T) {
+func TestBooleanPayload_SupportsWhicher(t *testing.T) {
 	testData := []struct {
 		name        string
 		filter      interface{}
@@ -477,7 +477,7 @@ func TestBooleanPayload_SupportsSelector(t *testing.T) {
 	}
 }
 
-func TestBooleanPayload_Select(t *testing.T) {
+func TestBooleanPayload_Whicher(t *testing.T) {
 	testData := []struct {
 		name string
 		fn   interface{}

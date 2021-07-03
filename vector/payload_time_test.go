@@ -307,7 +307,7 @@ func TestTimePayload_ByIndices(t *testing.T) {
 	}
 }
 
-func TestTimePayload_SupportsSelector(t *testing.T) {
+func TestTimePayload_SupportsWhicher(t *testing.T) {
 	testData := []struct {
 		name        string
 		filter      interface{}
@@ -335,7 +335,7 @@ func TestTimePayload_SupportsSelector(t *testing.T) {
 	}
 }
 
-func TestTimePayload_Select(t *testing.T) {
+func TestTimePayload_Whicher(t *testing.T) {
 	testData := []struct {
 		name   string
 		filter interface{}

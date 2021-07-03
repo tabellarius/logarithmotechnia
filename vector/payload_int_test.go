@@ -431,7 +431,7 @@ func TestIntegerPayload_ByIndices(t *testing.T) {
 	}
 }
 
-func TestIntegerPayload_SupportsSelector(t *testing.T) {
+func TestIntegerPayload_SupportsWhicher(t *testing.T) {
 	testData := []struct {
 		name        string
 		filter      interface{}
@@ -459,7 +459,7 @@ func TestIntegerPayload_SupportsSelector(t *testing.T) {
 	}
 }
 
-func TestIntegerPayload_Select(t *testing.T) {
+func TestIntegerPayload_Whicher(t *testing.T) {
 	testData := []struct {
 		name string
 		fn   interface{}
