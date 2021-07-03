@@ -156,6 +156,47 @@ func TestInterfacePayload_Len(t *testing.T) {
 	}
 }
 
+func TestInterfacePayload_ByIndices(t *testing.T) {
+	vec := Interface([]interface{}{1, 2, 3, 4, 5}, []bool{false, false, false, false, true})
+	testData := []struct {
+		name    string
+		indices []int
+		out     []interface{}
+		outNA   []bool
+	}{
+		{
+			name:    "all",
+			indices: []int{1, 2, 3, 4, 5},
+			out:     []interface{}{1, 2, 3, 4, nil},
+			outNA:   []bool{false, false, false, false, true},
+		},
+		{
+			name:    "all reverse",
+			indices: []int{5, 4, 3, 2, 1},
+			out:     []interface{}{nil, 4, 3, 2, 1},
+			outNA:   []bool{true, false, false, false, false},
+		},
+		{
+			name:    "some",
+			indices: []int{5, 1, 3},
+			out:     []interface{}{nil, 1, 3},
+			outNA:   []bool{true, false, false},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			payload := vec.ByIndices(data.indices).(*vector).payload.(*interfacePayload)
+			if !reflect.DeepEqual(payload.data, data.out) {
+				t.Error(fmt.Sprintf("payload.data (%v) is not equal to data.out (%v)", payload.data, data.out))
+			}
+			if !reflect.DeepEqual(payload.na, data.outNA) {
+				t.Error(fmt.Sprintf("payload.data (%v) is not equal to data.out (%v)", payload.data, data.out))
+			}
+		})
+	}
+}
+
 func TestInterfacePayload_SupportsWhicher(t *testing.T) {
 	testData := []struct {
 		name        string
@@ -184,7 +225,7 @@ func TestInterfacePayload_SupportsWhicher(t *testing.T) {
 	}
 }
 
-func TestInterfacePayload_Whicher(t *testing.T) {
+func TestInterfacePayload_Which(t *testing.T) {
 	testData := []struct {
 		name string
 		fn   interface{}
@@ -447,7 +488,7 @@ func TestInterfacePayload_Floats(t *testing.T) {
 	}
 }
 
-func TestInterfacePayload_Complex(t *testing.T) {
+func TestInterfacePayload_Complexes(t *testing.T) {
 	convertor := func(idx int, val interface{}, na bool) (complex128, bool) {
 		if na {
 			return cmplx.NaN(), true
