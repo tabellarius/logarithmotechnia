@@ -1,4 +1,3 @@
-Payload Interface
 Payload NA + remove NAVector()
 Convertable + Convert()
 vector -> DefVector
@@ -6,3 +5,4 @@ Test for empty
 Summarizable + Summarize()
 + Options() (сбор опций с Payload и Vector для лёгкого создания векторов)
 Complex printer
+Bounds checking in ByIndices
