@@ -66,7 +66,7 @@ func (p *naPayload) WithNA() []int {
 	naIndices := make([]int, p.length)
 
 	for i := 0; i < p.length; i++ {
-		naIndices = append(naIndices, i+1)
+		naIndices[i] = i + 1
 	}
 
 	return naIndices
@@ -154,4 +154,16 @@ func (p *naPayload) naArray() []bool {
 	}
 
 	return na
+}
+
+func NA(length int) Vector {
+	if length < 0 {
+		length = 0
+	}
+
+	payload := &naPayload{
+		length: length,
+	}
+
+	return New(payload, Config{})
 }
