@@ -134,7 +134,7 @@ func (p *booleanPayload) Integers() ([]int, []bool) {
 
 func (p *booleanPayload) Floats() ([]float64, []bool) {
 	if p.length == 0 {
-		return []float64{}, nil
+		return []float64{}, []bool{}
 	}
 
 	data := make([]float64, p.length)
@@ -183,7 +183,7 @@ func (p *booleanPayload) Complexes() ([]complex128, []bool) {
 
 func (p *booleanPayload) Booleans() ([]bool, []bool) {
 	if p.length == 0 {
-		return []bool{}, nil
+		return []bool{}, []bool{}
 	}
 
 	data := make([]bool, p.length)
@@ -197,7 +197,7 @@ func (p *booleanPayload) Booleans() ([]bool, []bool) {
 
 func (p *booleanPayload) Strings() ([]string, []bool) {
 	if p.length == 0 {
-		return []string{}, nil
+		return []string{}, []bool{}
 	}
 
 	data := make([]string, p.length)
@@ -207,6 +207,22 @@ func (p *booleanPayload) Strings() ([]string, []bool) {
 	}
 
 	na := make([]bool, p.Len())
+	copy(na, p.na)
+
+	return data, na
+}
+
+func (p *booleanPayload) Interfaces() ([]interface{}, []bool) {
+	if p.length == 0 {
+		return []interface{}{}, []bool{}
+	}
+
+	data := make([]interface{}, p.length)
+	for i := 0; i < p.length; i++ {
+		data[i] = interface{}(p.data[i])
+	}
+
+	na := make([]bool, p.length)
 	copy(na, p.na)
 
 	return data, na

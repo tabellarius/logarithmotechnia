@@ -142,6 +142,16 @@ func (p *naPayload) Times() ([]time.Time, []bool) {
 	return data, p.naArray()
 }
 
+func (p *naPayload) Interfaces() ([]interface{}, []bool) {
+	if p.length == 0 {
+		return []interface{}{}, []bool{}
+	}
+
+	data := make([]interface{}, p.length)
+
+	return data, p.naArray()
+}
+
 func (p *naPayload) naArray() []bool {
 	na := make([]bool, p.Len())
 

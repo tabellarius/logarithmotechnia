@@ -254,6 +254,20 @@ func (p *interfacePayload) Times() ([]time.Time, []bool) {
 	return data, na
 }
 
+func (p *interfacePayload) Interfaces() ([]interface{}, []bool) {
+	if p.length == 0 {
+		return []interface{}{}, []bool{}
+	}
+
+	data := make([]interface{}, p.length)
+	copy(data, p.data)
+
+	na := make([]bool, p.length)
+	copy(na, p.na)
+
+	return data, na
+}
+
 func Interface(data []interface{}, na []bool, options ...Config) Vector {
 	config := mergeConfigs(options)
 

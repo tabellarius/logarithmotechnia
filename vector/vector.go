@@ -82,6 +82,10 @@ type Timeable interface {
 	Times() ([]time.Time, []bool)
 }
 
+type Interfaceable interface {
+	Interfaces() ([]interface{}, []bool)
+}
+
 // vector holds data and functions shared by all vectors
 type vector struct {
 	length int
