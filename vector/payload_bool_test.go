@@ -402,7 +402,50 @@ func TestBooleanPayload_Strings(t *testing.T) {
 				t.Error(fmt.Sprintf("Strings (%v) are not equal to data.out (%v)\n", strings, data.out))
 			}
 			if !reflect.DeepEqual(na, data.outNA) {
-				t.Error(fmt.Sprintf("IsNA (%v) are not equal to data.outNA (%v)\n", na, data.outNA))
+				t.Error(fmt.Sprintf("NA (%v) are not equal to data.outNA (%v)\n", na, data.outNA))
+			}
+		})
+	}
+}
+
+func TestBooleanPayload_Interfaces(t *testing.T) {
+	testData := []struct {
+		in    []bool
+		inNA  []bool
+		out   []interface{}
+		outNA []bool
+	}{
+		{
+			in:    []bool{true, true, false, true, false},
+			inNA:  []bool{false, false, false, false, false},
+			out:   []interface{}{true, true, false, true, false},
+			outNA: []bool{false, false, false, false, false},
+		},
+		{
+			in:    []bool{true, false, true, true, true},
+			inNA:  []bool{false, false, false, true, true},
+			out:   []interface{}{true, false, true, nil, nil},
+			outNA: []bool{false, false, false, true, true},
+		},
+		{
+			in:    []bool{true, true, false, true, false, true, true},
+			inNA:  []bool{false, false, false, false, false, false, true},
+			out:   []interface{}{true, true, false, true, false, true, nil},
+			outNA: []bool{false, false, false, false, false, false, true},
+		},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			vec := Boolean(data.in, data.inNA)
+			payload := vec.(*vector).payload.(*booleanPayload)
+
+			interfaces, na := payload.Interfaces()
+			if !reflect.DeepEqual(interfaces, data.out) {
+				t.Error(fmt.Sprintf("Interfaces (%v) are not equal to data.out (%v)\n", interfaces, data.out))
+			}
+			if !reflect.DeepEqual(na, data.outNA) {
+				t.Error(fmt.Sprintf("NA (%v) are not equal to data.outNA (%v)\n", na, data.outNA))
 			}
 		})
 	}

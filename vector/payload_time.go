@@ -116,7 +116,7 @@ func (p *timePayload) applyByFunc(applyFunc func(int, time.Time, bool) (time.Tim
 
 func (p *timePayload) Strings() ([]string, []bool) {
 	if p.length == 0 {
-		return []string{}, nil
+		return []string{}, []bool{}
 	}
 
 	data := make([]string, p.length)
@@ -137,13 +137,33 @@ func (p *timePayload) Strings() ([]string, []bool) {
 
 func (p *timePayload) Times() ([]time.Time, []bool) {
 	if p.length == 0 {
-		return []time.Time{}, nil
+		return []time.Time{}, []bool{}
 	}
 
 	data := make([]time.Time, p.length)
 	copy(data, p.data)
 
 	na := make([]bool, p.Len())
+	copy(na, p.na)
+
+	return data, na
+}
+
+func (p *timePayload) Interfaces() ([]interface{}, []bool) {
+	if p.length == 0 {
+		return []interface{}{}, []bool{}
+	}
+
+	data := make([]interface{}, p.length)
+	for i := 0; i < p.length; i++ {
+		if p.na[i] {
+			data[i] = nil
+		} else {
+			data[i] = p.data[i]
+		}
+	}
+
+	na := make([]bool, p.length)
 	copy(na, p.na)
 
 	return data, na
