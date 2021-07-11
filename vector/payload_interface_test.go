@@ -295,12 +295,13 @@ func TestInterfacePayload_SupportsApplier(t *testing.T) {
 
 func TestInterfacePayload_Apply(t *testing.T) {
 	testData := []struct {
-		name    string
-		applier interface{}
-		dataIn  []interface{}
-		naIn    []bool
-		dataOut []interface{}
-		naOut   []bool
+		name        string
+		applier     interface{}
+		dataIn      []interface{}
+		naIn        []bool
+		dataOut     []interface{}
+		naOut       []bool
+		isNAPayload bool
 	}{
 		{
 			name: "regular",
@@ -310,10 +311,11 @@ func TestInterfacePayload_Apply(t *testing.T) {
 				}
 				return val, na
 			},
-			dataIn:  []interface{}{true, true, true, false, false},
-			naIn:    []bool{false, true, false, true, false},
-			dataOut: []interface{}{true, nil, true, nil, 5},
-			naOut:   []bool{false, true, false, true, false},
+			dataIn:      []interface{}{true, true, true, false, false},
+			naIn:        []bool{false, true, false, true, false},
+			dataOut:     []interface{}{true, nil, true, nil, 5},
+			naOut:       []bool{false, true, false, true, false},
+			isNAPayload: false,
 		},
 		{
 			name: "manipulate na",
@@ -324,33 +326,42 @@ func TestInterfacePayload_Apply(t *testing.T) {
 				}
 				return val, newNA
 			},
-			dataIn:  []interface{}{true, true, false, false, true},
-			naIn:    []bool{false, true, false, true, false},
-			dataOut: []interface{}{true, nil, false, nil, nil},
-			naOut:   []bool{false, true, false, true, true},
+			dataIn:      []interface{}{true, true, false, false, true},
+			naIn:        []bool{false, true, false, true, false},
+			dataOut:     []interface{}{true, nil, false, nil, nil},
+			naOut:       []bool{false, true, false, true, true},
+			isNAPayload: false,
 		},
 		{
-			name:    "incorrect applier",
-			applier: func(int, int, bool) bool { return true },
-			dataIn:  []interface{}{true, true, false, false, true},
-			naIn:    []bool{false, true, false, true, false},
-			dataOut: []interface{}{nil, nil, nil, nil, nil},
-			naOut:   []bool{true, true, true, true, true},
+			name:        "incorrect applier",
+			applier:     func(int, int, bool) bool { return true },
+			dataIn:      []interface{}{true, true, false, false, true},
+			naIn:        []bool{false, true, false, true, false},
+			dataOut:     []interface{}{nil, nil, nil, nil, nil},
+			naOut:       []bool{true, true, true, true, true},
+			isNAPayload: true,
 		},
 	}
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			payload := Interface(data.dataIn, data.naIn).(*vector).payload
-			payloadOut := payload.(Appliable).Apply(data.applier).(*interfacePayload)
+			payload := Interface(data.dataIn, data.naIn).(*vector).payload.(Appliable).Apply(data.applier)
 
-			if !reflect.DeepEqual(data.dataOut, payloadOut.data) {
-				t.Error(fmt.Sprintf("Output data (%v) does not match expected (%v)",
-					payloadOut.data, data.dataOut))
-			}
-			if !reflect.DeepEqual(data.naOut, payloadOut.na) {
-				t.Error(fmt.Sprintf("Output NA (%v) does not match expected (%v)",
-					payloadOut.na, data.naOut))
+			if !data.isNAPayload {
+				payloadOut := payload.(*interfacePayload)
+				if !reflect.DeepEqual(data.dataOut, payloadOut.data) {
+					t.Error(fmt.Sprintf("Output data (%v) does not match expected (%v)",
+						payloadOut.data, data.dataOut))
+				}
+				if !reflect.DeepEqual(data.naOut, payloadOut.na) {
+					t.Error(fmt.Sprintf("Output NA (%v) does not match expected (%v)",
+						payloadOut.na, data.naOut))
+				}
+			} else {
+				_, ok := payload.(*naPayload)
+				if !ok {
+					t.Error("Payload is not NA")
+				}
 			}
 		})
 	}

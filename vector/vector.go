@@ -41,7 +41,6 @@ type Payload interface {
 	Len() int
 	ByIndices(indices []int) Payload
 	StrForElem(idx int) string
-	NAPayload() Payload
 }
 
 type FromTo struct {
@@ -223,7 +222,7 @@ func (v *vector) Apply(applier interface{}) Vector {
 	if ok && payload.SupportsApplier(applier) {
 		newP = payload.Apply(applier)
 	} else {
-		newP = v.payload.NAPayload()
+		newP = NAPayload(v.payload.Len())
 	}
 
 	newV := v.Clone().(*vector)

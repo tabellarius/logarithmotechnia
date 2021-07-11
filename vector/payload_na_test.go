@@ -45,6 +45,40 @@ func TestNA(t *testing.T) {
 	}
 }
 
+func TestNAPayload(t *testing.T) {
+	testData := []struct {
+		name      string
+		inLength  int
+		outLength int
+	}{
+		{
+			name:      "normal",
+			inLength:  5,
+			outLength: 5,
+		},
+		{
+			name:      "zero",
+			inLength:  0,
+			outLength: 0,
+		},
+		{
+			name:      "negative",
+			inLength:  -1,
+			outLength: 0,
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			payload := NAPayload(data.inLength).(*naPayload)
+			if payload.length != data.outLength {
+				t.Error(fmt.Sprintf("payload.length (%d) is not equal to expected (%d)",
+					payload.length, data.outLength))
+			}
+		})
+	}
+}
+
 func TestNaPayload_Type(t *testing.T) {
 	vec := NA(5)
 	if vec.Type() != "na" {

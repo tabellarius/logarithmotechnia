@@ -81,7 +81,7 @@ func (p *stringPayload) Apply(applier interface{}) Payload {
 	if applyFunc, ok := applier.(func(int, string, bool) (string, bool)); ok {
 		data, na = p.applyByFunc(applyFunc)
 	} else {
-		return p.NAPayload()
+		return NAPayload(p.length)
 	}
 
 	return &stringPayload{
@@ -226,23 +226,6 @@ func (p *stringPayload) StrForElem(idx int) string {
 	}
 
 	return p.data[idx-1]
-}
-
-func (p *stringPayload) NAPayload() Payload {
-	data := make([]string, p.length)
-	na := make([]bool, p.length)
-	for i := 0; i < p.length; i++ {
-		data[i] = ""
-		na[i] = true
-	}
-
-	return &stringPayload{
-		length: p.length,
-		data:   data,
-		DefNAble: DefNAble{
-			na: na,
-		},
-	}
 }
 
 func String(data []string, na []bool, options ...Config) Vector {

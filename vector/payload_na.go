@@ -36,10 +36,6 @@ func (p *naPayload) StrForElem(int) string {
 	return "NA"
 }
 
-func (p *naPayload) NAPayload() Payload {
-	panic("implement me")
-}
-
 /* NAble interface */
 
 func (p *naPayload) IsNA() []bool {
@@ -156,7 +152,7 @@ func (p *naPayload) naArray() []bool {
 	return na
 }
 
-func NA(length int) Vector {
+func NAPayload(length int) Payload {
 	if length < 0 {
 		length = 0
 	}
@@ -165,5 +161,9 @@ func NA(length int) Vector {
 		length: length,
 	}
 
-	return New(payload, Config{})
+	return payload
+}
+
+func NA(length int) Vector {
+	return New(NAPayload(length), Config{})
 }

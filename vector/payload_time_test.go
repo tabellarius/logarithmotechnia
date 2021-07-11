@@ -397,22 +397,24 @@ func TestTimePayload_SupportsApplier(t *testing.T) {
 
 func TestTimePayload_Apply(t *testing.T) {
 	testData := []struct {
-		name    string
-		applier interface{}
-		dataIn  []time.Time
-		naIn    []bool
-		dataOut []time.Time
-		naOut   []bool
+		name        string
+		applier     interface{}
+		dataIn      []time.Time
+		naIn        []bool
+		dataOut     []time.Time
+		naOut       []bool
+		isNAPayload bool
 	}{
 		{
 			name: "regular",
 			applier: func(_ int, val time.Time, na bool) (time.Time, bool) {
 				return val.Add(24 * time.Hour), na
 			},
-			dataIn:  toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z"}),
-			naIn:    []bool{false, true, false},
-			dataOut: toTimeData([]string{"2006-01-03T15:04:05+07:00", "0001-01-01T00:00:00Z", "1800-06-11T11:00:00Z"}),
-			naOut:   []bool{false, true, false},
+			dataIn:      toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z"}),
+			naIn:        []bool{false, true, false},
+			dataOut:     toTimeData([]string{"2006-01-03T15:04:05+07:00", "0001-01-01T00:00:00Z", "1800-06-11T11:00:00Z"}),
+			naOut:       []bool{false, true, false},
+			isNAPayload: false,
 		},
 		{
 			name: "manipulate na",
@@ -422,33 +424,42 @@ func TestTimePayload_Apply(t *testing.T) {
 				}
 				return val, na
 			},
-			dataIn:  toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z"}),
-			naIn:    []bool{false, false, false},
-			dataOut: toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "0001-01-01T00:00:00Z"}),
-			naOut:   []bool{false, false, true},
+			dataIn:      toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z"}),
+			naIn:        []bool{false, false, false},
+			dataOut:     toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "0001-01-01T00:00:00Z"}),
+			naOut:       []bool{false, false, true},
+			isNAPayload: false,
 		},
 		{
-			name:    "incorrect applier",
-			applier: func(int, string, bool) bool { return true },
-			dataIn:  toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z"}),
-			naIn:    []bool{false, false, false},
-			dataOut: toTimeData([]string{"0001-01-01T00:00:00Z", "0001-01-01T00:00:00Z", "0001-01-01T00:00:00Z"}),
-			naOut:   []bool{true, true, true},
+			name:        "incorrect applier",
+			applier:     func(int, string, bool) bool { return true },
+			dataIn:      toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z"}),
+			naIn:        []bool{false, false, false},
+			dataOut:     toTimeData([]string{"0001-01-01T00:00:00Z", "0001-01-01T00:00:00Z", "0001-01-01T00:00:00Z"}),
+			naOut:       []bool{true, true, true},
+			isNAPayload: true,
 		},
 	}
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			payload := Time(data.dataIn, data.naIn).(*vector).payload
-			payloadOut := payload.(Appliable).Apply(data.applier).(*timePayload)
+			payload := Time(data.dataIn, data.naIn).(*vector).payload.(Appliable).Apply(data.applier)
 
-			if !reflect.DeepEqual(data.dataOut, payloadOut.data) {
-				t.Error(fmt.Sprintf("Output data (%v) does not match expected (%v)",
-					payloadOut.data, data.dataOut))
-			}
-			if !reflect.DeepEqual(data.naOut, payloadOut.na) {
-				t.Error(fmt.Sprintf("Output NA (%v) does not match expected (%v)",
-					payloadOut.na, data.naOut))
+			if !data.isNAPayload {
+				payloadOut := payload.(*timePayload)
+				if !reflect.DeepEqual(data.dataOut, payloadOut.data) {
+					t.Error(fmt.Sprintf("Output data (%v) does not match expected (%v)",
+						payloadOut.data, data.dataOut))
+				}
+				if !reflect.DeepEqual(data.naOut, payloadOut.na) {
+					t.Error(fmt.Sprintf("Output NA (%v) does not match expected (%v)",
+						payloadOut.na, data.naOut))
+				}
+			} else {
+				_, ok := payload.(*naPayload)
+				if !ok {
+					t.Error("Payload is not NA")
+				}
 			}
 		})
 	}

@@ -80,7 +80,7 @@ func (p *booleanPayload) Apply(applier interface{}) Payload {
 	if applyFunc, ok := applier.(func(int, bool, bool) (bool, bool)); ok {
 		data, na = p.applyByFunc(applyFunc)
 	} else {
-		return p.NAPayload()
+		return NAPayload(p.length)
 	}
 
 	return &booleanPayload{
@@ -222,22 +222,6 @@ func (p *booleanPayload) StrForElem(idx int) string {
 	}
 
 	return "false"
-}
-
-func (p *booleanPayload) NAPayload() Payload {
-	data := make([]bool, p.length)
-	na := make([]bool, p.length)
-	for i := 0; i < p.length; i++ {
-		na[i] = true
-	}
-
-	return &booleanPayload{
-		length: p.length,
-		data:   data,
-		DefNAble: DefNAble{
-			na: na,
-		},
-	}
 }
 
 func Boolean(data []bool, na []bool, options ...Config) Vector {

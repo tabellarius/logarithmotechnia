@@ -84,7 +84,7 @@ func (p *integerPayload) Apply(applier interface{}) Payload {
 	if applyFunc, ok := applier.(func(int, int, bool) (int, bool)); ok {
 		data, na = p.applyByFunc(applyFunc)
 	} else {
-		return p.NAPayload()
+		return NAPayload(p.length)
 	}
 
 	return &integerPayload{
@@ -215,22 +215,6 @@ func (p *integerPayload) StrForElem(idx int) string {
 	}
 
 	return strconv.Itoa(p.data[idx-1])
-}
-
-func (p *integerPayload) NAPayload() Payload {
-	data := make([]int, p.length)
-	na := make([]bool, p.length)
-	for i := 0; i < p.length; i++ {
-		na[i] = true
-	}
-
-	return &integerPayload{
-		length: p.length,
-		data:   data,
-		DefNAble: DefNAble{
-			na: na,
-		},
-	}
 }
 
 func Integer(data []int, na []bool, options ...Config) Vector {
