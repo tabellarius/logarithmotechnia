@@ -528,22 +528,24 @@ func TestFloatPayload_SupportsApplier(t *testing.T) {
 
 func TestFloatPayload_Apply(t *testing.T) {
 	testData := []struct {
-		name    string
-		applier interface{}
-		dataIn  []float64
-		naIn    []bool
-		dataOut []float64
-		naOut   []bool
+		name        string
+		applier     interface{}
+		dataIn      []float64
+		naIn        []bool
+		dataOut     []float64
+		naOut       []bool
+		isNAPayload bool
 	}{
 		{
 			name: "regular",
 			applier: func(_ int, val float64, na bool) (float64, bool) {
 				return val * 2, na
 			},
-			dataIn:  []float64{1, 9, 3, 5, 7},
-			naIn:    []bool{false, true, false, true, false},
-			dataOut: []float64{2, math.NaN(), 6, math.NaN(), 14},
-			naOut:   []bool{false, true, false, true, false},
+			dataIn:      []float64{1, 9, 3, 5, 7},
+			naIn:        []bool{false, true, false, true, false},
+			dataOut:     []float64{2, math.NaN(), 6, math.NaN(), 14},
+			naOut:       []bool{false, true, false, true, false},
+			isNAPayload: false,
 		},
 		{
 			name: "manipulate na",
@@ -553,33 +555,42 @@ func TestFloatPayload_Apply(t *testing.T) {
 				}
 				return val, na
 			},
-			dataIn:  []float64{1, 2, 3, 4, 5},
-			naIn:    []bool{false, false, true, false, false},
-			dataOut: []float64{1, 2, math.NaN(), 4, math.NaN()},
-			naOut:   []bool{false, false, true, false, true},
+			dataIn:      []float64{1, 2, 3, 4, 5},
+			naIn:        []bool{false, false, true, false, false},
+			dataOut:     []float64{1, 2, math.NaN(), 4, math.NaN()},
+			naOut:       []bool{false, false, true, false, true},
+			isNAPayload: false,
 		},
 		{
-			name:    "incorrect applier",
-			applier: func(int, float64, bool) bool { return true },
-			dataIn:  []float64{1, 9, 3, 5, 7},
-			naIn:    []bool{false, true, false, true, false},
-			dataOut: []float64{math.NaN(), math.NaN(), math.NaN(), math.NaN(), math.NaN()},
-			naOut:   []bool{true, true, true, true, true},
+			name:        "incorrect applier",
+			applier:     func(int, float64, bool) bool { return true },
+			dataIn:      []float64{1, 9, 3, 5, 7},
+			naIn:        []bool{false, true, false, true, false},
+			dataOut:     []float64{math.NaN(), math.NaN(), math.NaN(), math.NaN(), math.NaN()},
+			naOut:       []bool{true, true, true, true, true},
+			isNAPayload: true,
 		},
 	}
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			payload := Float(data.dataIn, data.naIn).(*vector).payload
-			payloadOut := payload.(Appliable).Apply(data.applier).(*floatPayload)
+			payload := Float(data.dataIn, data.naIn).(*vector).payload.(Appliable).Apply(data.applier)
 
-			if !util.EqualFloatArrays(data.dataOut, payloadOut.data) {
-				t.Error(fmt.Sprintf("Output data (%v) does not match expected (%v)",
-					payloadOut.data, data.dataOut))
-			}
-			if !reflect.DeepEqual(data.naOut, payloadOut.na) {
-				t.Error(fmt.Sprintf("Output NA (%v) does not match expected (%v)",
-					payloadOut.na, data.naOut))
+			if !data.isNAPayload {
+				payloadOut := payload.(*floatPayload)
+				if !util.EqualFloatArrays(data.dataOut, payloadOut.data) {
+					t.Error(fmt.Sprintf("Output data (%v) does not match expected (%v)",
+						payloadOut.data, data.dataOut))
+				}
+				if !reflect.DeepEqual(data.naOut, payloadOut.na) {
+					t.Error(fmt.Sprintf("Output NA (%v) does not match expected (%v)",
+						payloadOut.na, data.naOut))
+				}
+			} else {
+				_, ok := payload.(*naPayload)
+				if !ok {
+					t.Error("Payload is not NA")
+				}
 			}
 		})
 	}

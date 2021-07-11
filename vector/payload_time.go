@@ -85,7 +85,7 @@ func (p *timePayload) Apply(applier interface{}) Payload {
 	if applyFunc, ok := applier.(func(int, time.Time, bool) (time.Time, bool)); ok {
 		data, na = p.applyByFunc(applyFunc)
 	} else {
-		return p.NAPayload()
+		return NAPayload(p.length)
 	}
 
 	return &timePayload{
@@ -151,23 +151,6 @@ func (p *timePayload) Times() ([]time.Time, []bool) {
 
 func (p *timePayload) StrForElem(idx int) string {
 	return p.data[idx-1].Format(p.printer.Format)
-}
-
-func (p *timePayload) NAPayload() Payload {
-	data := make([]time.Time, p.length)
-	na := make([]bool, p.length)
-	for i := 0; i < p.length; i++ {
-		na[i] = true
-	}
-
-	return &timePayload{
-		length:  p.length,
-		data:    data,
-		printer: p.printer,
-		DefNAble: DefNAble{
-			na: na,
-		},
-	}
 }
 
 func Time(data []time.Time, na []bool, options ...Config) Vector {

@@ -15,10 +15,6 @@ func (e *emptyPayload) ByIndices([]int) Payload {
 	return EmptyPayload()
 }
 
-func (e *emptyPayload) NAPayload() Payload {
-	return EmptyPayload()
-}
-
 func EmptyPayload() Payload {
 	return &emptyPayload{}
 }

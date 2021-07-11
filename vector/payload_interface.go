@@ -62,24 +62,6 @@ func (p *interfacePayload) StrForElem(idx int) string {
 	return ""
 }
 
-func (p *interfacePayload) NAPayload() Payload {
-	data := make([]interface{}, p.length)
-	na := make([]bool, p.length)
-	for i := 0; i < p.length; i++ {
-		data[i] = nil
-		na[i] = true
-	}
-
-	return &interfacePayload{
-		length:  p.length,
-		data:    data,
-		printer: p.printer,
-		DefNAble: DefNAble{
-			na: na,
-		},
-	}
-}
-
 func (p *interfacePayload) SupportsWhicher(whicher interface{}) bool {
 	if _, ok := whicher.(func(int, interface{}, bool) bool); ok {
 		return true
@@ -123,7 +105,7 @@ func (p *interfacePayload) Apply(applier interface{}) Payload {
 	if applyFunc, ok := applier.(func(int, interface{}, bool) (interface{}, bool)); ok {
 		data, na = p.applyByFunc(applyFunc)
 	} else {
-		return p.NAPayload()
+		return NAPayload(p.length)
 	}
 
 	return &interfacePayload{
