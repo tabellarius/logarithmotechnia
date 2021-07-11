@@ -264,6 +264,44 @@ func TestTimePayload_Times(t *testing.T) {
 	}
 }
 
+func TestTimePayload_Interfaces(t *testing.T) {
+	testData := []struct {
+		in    []string
+		inNA  []bool
+		out   []interface{}
+		outNA []bool
+	}{
+		{
+			in:    []string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z"},
+			inNA:  []bool{false, false, false},
+			out:   toTimeInterfaceData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z"}),
+			outNA: []bool{false, false, false},
+		},
+		{
+			in:    []string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z"},
+			inNA:  []bool{false, true, false},
+			out:   toTimeInterfaceData([]string{"2006-01-02T15:04:05+07:00", "", "1800-06-10T11:00:00Z"}),
+			outNA: []bool{false, true, false},
+		},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			timeData := toTimeData(data.in)
+			vec := Time(timeData, data.inNA)
+			payload := vec.(*vector).payload.(*timePayload)
+
+			interfaces, na := payload.Interfaces()
+			if !reflect.DeepEqual(interfaces, data.out) {
+				t.Error(fmt.Sprintf("Interfaces (%v) are not equal to timeData (%v)\n", interfaces, data.out))
+			}
+			if !reflect.DeepEqual(na, data.outNA) {
+				t.Error(fmt.Sprintf("IsNA (%v) are not equal to data.outNA (%v)\n", na, data.outNA))
+			}
+		})
+	}
+}
+
 func TestTimePayload_ByIndices(t *testing.T) {
 	vec := Time(toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z"}),
 		[]bool{false, false, true},
@@ -474,6 +512,24 @@ func toTimeData(times []string) []time.Time {
 			fmt.Println(err)
 		}
 		timeData[i] = t
+	}
+
+	return timeData
+}
+
+func toTimeInterfaceData(times []string) []interface{} {
+	timeData := make([]interface{}, len(times))
+
+	for i := 0; i < len(times); i++ {
+		if times[i] == "" {
+			timeData[i] = nil
+		} else {
+			t, err := time.Parse(time.RFC3339, times[i])
+			if err != nil {
+				fmt.Println(err)
+			}
+			timeData[i] = t
+		}
 	}
 
 	return timeData

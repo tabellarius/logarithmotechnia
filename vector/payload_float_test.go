@@ -254,7 +254,50 @@ func TestFloatPayload_Integers(t *testing.T) {
 				t.Error(fmt.Sprintf("Integers (%v) are not equal to data.out (%v)\n", integers, data.out))
 			}
 			if !reflect.DeepEqual(na, data.outNA) {
-				t.Error(fmt.Sprintf("IsNA (%v) are not equal to data.outNA (%v)\n", na, data.outNA))
+				t.Error(fmt.Sprintf("NA (%v) are not equal to data.outNA (%v)\n", na, data.outNA))
+			}
+		})
+	}
+}
+
+func TestFloatPayload_Interfaces(t *testing.T) {
+	testData := []struct {
+		in    []float64
+		inNA  []bool
+		out   []interface{}
+		outNA []bool
+	}{
+		{
+			in:    []float64{1, 3, 0, 100, 0},
+			inNA:  []bool{false, false, false, false, false},
+			out:   []interface{}{1.0, 3.0, 0.0, 100.0, 0.0},
+			outNA: []bool{false, false, false, false, false},
+		},
+		{
+			in:    []float64{10, 0, 12, 14, 1110},
+			inNA:  []bool{false, false, false, true, true},
+			out:   []interface{}{10.0, 0.0, 12.0, nil, nil},
+			outNA: []bool{false, false, false, true, true},
+		},
+		{
+			in:    []float64{1, 3, 0, 100, 0, -11, -10},
+			inNA:  []bool{false, false, false, false, false, false, true},
+			out:   []interface{}{1.0, 3.0, 0.0, 100.0, 0.0, -11.0, nil},
+			outNA: []bool{false, false, false, false, false, false, true},
+		},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			vec := Float(data.in, data.inNA)
+			payload := vec.(*vector).payload.(*floatPayload)
+
+			interfaces, na := payload.Interfaces()
+			if !reflect.DeepEqual(interfaces, data.out) {
+				t.Error(fmt.Sprintf("Interfaces (%v) are not equal to data.out (%v)\n", interfaces, data.out))
+			}
+			if !reflect.DeepEqual(na, data.outNA) {
+				t.Error(fmt.Sprintf("NA (%v) are not equal to data.outNA (%v)\n", na, data.outNA))
 			}
 		})
 	}

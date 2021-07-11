@@ -32,6 +32,7 @@ type Vector interface {
 	Stringable
 	Complexable
 	Timeable
+	Interfaceable
 
 	Report() Report
 }
@@ -320,8 +321,6 @@ func (v *vector) byFromToWithRemove(from, to int) []int {
 	return indices
 }
 
-/* Not Applicable-related */
-
 func (v *vector) IsNA() []bool {
 	if nable, ok := v.payload.(NAble); ok {
 		return nable.IsNA()
@@ -329,6 +328,8 @@ func (v *vector) IsNA() []bool {
 
 	return make([]bool, v.length)
 }
+
+/* Not Applicable-related */
 
 func (v *vector) NotNA() []bool {
 	if nable, ok := v.payload.(NAble); ok {
@@ -412,7 +413,7 @@ func (v *vector) Strings() ([]string, []bool) {
 		return payload.Strings()
 	}
 
-	return make([]string, v.length), v.naVector()
+	return make([]string, v.length), v.naArray()
 }
 
 func (v *vector) Floats() ([]float64, []bool) {
@@ -425,7 +426,7 @@ func (v *vector) Floats() ([]float64, []bool) {
 		floats[i] = math.NaN()
 	}
 
-	return floats, v.naVector()
+	return floats, v.naArray()
 }
 
 func (v *vector) Complexes() ([]complex128, []bool) {
@@ -438,7 +439,7 @@ func (v *vector) Complexes() ([]complex128, []bool) {
 		complexes[i] = cmplx.NaN()
 	}
 
-	return complexes, v.naVector()
+	return complexes, v.naArray()
 }
 
 func (v *vector) Booleans() ([]bool, []bool) {
@@ -446,7 +447,7 @@ func (v *vector) Booleans() ([]bool, []bool) {
 		return payload.Booleans()
 	}
 
-	return make([]bool, v.length), v.naVector()
+	return make([]bool, v.length), v.naArray()
 }
 
 func (v *vector) Integers() ([]int, []bool) {
@@ -454,7 +455,7 @@ func (v *vector) Integers() ([]int, []bool) {
 		return payload.Integers()
 	}
 
-	return make([]int, v.length), v.naVector()
+	return make([]int, v.length), v.naArray()
 }
 
 func (v *vector) Times() ([]time.Time, []bool) {
@@ -462,10 +463,18 @@ func (v *vector) Times() ([]time.Time, []bool) {
 		return payload.Times()
 	}
 
-	return make([]time.Time, v.length), v.naVector()
+	return make([]time.Time, v.length), v.naArray()
 }
 
-func (v *vector) naVector() []bool {
+func (v *vector) Interfaces() ([]interface{}, []bool) {
+	if payload, ok := v.payload.(Interfaceable); ok {
+		return payload.Interfaces()
+	}
+
+	return make([]interface{}, v.length), v.naArray()
+}
+
+func (v *vector) naArray() []bool {
 	na := make([]bool, v.length)
 	for i := 0; i < v.length; i++ {
 		na[i] = true

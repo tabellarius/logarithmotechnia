@@ -219,10 +219,14 @@ func (p *booleanPayload) Interfaces() ([]interface{}, []bool) {
 
 	data := make([]interface{}, p.length)
 	for i := 0; i < p.length; i++ {
-		data[i] = interface{}(p.data[i])
+		if p.na[i] {
+			data[i] = nil
+		} else {
+			data[i] = p.data[i]
+		}
 	}
 
-	na := make([]bool, p.length)
+	na := make([]bool, p.Len())
 	copy(na, p.na)
 
 	return data, na

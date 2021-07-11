@@ -504,6 +504,46 @@ func TestNaPayload_Times(t *testing.T) {
 	}
 }
 
+func TestNaPayload_Interfaces(t *testing.T) {
+	testData := []struct {
+		length  int
+		outData []interface{}
+		outNA   []bool
+	}{
+		{
+			length:  5,
+			outData: []interface{}{nil, nil, nil, nil, nil},
+			outNA:   []bool{true, true, true, true, true},
+		},
+		{
+			length:  3,
+			outData: []interface{}{nil, nil, nil},
+			outNA:   []bool{true, true, true},
+		},
+		{
+			length:  0,
+			outData: []interface{}{},
+			outNA:   []bool{},
+		},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			payload := NA(data.length).(*vector).payload.(*naPayload)
+
+			interfaces, na := payload.Interfaces()
+			if !reflect.DeepEqual(interfaces, data.outData) {
+				t.Error(fmt.Sprintf("Interfaces (%v) are not equal to expected (%v)",
+					interfaces, data.outData))
+			}
+			if !reflect.DeepEqual(na, data.outNA) {
+				t.Error(fmt.Sprintf("NA (%v) are not equal to expected (%v)",
+					na, data.outNA))
+			}
+		})
+	}
+}
+
 func TestNaPayload_StrForElem(t *testing.T) {
 	payload := NA(5).(*vector).payload.(*naPayload)
 

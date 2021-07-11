@@ -261,6 +261,49 @@ func TestIntegerPayload_Integers(t *testing.T) {
 	}
 }
 
+func TestIntegerPayload_Interfaces(t *testing.T) {
+	testData := []struct {
+		in    []int
+		inNA  []bool
+		out   []interface{}
+		outNA []bool
+	}{
+		{
+			in:    []int{1, 3, 0, 100, 0},
+			inNA:  []bool{false, false, false, false, false},
+			out:   []interface{}{1, 3, 0, 100, 0},
+			outNA: []bool{false, false, false, false, false},
+		},
+		{
+			in:    []int{10, 0, 12, 14, 1110},
+			inNA:  []bool{false, false, false, true, true},
+			out:   []interface{}{10, 0, 12, nil, nil},
+			outNA: []bool{false, false, false, true, true},
+		},
+		{
+			in:    []int{1, 3, 0, 100, 0, -11, -10},
+			inNA:  []bool{false, false, false, false, false, false, true},
+			out:   []interface{}{1, 3, 0, 100, 0, -11, nil},
+			outNA: []bool{false, false, false, false, false, false, true},
+		},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			vec := Integer(data.in, data.inNA)
+			payload := vec.(*vector).payload.(*integerPayload)
+
+			interfaces, na := payload.Interfaces()
+			if !reflect.DeepEqual(interfaces, data.out) {
+				t.Error(fmt.Sprintf("Interfaces (%v) are not equal to data.out (%v)\n", interfaces, data.out))
+			}
+			if !reflect.DeepEqual(na, data.outNA) {
+				t.Error(fmt.Sprintf("IsNA (%v) are not equal to data.outNA (%v)\n", na, data.outNA))
+			}
+		})
+	}
+}
+
 func TestIntegerPayload_Floats(t *testing.T) {
 	testData := []struct {
 		in    []int

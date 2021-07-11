@@ -467,6 +467,49 @@ func TestComplexPayload_Integers(t *testing.T) {
 	}
 }
 
+func TestComplexPayload_Interfaces(t *testing.T) {
+	testData := []struct {
+		in    []complex128
+		inNA  []bool
+		out   []interface{}
+		outNA []bool
+	}{
+		{
+			in:    []complex128{1 + 0i, 3 + 0i, 0 + 0i, 100 + 0i, 0 + 0i},
+			inNA:  []bool{false, false, false, false, false},
+			out:   []interface{}{1 + 0i, 3 + 0i, 0 + 0i, 100 + 0i, 0 + 0i},
+			outNA: []bool{false, false, false, false, false},
+		},
+		{
+			in:    []complex128{10 + 0i, 0 + 0i, 12 + 0i, 14 + 0i, 1110 + 0i},
+			inNA:  []bool{false, false, false, true, true},
+			out:   []interface{}{10 + 0i, 0 + 0i, 12 + 0i, nil, nil},
+			outNA: []bool{false, false, false, true, true},
+		},
+		{
+			in:    []complex128{1 + 0i, 3 + 0i, 0 + 0i, 100 + 0i, 0 + 0i, -11 + 0i, -10 + 0i},
+			inNA:  []bool{false, false, false, false, false, false, true},
+			out:   []interface{}{1 + 0i, 3 + 0i, 0 + 0i, 100 + 0i, 0 + 0i, -11 + 0i, nil},
+			outNA: []bool{false, false, false, false, false, false, true},
+		},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			vec := Complex(data.in, data.inNA)
+			payload := vec.(*vector).payload.(*complexPayload)
+
+			interfaces, na := payload.Interfaces()
+			if !reflect.DeepEqual(interfaces, data.out) {
+				t.Error(fmt.Sprintf("Interfaces (%v) are not equal to data.out (%v)\n", interfaces, data.out))
+			}
+			if !reflect.DeepEqual(na, data.outNA) {
+				t.Error(fmt.Sprintf("NA (%v) are not equal to data.outNA (%v)\n", na, data.outNA))
+			}
+		})
+	}
+}
+
 func TestComplexPayload_Floats(t *testing.T) {
 	testData := []struct {
 		in    []complex128

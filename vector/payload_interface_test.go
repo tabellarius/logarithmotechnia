@@ -762,3 +762,61 @@ func TestInterfacePayload_Times(t *testing.T) {
 		})
 	}
 }
+
+func TestInterfacePayload_Interfaces(t *testing.T) {
+	convertor := func(idx int, val interface{}, na bool) (int, bool) {
+		if na {
+			return 0, true
+		}
+
+		switch v := val.(type) {
+		case float64:
+			return int(v), false
+		case int:
+			return v, false
+		default:
+			return 0, true
+		}
+	}
+
+	testData := []struct {
+		name      string
+		dataIn    []interface{}
+		naIn      []bool
+		convertor func(idx int, val interface{}, na bool) (int, bool)
+		dataOut   []interface{}
+		naOut     []bool
+	}{
+		{
+			name:      "regular",
+			dataIn:    []interface{}{1, 2.5, "three", 4 + 3i, 5, 0},
+			naIn:      []bool{false, false, false, false, true, false},
+			convertor: convertor,
+			dataOut:   []interface{}{1, 2.5, "three", 4 + 3i, nil, 0},
+			naOut:     []bool{false, false, false, false, true, false},
+		},
+		{
+			name:      "empty",
+			dataIn:    []interface{}{},
+			naIn:      []bool{},
+			convertor: convertor,
+			dataOut:   []interface{}{},
+			naOut:     []bool{},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			vec := Interface(data.dataIn, data.naIn, OptionConvertors(InterfaceConvertors{Intabler: data.convertor}))
+			payload := vec.(*vector).payload.(*interfacePayload)
+
+			interfaces, na := payload.Interfaces()
+			if !reflect.DeepEqual(interfaces, data.dataOut) {
+				t.Error(fmt.Sprintf("Result data (%v) is not equal to expected (%v)", interfaces, data.dataOut))
+			}
+			if !reflect.DeepEqual(na, data.naOut) {
+				t.Error(fmt.Sprintf("Result na (%v) is not equal to expected (%v)", na, data.naOut))
+			}
+		})
+	}
+}
