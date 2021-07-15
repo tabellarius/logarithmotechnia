@@ -254,7 +254,7 @@ func Boolean(data []bool, na []bool, options ...Config) Vector {
 		if len(na) == length {
 			copy(vecNA, na)
 		} else {
-			emp := Empty()
+			emp := NA(0)
 			emp.Report().AddError("Boolean(): data length is not equal to na's length")
 			return emp
 		}

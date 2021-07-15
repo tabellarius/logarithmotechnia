@@ -201,10 +201,22 @@ func TestNaPayload_NotNA(t *testing.T) {
 }
 
 func TestNaPayload_HasNA(t *testing.T) {
-	payload := NA(5).(*vector).payload.(*naPayload)
+	testData := []struct {
+		length int
+		hasNA  bool
+	}{
+		{5, true}, {0, false}, {-1, false},
+	}
 
-	if !payload.HasNA() {
-		t.Error("payload.HasNA() is not true")
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			payload := NA(data.length).(*vector).payload.(*naPayload)
+			hasNA := payload.HasNA()
+			if !reflect.DeepEqual(hasNA, data.hasNA) {
+				t.Error(fmt.Sprintf("payload.hasNA() (%v) is not equal to expected (%v)",
+					hasNA, data.hasNA))
+			}
+		})
 	}
 }
 

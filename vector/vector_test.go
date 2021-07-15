@@ -60,7 +60,7 @@ func TestVector_Integers(t *testing.T) {
 			outNA:     []bool{false, false, true, false, false},
 		},
 		{
-			vec:       Empty(),
+			vec:       NA(0),
 			outValues: []int{},
 			outNA:     []bool{},
 		},
@@ -91,7 +91,7 @@ func TestVector_Floats(t *testing.T) {
 			outNA:     []bool{false, false, true, false, false},
 		},
 		{
-			vec:       Empty(),
+			vec:       NA(0),
 			outValues: []float64{},
 			outNA:     []bool{},
 		},
@@ -132,7 +132,7 @@ func TestVector_Complexes(t *testing.T) {
 			outNA:     []bool{false, false, true, false, false},
 		},
 		{
-			vec:       Empty(),
+			vec:       NA(0),
 			outValues: []complex128{},
 			outNA:     []bool{},
 		},
@@ -173,7 +173,7 @@ func TestVector_Booleans(t *testing.T) {
 			outNA:     []bool{false, false, false, true, false, false},
 		},
 		{
-			vec:       Empty(),
+			vec:       NA(0),
 			outValues: []bool{},
 			outNA:     []bool{},
 		},
@@ -204,7 +204,7 @@ func TestVector_Strings(t *testing.T) {
 			outNA:     []bool{false, false, true, false, false},
 		},
 		{
-			vec:       Empty(),
+			vec:       NA(0),
 			outValues: []string{},
 			outNA:     []bool{},
 		},
@@ -235,7 +235,7 @@ func TestVector_Times(t *testing.T) {
 			outNA:     []bool{true, true, true, true, true},
 		},
 		{
-			vec:       Empty(),
+			vec:       NA(0),
 			outValues: []time.Time{},
 			outNA:     []bool{},
 		},
@@ -500,7 +500,7 @@ func TestVector_IsNA(t *testing.T) {
 		},
 		{
 			name:  "empty",
-			vec:   Empty(),
+			vec:   NA(0),
 			notNA: []bool{},
 		},
 	}
@@ -530,7 +530,7 @@ func TestVector_NotNA(t *testing.T) {
 		},
 		{
 			name:  "empty",
-			vec:   Empty(),
+			vec:   NA(0),
 			notNA: []bool{},
 		},
 	}
@@ -565,7 +565,7 @@ func TestVector_HasNA(t *testing.T) {
 		},
 		{
 			name:  "Empty",
-			vec:   Empty(),
+			vec:   NA(0),
 			hasNA: false,
 		},
 	}
@@ -603,7 +603,7 @@ func TestVector_WithNA(t *testing.T) {
 		},
 		{
 			name:   "Empty",
-			vec:    Empty(),
+			vec:    NA(0),
 			withNA: []int{},
 		},
 	}
@@ -641,7 +641,7 @@ func TestVector_WithoutNA(t *testing.T) {
 		},
 		{
 			name:      "Empty",
-			vec:       Empty(),
+			vec:       NA(0),
 			withoutNA: []int{},
 		},
 	}

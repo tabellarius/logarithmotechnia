@@ -121,8 +121,8 @@ func TestInterface(t *testing.T) {
 
 func testInterfaceEmpty(t *testing.T) {
 	vec := Interface([]interface{}{1, 2, 3, 4, 5}, []bool{false, false, true, false})
-	_, ok := vec.(*vector).payload.(*emptyPayload)
-	if !ok {
+	naPayload, ok := vec.(*vector).payload.(*naPayload)
+	if !ok || naPayload.Len() > 0 {
 		t.Error("Vector's payload is not empty")
 	}
 }

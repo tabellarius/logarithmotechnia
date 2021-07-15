@@ -1,7 +1,7 @@
-Convertable + Convert()
-vector -> DefVector
 Test for empty OR remove it (for NA of zero size)
+vector -> DefVector
 Summarizable + Summarize()
 + Options() (сбор опций с Payload и Vector для лёгкого создания векторов)
 Complex printer
 Move payload to payloads dir
+Convert() + Convertable ??

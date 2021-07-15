@@ -191,7 +191,7 @@ func (v *vector) Filter(whicher interface{}) Vector {
 		return v.ByIndices(v.filterByBooleans(v.Which(whicher)))
 	}
 
-	return Empty()
+	return NA(0)
 }
 
 func (v *vector) SupportsWhicher(whicher interface{}) bool {
@@ -505,17 +505,4 @@ func New(payload Payload, config Config) Vector {
 	}
 
 	return &vec
-}
-
-//Empty creates an empty (zero-length) vector
-func Empty() Vector {
-	return &vector{
-		length: 0,
-		DefNameable: DefNameable{
-			length: 0,
-			names:  map[string]int{},
-		},
-		payload: EmptyPayload(),
-		report:  Report{},
-	}
 }
