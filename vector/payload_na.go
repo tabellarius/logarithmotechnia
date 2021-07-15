@@ -55,7 +55,7 @@ func (p *naPayload) NotNA() []bool {
 }
 
 func (p *naPayload) HasNA() bool {
-	return true
+	return p.length > 0
 }
 
 func (p *naPayload) WithNA() []int {

@@ -96,8 +96,8 @@ func TestTime(t *testing.T) {
 			vv := v.(*vector)
 
 			if data.isEmpty {
-				_, ok := vv.payload.(*emptyPayload)
-				if !ok {
+				naPayload, ok := vv.payload.(*naPayload)
+				if !ok || naPayload.Len() > 0 {
 					t.Error("Vector's payload is not empty")
 				}
 			} else {
