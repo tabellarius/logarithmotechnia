@@ -109,6 +109,33 @@ func (p *stringPayload) applyByFunc(applyFunc func(int, string, bool) (string, b
 	return data, na
 }
 
+func (p *stringPayload) SupportsSummarizer(summarizer interface{}) bool {
+	if _, ok := summarizer.(func(int, string, string, bool) (string, bool)); ok {
+		return true
+	}
+
+	return false
+}
+
+func (p *stringPayload) Summarize(summarizer interface{}) Payload {
+	fn, ok := summarizer.(func(int, string, string, bool) (string, bool))
+	if !ok {
+		return NAPayload(1)
+	}
+
+	val := ""
+	na := false
+	for i := 0; i < p.length; i++ {
+		val, na = fn(i+1, val, p.data[i], p.na[i])
+
+		if na {
+			return NAPayload(1)
+		}
+	}
+
+	return StringPayload([]string{val}, nil)
+}
+
 func (p *stringPayload) Integers() ([]int, []bool) {
 	if p.length == 0 {
 		return []int{}, []bool{}
@@ -248,9 +275,7 @@ func (p *stringPayload) StrForElem(idx int) string {
 	return p.data[idx-1]
 }
 
-func String(data []string, na []bool, options ...Config) Vector {
-	config := mergeConfigs(options)
-
+func StringPayload(data []string, na []bool) Payload {
 	length := len(data)
 
 	vecNA := make([]bool, length)
@@ -258,8 +283,7 @@ func String(data []string, na []bool, options ...Config) Vector {
 		if len(na) == length {
 			copy(vecNA, na)
 		} else {
-			emp := NA(0)
-			emp.Report().AddError("String(): data length is not equal to na's length")
+			emp := NAPayload(0)
 			return emp
 		}
 	}
@@ -273,13 +297,17 @@ func String(data []string, na []bool, options ...Config) Vector {
 		}
 	}
 
-	payload := &stringPayload{
+	return &stringPayload{
 		length: length,
 		data:   vecData,
 		DefNAble: DefNAble{
 			na: vecNA,
 		},
 	}
+}
 
-	return New(payload, config)
+func String(data []string, na []bool, options ...Config) Vector {
+	config := mergeConfigs(options)
+
+	return New(StringPayload(data, na), config)
 }

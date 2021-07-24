@@ -134,6 +134,33 @@ func (p *interfacePayload) applyByFunc(applyFunc func(int, interface{}, bool) (i
 	return data, na
 }
 
+func (p *interfacePayload) SupportsSummarizer(summarizer interface{}) bool {
+	if _, ok := summarizer.(func(int, interface{}, interface{}, bool) (interface{}, bool)); ok {
+		return true
+	}
+
+	return false
+}
+
+func (p *interfacePayload) Summarize(summarizer interface{}) Payload {
+	fn, ok := summarizer.(func(int, interface{}, interface{}, bool) (interface{}, bool))
+	if !ok {
+		return NAPayload(1)
+	}
+
+	val := interface{}(nil)
+	na := false
+	for i := 0; i < p.length; i++ {
+		val, na = fn(i+1, val, p.data[i], p.na[i])
+
+		if na {
+			return NAPayload(1)
+		}
+	}
+
+	return InterfacePayload([]interface{}{val}, nil)
+}
+
 func (p *interfacePayload) Integers() ([]int, []bool) {
 	if p.length == 0 {
 		return []int{}, []bool{}
@@ -268,7 +295,7 @@ func (p *interfacePayload) Interfaces() ([]interface{}, []bool) {
 	return data, na
 }
 
-func Interface(data []interface{}, na []bool, options ...Config) Vector {
+func InterfacePayload(data []interface{}, na []bool, options ...Config) Payload {
 	config := mergeConfigs(options)
 
 	length := len(data)
@@ -278,8 +305,7 @@ func Interface(data []interface{}, na []bool, options ...Config) Vector {
 		if len(na) == length {
 			copy(vecNA, na)
 		} else {
-			emp := NA(0)
-			emp.Report().AddError("Integer(): data length is not equal to na's length")
+			emp := NAPayload(0)
 			return emp
 		}
 	}
@@ -293,7 +319,7 @@ func Interface(data []interface{}, na []bool, options ...Config) Vector {
 		}
 	}
 
-	payload := &interfacePayload{
+	return &interfacePayload{
 		length:     length,
 		data:       vecData,
 		printer:    config.InterfacePrinter,
@@ -303,5 +329,10 @@ func Interface(data []interface{}, na []bool, options ...Config) Vector {
 		},
 	}
 
-	return New(payload, config)
+}
+
+func Interface(data []interface{}, na []bool, options ...Config) Vector {
+	config := mergeConfigs(options)
+
+	return New(InterfacePayload(data, na, options...), config)
 }

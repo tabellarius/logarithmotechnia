@@ -1,7 +1,5 @@
-Test for empty OR remove it (for NA of zero size)
-vector -> DefVector
 Summarizable + Summarize()
-+ Options() (сбор опций с Payload и Vector для лёгкого создания векторов)
 Complex printer
++ Options() (сбор опций с Payload и Vector для лёгкого создания векторов) + добавить в функции, возвращающие Payload
 Move payload to payloads dir
-Convert() + Convertable ??
+Make all payload public

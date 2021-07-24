@@ -114,6 +114,33 @@ func (p *timePayload) applyByFunc(applyFunc func(int, time.Time, bool) (time.Tim
 	return data, na
 }
 
+func (p *timePayload) SupportsSummarizer(summarizer interface{}) bool {
+	if _, ok := summarizer.(func(int, time.Time, time.Time, bool) (time.Time, bool)); ok {
+		return true
+	}
+
+	return false
+}
+
+func (p *timePayload) Summarize(summarizer interface{}) Payload {
+	fn, ok := summarizer.(func(int, time.Time, time.Time, bool) (time.Time, bool))
+	if !ok {
+		return NAPayload(1)
+	}
+
+	val := time.Time{}
+	na := false
+	for i := 0; i < p.length; i++ {
+		val, na = fn(i+1, val, p.data[i], p.na[i])
+
+		if na {
+			return NAPayload(1)
+		}
+	}
+
+	return TimePayload([]time.Time{val}, nil)
+}
+
 func (p *timePayload) Strings() ([]string, []bool) {
 	if p.length == 0 {
 		return []string{}, []bool{}
@@ -173,7 +200,7 @@ func (p *timePayload) StrForElem(idx int) string {
 	return p.data[idx-1].Format(p.printer.Format)
 }
 
-func Time(data []time.Time, na []bool, options ...Config) Vector {
+func TimePayload(data []time.Time, na []bool, options ...Config) Payload {
 	config := mergeConfigs(options)
 
 	length := len(data)
@@ -183,8 +210,7 @@ func Time(data []time.Time, na []bool, options ...Config) Vector {
 		if len(na) == length {
 			copy(vecNA, na)
 		} else {
-			emp := NA(0)
-			emp.Report().AddError("Float(): data length is not equal to na's length")
+			emp := NAPayload(0)
 			return emp
 		}
 	}
@@ -203,7 +229,7 @@ func Time(data []time.Time, na []bool, options ...Config) Vector {
 		printer = *config.TimePrinter
 	}
 
-	payload := &timePayload{
+	return &timePayload{
 		length:  length,
 		data:    vecData,
 		printer: printer,
@@ -211,6 +237,10 @@ func Time(data []time.Time, na []bool, options ...Config) Vector {
 			na: vecNA,
 		},
 	}
+}
 
-	return New(payload, config)
+func Time(data []time.Time, na []bool, options ...Config) Vector {
+	config := mergeConfigs(options)
+
+	return New(TimePayload(data, na), config)
 }
