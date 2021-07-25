@@ -126,7 +126,6 @@ func (p *booleanPayload) Summarize(summarizer interface{}) Payload {
 	na := false
 	for i := 0; i < p.length; i++ {
 		val, na = fn(i+1, val, p.data[i], p.na[i])
-
 		if na {
 			return NAPayload(1)
 		}

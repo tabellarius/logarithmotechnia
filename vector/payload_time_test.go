@@ -534,3 +534,102 @@ func toTimeInterfaceData(times []string) []interface{} {
 
 	return timeData
 }
+
+func TestTimePayload_SupportsSummarizer(t *testing.T) {
+	testData := []struct {
+		name        string
+		summarizer  interface{}
+		isSupported bool
+	}{
+		{
+			name:        "valid",
+			summarizer:  func(int, time.Time, time.Time, bool) (time.Time, bool) { return time.Time{}, false },
+			isSupported: true,
+		},
+		{
+			name:        "invalid",
+			summarizer:  func(int, int, bool) bool { return true },
+			isSupported: false,
+		},
+	}
+
+	payload := Time([]time.Time{}, nil).(*vector).payload.(Summarizable)
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			if payload.SupportsSummarizer(data.summarizer) != data.isSupported {
+				t.Error("Summarizer's support is incorrect.")
+			}
+		})
+	}
+}
+
+func TestTimePayload_Summarize(t *testing.T) {
+	summarizer := func(idx int, prev time.Time, cur time.Time, na bool) (time.Time, bool) {
+		if cur.Unix() > prev.Unix() {
+			return cur, na
+		}
+
+		return prev, na
+	}
+
+	testData := []struct {
+		name        string
+		summarizer  interface{}
+		dataIn      []time.Time
+		naIn        []bool
+		dataOut     []time.Time
+		naOut       []bool
+		isNAPayload bool
+	}{
+		{
+			name:        "true",
+			summarizer:  summarizer,
+			dataIn:      toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z"}),
+			naIn:        []bool{false, false, false},
+			dataOut:     toTimeData([]string{"2021-01-01T12:30:00+03:00"}),
+			naOut:       []bool{false},
+			isNAPayload: false,
+		},
+		{
+			name:        "NA",
+			summarizer:  summarizer,
+			dataIn:      toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z"}),
+			naIn:        []bool{false, false, true},
+			isNAPayload: true,
+		},
+		{
+			name:        "incorrect summarizer",
+			summarizer:  func(int, int, bool) bool { return true },
+			dataIn:      toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z"}),
+			naIn:        []bool{false, false, false},
+			isNAPayload: true,
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			payload := Time(data.dataIn, data.naIn).(*vector).payload.(Summarizable).Summarize(data.summarizer)
+
+			if !data.isNAPayload {
+				payloadOut := payload.(*timePayload)
+				if !reflect.DeepEqual(data.dataOut, payloadOut.data) {
+					t.Error(fmt.Sprintf("Output data (%v) does not match expected (%v)",
+						data.dataOut, payloadOut.data))
+				}
+				if !reflect.DeepEqual(data.naOut, payloadOut.na) {
+					t.Error(fmt.Sprintf("Output NA (%v) does not match expected (%v)",
+						data.naOut, payloadOut.na))
+				}
+			} else {
+				naPayload, ok := payload.(*naPayload)
+				if ok {
+					if naPayload.length != 1 {
+						t.Error("Incorrect length of NA payload (not 1)")
+					}
+				} else {
+					t.Error("Payload is not NA")
+				}
+			}
+		})
+	}
+}
