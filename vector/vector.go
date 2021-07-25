@@ -59,6 +59,11 @@ type Appliable interface {
 	Apply(applier interface{}) Payload
 }
 
+type Summarizable interface {
+	SupportsSummarizer(summarizer interface{}) bool
+	Summarize(summarizer interface{}) Payload
+}
+
 type Intable interface {
 	Integers() ([]int, []bool)
 }

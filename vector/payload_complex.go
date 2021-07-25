@@ -109,6 +109,33 @@ func (p *complexPayload) applyByFunc(applyFunc func(int, complex128, bool) (comp
 	return data, na
 }
 
+func (p *complexPayload) SupportsSummarizer(summarizer interface{}) bool {
+	if _, ok := summarizer.(func(int, complex128, complex128, bool) (complex128, bool)); ok {
+		return true
+	}
+
+	return false
+}
+
+func (p *complexPayload) Summarize(summarizer interface{}) Payload {
+	fn, ok := summarizer.(func(int, complex128, complex128, bool) (complex128, bool))
+	if !ok {
+		return NAPayload(1)
+	}
+
+	val := 0 + 0i
+	na := false
+	for i := 0; i < p.length; i++ {
+		val, na = fn(i+1, val, p.data[i], p.na[i])
+
+		if na {
+			return NAPayload(1)
+		}
+	}
+
+	return ComplexPayload([]complex128{val}, nil)
+}
+
 func (p *complexPayload) Integers() ([]int, []bool) {
 	if p.length == 0 {
 		return []int{}, []bool{}
@@ -240,9 +267,7 @@ func (p *complexPayload) StrForElem(idx int) string {
 	return strconv.FormatComplex(p.data[i], 'f', 3, 128)
 }
 
-func Complex(data []complex128, na []bool, options ...Config) Vector {
-	config := mergeConfigs(options)
-
+func ComplexPayload(data []complex128, na []bool) Payload {
 	length := len(data)
 
 	vecNA := make([]bool, length)
@@ -250,8 +275,7 @@ func Complex(data []complex128, na []bool, options ...Config) Vector {
 		if len(na) == length {
 			copy(vecNA, na)
 		} else {
-			emp := NA(0)
-			emp.Report().AddError("Complex(): data length is not equal to na's length")
+			emp := NAPayload(0)
 			return emp
 		}
 	}
@@ -265,13 +289,17 @@ func Complex(data []complex128, na []bool, options ...Config) Vector {
 		}
 	}
 
-	payload := &complexPayload{
+	return &complexPayload{
 		length: length,
 		data:   vecData,
 		DefNAble: DefNAble{
 			na: vecNA,
 		},
 	}
+}
 
-	return New(payload, config)
+func Complex(data []complex128, na []bool, options ...Config) Vector {
+	config := mergeConfigs(options)
+
+	return New(ComplexPayload(data, na), config)
 }

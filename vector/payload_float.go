@@ -116,6 +116,33 @@ func (p *floatPayload) applyByFunc(applyFunc func(int, float64, bool) (float64, 
 	return data, na
 }
 
+func (p *floatPayload) SupportsSummarizer(summarizer interface{}) bool {
+	if _, ok := summarizer.(func(int, float64, float64, bool) (float64, bool)); ok {
+		return true
+	}
+
+	return false
+}
+
+func (p *floatPayload) Summarize(summarizer interface{}) Payload {
+	fn, ok := summarizer.(func(int, float64, float64, bool) (float64, bool))
+	if !ok {
+		return NAPayload(1)
+	}
+
+	val := 0.0
+	na := false
+	for i := 0; i < p.length; i++ {
+		val, na = fn(i+1, val, p.data[i], p.na[i])
+
+		if na {
+			return NAPayload(1)
+		}
+	}
+
+	return FloatPayload([]float64{val}, nil)
+}
+
 func (p *floatPayload) Integers() ([]int, []bool) {
 	if p.length == 0 {
 		return []int{}, []bool{}
@@ -254,7 +281,7 @@ func (p *floatPayload) StrForElem(idx int) string {
 	return strconv.FormatFloat(p.data[i], 'f', p.printer.Precision, 64)
 }
 
-func Float(data []float64, na []bool, options ...Config) Vector {
+func FloatPayload(data []float64, na []bool, options ...Config) Payload {
 	config := mergeConfigs(options)
 
 	length := len(data)
@@ -264,8 +291,7 @@ func Float(data []float64, na []bool, options ...Config) Vector {
 		if len(na) == length {
 			copy(vecNA, na)
 		} else {
-			emp := NA(0)
-			emp.Report().AddError("Float(): data length is not equal to na's length")
+			emp := NAPayload(0)
 			return emp
 		}
 	}
@@ -284,7 +310,7 @@ func Float(data []float64, na []bool, options ...Config) Vector {
 		printer = *config.FloatPrinter
 	}
 
-	payload := &floatPayload{
+	return &floatPayload{
 		length:  length,
 		data:    vecData,
 		printer: printer,
@@ -292,6 +318,10 @@ func Float(data []float64, na []bool, options ...Config) Vector {
 			na: vecNA,
 		},
 	}
+}
 
-	return New(payload, config)
+func Float(data []float64, na []bool, options ...Config) Vector {
+	config := mergeConfigs(options)
+
+	return New(FloatPayload(data, na, options...), config)
 }

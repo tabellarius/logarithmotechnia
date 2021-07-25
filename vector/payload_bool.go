@@ -108,6 +108,32 @@ func (p *booleanPayload) applyByFunc(applyFunc func(int, bool, bool) (bool, bool
 	return data, na
 }
 
+func (p *booleanPayload) SupportsSummarizer(summarizer interface{}) bool {
+	if _, ok := summarizer.(func(int, bool, bool, bool) (bool, bool)); ok {
+		return true
+	}
+
+	return false
+}
+
+func (p *booleanPayload) Summarize(summarizer interface{}) Payload {
+	fn, ok := summarizer.(func(int, bool, bool, bool) (bool, bool))
+	if !ok {
+		return NAPayload(1)
+	}
+
+	val := false
+	na := false
+	for i := 0; i < p.length; i++ {
+		val, na = fn(i+1, val, p.data[i], p.na[i])
+		if na {
+			return NAPayload(1)
+		}
+	}
+
+	return BooleanPayload([]bool{val}, nil)
+}
+
 func (p *booleanPayload) Integers() ([]int, []bool) {
 	if p.length == 0 {
 		return []int{}, []bool{}
@@ -244,9 +270,7 @@ func (p *booleanPayload) StrForElem(idx int) string {
 	return "false"
 }
 
-func Boolean(data []bool, na []bool, options ...Config) Vector {
-	config := mergeConfigs(options)
-
+func BooleanPayload(data []bool, na []bool) Payload {
 	length := len(data)
 
 	vecNA := make([]bool, length)
@@ -254,8 +278,7 @@ func Boolean(data []bool, na []bool, options ...Config) Vector {
 		if len(na) == length {
 			copy(vecNA, na)
 		} else {
-			emp := NA(0)
-			emp.Report().AddError("Boolean(): data length is not equal to na's length")
+			emp := NAPayload(0)
 			return emp
 		}
 	}
@@ -269,13 +292,17 @@ func Boolean(data []bool, na []bool, options ...Config) Vector {
 		}
 	}
 
-	payload := &booleanPayload{
+	return &booleanPayload{
 		length: length,
 		data:   vecData,
 		DefNAble: DefNAble{
 			na: vecNA,
 		},
 	}
+}
 
-	return New(payload, config)
+func Boolean(data []bool, na []bool, options ...Config) Vector {
+	config := mergeConfigs(options)
+
+	return New(BooleanPayload(data, na), config)
 }

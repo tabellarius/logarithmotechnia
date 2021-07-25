@@ -651,3 +651,98 @@ func TestStringPayload_Apply(t *testing.T) {
 		})
 	}
 }
+
+func TestStringPayload_SupportsSummarizer(t *testing.T) {
+	testData := []struct {
+		name        string
+		summarizer  interface{}
+		isSupported bool
+	}{
+		{
+			name:        "valid",
+			summarizer:  func(int, string, string, bool) (string, bool) { return "", false },
+			isSupported: true,
+		},
+		{
+			name:        "invalid",
+			summarizer:  func(int, int, bool) bool { return true },
+			isSupported: false,
+		},
+	}
+
+	payload := String([]string{}, nil).(*vector).payload.(Summarizable)
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			if payload.SupportsSummarizer(data.summarizer) != data.isSupported {
+				t.Error("Summarizer's support is incorrect.")
+			}
+		})
+	}
+}
+
+func TestStringPayload_Summarize(t *testing.T) {
+	summarizer := func(idx int, prev string, cur string, na bool) (string, bool) {
+		return prev + cur, na
+	}
+
+	testData := []struct {
+		name        string
+		summarizer  interface{}
+		dataIn      []string
+		naIn        []bool
+		dataOut     []string
+		naOut       []bool
+		isNAPayload bool
+	}{
+		{
+			name:        "true",
+			summarizer:  summarizer,
+			dataIn:      []string{"1", "2", "1", "6", "5"},
+			naIn:        []bool{false, false, false, false, false},
+			dataOut:     []string{"12165"},
+			naOut:       []bool{false},
+			isNAPayload: false,
+		},
+		{
+			name:        "NA",
+			summarizer:  summarizer,
+			dataIn:      []string{"1", "2", "1", "6", "5"},
+			naIn:        []bool{false, false, false, false, true},
+			isNAPayload: true,
+		},
+		{
+			name:        "incorrect applier",
+			summarizer:  func(int, int, bool) bool { return true },
+			dataIn:      []string{"1", "2", "1", "6", "5"},
+			naIn:        []bool{false, true, false, true, false},
+			isNAPayload: true,
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			payload := String(data.dataIn, data.naIn).(*vector).payload.(Summarizable).Summarize(data.summarizer)
+
+			if !data.isNAPayload {
+				payloadOut := payload.(*stringPayload)
+				if !reflect.DeepEqual(data.dataOut, payloadOut.data) {
+					t.Error(fmt.Sprintf("Output data (%v) does not match expected (%v)",
+						data.dataOut, payloadOut.data))
+				}
+				if !reflect.DeepEqual(data.naOut, payloadOut.na) {
+					t.Error(fmt.Sprintf("Output NA (%v) does not match expected (%v)",
+						data.naOut, payloadOut.na))
+				}
+			} else {
+				naPayload, ok := payload.(*naPayload)
+				if ok {
+					if naPayload.length != 1 {
+						t.Error("Incorrect length of NA payload (not 1)")
+					}
+				} else {
+					t.Error("Payload is not NA")
+				}
+			}
+		})
+	}
+}
