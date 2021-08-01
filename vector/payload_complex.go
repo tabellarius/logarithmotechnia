@@ -6,9 +6,14 @@ import (
 	"strconv"
 )
 
+type ComplexPrinter struct {
+	Precision int
+}
+
 type complexPayload struct {
-	length int
-	data   []complex128
+	length  int
+	data    []complex128
+	printer ComplexPrinter
 	DefNAble
 }
 
@@ -30,8 +35,9 @@ func (p *complexPayload) ByIndices(indices []int) Payload {
 	}
 
 	return &complexPayload{
-		length: len(data),
-		data:   data,
+		length:  len(data),
+		data:    data,
+		printer: p.printer,
 		DefNAble: DefNAble{
 			na: na,
 		},
@@ -264,10 +270,12 @@ func (p *complexPayload) StrForElem(idx int) string {
 		return "NaN"
 	}
 
-	return strconv.FormatComplex(p.data[i], 'f', 3, 128)
+	return strconv.FormatComplex(p.data[i], 'f', p.printer.Precision, 128)
 }
 
-func ComplexPayload(data []complex128, na []bool) Payload {
+func ComplexPayload(data []complex128, na []bool, options ...Config) Payload {
+	config := mergeConfigs(options)
+
 	length := len(data)
 
 	vecNA := make([]bool, length)
@@ -289,9 +297,15 @@ func ComplexPayload(data []complex128, na []bool) Payload {
 		}
 	}
 
+	printer := ComplexPrinter{Precision: 3}
+	if config.FloatPrinter != nil {
+		printer = *config.ComplexPrinter
+	}
+
 	return &complexPayload{
-		length: length,
-		data:   vecData,
+		length:  length,
+		data:    vecData,
+		printer: printer,
 		DefNAble: DefNAble{
 			na: vecNA,
 		},
