@@ -3,6 +3,7 @@ package vector
 type Config struct {
 	NamesMap         map[string]int
 	FloatPrinter     *FloatPrinter
+	ComplexPrinter   *ComplexPrinter
 	TimePrinter      *TimePrinter
 	InterfacePrinter func(payload interface{}) string
 	Convertors       *InterfaceConvertors
@@ -14,6 +15,10 @@ func OptionNamesMap(namesMap map[string]int) Config {
 
 func OptionFloatPrinter(printer FloatPrinter) Config {
 	return Config{FloatPrinter: &printer}
+}
+
+func OptionComplexPrinter(printer ComplexPrinter) Config {
+	return Config{ComplexPrinter: &printer}
 }
 
 func OptionTimePrinter(printer TimePrinter) Config {
