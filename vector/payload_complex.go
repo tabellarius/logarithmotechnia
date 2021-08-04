@@ -255,6 +255,22 @@ func (p *complexPayload) Interfaces() ([]interface{}, []bool) {
 	return data, na
 }
 
+func (p *complexPayload) Append(vec Vector) Payload {
+	length := p.length + vec.Len()
+
+	vals, na := vec.Complexes()
+
+	newVals := make([]complex128, length)
+	newNA := make([]bool, length)
+
+	copy(newVals, p.data)
+	copy(newVals[p.length:], vals)
+	copy(newNA, p.na)
+	copy(newNA[p.length:], na)
+
+	return ComplexPayload(newVals, newNA, OptionComplexPrinter(p.printer))
+}
+
 func (p *complexPayload) StrForElem(idx int) string {
 	i := idx - 1
 

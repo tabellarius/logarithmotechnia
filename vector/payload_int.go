@@ -256,6 +256,22 @@ func (p *integerPayload) Interfaces() ([]interface{}, []bool) {
 	return data, na
 }
 
+func (p *integerPayload) Append(vec Vector) Payload {
+	length := p.length + vec.Len()
+
+	vals, na := vec.Integers()
+
+	newVals := make([]int, length)
+	newNA := make([]bool, length)
+
+	copy(newVals, p.data)
+	copy(newVals[p.length:], vals)
+	copy(newNA, p.na)
+	copy(newNA[p.length:], na)
+
+	return IntegerPayload(newVals, newNA)
+}
+
 func (p *integerPayload) StrForElem(idx int) string {
 	if p.na[idx-1] {
 		return "NA"

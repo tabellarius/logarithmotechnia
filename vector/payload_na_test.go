@@ -566,3 +566,35 @@ func TestNaPayload_StrForElem(t *testing.T) {
 	}
 
 }
+
+func TestNaPayload_Append(t *testing.T) {
+	payload := NAPayload(3)
+
+	testData := []struct {
+		name   string
+		vec    Vector
+		outLen int
+	}{
+		{
+			name:   "na",
+			vec:    NA(2),
+			outLen: 5,
+		},
+		{
+			name:   "integer",
+			vec:    Integer([]int{1, 1}, []bool{true, false}),
+			outLen: 5,
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			outPayload := payload.Append(data.vec).(*booleanPayload)
+
+			if outPayload.length != data.outLen {
+				t.Error(fmt.Sprintf("Out length (%d) is not equal to expected (%d)",
+					outPayload.length, data.outLen))
+			}
+		})
+	}
+}

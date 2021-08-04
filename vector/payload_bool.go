@@ -258,6 +258,22 @@ func (p *booleanPayload) Interfaces() ([]interface{}, []bool) {
 	return data, na
 }
 
+func (p *booleanPayload) Append(vec Vector) Payload {
+	length := p.length + vec.Len()
+
+	vals, na := vec.Booleans()
+
+	newVals := make([]bool, length)
+	newNA := make([]bool, length)
+
+	copy(newVals, p.data)
+	copy(newVals[p.length:], vals)
+	copy(newNA, p.na)
+	copy(newNA[p.length:], na)
+
+	return BooleanPayload(newVals, newNA)
+}
+
 func (p *booleanPayload) StrForElem(idx int) string {
 	if p.na[idx-1] {
 		return "NA"

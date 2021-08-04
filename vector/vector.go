@@ -28,7 +28,7 @@ type Vector interface {
 
 	Intable
 	Floatable
-	Booleable
+	Boolable
 	Stringable
 	Complexable
 	Timeable
@@ -42,6 +42,7 @@ type Payload interface {
 	Len() int
 	ByIndices(indices []int) Payload
 	StrForElem(idx int) string
+	Append(vec Vector) Payload
 }
 
 type FromTo struct {
@@ -72,7 +73,7 @@ type Floatable interface {
 	Floats() ([]float64, []bool)
 }
 
-type Booleable interface {
+type Boolable interface {
 	Booleans() ([]bool, []bool)
 }
 
@@ -448,7 +449,7 @@ func (v *vector) Complexes() ([]complex128, []bool) {
 }
 
 func (v *vector) Booleans() ([]bool, []bool) {
-	if payload, ok := v.payload.(Booleable); ok {
+	if payload, ok := v.payload.(Boolable); ok {
 		return payload.Booleans()
 	}
 

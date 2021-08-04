@@ -196,6 +196,22 @@ func (p *timePayload) Interfaces() ([]interface{}, []bool) {
 	return data, na
 }
 
+func (p *timePayload) Append(vec Vector) Payload {
+	length := p.length + vec.Len()
+
+	vals, na := vec.Times()
+
+	newVals := make([]time.Time, length)
+	newNA := make([]bool, length)
+
+	copy(newVals, p.data)
+	copy(newVals[p.length:], vals)
+	copy(newNA, p.na)
+	copy(newNA[p.length:], na)
+
+	return TimePayload(newVals, newNA)
+}
+
 func (p *timePayload) StrForElem(idx int) string {
 	return p.data[idx-1].Format(p.printer.Format)
 }
