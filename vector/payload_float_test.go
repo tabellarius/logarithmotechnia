@@ -737,3 +737,48 @@ func TestFloatPayload_Summarize(t *testing.T) {
 		})
 	}
 }
+
+func TestFloatPayload_Append(t *testing.T) {
+	payload := FloatPayload([]float64{1.1, 2.2, 3.3}, nil)
+
+	testData := []struct {
+		name    string
+		vec     Vector
+		outData []float64
+		outNA   []bool
+	}{
+		{
+			name:    "float",
+			vec:     Float([]float64{4.4, 5.5}, []bool{true, false}),
+			outData: []float64{1.1, 2.2, 3.3, math.NaN(), 5.5},
+			outNA:   []bool{false, false, false, true, false},
+		},
+		{
+			name:    "integer",
+			vec:     Integer([]int{4, 5}, []bool{true, false}),
+			outData: []float64{1.1, 2.2, 3.3, math.NaN(), 5},
+			outNA:   []bool{false, false, false, true, false},
+		},
+		{
+			name:    "na",
+			vec:     NA(2),
+			outData: []float64{1.1, 2.2, 3.3, math.NaN(), math.NaN()},
+			outNA:   []bool{false, false, false, true, true},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			outPayload := payload.Append(data.vec).(*floatPayload)
+
+			if !util.EqualFloatArrays(data.outData, outPayload.data) {
+				t.Error(fmt.Sprintf("Output data (%v) does not match expected (%v)",
+					outPayload.data, data.outData))
+			}
+			if !reflect.DeepEqual(data.outNA, outPayload.na) {
+				t.Error(fmt.Sprintf("Output NA (%v) does not match expected (%v)",
+					outPayload.na, data.outNA))
+			}
+		})
+	}
+}

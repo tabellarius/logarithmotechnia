@@ -633,3 +633,52 @@ func TestTimePayload_Summarize(t *testing.T) {
 		})
 	}
 }
+
+func TestTimePayload_Append(t *testing.T) {
+	payload := TimePayload(toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z"}),
+		nil)
+
+	testData := []struct {
+		name    string
+		vec     Vector
+		outData []time.Time
+		outNA   []bool
+	}{
+		{
+			name: "times",
+			vec:  Time(toTimeData([]string{"2026-01-02T15:04:05+07:00", "2023-01-01T12:30:00+03:00"}), []bool{true, false}),
+			outData: toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z",
+				"0001-01-01T00:00:00Z", "2023-01-01T12:30:00+03:00"}),
+			outNA: []bool{false, false, false, true, false},
+		},
+		{
+			name: "integer",
+			vec:  Integer([]int{4, 5}, []bool{true, false}),
+			outData: toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z",
+				"0001-01-01T00:00:00Z", "0001-01-01T00:00:00Z"}),
+			outNA: []bool{false, false, false, true, true},
+		},
+		{
+			name: "na",
+			vec:  NA(2),
+			outData: toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z",
+				"0001-01-01T00:00:00Z", "0001-01-01T00:00:00Z"}),
+			outNA: []bool{false, false, false, true, true},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			outPayload := payload.Append(data.vec).(*timePayload)
+
+			if !reflect.DeepEqual(data.outData, outPayload.data) {
+				t.Error(fmt.Sprintf("Output data (%v) does not match expected (%v)",
+					outPayload.data, data.outData))
+			}
+			if !reflect.DeepEqual(data.outNA, outPayload.na) {
+				t.Error(fmt.Sprintf("Output NA (%v) does not match expected (%v)",
+					outPayload.na, data.outNA))
+			}
+		})
+	}
+}
