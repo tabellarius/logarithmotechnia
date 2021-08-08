@@ -1,6 +1,8 @@
 package dataframe
 
-import "logarithmotechnia.com/logarithmotechnia/vector"
+import (
+	"logarithmotechnia.com/logarithmotechnia/vector"
+)
 
 type Dataframe interface {
 	RowNum() int
@@ -25,7 +27,7 @@ type Dataframe interface {
 type dataframe struct {
 	rowNum   int
 	colNum   int
-	vectors  []vector.Vector
+	columns  []vector.Vector
 	colNames []string
 }
 
@@ -34,7 +36,13 @@ func (df *dataframe) Clone() Dataframe {
 }
 
 func (df *dataframe) ByIndices(indices []int) Dataframe {
-	panic("implement me")
+	newColumns := make([]vector.Vector, df.colNum)
+
+	for i, column := range df.columns {
+		newColumns[i] = column.ByIndices(indices)
+	}
+
+	return New(newColumns)
 }
 
 func (df *dataframe) Filter(filter interface{}) Dataframe {
@@ -77,21 +85,34 @@ func (df *dataframe) ColNum() int {
 	return df.colNum
 }
 
-func Df(data interface{}) (Dataframe, error) {
+func New(data interface{}) Dataframe {
 	var df dataframe
 	if vectors, ok := data.([]vector.Vector); ok {
 		df = dataframeFromVectors(vectors)
 	}
 
-	return &df, nil
+	return &df
 }
 
 func dataframeFromVectors(vectors []vector.Vector) dataframe {
+	maxLen := 0
+
+	for _, v := range vectors {
+		if v.Len() > maxLen {
+			maxLen = v.Len()
+		}
+	}
+
+	for i, v := range vectors {
+		if v.Len() < maxLen {
+			vectors[i] = v.Append(vector.NA(maxLen - v.Len()))
+		}
+	}
 
 	return dataframe{
-		rowNum:   0,
-		colNum:   0,
-		vectors:  vectors,
+		rowNum:   maxLen,
+		colNum:   len(vectors),
+		columns:  vectors,
 		colNames: nil,
 	}
 }

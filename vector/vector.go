@@ -1,8 +1,6 @@
 package vector
 
 import (
-	"math"
-	"math/cmplx"
 	"time"
 )
 
@@ -20,6 +18,8 @@ type Vector interface {
 	Which(whicher interface{}) []bool
 	SupportsApplier(applier interface{}) bool
 	Apply(applier interface{}) Vector
+
+	Append(vec Vector) Vector
 
 	IsEmpty() bool
 
@@ -327,6 +327,12 @@ func (v *vector) byFromToWithRemove(from, to int) []int {
 	return indices
 }
 
+func (v *vector) Append(vec Vector) Vector {
+	newPayload := v.payload.Append(vec)
+
+	return New(newPayload, v.config())
+}
+
 func (v *vector) IsNA() []bool {
 	if nable, ok := v.payload.(NAble); ok {
 		return nable.IsNA()
@@ -419,7 +425,7 @@ func (v *vector) Strings() ([]string, []bool) {
 		return payload.Strings()
 	}
 
-	return make([]string, v.length), v.naArray()
+	return NA(v.length).Strings()
 }
 
 func (v *vector) Floats() ([]float64, []bool) {
@@ -427,12 +433,7 @@ func (v *vector) Floats() ([]float64, []bool) {
 		return payload.Floats()
 	}
 
-	floats := make([]float64, v.length)
-	for i := 0; i < v.length; i++ {
-		floats[i] = math.NaN()
-	}
-
-	return floats, v.naArray()
+	return NA(v.length).Floats()
 }
 
 func (v *vector) Complexes() ([]complex128, []bool) {
@@ -440,12 +441,7 @@ func (v *vector) Complexes() ([]complex128, []bool) {
 		return payload.Complexes()
 	}
 
-	complexes := make([]complex128, v.length)
-	for i := 0; i < v.length; i++ {
-		complexes[i] = cmplx.NaN()
-	}
-
-	return complexes, v.naArray()
+	return NA(v.length).Complexes()
 }
 
 func (v *vector) Booleans() ([]bool, []bool) {
@@ -453,7 +449,7 @@ func (v *vector) Booleans() ([]bool, []bool) {
 		return payload.Booleans()
 	}
 
-	return make([]bool, v.length), v.naArray()
+	return NA(v.length).Booleans()
 }
 
 func (v *vector) Integers() ([]int, []bool) {
@@ -461,7 +457,7 @@ func (v *vector) Integers() ([]int, []bool) {
 		return payload.Integers()
 	}
 
-	return make([]int, v.length), v.naArray()
+	return NA(v.length).Integers()
 }
 
 func (v *vector) Times() ([]time.Time, []bool) {
@@ -469,7 +465,7 @@ func (v *vector) Times() ([]time.Time, []bool) {
 		return payload.Times()
 	}
 
-	return make([]time.Time, v.length), v.naArray()
+	return NA(v.length).Times()
 }
 
 func (v *vector) Interfaces() ([]interface{}, []bool) {
@@ -477,16 +473,13 @@ func (v *vector) Interfaces() ([]interface{}, []bool) {
 		return payload.Interfaces()
 	}
 
-	return make([]interface{}, v.length), v.naArray()
+	return NA(v.length).Interfaces()
 }
 
-func (v *vector) naArray() []bool {
-	na := make([]bool, v.length)
-	for i := 0; i < v.length; i++ {
-		na[i] = true
+func (v *vector) config() Config {
+	return Config{
+		NamesMap: v.NamesMap(),
 	}
-
-	return na
 }
 
 // New creates a vector part of the future vector. This function is used by public functions which create

@@ -856,3 +856,59 @@ func TestVector_Apply(t *testing.T) {
 		})
 	}
 }
+
+func TestVectorPayload_Append(t *testing.T) {
+	vec := Integer([]int{1, 2, 3}, nil)
+
+	testData := []struct {
+		name    string
+		vec     Vector
+		outData []int
+		outNA   []bool
+	}{
+		{
+			name:    "boolean",
+			vec:     Boolean([]bool{true, true}, []bool{true, false}),
+			outData: []int{1, 2, 3, 0, 1},
+			outNA:   []bool{false, false, false, true, false},
+		},
+		{
+			name:    "integer",
+			vec:     Integer([]int{4, 5}, []bool{true, false}),
+			outData: []int{1, 2, 3, 0, 5},
+			outNA:   []bool{false, false, false, true, false},
+		},
+		{
+			name:    "empty",
+			vec:     Integer([]int{}, []bool{}),
+			outData: []int{1, 2, 3},
+			outNA:   []bool{false, false, false},
+		},
+		{
+			name:    "na",
+			vec:     NA(2),
+			outData: []int{1, 2, 3, 0, 0},
+			outNA:   []bool{false, false, false, true, true},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			outVector := vec.Append(data.vec).(*vector)
+			outPayload := outVector.payload.(*integerPayload)
+
+			if outVector.Len() != vec.Len()+data.vec.Len() {
+				t.Error(fmt.Sprintf("Output length (%d) does not match expected (%d)",
+					outVector.Len(), vec.Len()+data.vec.Len()))
+			}
+			if !reflect.DeepEqual(data.outData, outPayload.data) {
+				t.Error(fmt.Sprintf("Output data (%v) does not match expected (%v)",
+					outPayload.data, data.outData))
+			}
+			if !reflect.DeepEqual(data.outNA, outPayload.na) {
+				t.Error(fmt.Sprintf("Output NA (%v) does not match expected (%v)",
+					outPayload.na, data.outNA))
+			}
+		})
+	}
+}
