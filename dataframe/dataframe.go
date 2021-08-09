@@ -4,10 +4,16 @@ import (
 	"logarithmotechnia.com/logarithmotechnia/vector"
 )
 
+/*
 type Dataframe interface {
 	RowNum() int
 	ColNum() int
 	Clone() Dataframe
+
+	ColNames()
+	SetColname(index int, name string)
+	SetColNames([]string)
+	Columns() []vector.Vector
 
 	ByIndices(indices []int) Dataframe
 
@@ -19,23 +25,42 @@ type Dataframe interface {
 	Transmute(params ...interface{})
 	Relocate(params ...interface{})
 
-	Vectors() []vector.Vector
-
 	IsEmpty() bool
 }
+*/
 
-type dataframe struct {
+type Dataframe struct {
 	rowNum   int
 	colNum   int
 	columns  []vector.Vector
 	colNames []string
 }
 
-func (df *dataframe) Clone() Dataframe {
+func (df *Dataframe) RowNum() int {
+	return df.rowNum
+}
+
+func (df *Dataframe) ColNum() int {
+	return df.colNum
+}
+
+func (df *Dataframe) Clone() Dataframe {
 	panic("implement me")
 }
 
-func (df *dataframe) ByIndices(indices []int) Dataframe {
+func (df *Dataframe) ColNames() {
+	panic("implement me")
+}
+
+func (df *Dataframe) SetColname(index int, name string) {
+	panic("implement me")
+}
+
+func (df *Dataframe) SetColNames(strings []string) {
+	panic("implement me")
+}
+
+func (df *Dataframe) ByIndices(indices []int) *Dataframe {
 	newColumns := make([]vector.Vector, df.colNum)
 
 	for i, column := range df.columns {
@@ -45,56 +70,48 @@ func (df *dataframe) ByIndices(indices []int) Dataframe {
 	return New(newColumns)
 }
 
-func (df *dataframe) Filter(filter interface{}) Dataframe {
+func (df *Dataframe) Filter(filter interface{}) Dataframe {
 	panic("implement me")
 }
 
-func (df *dataframe) SupportsFilter(filter interface{}) bool {
+func (df *Dataframe) SupportsFilter(filter interface{}) bool {
 	panic("implement me")
 }
 
-func (df *dataframe) Select(selectors ...interface{}) {
+func (df *Dataframe) Select(selectors ...interface{}) {
 	panic("implement me")
 }
 
-func (df *dataframe) Mutate(params ...interface{}) {
+func (df *Dataframe) Mutate(params ...interface{}) {
 	panic("implement me")
 }
 
-func (df *dataframe) Transmute(params ...interface{}) {
+func (df *Dataframe) Transmute(params ...interface{}) {
 	panic("implement me")
 }
 
-func (df *dataframe) Relocate(params ...interface{}) {
+func (df *Dataframe) Relocate(params ...interface{}) {
 	panic("implement me")
 }
 
-func (df *dataframe) Vectors() []vector.Vector {
+func (df *Dataframe) Columns() []vector.Vector {
 	panic("implement me")
 }
 
-func (df *dataframe) IsEmpty() bool {
+func (df *Dataframe) IsEmpty() bool {
 	panic("implement me")
 }
 
-func (df *dataframe) RowNum() int {
-	return df.rowNum
-}
-
-func (df *dataframe) ColNum() int {
-	return df.colNum
-}
-
-func New(data interface{}) Dataframe {
-	var df dataframe
+func New(data interface{}) *Dataframe {
+	var df *Dataframe
 	if vectors, ok := data.([]vector.Vector); ok {
 		df = dataframeFromVectors(vectors)
 	}
 
-	return &df
+	return df
 }
 
-func dataframeFromVectors(vectors []vector.Vector) dataframe {
+func dataframeFromVectors(vectors []vector.Vector) *Dataframe {
 	maxLen := 0
 
 	for _, v := range vectors {
@@ -109,7 +126,7 @@ func dataframeFromVectors(vectors []vector.Vector) dataframe {
 		}
 	}
 
-	return dataframe{
+	return &Dataframe{
 		rowNum:   maxLen,
 		colNum:   len(vectors),
 		columns:  vectors,

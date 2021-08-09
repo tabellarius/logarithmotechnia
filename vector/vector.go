@@ -1,6 +1,7 @@
 package vector
 
 import (
+	"logarithmotechnia.com/logarithmotechnia/util"
 	"time"
 )
 
@@ -243,19 +244,7 @@ func (v *vector) Apply(applier interface{}) Vector {
 }
 
 func (v *vector) filterByBooleans(booleans []bool) []int {
-	if len(booleans) != v.length {
-		v.Report().AddError("Number of booleans is not equal to vector's length.")
-		return []int{}
-	}
-
-	var indices []int
-	for index := 0; index < v.length; index++ {
-		if booleans[index] == true {
-			indices = append(indices, index+1)
-		}
-	}
-
-	return indices
+	return util.ToIndexes(v.length, booleans)
 }
 
 func (v *vector) filterByFromTo(from int, to int) []int {
