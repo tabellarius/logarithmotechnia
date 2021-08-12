@@ -36,6 +36,12 @@ func (p *naPayload) StrForElem(int) string {
 	return "NA"
 }
 
+func (p *naPayload) Append(vec Vector) Payload {
+	length := p.length + vec.Len()
+
+	return NAPayload(length)
+}
+
 /* NAble interface */
 
 func (p *naPayload) IsNA() []bool {

@@ -295,6 +295,22 @@ func (p *interfacePayload) Interfaces() ([]interface{}, []bool) {
 	return data, na
 }
 
+func (p *interfacePayload) Append(vec Vector) Payload {
+	length := p.length + vec.Len()
+
+	vals, na := vec.Interfaces()
+
+	newVals := make([]interface{}, length)
+	newNA := make([]bool, length)
+
+	copy(newVals, p.data)
+	copy(newVals[p.length:], vals)
+	copy(newNA, p.na)
+	copy(newNA[p.length:], na)
+
+	return InterfacePayload(newVals, newNA)
+}
+
 func InterfacePayload(data []interface{}, na []bool, options ...Config) Payload {
 	config := mergeConfigs(options)
 

@@ -2,7 +2,7 @@ package vector
 
 import (
 	"fmt"
-	"logarithmotechnia.com/logarithmotechnia/util"
+	"github.com/dee-ru/logarithmotechnia/util"
 	"math"
 	"math/cmplx"
 	"reflect"
@@ -755,6 +755,51 @@ func TestIntegerPayload_Summarize(t *testing.T) {
 				} else {
 					t.Error("Payload is not NA")
 				}
+			}
+		})
+	}
+}
+
+func TestIntegerPayload_Append(t *testing.T) {
+	payload := IntegerPayload([]int{1, 2, 3}, nil)
+
+	testData := []struct {
+		name    string
+		vec     Vector
+		outData []int
+		outNA   []bool
+	}{
+		{
+			name:    "boolean",
+			vec:     Boolean([]bool{true, true}, []bool{true, false}),
+			outData: []int{1, 2, 3, 0, 1},
+			outNA:   []bool{false, false, false, true, false},
+		},
+		{
+			name:    "integer",
+			vec:     Integer([]int{4, 5}, []bool{true, false}),
+			outData: []int{1, 2, 3, 0, 5},
+			outNA:   []bool{false, false, false, true, false},
+		},
+		{
+			name:    "na",
+			vec:     NA(2),
+			outData: []int{1, 2, 3, 0, 0},
+			outNA:   []bool{false, false, false, true, true},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			outPayload := payload.Append(data.vec).(*integerPayload)
+
+			if !reflect.DeepEqual(data.outData, outPayload.data) {
+				t.Error(fmt.Sprintf("Output data (%v) does not match expected (%v)",
+					outPayload.data, data.outData))
+			}
+			if !reflect.DeepEqual(data.outNA, outPayload.na) {
+				t.Error(fmt.Sprintf("Output NA (%v) does not match expected (%v)",
+					outPayload.na, data.outNA))
 			}
 		})
 	}

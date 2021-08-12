@@ -281,6 +281,22 @@ func (p *floatPayload) StrForElem(idx int) string {
 	return strconv.FormatFloat(p.data[i], 'f', p.printer.Precision, 64)
 }
 
+func (p *floatPayload) Append(vec Vector) Payload {
+	length := p.length + vec.Len()
+
+	vals, na := vec.Floats()
+
+	newVals := make([]float64, length)
+	newNA := make([]bool, length)
+
+	copy(newVals, p.data)
+	copy(newVals[p.length:], vals)
+	copy(newNA, p.na)
+	copy(newNA[p.length:], na)
+
+	return FloatPayload(newVals, newNA, OptionFloatPrinter(p.printer))
+}
+
 func FloatPayload(data []float64, na []bool, options ...Config) Payload {
 	config := mergeConfigs(options)
 

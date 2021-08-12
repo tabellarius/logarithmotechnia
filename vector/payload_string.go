@@ -267,6 +267,22 @@ func (p *stringPayload) Interfaces() ([]interface{}, []bool) {
 	return data, na
 }
 
+func (p *stringPayload) Append(vec Vector) Payload {
+	length := p.length + vec.Len()
+
+	vals, na := vec.Strings()
+
+	newVals := make([]string, length)
+	newNA := make([]bool, length)
+
+	copy(newVals, p.data)
+	copy(newVals[p.length:], vals)
+	copy(newNA, p.na)
+	copy(newNA[p.length:], na)
+
+	return StringPayload(newVals, newNA)
+}
+
 func (p *stringPayload) StrForElem(idx int) string {
 	if p.na[idx-1] {
 		return "NA"

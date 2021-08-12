@@ -769,3 +769,48 @@ func TestBooleanPayload_Summarize(t *testing.T) {
 		})
 	}
 }
+
+func TestBooleanPayload_Append(t *testing.T) {
+	payload := BooleanPayload([]bool{true, false, true}, nil)
+
+	testData := []struct {
+		name    string
+		vec     Vector
+		outData []bool
+		outNA   []bool
+	}{
+		{
+			name:    "boolean",
+			vec:     Boolean([]bool{true, true}, []bool{true, false}),
+			outData: []bool{true, false, true, false, true},
+			outNA:   []bool{false, false, false, true, false},
+		},
+		{
+			name:    "integer",
+			vec:     Integer([]int{1, 1}, []bool{true, false}),
+			outData: []bool{true, false, true, false, true},
+			outNA:   []bool{false, false, false, true, false},
+		},
+		{
+			name:    "na",
+			vec:     NA(2),
+			outData: []bool{true, false, true, false, false},
+			outNA:   []bool{false, false, false, true, true},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			outPayload := payload.Append(data.vec).(*booleanPayload)
+
+			if !reflect.DeepEqual(data.outData, outPayload.data) {
+				t.Error(fmt.Sprintf("Output data (%v) does not match expected (%v)",
+					outPayload.data, data.outData))
+			}
+			if !reflect.DeepEqual(data.outNA, outPayload.na) {
+				t.Error(fmt.Sprintf("Output NA (%v) does not match expected (%v)",
+					outPayload.na, data.outNA))
+			}
+		})
+	}
+}

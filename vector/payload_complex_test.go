@@ -2,7 +2,7 @@ package vector
 
 import (
 	"fmt"
-	"logarithmotechnia.com/logarithmotechnia/util"
+	"github.com/dee-ru/logarithmotechnia/util"
 	"math"
 	"math/cmplx"
 	"reflect"
@@ -734,6 +734,51 @@ func TestComplexPayload_Summarize(t *testing.T) {
 				} else {
 					t.Error("Payload is not NA")
 				}
+			}
+		})
+	}
+}
+
+func TestComplexPayload_Append(t *testing.T) {
+	payload := ComplexPayload([]complex128{1 + 1i, 2 + 2i, 3 + 3i}, nil)
+
+	testData := []struct {
+		name    string
+		vec     Vector
+		outData []complex128
+		outNA   []bool
+	}{
+		{
+			name:    "complex",
+			vec:     Complex([]complex128{4 + 4i, 5 + 5i}, []bool{true, false}),
+			outData: []complex128{1 + 1i, 2 + 2i, 3 + 3i, cmplx.NaN(), 5 + 5i},
+			outNA:   []bool{false, false, false, true, false},
+		},
+		{
+			name:    "integer",
+			vec:     Integer([]int{4, 5}, []bool{true, false}),
+			outData: []complex128{1 + 1i, 2 + 2i, 3 + 3i, cmplx.NaN(), 5 + 0i},
+			outNA:   []bool{false, false, false, true, false},
+		},
+		{
+			name:    "na",
+			vec:     NA(2),
+			outData: []complex128{1 + 1i, 2 + 2i, 3 + 3i, cmplx.NaN(), cmplx.NaN()},
+			outNA:   []bool{false, false, false, true, true},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			outPayload := payload.Append(data.vec).(*complexPayload)
+
+			if !util.EqualComplexArrays(data.outData, outPayload.data) {
+				t.Error(fmt.Sprintf("Output data (%v) does not match expected (%v)",
+					outPayload.data, data.outData))
+			}
+			if !reflect.DeepEqual(data.outNA, outPayload.na) {
+				t.Error(fmt.Sprintf("Output NA (%v) does not match expected (%v)",
+					outPayload.na, data.outNA))
 			}
 		})
 	}

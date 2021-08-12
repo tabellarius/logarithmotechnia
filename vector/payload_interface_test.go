@@ -2,7 +2,7 @@ package vector
 
 import (
 	"fmt"
-	"logarithmotechnia.com/logarithmotechnia/util"
+	"github.com/dee-ru/logarithmotechnia/util"
 	"math"
 	"math/cmplx"
 	"reflect"
@@ -915,6 +915,51 @@ func TestInterfacePayload_Summarize(t *testing.T) {
 				} else {
 					t.Error("Payload is not NA")
 				}
+			}
+		})
+	}
+}
+
+func TestInterfacePayload_Append(t *testing.T) {
+	payload := InterfacePayload([]interface{}{1, 2, 3}, nil)
+
+	testData := []struct {
+		name    string
+		vec     Vector
+		outData []interface{}
+		outNA   []bool
+	}{
+		{
+			name:    "boolean",
+			vec:     Boolean([]bool{true, true}, []bool{true, false}),
+			outData: []interface{}{1, 2, 3, nil, true},
+			outNA:   []bool{false, false, false, true, false},
+		},
+		{
+			name:    "integer",
+			vec:     Integer([]int{4, 5}, []bool{true, false}),
+			outData: []interface{}{1, 2, 3, nil, 5},
+			outNA:   []bool{false, false, false, true, false},
+		},
+		{
+			name:    "na",
+			vec:     NA(2),
+			outData: []interface{}{1, 2, 3, nil, nil},
+			outNA:   []bool{false, false, false, true, true},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			outPayload := payload.Append(data.vec).(*interfacePayload)
+
+			if !reflect.DeepEqual(data.outData, outPayload.data) {
+				t.Error(fmt.Sprintf("Output data (%v) does not match expected (%v)",
+					outPayload.data, data.outData))
+			}
+			if !reflect.DeepEqual(data.outNA, outPayload.na) {
+				t.Error(fmt.Sprintf("Output NA (%v) does not match expected (%v)",
+					outPayload.na, data.outNA))
 			}
 		})
 	}
