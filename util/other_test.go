@@ -2,13 +2,12 @@ package util
 
 import (
 	"fmt"
-	"logarithmotechnia.com/logarithmotechnia/vector"
 	"reflect"
 	"testing"
 )
 
 func TestToIndexes(t *testing.T) {
-	vec := vector.Integer([]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, nil)
+	vecLength := 10
 
 	testData := []struct {
 		name    string
@@ -44,7 +43,7 @@ func TestToIndexes(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			indices := ToIndexes(vec.Len(), data.which)
+			indices := ToIndices(vecLength, data.which)
 			if !reflect.DeepEqual(indices, data.indices) {
 				t.Error(fmt.Sprintf("Indices (%v) is not equal to expected (%v)", indices, data.indices))
 			}

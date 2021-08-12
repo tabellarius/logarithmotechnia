@@ -1,6 +1,6 @@
 package util
 
-func ToIndexes(vecLength int, booleans []bool) []int {
+func ToIndices(vecLength int, booleans []bool) []int {
 	var indices = make([]int, 0)
 	length := len(booleans)
 

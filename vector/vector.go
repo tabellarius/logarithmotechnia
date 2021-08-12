@@ -1,7 +1,7 @@
 package vector
 
 import (
-	"logarithmotechnia.com/logarithmotechnia/util"
+	"github.com/dee-ru/logarithmotechnia/util"
 	"time"
 )
 
@@ -244,7 +244,7 @@ func (v *vector) Apply(applier interface{}) Vector {
 }
 
 func (v *vector) filterByBooleans(booleans []bool) []int {
-	return util.ToIndexes(v.length, booleans)
+	return util.ToIndices(v.length, booleans)
 }
 
 func (v *vector) filterByFromTo(from int, to int) []int {
