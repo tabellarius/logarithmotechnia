@@ -91,12 +91,6 @@ func (v *DefNameable) SetName(idx int, name string) {
 func (v *DefNameable) SetNames(names []string) {
 	length := len(names)
 
-	/*
-		if length != v.length {
-			v.report.AddWarning("SetNames(): names []string is not equal to vector's length")
-		}
-	*/
-
 	if length > v.length {
 		length = v.length
 	}

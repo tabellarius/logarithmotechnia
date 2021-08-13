@@ -1,9 +1,11 @@
 package dataframe
 
-func (df *Dataframe) Mutate(params ...interface{}) *Dataframe {
+import "github.com/dee-ru/logarithmotechnia/vector"
+
+func (df *Dataframe) Mutate(map[string]vector.Vector) *Dataframe {
 	panic("implement me")
 }
 
-func (df *Dataframe) Transmute(params ...interface{}) *Dataframe {
+func (df *Dataframe) Transmute(map[string]vector.Vector) *Dataframe {
 	panic("implement me")
 }
