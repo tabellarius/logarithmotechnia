@@ -14,6 +14,7 @@ type Vector interface {
 
 	ByIndices(indices []int) Vector
 	ByNames(names []string) Vector
+	FromTo(from, to int) Vector
 	Filter(whicher interface{}) Vector
 	SupportsWhicher(whicher interface{}) bool
 	Which(whicher interface{}) []bool
@@ -44,11 +45,6 @@ type Payload interface {
 	ByIndices(indices []int) Payload
 	StrForElem(idx int) string
 	Append(vec Vector) Payload
-}
-
-type FromTo struct {
-	from int
-	to   int
 }
 
 type Whichable interface {
@@ -169,6 +165,10 @@ func (v *vector) ByNames(names []string) Vector {
 	return v.ByIndices(indices)
 }
 
+func (v *vector) FromTo(from, to int) Vector {
+	return v.ByIndices(v.filterByFromTo(from, to))
+}
+
 func (v *vector) Filter(whicher interface{}) Vector {
 	if index, ok := whicher.(int); ok {
 		return v.ByIndices([]int{index})
@@ -184,10 +184,6 @@ func (v *vector) Filter(whicher interface{}) Vector {
 
 	if names, ok := whicher.([]string); ok {
 		return v.ByNames(names)
-	}
-
-	if fromTo, ok := whicher.(FromTo); ok {
-		return v.ByIndices(v.filterByFromTo(fromTo.from, fromTo.to))
 	}
 
 	if booleans, ok := whicher.([]bool); ok {
