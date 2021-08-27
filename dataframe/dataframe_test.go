@@ -462,5 +462,19 @@ func TestDataframe_Clone(t *testing.T) {
 }
 
 func TestDataframe_Columns(t *testing.T) {
+	columns := []vector.Vector{
+		vector.Integer([]int{1, 2, 3}, nil),
+		vector.String([]string{"1", "2", "3"}, nil),
+		vector.Boolean([]bool{true, false, true}, nil),
+	}
+
+	df := New(columns)
+
+	dfColumns := df.Columns()
+
+	if !reflect.DeepEqual(columns, dfColumns) {
+		t.Error(fmt.Sprintf("Columns (%v) are not equal to expected (%v)",
+			columns, dfColumns))
+	}
 
 }
