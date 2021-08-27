@@ -20,19 +20,27 @@ func (df *Dataframe) ColNum() int {
 	return df.colNum
 }
 
-func (df *Dataframe) Clone() Dataframe {
-	panic("implement me")
-}
-
-func (df *Dataframe) ColumnNames() {
-	panic("implement me")
+func (df *Dataframe) Clone() *Dataframe {
+	return New(df.columns, df.config)
 }
 
 func (df *Dataframe) Cn(name string) vector.Vector {
 	index := df.columnIndexByName(name)
 
 	if index > 0 {
-		return df.columns[index]
+		return df.columns[index-1]
+	}
+
+	return nil
+}
+
+func (df *Dataframe) C(selector interface{}) vector.Vector {
+	if index, ok := selector.(int); ok {
+		return df.Ci(index)
+	}
+
+	if name, ok := selector.(string); ok {
+		return df.Cn(name)
 	}
 
 	return nil
@@ -40,7 +48,7 @@ func (df *Dataframe) Cn(name string) vector.Vector {
 
 func (df *Dataframe) Ci(index int) vector.Vector {
 	if df.isValidIndex(index) {
-		return df.columns[index]
+		return df.columns[index-1]
 	}
 
 	return nil
@@ -48,18 +56,26 @@ func (df *Dataframe) Ci(index int) vector.Vector {
 
 func (df *Dataframe) SetColumnName(index int, name string) *Dataframe {
 	if df.isValidIndex(index) {
-		df.config.columnNames[index] = name
+		df.config.columnNames[index-1] = name
 	}
 
 	return df
 }
 
-func (df *Dataframe) SetColumnNames(strings []string) *Dataframe {
+func (df *Dataframe) SetColumnNames(names []string) *Dataframe {
+	index := 1
+	for _, name := range names {
+		df.SetColumnName(index, name)
+		index++
+		if index > df.colNum {
+			break
+		}
+	}
 
 	return df
 }
 
-func (df *Dataframe) GetColumnNames() []string {
+func (df *Dataframe) ColumnNames() []string {
 	names := make([]string, df.colNum)
 	copy(names, df.config.columnNames)
 
@@ -73,7 +89,7 @@ func (df *Dataframe) ByIndices(indices []int) *Dataframe {
 		newColumns[i] = column.ByIndices(indices)
 	}
 
-	return New(newColumns)
+	return New(newColumns, df.config)
 }
 
 func (df *Dataframe) Columns() []vector.Vector {
@@ -81,7 +97,7 @@ func (df *Dataframe) Columns() []vector.Vector {
 }
 
 func (df *Dataframe) IsEmpty() bool {
-	panic("implement me")
+	return df.colNum == 0
 }
 
 func (df *Dataframe) isValidIndex(index int) bool {
@@ -93,16 +109,16 @@ func (df *Dataframe) isValidIndex(index int) bool {
 }
 
 func (df *Dataframe) columnIndexByName(name string) int {
-	index := 0
+	index := 1
 
 	for _, columnName := range df.config.columnNames {
-		index++
 		if columnName == name {
-			break
+			return index
 		}
+		index++
 	}
 
-	return index
+	return 0
 }
 
 func New(data interface{}, options ...Config) *Dataframe {
