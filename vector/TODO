@@ -1,7 +1,6 @@
 + SetOptions() + config() (сбор опций с Payload и Vector для лёгкого создания векторов) + добавить в функции, возвращающие Payload
-Move payload to payloads dir
-Make all payload public
 Appliers for different return types
 Factors
-FromTo
 Helpers for payloads
+Move payload to payloads dir
+Make all payload public

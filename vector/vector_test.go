@@ -351,6 +351,104 @@ func TestVector_ByNames(t *testing.T) {
 	}
 }
 
+func TestVector_FromTo(t *testing.T) {
+	vec := Integer(
+		[]int{1, 2, 3, 4, 5},
+		[]bool{false, false, true, false, false},
+	)
+
+	testData := []struct {
+		name   string
+		from   int
+		to     int
+		out    []int
+		outNA  []bool
+		length int
+	}{
+		{
+			name:   "FromTo straight",
+			from:   2,
+			to:     4,
+			out:    []int{2, 0, 4},
+			outNA:  []bool{false, true, false},
+			length: 3,
+		},
+		{
+			name:   "FromTo reverse",
+			from:   4,
+			to:     2,
+			out:    []int{4, 0, 2},
+			outNA:  []bool{false, true, false},
+			length: 3,
+		},
+		{
+			name:   "FromTo with remove straight",
+			from:   -2,
+			to:     -4,
+			out:    []int{1, 5},
+			outNA:  []bool{false, false},
+			length: 2,
+		},
+		{
+			name:   "FromTo with remove reverse",
+			from:   -4,
+			to:     -2,
+			out:    []int{1, 5},
+			outNA:  []bool{false, false},
+			length: 2,
+		},
+		{
+			name:   "FromTo straight with incorrect boundaries",
+			from:   0,
+			to:     7,
+			out:    []int{1, 2, 0, 4, 5},
+			outNA:  []bool{false, false, true, false, false},
+			length: 5,
+		},
+		{
+			name:   "FromTo full remove with incorrect boundaries",
+			from:   0,
+			to:     -7,
+			out:    []int{},
+			outNA:  []bool{},
+			length: 0,
+		},
+		{
+			name:   "FromTo different signs",
+			from:   -2,
+			to:     4,
+			out:    []int{},
+			outNA:  []bool{},
+			length: 0,
+		},
+		{
+			name:   "FromTo different signs reverse",
+			from:   2,
+			to:     -4,
+			out:    []int{},
+			outNA:  []bool{},
+			length: 0,
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			newVec := vec.FromTo(data.from, data.to)
+			integers, na := newVec.Integers()
+			if !reflect.DeepEqual(integers, data.out) {
+				t.Error(fmt.Sprintf("Result (%v) is not equal to expected (%v)", integers, data.out))
+			}
+			if !reflect.DeepEqual(na, data.outNA) {
+				t.Error(fmt.Sprintf("Result NA (%v) is not equal to expected NA (%v)", na, data.outNA))
+			}
+			if newVec.Len() != data.length {
+				t.Error(fmt.Sprintf("Result length (%d) is not equal to expected length (%d)",
+					newVec.Len(), data.length))
+			}
+		})
+	}
+}
+
 func TestVector_Filter(t *testing.T) {
 	vec := Integer(
 		[]int{1, 2, 3, 4, 5},
@@ -377,62 +475,6 @@ func TestVector_Filter(t *testing.T) {
 			out:     []int{1},
 			outNA:   []bool{false},
 			length:  1,
-		},
-		{
-			name:    "FromTo straight",
-			whicher: FromTo{2, 4},
-			out:     []int{2, 0, 4},
-			outNA:   []bool{false, true, false},
-			length:  3,
-		},
-		{
-			name:    "FromTo reverse",
-			whicher: FromTo{4, 2},
-			out:     []int{4, 0, 2},
-			outNA:   []bool{false, true, false},
-			length:  3,
-		},
-		{
-			name:    "FromTo with remove straight",
-			whicher: FromTo{-2, -4},
-			out:     []int{1, 5},
-			outNA:   []bool{false, false},
-			length:  2,
-		},
-		{
-			name:    "FromTo with remove reverse",
-			whicher: FromTo{-4, -2},
-			out:     []int{1, 5},
-			outNA:   []bool{false, false},
-			length:  2,
-		},
-		{
-			name:    "FromTo straight with incorrect boundaries",
-			whicher: FromTo{0, 7},
-			out:     []int{1, 2, 0, 4, 5},
-			outNA:   []bool{false, false, true, false, false},
-			length:  5,
-		},
-		{
-			name:    "FromTo full remove with incorrect boundaries",
-			whicher: FromTo{0, -7},
-			out:     []int{},
-			outNA:   []bool{},
-			length:  0,
-		},
-		{
-			name:    "FromTo different signs",
-			whicher: FromTo{-2, 4},
-			out:     []int{},
-			outNA:   []bool{},
-			length:  0,
-		},
-		{
-			name:    "FromTo different signs reverse",
-			whicher: FromTo{2, -4},
-			out:     []int{},
-			outNA:   []bool{},
-			length:  0,
 		},
 		{
 			name:    "booleanPayload",
