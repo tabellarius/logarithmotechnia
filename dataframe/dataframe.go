@@ -47,7 +47,7 @@ func (df *Dataframe) C(selector interface{}) vector.Vector {
 }
 
 func (df *Dataframe) Ci(index int) vector.Vector {
-	if df.isValidIndex(index) {
+	if df.IsValidColumnIndex(index) {
 		return df.columns[index-1]
 	}
 
@@ -55,8 +55,12 @@ func (df *Dataframe) Ci(index int) vector.Vector {
 }
 
 func (df *Dataframe) SetColumnName(index int, name string) *Dataframe {
-	if df.isValidIndex(index) {
-		df.config.columnNames[index-1] = name
+	if df.IsValidColumnIndex(index) {
+		if df.HasColumn(name) {
+
+		} else {
+			df.config.columnNames[index-1] = name
+		}
 	}
 
 	return df
@@ -100,12 +104,16 @@ func (df *Dataframe) IsEmpty() bool {
 	return df.colNum == 0
 }
 
-func (df *Dataframe) isValidIndex(index int) bool {
+func (df *Dataframe) IsValidColumnIndex(index int) bool {
 	if index >= 1 && index <= df.colNum {
 		return true
 	}
 
 	return false
+}
+
+func (df *Dataframe) HasColumn(name string) bool {
+	return strPosInSlice(df.config.columnNames, name) != 1
 }
 
 func (df *Dataframe) columnIndexByName(name string) int {
