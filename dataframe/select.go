@@ -1,5 +1,10 @@
 package dataframe
 
+import (
+	"fmt"
+	"github.com/dee-ru/logarithmotechnia/vector"
+)
+
 type FromToColNames struct {
 	from string
 	to   string
@@ -11,8 +16,8 @@ type FromToColIndices struct {
 }
 
 func (df *Dataframe) Select(selectors ...interface{}) *Dataframe {
-	colNames := make([]string, df.colNum)
-	copy(colNames, df.config.columnNames)
+	colNames := make([]string, 0)
+	fmt.Println("Selector:", selectors)
 
 	for _, selector := range selectors {
 		switch selector.(type) {
@@ -21,30 +26,53 @@ func (df *Dataframe) Select(selectors ...interface{}) *Dataframe {
 		case []string:
 			colNames = df.selectByNames(colNames, selector.([]string))
 		case int:
+			fmt.Println(":int")
 			colNames = df.selectByIndex(colNames, selector.(int))
+			fmt.Println(colNames)
 		case []int:
+			fmt.Println(":[]int")
 			colNames = df.selectByIndices(colNames, selector.([]int))
+			fmt.Println(colNames)
 		case FromToColNames:
 			colNames = df.selectByFromToColNames(colNames, selector.(FromToColNames))
 		case FromToColIndices:
 		}
 	}
 
-	return df
+	columnMap := map[string]int{}
+	for i, name := range df.config.columnNames {
+		columnMap[name] = i
+	}
+
+	vectors := []vector.Vector{}
+	names := []string{}
+	for _, name := range colNames {
+		vectors = append(vectors, df.columns[columnMap[name]])
+	}
+
+	return New(vectors, OptionColumnNames(names))
 }
 
 func (df *Dataframe) selectByName(colNames []string, name string) []string {
 	remove := false
 
-	if name[0] == '-' {
+	if name[0] == '-' && !df.HasColumn(name) {
 		remove = true
 		name = name[1:]
 	}
 
+	if !df.HasColumn(name) {
+		return colNames
+	}
+
 	if remove {
+		if len(colNames) == 0 {
+			colNames = make([]string, df.colNum)
+			copy(colNames, df.config.columnNames)
+		}
 		pos := strPosInSlice(colNames, name)
 		if pos != -1 {
-			return append(colNames[:pos], colNames[:pos+1]...)
+			return append(colNames[:pos], colNames[pos+1:]...)
 		}
 	} else {
 		if strPosInSlice(colNames, name) == -1 && df.HasColumn(name) {

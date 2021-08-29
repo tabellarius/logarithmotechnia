@@ -55,31 +55,39 @@ func (df *Dataframe) Ci(index int) vector.Vector {
 }
 
 func (df *Dataframe) SetColumnName(index int, name string) *Dataframe {
-	if df.IsValidColumnIndex(index) {
-		if df.HasColumn(name) {
+	df.setColumnName(index, name)
+	df.config.columnNamesVector = vector.String(df.config.columnNames, nil)
 
-		} else {
+	return df
+}
+
+func (df *Dataframe) setColumnName(index int, name string) {
+	if df.IsValidColumnIndex(index) {
+		if !df.HasColumn(name) {
 			df.config.columnNames[index-1] = name
 		}
 	}
-
-	return df
 }
 
 func (df *Dataframe) SetColumnNames(names []string) *Dataframe {
 	index := 1
 	for _, name := range names {
-		df.SetColumnName(index, name)
+		df.setColumnName(index, name)
 		index++
 		if index > df.colNum {
 			break
 		}
 	}
+	df.config.columnNamesVector = vector.String(df.config.columnNames, nil)
 
 	return df
 }
 
-func (df *Dataframe) ColumnNames() []string {
+func (df *Dataframe) Names() vector.Vector {
+	return df.config.columnNamesVector
+}
+
+func (df *Dataframe) NamesAsStrings() []string {
 	names := make([]string, df.colNum)
 	copy(names, df.config.columnNames)
 
@@ -113,7 +121,7 @@ func (df *Dataframe) IsValidColumnIndex(index int) bool {
 }
 
 func (df *Dataframe) HasColumn(name string) bool {
-	return strPosInSlice(df.config.columnNames, name) != 1
+	return strPosInSlice(df.config.columnNames, name) != -1
 }
 
 func (df *Dataframe) columnIndexByName(name string) int {

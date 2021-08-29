@@ -1,7 +1,10 @@
 package dataframe
 
+import "github.com/dee-ru/logarithmotechnia/vector"
+
 type Config struct {
-	columnNames []string
+	columnNames       []string
+	columnNamesVector vector.Vector
 }
 
 func mergeConfigs(configs []Config) Config {

@@ -280,7 +280,7 @@ func TestDataframe_C(t *testing.T) {
 	}
 }
 
-func TestDataframe_ColumnNames(t *testing.T) {
+func TestDataframe_NamesAsStrings(t *testing.T) {
 	testData := []struct {
 		name        string
 		dataframe   *Dataframe
@@ -299,7 +299,7 @@ func TestDataframe_ColumnNames(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			columnNames := data.dataframe.ColumnNames()
+			columnNames := data.dataframe.NamesAsStrings()
 
 			if !reflect.DeepEqual(columnNames, data.columnNames) {
 				t.Error(fmt.Sprintf("Columns names (%v) are not equal to expected (%v)",
@@ -351,34 +351,40 @@ func TestDataframe_SetColumnName(t *testing.T) {
 	})
 
 	testData := []struct {
-		name        string
-		index       int
-		columnNames []string
+		name              string
+		index             int
+		columnNames       []string
+		columnNamesVector vector.Vector
 	}{
 		{
-			name:        "int",
-			index:       1,
-			columnNames: []string{"int", "2", "3"},
+			name:              "int",
+			index:             1,
+			columnNames:       []string{"int", "2", "3"},
+			columnNamesVector: vector.String([]string{"int", "2", "3"}, nil),
 		},
 		{
-			name:        "string",
-			index:       2,
-			columnNames: []string{"int", "string", "3"},
+			name:              "string",
+			index:             2,
+			columnNames:       []string{"int", "string", "3"},
+			columnNamesVector: vector.String([]string{"int", "string", "3"}, nil),
 		},
 		{
-			name:        "bool",
-			index:       3,
-			columnNames: []string{"int", "string", "bool"},
+			name:              "bool",
+			index:             3,
+			columnNames:       []string{"int", "string", "bool"},
+			columnNamesVector: vector.String([]string{"int", "string", "bool"}, nil),
 		},
 		{
-			name:        "zero",
-			index:       0,
-			columnNames: []string{"int", "string", "bool"},
+			name:              "zero",
+			index:             0,
+			columnNames:       []string{"int", "string", "bool"},
+			columnNamesVector: vector.String([]string{"int", "string", "bool"}, nil),
 		},
 		{
-			name:        "four",
-			index:       4,
-			columnNames: []string{"int", "string", "bool"},
+			name:              "four",
+			index:             4,
+			columnNames:       []string{"int", "string", "bool"},
+			columnNamesVector: vector.String([]string{"int", "string", "bool"}, nil),
 		},
 	}
 
@@ -389,6 +395,11 @@ func TestDataframe_SetColumnName(t *testing.T) {
 			if !reflect.DeepEqual(df.config.columnNames, data.columnNames) {
 				t.Error(fmt.Sprintf("Column names (%v) is not equal to expected (%v)",
 					df.config.columnNames, data.columnNames))
+			}
+
+			if !reflect.DeepEqual(df.config.columnNamesVector, data.columnNamesVector) {
+				t.Error(fmt.Sprintf("Column names vector (%v) is not equal to expected (%v)",
+					df.config.columnNamesVector, data.columnNamesVector))
 			}
 		})
 	}
@@ -477,4 +488,76 @@ func TestDataframe_Columns(t *testing.T) {
 			columns, dfColumns))
 	}
 
+}
+
+func TestDataframe_HasColumn(t *testing.T) {
+	df := New([]vector.Vector{
+		vector.Integer([]int{1, 2, 3}, nil),
+		vector.String([]string{"1", "2", "3"}, nil),
+		vector.Boolean([]bool{true, false, true}, nil),
+	}, OptionColumnNames([]string{"int", "string", "bool"}))
+
+	testData := []struct {
+		name      string
+		column    string
+		hasColumn bool
+	}{
+		{
+			name:      "exists 1",
+			column:    "int",
+			hasColumn: true,
+		},
+		{
+			name:      "exists 2",
+			column:    "string",
+			hasColumn: true,
+		},
+		{
+			name:      "not exists",
+			column:    "float",
+			hasColumn: false,
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			hasColumn := df.HasColumn(data.column)
+
+			if hasColumn != data.hasColumn {
+				t.Error(fmt.Sprintf("hasColumn (%v) are not equal to expected (%v)",
+					hasColumn, data.hasColumn))
+			}
+		})
+	}
+}
+
+func TestDataframe_IsValidColumnIndex(t *testing.T) {
+	df := New([]vector.Vector{
+		vector.Integer([]int{1, 2, 3}, nil),
+		vector.String([]string{"1", "2", "3"}, nil),
+		vector.Boolean([]bool{true, false, true}, nil),
+	}, OptionColumnNames([]string{"int", "string", "bool"}))
+
+	testData := []struct {
+		name  string
+		index int
+		valid bool
+	}{
+		{"minimum", 1, true},
+		{"maximum", 3, true},
+		{"zero", 0, false},
+		{"overflow", 4, false},
+		{"negative", -1, false},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			valid := df.IsValidColumnIndex(data.index)
+
+			if valid != data.valid {
+				t.Error(fmt.Sprintf("hasColumn (%v) are not equal to expected (%v)",
+					valid, data.valid))
+			}
+		})
+	}
 }
