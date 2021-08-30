@@ -1,7 +1,6 @@
 package dataframe
 
 import (
-	"fmt"
 	"github.com/dee-ru/logarithmotechnia/vector"
 )
 
@@ -17,7 +16,6 @@ type FromToColIndices struct {
 
 func (df *Dataframe) Select(selectors ...interface{}) *Dataframe {
 	colNames := make([]string, 0)
-	fmt.Println("Selector:", selectors)
 
 	for _, selector := range selectors {
 		switch selector.(type) {
@@ -26,13 +24,11 @@ func (df *Dataframe) Select(selectors ...interface{}) *Dataframe {
 		case []string:
 			colNames = df.selectByNames(colNames, selector.([]string))
 		case int:
-			fmt.Println(":int")
 			colNames = df.selectByIndex(colNames, selector.(int))
-			fmt.Println(colNames)
 		case []int:
-			fmt.Println(":[]int")
 			colNames = df.selectByIndices(colNames, selector.([]int))
-			fmt.Println(colNames)
+		case []bool:
+			colNames = df.selectByBooleans(colNames, selector.([]bool))
 		case FromToColNames:
 			colNames = df.selectByFromToColNames(colNames, selector.(FromToColNames))
 		case FromToColIndices:
@@ -103,6 +99,11 @@ func (df *Dataframe) selectByIndices(colNames []string, indices []int) []string 
 	for _, index := range indices {
 		colNames = df.selectByIndex(colNames, index)
 	}
+
+	return colNames
+}
+
+func (df *Dataframe) selectByBooleans(colNames []string, booleans []bool) []string {
 
 	return colNames
 }
