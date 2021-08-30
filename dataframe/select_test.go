@@ -2,7 +2,7 @@ package dataframe
 
 import (
 	"fmt"
-	"github.com/dee-ru/logarithmotechnia/vector"
+	"logarithmotechnia/vector"
 	"reflect"
 	"testing"
 )
@@ -27,6 +27,12 @@ func TestDataframe_Select(t *testing.T) {
 		selectors []interface{}
 		columns   []vector.Vector
 	}{
+		{
+			name:      "zero selectors",
+			selectors: []interface{}{},
+			columns: []vector.Vector{df.columns[0], df.columns[1], df.columns[2], df.columns[3],
+				df.columns[4], df.columns[5]},
+		},
 		{
 			name:      "one column with string selector",
 			selectors: []interface{}{"name"},
@@ -58,12 +64,12 @@ func TestDataframe_Select(t *testing.T) {
 			columns:   []vector.Vector{df.columns[0], df.columns[3], df.columns[2]},
 		},
 		{
-			name:      "non-existant string selector",
+			name:      "non-existent string selector",
 			selectors: []interface{}{"exp"},
 			columns:   []vector.Vector{},
 		},
 		{
-			name:      "non-existant removal string selector",
+			name:      "non-existent removal string selector",
 			selectors: []interface{}{"-exp"},
 			columns:   []vector.Vector{},
 		},
@@ -83,7 +89,7 @@ func TestDataframe_Select(t *testing.T) {
 			columns:   []vector.Vector{df.columns[0]},
 		},
 		{
-			name:      "non-existant index selector",
+			name:      "non-existent index selector",
 			selectors: []interface{}{-1},
 			columns:   []vector.Vector{},
 		},
@@ -98,7 +104,7 @@ func TestDataframe_Select(t *testing.T) {
 			columns:   []vector.Vector{df.columns[0], df.columns[1], df.columns[4], df.columns[5]},
 		},
 		{
-			name:      "multiple index selectors with non-existant and duplicate",
+			name:      "multiple index selectors with non-existent and duplicate",
 			selectors: []interface{}{1, -1, 2, 0, 5, 10, 1, 6, 5},
 			columns:   []vector.Vector{df.columns[0], df.columns[1], df.columns[4], df.columns[5]},
 		},
@@ -106,6 +112,51 @@ func TestDataframe_Select(t *testing.T) {
 			name:      "string and index selectors combined",
 			selectors: []interface{}{[]string{"gender", "name"}, 6, "age"},
 			columns:   []vector.Vector{df.columns[2], df.columns[0], df.columns[5], df.columns[1]},
+		},
+		{
+			name:      "boolean selector - full",
+			selectors: []interface{}{[]bool{true, true, false, true, false, false}},
+			columns:   []vector.Vector{df.columns[0], df.columns[1], df.columns[3]},
+		},
+		{
+			name:      "FromTo regular",
+			selectors: []interface{}{FromToColNames{"name", "salary"}},
+			columns:   []vector.Vector{df.columns[0], df.columns[1], df.columns[2], df.columns[3]},
+		},
+		{
+			name:      "FromTo names reverse",
+			selectors: []interface{}{FromToColNames{"salary", "name"}},
+			columns:   []vector.Vector{df.columns[3], df.columns[2], df.columns[1], df.columns[0]},
+		},
+		{
+			name:      "FromTo names incorrect from",
+			selectors: []interface{}{FromToColNames{"nam", "salary"}},
+			columns:   []vector.Vector{},
+		},
+		{
+			name:      "FromTo names incorrect to",
+			selectors: []interface{}{FromToColNames{"name", "salar"}},
+			columns:   []vector.Vector{},
+		},
+		{
+			name:      "FromTo indices regular",
+			selectors: []interface{}{FromToColIndices{1, 4}},
+			columns:   []vector.Vector{df.columns[0], df.columns[1], df.columns[2], df.columns[3]},
+		},
+		{
+			name:      "FromTo indices reverse",
+			selectors: []interface{}{FromToColIndices{4, 1}},
+			columns:   []vector.Vector{df.columns[3], df.columns[2], df.columns[1], df.columns[0]},
+		},
+		{
+			name:      "FromTo indices incorrect to",
+			selectors: []interface{}{FromToColIndices{0, 4}},
+			columns:   []vector.Vector{},
+		},
+		{
+			name:      "FromTo indices incorrect from",
+			selectors: []interface{}{FromToColIndices{1, 7}},
+			columns:   []vector.Vector{},
 		},
 	}
 

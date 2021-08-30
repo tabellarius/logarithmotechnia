@@ -1,6 +1,6 @@
 package dataframe
 
-import "github.com/dee-ru/logarithmotechnia/vector"
+import "logarithmotechnia/vector"
 
 type Config struct {
 	columnNames       []string

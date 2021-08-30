@@ -1,8 +1,8 @@
 package dataframe
 
 import (
-	"github.com/dee-ru/logarithmotechnia/util"
-	"github.com/dee-ru/logarithmotechnia/vector"
+	"logarithmotechnia/util"
+	"logarithmotechnia/vector"
 )
 
 func (df *Dataframe) Filter(filter interface{}) *Dataframe {

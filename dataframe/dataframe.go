@@ -1,7 +1,7 @@
 package dataframe
 
 import (
-	"github.com/dee-ru/logarithmotechnia/vector"
+	"logarithmotechnia/vector"
 	"strconv"
 )
 

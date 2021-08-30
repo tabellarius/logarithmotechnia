@@ -1,7 +1,7 @@
 package vector
 
 import (
-	"github.com/dee-ru/logarithmotechnia/util"
+	"logarithmotechnia/util"
 	"time"
 )
 
