@@ -1,6 +1,6 @@
 package dataframe
 
-import "github.com/dee-ru/logarithmotechnia/vector"
+import "logarithmotechnia/vector"
 
 func (df *Dataframe) Mutate(map[string]vector.Vector) *Dataframe {
 	panic("implement me")

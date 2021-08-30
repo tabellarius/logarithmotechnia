@@ -2,7 +2,7 @@ package dataframe
 
 import (
 	"fmt"
-	"github.com/dee-ru/logarithmotechnia/vector"
+	"logarithmotechnia/vector"
 	"reflect"
 	"testing"
 )

@@ -1,7 +1,7 @@
 package dataframe
 
 import (
-	"github.com/dee-ru/logarithmotechnia/vector"
+	"logarithmotechnia/vector"
 	"strconv"
 )
 
@@ -47,7 +47,7 @@ func (df *Dataframe) C(selector interface{}) vector.Vector {
 }
 
 func (df *Dataframe) Ci(index int) vector.Vector {
-	if df.isValidIndex(index) {
+	if df.IsValidColumnIndex(index) {
 		return df.columns[index-1]
 	}
 
@@ -55,27 +55,39 @@ func (df *Dataframe) Ci(index int) vector.Vector {
 }
 
 func (df *Dataframe) SetColumnName(index int, name string) *Dataframe {
-	if df.isValidIndex(index) {
-		df.config.columnNames[index-1] = name
-	}
+	df.setColumnName(index, name)
+	df.config.columnNamesVector = vector.String(df.config.columnNames, nil)
 
 	return df
+}
+
+func (df *Dataframe) setColumnName(index int, name string) {
+	if df.IsValidColumnIndex(index) {
+		if !df.HasColumn(name) {
+			df.config.columnNames[index-1] = name
+		}
+	}
 }
 
 func (df *Dataframe) SetColumnNames(names []string) *Dataframe {
 	index := 1
 	for _, name := range names {
-		df.SetColumnName(index, name)
+		df.setColumnName(index, name)
 		index++
 		if index > df.colNum {
 			break
 		}
 	}
+	df.config.columnNamesVector = vector.String(df.config.columnNames, nil)
 
 	return df
 }
 
-func (df *Dataframe) ColumnNames() []string {
+func (df *Dataframe) Names() vector.Vector {
+	return df.config.columnNamesVector
+}
+
+func (df *Dataframe) NamesAsStrings() []string {
 	names := make([]string, df.colNum)
 	copy(names, df.config.columnNames)
 
@@ -100,12 +112,16 @@ func (df *Dataframe) IsEmpty() bool {
 	return df.colNum == 0
 }
 
-func (df *Dataframe) isValidIndex(index int) bool {
+func (df *Dataframe) IsValidColumnIndex(index int) bool {
 	if index >= 1 && index <= df.colNum {
 		return true
 	}
 
 	return false
+}
+
+func (df *Dataframe) HasColumn(name string) bool {
+	return strPosInSlice(df.config.columnNames, name) != -1
 }
 
 func (df *Dataframe) columnIndexByName(name string) int {
