@@ -297,60 +297,6 @@ func TestVector_ByIndices(t *testing.T) {
 	}
 }
 
-func TestVector_ByNames(t *testing.T) {
-	vec := Integer(
-		[]int{1, 2, 3, 4, 5},
-		[]bool{false, false, true, false, false},
-		OptionNamesMap(map[string]int{"one": 1, "three": 3, "five": 5}),
-	)
-	testData := []struct {
-		name   string
-		names  []string
-		out    []int
-		outNA  []bool
-		length int
-	}{
-		{
-			name:   "all",
-			names:  []string{"one", "three", "five"},
-			out:    []int{1, 0, 5},
-			outNA:  []bool{false, true, false},
-			length: 3,
-		},
-		{
-			name:   "with incorrect",
-			names:  []string{"zero", "three", "five"},
-			out:    []int{0, 5},
-			outNA:  []bool{true, false},
-			length: 2,
-		},
-		{
-			name:   "empty",
-			names:  []string{},
-			out:    []int{},
-			outNA:  []bool{},
-			length: 0,
-		},
-	}
-
-	for i, data := range testData {
-		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			newVec := vec.ByNames(data.names)
-			integers, na := newVec.Integers()
-			if !reflect.DeepEqual(integers, data.out) {
-				t.Error(fmt.Sprintf("Result (%v) is not equal to expected (%v)", integers, data.out))
-			}
-			if !reflect.DeepEqual(na, data.outNA) {
-				t.Error(fmt.Sprintf("Result NA (%v) is not equal to expected NA (%v)", na, data.outNA))
-			}
-			if newVec.Len() != data.length {
-				t.Error(fmt.Sprintf("Result length (%d) is not equal to expected length (%d)",
-					newVec.Len(), data.length))
-			}
-		})
-	}
-}
-
 func TestVector_FromTo(t *testing.T) {
 	vec := Integer(
 		[]int{1, 2, 3, 4, 5},
@@ -482,20 +428,6 @@ func TestVector_Filter(t *testing.T) {
 			out:     []int{1, 0, 5},
 			outNA:   []bool{false, true, false},
 			length:  3,
-		},
-		{
-			name:    "string",
-			whicher: "one",
-			out:     []int{1},
-			outNA:   []bool{false},
-			length:  1,
-		},
-		{
-			name:    "[]string",
-			whicher: []string{"one", "three"},
-			out:     []int{1, 0},
-			outNA:   []bool{false, true},
-			length:  2,
 		},
 		{
 			name:    "byIntFunc",
@@ -737,10 +669,6 @@ func TestVector_Clone(t *testing.T) {
 
 	if vec.length != newVec.length {
 		t.Error(fmt.Sprintf("vec.length (%d) is not equal to newVec.length (%d)", vec.length, newVec.length))
-	}
-
-	if !reflect.DeepEqual(vec.names, newVec.names) {
-		t.Error(fmt.Sprintf("vec.names (%v) is not equal to newVec.names (%v)", vec.names, newVec.names))
 	}
 
 	srcAddr := &(vec.payload.(*integerPayload).data[0])

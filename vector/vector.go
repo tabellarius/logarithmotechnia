@@ -13,7 +13,6 @@ type Vector interface {
 	Clone() Vector
 
 	ByIndices(indices []int) Vector
-	ByNames(names []string) Vector
 	FromTo(from, to int) Vector
 	Filter(whicher interface{}) Vector
 	SupportsWhicher(whicher interface{}) bool
@@ -25,7 +24,6 @@ type Vector interface {
 
 	IsEmpty() bool
 
-	Nameable
 	NAble
 
 	Intable
@@ -92,8 +90,7 @@ type Interfaceable interface {
 
 // vector holds data and functions shared by all vectors
 type vector struct {
-	length int
-	DefNameable
+	length  int
 	payload Payload
 	report  Report
 }
@@ -109,11 +106,7 @@ func (v *vector) Len() int {
 
 func (v *vector) Clone() Vector {
 	return &vector{
-		length: v.length,
-		DefNameable: DefNameable{
-			length: v.length,
-			names:  v.NamesMap(),
-		},
+		length:  v.length,
 		payload: v.payload,
 		report:  v.report.Copy(),
 	}
@@ -130,11 +123,7 @@ func (v *vector) ByIndices(indices []int) Vector {
 
 	newPayload := v.payload.ByIndices(selected)
 	vec := &vector{
-		length: newPayload.Len(),
-		DefNameable: DefNameable{
-			length: newPayload.Len(),
-			names:  v.NamesForIndices(selected),
-		},
+		length:  newPayload.Len(),
 		payload: v.payload.ByIndices(selected),
 		report:  Report{},
 	}
@@ -153,18 +142,6 @@ func (v *vector) normalizeFromTo(from, to int) (int, int) {
 	return from, to
 }
 
-func (v *vector) ByNames(names []string) Vector {
-	indices := make([]int, 0)
-
-	for _, name := range names {
-		if idx, ok := v.names[name]; ok {
-			indices = append(indices, idx)
-		}
-	}
-
-	return v.ByIndices(indices)
-}
-
 func (v *vector) FromTo(from, to int) Vector {
 	return v.ByIndices(v.filterByFromTo(from, to))
 }
@@ -176,14 +153,6 @@ func (v *vector) Filter(whicher interface{}) Vector {
 
 	if indices, ok := whicher.([]int); ok {
 		return v.ByIndices(indices)
-	}
-
-	if name, ok := whicher.(string); ok {
-		return v.ByNames([]string{name})
-	}
-
-	if names, ok := whicher.([]string); ok {
-		return v.ByNames(names)
 	}
 
 	if booleans, ok := whicher.([]bool); ok {
@@ -315,7 +284,7 @@ func (v *vector) byFromToWithRemove(from, to int) []int {
 func (v *vector) Append(vec Vector) Vector {
 	newPayload := v.payload.Append(vec)
 
-	return New(newPayload, v.config())
+	return New(newPayload)
 }
 
 func (v *vector) IsNA() []bool {
@@ -398,10 +367,6 @@ func (v *vector) String() string {
 func (v *vector) strForElem(idx int) string {
 	str := v.payload.StrForElem(idx)
 
-	if v.HasNameFor(idx) {
-		str += " (" + v.Name(idx) + ")"
-	}
-
 	return str
 }
 
@@ -461,31 +426,13 @@ func (v *vector) Interfaces() ([]interface{}, []bool) {
 	return NA(v.length).Interfaces()
 }
 
-func (v *vector) config() Config {
-	return Config{
-		NamesMap: v.NamesMap(),
-	}
-}
-
 // New creates a vector part of the future vector. This function is used by public functions which create
 // typed vectors
-func New(payload Payload, config Config) Vector {
+func New(payload Payload, _ ...Config) Vector {
 	vec := vector{
-		length: payload.Len(),
-		DefNameable: DefNameable{
-			length: payload.Len(),
-			names:  map[string]int{},
-		},
+		length:  payload.Len(),
 		payload: payload,
 		report:  Report{},
-	}
-
-	if config.NamesMap != nil {
-		for name, idx := range config.NamesMap {
-			if idx >= 1 && idx <= vec.length {
-				vec.names[name] = idx
-			}
-		}
 	}
 
 	return &vec

@@ -112,12 +112,6 @@ func TestFloat(t *testing.T) {
 						t.Error(fmt.Sprintf("Payload data (%v) is not equal to correct data (%v)\n",
 							payload.data, data.outData))
 					}
-
-					if vv.length != vv.DefNameable.length || vv.length != payload.length {
-						t.Error(fmt.Sprintf("Lengths are different: (vv.length - %d, "+
-							"vv.DefNameable.length - %d, payload.length - %d, ",
-							vv.length, vv.DefNameable.length, payload.length))
-					}
 				}
 
 				if len(data.na) > 0 && len(data.na) == length {
@@ -132,14 +126,6 @@ func TestFloat(t *testing.T) {
 				} else {
 					t.Error("error")
 				}
-
-				if data.names != nil {
-					if !reflect.DeepEqual(vv.names, data.expectedNames) {
-						t.Error(fmt.Sprintf("Vector names (%v) is not equal to out names (%v)",
-							vv.names, data.expectedNames))
-					}
-				}
-
 			}
 		})
 	}
@@ -473,7 +459,7 @@ func TestFloatPayload_ByIndices(t *testing.T) {
 	}
 }
 
-func TestFloatPayload_Supportswhicher(t *testing.T) {
+func TestFloatPayload_SupportsWhicher(t *testing.T) {
 	testData := []struct {
 		name        string
 		filter      interface{}
