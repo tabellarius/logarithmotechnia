@@ -17,63 +17,40 @@ func TestInterface(t *testing.T) {
 	emptyNA := []bool{false, false, false, false, false}
 
 	testData := []struct {
-		name          string
-		data          []interface{}
-		na            []bool
-		outData       []interface{}
-		names         map[string]int
-		expectedNames map[string]int
+		name    string
+		data    []interface{}
+		na      []bool
+		outData []interface{}
 	}{
 		{
 			name:    "normal + false na",
 			data:    []interface{}{1, 2, 3, 4, 5},
 			na:      []bool{false, false, false, false, false},
 			outData: []interface{}{1, 2, 3, 4, 5},
-			names:   nil,
 		},
 		{
 			name:    "normal + empty na",
 			data:    []interface{}{1, 2, 3, 4, 5},
 			na:      []bool{},
 			outData: []interface{}{1, 2, 3, 4, 5},
-			names:   nil,
 		},
 		{
 			name:    "normal + nil na",
 			data:    []interface{}{1, 2, 3, 4, 5},
 			na:      nil,
 			outData: []interface{}{1, 2, 3, 4, 5},
-			names:   nil,
 		},
 		{
 			name:    "normal + mixed na",
 			data:    []interface{}{1, 2, 3, 4, 5},
 			na:      []bool{false, true, true, true, false},
 			outData: []interface{}{1, nil, nil, nil, 5},
-			names:   nil,
-		},
-		{
-			name:          "normal + names",
-			data:          []interface{}{1, 2, 3, 4, 5},
-			na:            []bool{false, false, false, false, false},
-			outData:       []interface{}{1, 2, 3, 4, 5},
-			names:         map[string]int{"one": 1, "three": 3, "five": 5},
-			expectedNames: map[string]int{"one": 1, "three": 3, "five": 5},
-		},
-		{
-			name:          "normal + incorrect names",
-			data:          []interface{}{1, 2, 3, 4, 5},
-			na:            []bool{false, false, false, false, false},
-			outData:       []interface{}{1, 2, 3, 4, 5},
-			names:         map[string]int{"zero": 0, "one": 1, "three": 3, "five": 5, "seven": 7},
-			expectedNames: map[string]int{"one": 1, "three": 3, "five": 5},
 		},
 	}
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			config := Config{NamesMap: data.names}
-			v := Interface(data.data, data.na, config).(*vector)
+			v := Interface(data.data, data.na).(*vector)
 
 			length := len(data.data)
 			if v.length != length {
@@ -88,12 +65,6 @@ func TestInterface(t *testing.T) {
 					t.Error(fmt.Sprintf("Payload data (%v) is not equal to correct data (%v)\n",
 						payload.data, data.data))
 				}
-
-				if v.length != v.DefNameable.length || v.length != payload.length {
-					t.Error(fmt.Sprintf("Lengths are different: (vv.length - %d, "+
-						"vv.DefNameable.length - %d, payload.length - %d, ",
-						v.length, v.DefNameable.length, payload.length))
-				}
 			}
 
 			if len(data.na) > 0 && len(data.na) == length {
@@ -107,13 +78,6 @@ func TestInterface(t *testing.T) {
 				}
 			} else {
 				t.Error("error")
-			}
-
-			if data.names != nil {
-				if !reflect.DeepEqual(v.names, data.expectedNames) {
-					t.Error(fmt.Sprintf("Vector names (%v) is not equal to out names (%v)",
-						v.names, data.expectedNames))
-				}
 			}
 		})
 	}

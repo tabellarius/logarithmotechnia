@@ -13,20 +13,17 @@ func TestBoolean(t *testing.T) {
 	emptyNA := []bool{false, false, false, false, false}
 
 	testData := []struct {
-		name          string
-		data          []bool
-		na            []bool
-		outData       []bool
-		names         map[string]int
-		expectedNames map[string]int
-		isEmpty       bool
+		name    string
+		data    []bool
+		na      []bool
+		outData []bool
+		isEmpty bool
 	}{
 		{
 			name:    "normal + na false",
 			data:    []bool{true, false, true, false, true},
 			na:      []bool{false, false, false, false, false},
 			outData: []bool{true, false, true, false, true},
-			names:   nil,
 			isEmpty: false,
 		},
 		{
@@ -34,7 +31,6 @@ func TestBoolean(t *testing.T) {
 			data:    []bool{true, false, true, false, true},
 			na:      []bool{},
 			outData: []bool{true, false, true, false, true},
-			names:   nil,
 			isEmpty: false,
 		},
 		{
@@ -42,7 +38,6 @@ func TestBoolean(t *testing.T) {
 			data:    []bool{true, false, true, false, true},
 			na:      nil,
 			outData: []bool{true, false, true, false, true},
-			names:   nil,
 			isEmpty: false,
 		},
 		{
@@ -50,46 +45,19 @@ func TestBoolean(t *testing.T) {
 			data:    []bool{true, false, true, false, true},
 			na:      []bool{false, true, true, true, false},
 			outData: []bool{true, false, false, false, true},
-			names:   nil,
 			isEmpty: false,
 		},
 		{
 			name:    "normal + incorrect sized na",
 			data:    []bool{true, false, true, false, true},
 			na:      []bool{false, false, false, false},
-			names:   nil,
 			isEmpty: true,
-		},
-		{
-			name:          "normal + names",
-			data:          []bool{true, false, true, false, true},
-			na:            []bool{false, false, false, false, false},
-			outData:       []bool{true, false, true, false, true},
-			names:         map[string]int{"one": 1, "three": 3, "five": 5},
-			expectedNames: map[string]int{"one": 1, "three": 3, "five": 5},
-			isEmpty:       false,
-		},
-		{
-			name:          "normal + incorrect names",
-			data:          []bool{true, false, true, false, true},
-			na:            []bool{false, false, false, false, false},
-			outData:       []bool{true, false, true, false, true},
-			names:         map[string]int{"zero": 0, "one": 1, "three": 3, "five": 5, "seven": 7},
-			expectedNames: map[string]int{"one": 1, "three": 3, "five": 5},
-			isEmpty:       false,
 		},
 	}
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			var v Vector
-			if data.names == nil {
-				v = Boolean(data.data, data.na)
-			} else {
-				config := Config{NamesMap: data.names}
-				v = Boolean(data.data, data.na, config).(*vector)
-			}
-
+			v := Boolean(data.data, data.na)
 			vv := v.(*vector)
 
 			if data.isEmpty {
@@ -111,12 +79,6 @@ func TestBoolean(t *testing.T) {
 						t.Error(fmt.Sprintf("Payload data (%v) is not equal to correct data (%v)\n",
 							payload.data, data.outData))
 					}
-
-					if vv.length != vv.DefNameable.length || vv.length != payload.length {
-						t.Error(fmt.Sprintf("Lengths are different: (vv.length - %d, "+
-							"vv.DefNameable.length - %d, payload.length - %d, ",
-							vv.length, vv.DefNameable.length, payload.length))
-					}
 				}
 
 				if len(data.na) > 0 && len(data.na) == length {
@@ -131,14 +93,6 @@ func TestBoolean(t *testing.T) {
 				} else {
 					t.Error("error")
 				}
-
-				if data.names != nil {
-					if !reflect.DeepEqual(vv.names, data.expectedNames) {
-						t.Error(fmt.Sprintf("Vector names (%v) is not equal to out names (%v)",
-							vv.names, data.expectedNames))
-					}
-				}
-
 			}
 		})
 	}

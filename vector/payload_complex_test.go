@@ -14,20 +14,17 @@ func TestComplex(t *testing.T) {
 	emptyNA := []bool{false, false, false, false, false}
 
 	testData := []struct {
-		name          string
-		data          []complex128
-		na            []bool
-		outData       []complex128
-		names         map[string]int
-		expectedNames map[string]int
-		isEmpty       bool
+		name    string
+		data    []complex128
+		na      []bool
+		outData []complex128
+		isEmpty bool
 	}{
 		{
 			name:    "normal + na false",
 			data:    []complex128{1.1 + 0i, 2.2 + 2.2i, 3.3 + 3.3i, 4.4 + 4.4i, 5.5 - 5.5i},
 			na:      []bool{false, false, false, false, false},
 			outData: []complex128{1.1 + 0i, 2.2 + 2.2i, 3.3 + 3.3i, 4.4 + 4.4i, 5.5 - 5.5i},
-			names:   nil,
 			isEmpty: false,
 		},
 		{
@@ -35,7 +32,6 @@ func TestComplex(t *testing.T) {
 			data:    []complex128{1.1 + 0i, 2.2 + 2.2i, 3.3 + 3.3i, 4.4 + 4.4i, 5.5 - 5.5i},
 			na:      []bool{},
 			outData: []complex128{1.1 + 0i, 2.2 + 2.2i, 3.3 + 3.3i, 4.4 + 4.4i, 5.5 - 5.5i},
-			names:   nil,
 			isEmpty: false,
 		},
 		{
@@ -43,7 +39,6 @@ func TestComplex(t *testing.T) {
 			data:    []complex128{1.1 + 0i, 2.2 + 2.2i, 3.3 + 3.3i, 4.4 + 4.4i, 5.5 - 5.5i},
 			na:      nil,
 			outData: []complex128{1.1 + 0i, 2.2 + 2.2i, 3.3 + 3.3i, 4.4 + 4.4i, 5.5 - 5.5i},
-			names:   nil,
 			isEmpty: false,
 		},
 		{
@@ -51,45 +46,19 @@ func TestComplex(t *testing.T) {
 			data:    []complex128{1.1 + 0i, 2.2 + 2.2i, 3.3 + 3.3i, 4.4 + 4.4i, 5.5 - 5.5i},
 			na:      []bool{false, true, true, true, false},
 			outData: []complex128{1.1 + 0i, cmplx.NaN(), cmplx.NaN(), cmplx.NaN(), 5.5 - 5.5i},
-			names:   nil,
 			isEmpty: false,
 		},
 		{
 			name:    "normal + incorrect sized na",
 			data:    []complex128{1.1 + 0i, 2.2 + 2.2i, 3.3 + 3.3i, 4.4 + 4.4i, 5.5 - 5.5i},
 			na:      []bool{false, false, false, false},
-			names:   nil,
 			isEmpty: true,
-		},
-		{
-			name:          "normal + names",
-			data:          []complex128{1.1 + 0i, 2.2 + 2.2i, 3.3 + 3.3i, 4.4 + 4.4i, 5.5 - 5.5i},
-			na:            []bool{false, false, false, false, false},
-			outData:       []complex128{1.1 + 0i, 2.2 + 2.2i, 3.3 + 3.3i, 4.4 + 4.4i, 5.5 - 5.5i},
-			names:         map[string]int{"one": 1, "three": 3, "five": 5},
-			expectedNames: map[string]int{"one": 1, "three": 3, "five": 5},
-			isEmpty:       false,
-		},
-		{
-			name:          "normal + incorrect names",
-			data:          []complex128{1.1 + 0i, 2.2 + 2.2i, 3.3 + 3.3i, 4.4 + 4.4i, 5.5 - 5.5i},
-			na:            []bool{false, false, false, false, false},
-			outData:       []complex128{1.1 + 0i, 2.2 + 2.2i, 3.3 + 3.3i, 4.4 + 4.4i, 5.5 - 5.5i},
-			names:         map[string]int{"zero": 0, "one": 1, "three": 3, "five": 5, "seven": 7},
-			expectedNames: map[string]int{"one": 1, "three": 3, "five": 5},
-			isEmpty:       false,
 		},
 	}
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			var v Vector
-			if data.names == nil {
-				v = Complex(data.data, data.na)
-			} else {
-				config := Config{NamesMap: data.names}
-				v = Complex(data.data, data.na, config).(*vector)
-			}
+			v := Complex(data.data, data.na)
 
 			vv := v.(*vector)
 
@@ -112,12 +81,6 @@ func TestComplex(t *testing.T) {
 						t.Error(fmt.Sprintf("Payload data (%v) is not equal to correct data (%v)\n",
 							payload.data, data.outData))
 					}
-
-					if vv.length != vv.DefNameable.length || vv.length != payload.length {
-						t.Error(fmt.Sprintf("Lengths are different: (vv.length - %d, "+
-							"vv.DefNameable.length - %d, payload.length - %d, ",
-							vv.length, vv.DefNameable.length, payload.length))
-					}
 				}
 
 				if len(data.na) > 0 && len(data.na) == length {
@@ -132,14 +95,6 @@ func TestComplex(t *testing.T) {
 				} else {
 					t.Error("error")
 				}
-
-				if data.names != nil {
-					if !reflect.DeepEqual(vv.names, data.expectedNames) {
-						t.Error(fmt.Sprintf("Vector names (%v) is not equal to out names (%v)",
-							vv.names, data.expectedNames))
-					}
-				}
-
 			}
 		})
 	}

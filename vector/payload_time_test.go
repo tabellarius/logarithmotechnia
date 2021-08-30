@@ -12,20 +12,17 @@ func TestTime(t *testing.T) {
 	emptyNA := []bool{false, false, false}
 
 	testData := []struct {
-		name          string
-		data          []string
-		na            []bool
-		outData       []string
-		names         map[string]int
-		expectedNames map[string]int
-		isEmpty       bool
+		name    string
+		data    []string
+		na      []bool
+		outData []string
+		isEmpty bool
 	}{
 		{
 			name:    "normal + false na",
 			data:    []string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z"},
 			na:      []bool{false, false, false},
 			outData: []string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z"},
-			names:   nil,
 			isEmpty: false,
 		},
 		{
@@ -33,7 +30,6 @@ func TestTime(t *testing.T) {
 			data:    []string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z"},
 			na:      []bool{},
 			outData: []string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z"},
-			names:   nil,
 			isEmpty: false,
 		},
 		{
@@ -41,7 +37,6 @@ func TestTime(t *testing.T) {
 			data:    []string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z"},
 			na:      nil,
 			outData: []string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z"},
-			names:   nil,
 			isEmpty: false,
 		},
 		{
@@ -49,49 +44,22 @@ func TestTime(t *testing.T) {
 			data:    []string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z"},
 			na:      []bool{false, false, true},
 			outData: []string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "0001-01-01T00:00:00Z"},
-			names:   nil,
 			isEmpty: false,
 		},
 		{
 			name:    "normal + incorrect sized na",
 			data:    []string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z"},
 			na:      []bool{false, false, false, false},
-			names:   nil,
 			isEmpty: true,
-		},
-		{
-			name:          "normal + names",
-			data:          []string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z"},
-			na:            []bool{false, false, false},
-			outData:       []string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z"},
-			names:         map[string]int{"one": 1, "three": 3},
-			expectedNames: map[string]int{"one": 1, "three": 3},
-			isEmpty:       false,
-		},
-		{
-			name:          "normal + incorrect names",
-			data:          []string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z"},
-			na:            []bool{false, false, false},
-			outData:       []string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z"},
-			names:         map[string]int{"zero": 0, "one": 1, "three": 3, "five": 5},
-			expectedNames: map[string]int{"one": 1, "three": 3},
-			isEmpty:       false,
 		},
 	}
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			var v Vector
-
 			timeData := toTimeData(data.data)
 			outTimeData := toTimeData(data.outData)
 
-			if data.names == nil {
-				v = Time(timeData, data.na)
-			} else {
-				config := Config{NamesMap: data.names}
-				v = Time(timeData, data.na, config).(*vector)
-			}
+			v := Time(timeData, data.na)
 
 			vv := v.(*vector)
 
@@ -114,12 +82,6 @@ func TestTime(t *testing.T) {
 						t.Error(fmt.Sprintf("Payload data (%v) is not equal to correct data (%v)\n",
 							payload.data[1:], timeData))
 					}
-
-					if vv.length != vv.DefNameable.length || vv.length != payload.length {
-						t.Error(fmt.Sprintf("Lengths are different: (vv.length - %d, "+
-							"vv.DefNameable.length - %d, payload.length - %d, ",
-							vv.length, vv.DefNameable.length, payload.length))
-					}
 				}
 
 				if len(data.na) > 0 && len(data.na) == length {
@@ -134,14 +96,6 @@ func TestTime(t *testing.T) {
 				} else {
 					t.Error("error")
 				}
-
-				if data.names != nil {
-					if !reflect.DeepEqual(vv.names, data.expectedNames) {
-						t.Error(fmt.Sprintf("Vector names (%v) is not equal to out names (%v)",
-							vv.names, data.expectedNames))
-					}
-				}
-
 			}
 		})
 	}
