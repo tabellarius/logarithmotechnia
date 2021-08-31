@@ -8,6 +8,9 @@ import (
 
 const maxIntPrint = 5
 
+type IntegerWhicherFunc = func(int, int, bool) bool
+type IntegerWhicherCompactFunc = func(int, bool) bool
+
 // integerPayload is a structure, subsisting Integer vectors
 type integerPayload struct {
 	length int
@@ -42,11 +45,11 @@ func (p *integerPayload) ByIndices(indices []int) Payload {
 }
 
 func (p *integerPayload) SupportsWhicher(whicher interface{}) bool {
-	if _, ok := whicher.(func(int, int, bool) bool); ok {
+	if _, ok := whicher.(IntegerWhicherFunc); ok {
 		return true
 	}
 
-	if _, ok := whicher.(func(int, bool) bool); ok {
+	if _, ok := whicher.(IntegerWhicherCompactFunc); ok {
 		return true
 	}
 
@@ -54,18 +57,18 @@ func (p *integerPayload) SupportsWhicher(whicher interface{}) bool {
 }
 
 func (p *integerPayload) Which(whicher interface{}) []bool {
-	if byFunc, ok := whicher.(func(int, int, bool) bool); ok {
+	if byFunc, ok := whicher.(IntegerWhicherFunc); ok {
 		return p.selectByFunc(byFunc)
 	}
 
-	if byFunc, ok := whicher.(func(int, bool) bool); ok {
+	if byFunc, ok := whicher.(IntegerWhicherCompactFunc); ok {
 		return p.selectByCompactFunc(byFunc)
 	}
 
 	return make([]bool, p.length)
 }
 
-func (p *integerPayload) selectByFunc(byFunc func(int, int, bool) bool) []bool {
+func (p *integerPayload) selectByFunc(byFunc IntegerWhicherFunc) []bool {
 	booleans := make([]bool, p.length)
 
 	for idx, val := range p.data {
@@ -77,7 +80,7 @@ func (p *integerPayload) selectByFunc(byFunc func(int, int, bool) bool) []bool {
 	return booleans
 }
 
-func (p *integerPayload) selectByCompactFunc(byFunc func(int, bool) bool) []bool {
+func (p *integerPayload) selectByCompactFunc(byFunc IntegerWhicherCompactFunc) []bool {
 	booleans := make([]bool, p.length)
 
 	for idx, val := range p.data {

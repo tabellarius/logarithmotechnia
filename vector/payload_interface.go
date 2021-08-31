@@ -6,6 +6,9 @@ import (
 	"time"
 )
 
+type InterfaceWhicherFunc = func(int, interface{}, bool) bool
+type InterfaceWhicherCompactFunc = func(interface{}, bool) bool
+
 type InterfaceConvertors struct {
 	Intabler     func(idx int, val interface{}, na bool) (int, bool)
 	Floatabler   func(idx int, val interface{}, na bool) (float64, bool)
@@ -63,11 +66,11 @@ func (p *interfacePayload) StrForElem(idx int) string {
 }
 
 func (p *interfacePayload) SupportsWhicher(whicher interface{}) bool {
-	if _, ok := whicher.(func(int, interface{}, bool) bool); ok {
+	if _, ok := whicher.(InterfaceWhicherFunc); ok {
 		return true
 	}
 
-	if _, ok := whicher.(func(interface{}, bool) bool); ok {
+	if _, ok := whicher.(InterfaceWhicherCompactFunc); ok {
 		return true
 	}
 
@@ -75,18 +78,18 @@ func (p *interfacePayload) SupportsWhicher(whicher interface{}) bool {
 }
 
 func (p *interfacePayload) Which(whicher interface{}) []bool {
-	if byFunc, ok := whicher.(func(int, interface{}, bool) bool); ok {
+	if byFunc, ok := whicher.(InterfaceWhicherFunc); ok {
 		return p.selectByFunc(byFunc)
 	}
 
-	if byFunc, ok := whicher.(func(interface{}, bool) bool); ok {
+	if byFunc, ok := whicher.(InterfaceWhicherCompactFunc); ok {
 		return p.selectByCompactFunc(byFunc)
 	}
 
 	return make([]bool, p.length)
 }
 
-func (p *interfacePayload) selectByFunc(byFunc func(int, interface{}, bool) bool) []bool {
+func (p *interfacePayload) selectByFunc(byFunc InterfaceWhicherFunc) []bool {
 	booleans := make([]bool, p.length)
 
 	for idx, val := range p.data {
@@ -98,7 +101,7 @@ func (p *interfacePayload) selectByFunc(byFunc func(int, interface{}, bool) bool
 	return booleans
 }
 
-func (p *interfacePayload) selectByCompactFunc(byFunc func(interface{}, bool) bool) []bool {
+func (p *interfacePayload) selectByCompactFunc(byFunc InterfaceWhicherCompactFunc) []bool {
 	booleans := make([]bool, p.length)
 
 	for idx, val := range p.data {
