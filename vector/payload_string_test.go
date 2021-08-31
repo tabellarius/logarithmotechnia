@@ -453,6 +453,11 @@ func TestStringPayload_SupportsWhicher(t *testing.T) {
 			isSupported: true,
 		},
 		{
+			name:        "func(string, bool) bool",
+			filter:      func(string, bool) bool { return true },
+			isSupported: true,
+		},
+		{
 			name:        "func(int, float64, bool) bool",
 			filter:      func(int, float64, bool) bool { return true },
 			isSupported: false,
@@ -489,6 +494,11 @@ func TestStringPayload_Whicher(t *testing.T) {
 			name: "func(_ int, val string, _ bool) bool {return val == 2}",
 			fn:   func(_ int, val string, _ bool) bool { return val == "2" },
 			out:  []bool{false, true, false, false, false, true, false, false, false, false},
+		},
+		{
+			name: "Comparer compact",
+			fn:   func(val string, _ bool) bool { return val == "39" || val == "90" },
+			out:  []bool{false, false, true, false, false, false, false, true, false, false},
 		},
 		{
 			name: "func() bool {return true}",

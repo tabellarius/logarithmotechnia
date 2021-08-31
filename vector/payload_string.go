@@ -43,12 +43,20 @@ func (p *stringPayload) SupportsWhicher(whicher interface{}) bool {
 		return true
 	}
 
+	if _, ok := whicher.(func(string, bool) bool); ok {
+		return true
+	}
+
 	return false
 }
 
 func (p *stringPayload) Which(whicher interface{}) []bool {
 	if byFunc, ok := whicher.(func(int, string, bool) bool); ok {
 		return p.selectByFunc(byFunc)
+	}
+
+	if byFunc, ok := whicher.(func(string, bool) bool); ok {
+		return p.selectByCompactFunc(byFunc)
 	}
 
 	return make([]bool, p.length)
@@ -59,6 +67,18 @@ func (p *stringPayload) selectByFunc(byFunc func(int, string, bool) bool) []bool
 
 	for idx, val := range p.data {
 		if byFunc(idx+1, val, p.na[idx]) {
+			booleans[idx] = true
+		}
+	}
+
+	return booleans
+}
+
+func (p *stringPayload) selectByCompactFunc(byFunc func(string, bool) bool) []bool {
+	booleans := make([]bool, p.length)
+
+	for idx, val := range p.data {
+		if byFunc(val, p.na[idx]) {
 			booleans[idx] = true
 		}
 	}

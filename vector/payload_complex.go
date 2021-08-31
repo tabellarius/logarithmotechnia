@@ -49,12 +49,20 @@ func (p *complexPayload) SupportsWhicher(whicher interface{}) bool {
 		return true
 	}
 
+	if _, ok := whicher.(func(complex128, bool) bool); ok {
+		return true
+	}
+
 	return false
 }
 
 func (p *complexPayload) Which(whicher interface{}) []bool {
 	if byFunc, ok := whicher.(func(int, complex128, bool) bool); ok {
 		return p.selectByFunc(byFunc)
+	}
+
+	if byFunc, ok := whicher.(func(complex128, bool) bool); ok {
+		return p.selectByCompactFunc(byFunc)
 	}
 
 	return make([]bool, p.length)
@@ -65,6 +73,18 @@ func (p *complexPayload) selectByFunc(byFunc func(int, complex128, bool) bool) [
 
 	for idx, val := range p.data {
 		if byFunc(idx+1, val, p.na[idx]) {
+			booleans[idx] = true
+		}
+	}
+
+	return booleans
+}
+
+func (p *complexPayload) selectByCompactFunc(byFunc func(complex128, bool) bool) []bool {
+	booleans := make([]bool, p.length)
+
+	for idx, val := range p.data {
+		if byFunc(val, p.na[idx]) {
 			booleans[idx] = true
 		}
 	}

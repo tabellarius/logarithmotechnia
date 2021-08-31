@@ -311,6 +311,11 @@ func TestTimePayload_SupportsWhicher(t *testing.T) {
 			isSupported: true,
 		},
 		{
+			name:        "func(time.Time, bool) bool",
+			filter:      func(time.Time, bool) bool { return true },
+			isSupported: true,
+		},
+		{
 			name:        "func(int, int, bool) bool",
 			filter:      func(int, int, bool) bool { return true },
 			isSupported: false,
@@ -337,6 +342,11 @@ func TestTimePayload_Whicher(t *testing.T) {
 			name:   "func(int, time.Time, bool) bool",
 			filter: func(idx int, val time.Time, na bool) bool { return idx == 1 || na == true },
 			out:    []bool{true, false, true},
+		},
+		{
+			name:   "func(int, time.Time, bool) bool",
+			filter: func(_ time.Time, na bool) bool { return !na },
+			out:    []bool{true, true, false},
 		},
 		{
 			name:   "func() bool",

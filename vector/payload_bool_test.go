@@ -458,6 +458,11 @@ func TestBooleanPayload_SupportsWhicher(t *testing.T) {
 			isSupported: true,
 		},
 		{
+			name:        "func(bool, bool) bool",
+			filter:      func(bool, bool) bool { return true },
+			isSupported: true,
+		},
+		{
 			name:        "func(int, float64, bool) bool",
 			filter:      func(int, float64, bool) bool { return true },
 			isSupported: false,
@@ -494,6 +499,11 @@ func TestBooleanPayload_Whicher(t *testing.T) {
 			name: "Nth(3)",
 			fn:   func(idx int, _ bool, _ bool) bool { return idx%3 == 0 },
 			out:  []bool{false, false, true, false, false, true, false, false, true, false},
+		},
+		{
+			name: "Inverse compact",
+			fn:   func(val bool, _ bool) bool { return !val },
+			out:  []bool{false, true, false, true, false, true, false, true, false, true},
 		},
 		{
 			name: "func() bool {return true}",

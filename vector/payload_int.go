@@ -46,12 +46,20 @@ func (p *integerPayload) SupportsWhicher(whicher interface{}) bool {
 		return true
 	}
 
+	if _, ok := whicher.(func(int, bool) bool); ok {
+		return true
+	}
+
 	return false
 }
 
 func (p *integerPayload) Which(whicher interface{}) []bool {
 	if byFunc, ok := whicher.(func(int, int, bool) bool); ok {
 		return p.selectByFunc(byFunc)
+	}
+
+	if byFunc, ok := whicher.(func(int, bool) bool); ok {
+		return p.selectByCompactFunc(byFunc)
 	}
 
 	return make([]bool, p.length)
@@ -62,6 +70,18 @@ func (p *integerPayload) selectByFunc(byFunc func(int, int, bool) bool) []bool {
 
 	for idx, val := range p.data {
 		if byFunc(idx+1, val, p.na[idx]) {
+			booleans[idx] = true
+		}
+	}
+
+	return booleans
+}
+
+func (p *integerPayload) selectByCompactFunc(byFunc func(int, bool) bool) []bool {
+	booleans := make([]bool, p.length)
+
+	for idx, val := range p.data {
+		if byFunc(val, p.na[idx]) {
 			booleans[idx] = true
 		}
 	}

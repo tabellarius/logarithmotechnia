@@ -6,3 +6,5 @@ Helpers for payloads
 Rework Config
 (?) Move payload to payloads dir
 (?) Make all payload public
+Convertor (transform values into []interface{})
+String functions

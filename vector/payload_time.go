@@ -47,12 +47,20 @@ func (p *timePayload) SupportsWhicher(whicher interface{}) bool {
 		return true
 	}
 
+	if _, ok := whicher.(func(time.Time, bool) bool); ok {
+		return true
+	}
+
 	return false
 }
 
 func (p *timePayload) Which(whicher interface{}) []bool {
 	if byFunc, ok := whicher.(func(int, time.Time, bool) bool); ok {
 		return p.selectByFunc(byFunc)
+	}
+
+	if byFunc, ok := whicher.(func(time.Time, bool) bool); ok {
+		return p.selectByCompactFunc(byFunc)
 	}
 
 	return make([]bool, p.length)
@@ -63,6 +71,18 @@ func (p *timePayload) selectByFunc(byFunc func(int, time.Time, bool) bool) []boo
 
 	for idx, val := range p.data {
 		if byFunc(idx+1, val, p.na[idx]) {
+			booleans[idx] = true
+		}
+	}
+
+	return booleans
+}
+
+func (p *timePayload) selectByCompactFunc(byFunc func(time.Time, bool) bool) []bool {
+	booleans := make([]bool, p.length)
+
+	for idx, val := range p.data {
+		if byFunc(val, p.na[idx]) {
 			booleans[idx] = true
 		}
 	}

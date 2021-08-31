@@ -509,6 +509,11 @@ func TestFloatPayload_Whicher(t *testing.T) {
 			out:  []bool{false, false, true, false, false, true, false, false, true, false},
 		},
 		{
+			name: "Greater compact",
+			fn:   func(val float64, _ bool) bool { return val > 10 },
+			out:  []bool{false, false, true, false, true, false, true, true, false, false},
+		},
+		{
 			name: "func() bool {return true}",
 			fn:   func() bool { return true },
 			out:  []bool{false, false, false, false, false, false, false, false, false, false},
