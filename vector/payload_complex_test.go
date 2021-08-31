@@ -182,6 +182,11 @@ func TestComplexPayload_Supportswhicher(t *testing.T) {
 			isSupported: true,
 		},
 		{
+			name:        "func(complex128, bool) bool",
+			filter:      func(complex128, bool) bool { return true },
+			isSupported: true,
+		},
+		{
 			name:        "func(int, int, bool) bool",
 			filter:      func(int, int, bool) bool { return true },
 			isSupported: false,
@@ -218,6 +223,11 @@ func TestComplexPayload_Whicher(t *testing.T) {
 			name: "Nth(3)",
 			fn:   func(idx int, _ complex128, _ bool) bool { return idx%3 == 0 },
 			out:  []bool{false, false, true, false, false, true, false, false, true, false},
+		},
+		{
+			name: "Nth(3)",
+			fn:   func(val complex128, _ bool) bool { return val == 1 || val == 4 },
+			out:  []bool{true, false, false, true, false, false, false, false, true, false},
 		},
 		{
 			name: "func() bool {return true}",

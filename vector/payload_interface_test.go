@@ -173,6 +173,11 @@ func TestInterfacePayload_SupportsWhicher(t *testing.T) {
 			isSupported: true,
 		},
 		{
+			name:        "func(interface{}, bool) bool",
+			filter:      func(interface{}, bool) bool { return true },
+			isSupported: true,
+		},
+		{
 			name:        "func(int, float64, bool) bool",
 			filter:      func(int, float64, bool) bool { return true },
 			isSupported: false,
@@ -211,13 +216,18 @@ func TestInterfacePayload_Which(t *testing.T) {
 			out:  []bool{false, false, true, false, false, true, false, false, true, false},
 		},
 		{
+			name: "Not boolean compact",
+			fn:   func(val interface{}, _ bool) bool { _, ok := val.(bool); return !ok },
+			out:  []bool{false, false, true, false, false, true, false, false, true, false},
+		},
+		{
 			name: "func() bool {return true}",
 			fn:   func() bool { return true },
 			out:  []bool{false, false, false, false, false, false, false, false, false, false},
 		},
 	}
 
-	payload := Interface([]interface{}{true, false, true, false, true, false, true, false, true, false}, nil).(*vector).payload.(Whichable)
+	payload := Interface([]interface{}{true, false, 1, false, true, 2.5, true, false, "true", false}, nil).(*vector).payload.(Whichable)
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {

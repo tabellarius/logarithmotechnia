@@ -6,6 +6,9 @@ import (
 	"strconv"
 )
 
+type StringWhicherFunc = func(int, string, bool) bool
+type StringWhicherCompactFunc = func(string, bool) bool
+
 type stringPayload struct {
 	length int
 	data   []string
@@ -39,7 +42,11 @@ func (p *stringPayload) ByIndices(indices []int) Payload {
 }
 
 func (p *stringPayload) SupportsWhicher(whicher interface{}) bool {
-	if _, ok := whicher.(func(int, string, bool) bool); ok {
+	if _, ok := whicher.(StringWhicherFunc); ok {
+		return true
+	}
+
+	if _, ok := whicher.(func(string, bool) bool); ok {
 		return true
 	}
 
@@ -47,18 +54,34 @@ func (p *stringPayload) SupportsWhicher(whicher interface{}) bool {
 }
 
 func (p *stringPayload) Which(whicher interface{}) []bool {
-	if byFunc, ok := whicher.(func(int, string, bool) bool); ok {
+	if byFunc, ok := whicher.(StringWhicherFunc); ok {
 		return p.selectByFunc(byFunc)
+	}
+
+	if byFunc, ok := whicher.(StringWhicherCompactFunc); ok {
+		return p.selectByCompactFunc(byFunc)
 	}
 
 	return make([]bool, p.length)
 }
 
-func (p *stringPayload) selectByFunc(byFunc func(int, string, bool) bool) []bool {
+func (p *stringPayload) selectByFunc(byFunc StringWhicherFunc) []bool {
 	booleans := make([]bool, p.length)
 
 	for idx, val := range p.data {
 		if byFunc(idx+1, val, p.na[idx]) {
+			booleans[idx] = true
+		}
+	}
+
+	return booleans
+}
+
+func (p *stringPayload) selectByCompactFunc(byFunc StringWhicherCompactFunc) []bool {
+	booleans := make([]bool, p.length)
+
+	for idx, val := range p.data {
+		if byFunc(val, p.na[idx]) {
 			booleans[idx] = true
 		}
 	}

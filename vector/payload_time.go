@@ -4,6 +4,9 @@ import (
 	"time"
 )
 
+type TimeWhicherFunc = func(int, time.Time, bool) bool
+type TimeWhicherCompactFunc = func(time.Time, bool) bool
+
 type TimePrinter struct {
 	Format string
 }
@@ -43,7 +46,11 @@ func (p *timePayload) ByIndices(indices []int) Payload {
 }
 
 func (p *timePayload) SupportsWhicher(whicher interface{}) bool {
-	if _, ok := whicher.(func(int, time.Time, bool) bool); ok {
+	if _, ok := whicher.(TimeWhicherFunc); ok {
+		return true
+	}
+
+	if _, ok := whicher.(TimeWhicherCompactFunc); ok {
 		return true
 	}
 
@@ -51,18 +58,34 @@ func (p *timePayload) SupportsWhicher(whicher interface{}) bool {
 }
 
 func (p *timePayload) Which(whicher interface{}) []bool {
-	if byFunc, ok := whicher.(func(int, time.Time, bool) bool); ok {
+	if byFunc, ok := whicher.(TimeWhicherFunc); ok {
 		return p.selectByFunc(byFunc)
+	}
+
+	if byFunc, ok := whicher.(TimeWhicherCompactFunc); ok {
+		return p.selectByCompactFunc(byFunc)
 	}
 
 	return make([]bool, p.length)
 }
 
-func (p *timePayload) selectByFunc(byFunc func(int, time.Time, bool) bool) []bool {
+func (p *timePayload) selectByFunc(byFunc TimeWhicherFunc) []bool {
 	booleans := make([]bool, p.length)
 
 	for idx, val := range p.data {
 		if byFunc(idx+1, val, p.na[idx]) {
+			booleans[idx] = true
+		}
+	}
+
+	return booleans
+}
+
+func (p *timePayload) selectByCompactFunc(byFunc TimeWhicherCompactFunc) []bool {
+	booleans := make([]bool, p.length)
+
+	for idx, val := range p.data {
+		if byFunc(val, p.na[idx]) {
 			booleans[idx] = true
 		}
 	}

@@ -6,6 +6,9 @@ import (
 	"strconv"
 )
 
+type ComplexWhicherFunc = func(int, complex128, bool) bool
+type ComplexWhicherCompactFunc = func(complex128, bool) bool
+
 type ComplexPrinter struct {
 	Precision int
 }
@@ -45,7 +48,11 @@ func (p *complexPayload) ByIndices(indices []int) Payload {
 }
 
 func (p *complexPayload) SupportsWhicher(whicher interface{}) bool {
-	if _, ok := whicher.(func(int, complex128, bool) bool); ok {
+	if _, ok := whicher.(ComplexWhicherFunc); ok {
+		return true
+	}
+
+	if _, ok := whicher.(ComplexWhicherCompactFunc); ok {
 		return true
 	}
 
@@ -53,18 +60,34 @@ func (p *complexPayload) SupportsWhicher(whicher interface{}) bool {
 }
 
 func (p *complexPayload) Which(whicher interface{}) []bool {
-	if byFunc, ok := whicher.(func(int, complex128, bool) bool); ok {
+	if byFunc, ok := whicher.(ComplexWhicherFunc); ok {
 		return p.selectByFunc(byFunc)
+	}
+
+	if byFunc, ok := whicher.(ComplexWhicherCompactFunc); ok {
+		return p.selectByCompactFunc(byFunc)
 	}
 
 	return make([]bool, p.length)
 }
 
-func (p *complexPayload) selectByFunc(byFunc func(int, complex128, bool) bool) []bool {
+func (p *complexPayload) selectByFunc(byFunc ComplexWhicherFunc) []bool {
 	booleans := make([]bool, p.length)
 
 	for idx, val := range p.data {
 		if byFunc(idx+1, val, p.na[idx]) {
+			booleans[idx] = true
+		}
+	}
+
+	return booleans
+}
+
+func (p *complexPayload) selectByCompactFunc(byFunc ComplexWhicherCompactFunc) []bool {
+	booleans := make([]bool, p.length)
+
+	for idx, val := range p.data {
+		if byFunc(val, p.na[idx]) {
 			booleans[idx] = true
 		}
 	}

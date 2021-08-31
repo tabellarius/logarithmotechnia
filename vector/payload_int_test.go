@@ -441,6 +441,11 @@ func TestIntegerPayload_SupportsWhicher(t *testing.T) {
 			isSupported: true,
 		},
 		{
+			name:        "func(int, bool) bool",
+			filter:      func(int, bool) bool { return true },
+			isSupported: true,
+		},
+		{
 			name:        "func(int, float64, bool) bool",
 			filter:      func(int, float64, bool) bool { return true },
 			isSupported: false,
@@ -492,6 +497,11 @@ func TestIntegerPayload_Whicher(t *testing.T) {
 			name: "Nth(10)",
 			fn:   func(idx int, _ int, _ bool) bool { return idx%10 == 0 },
 			out:  []bool{false, false, false, false, false, false, false, false, false, true},
+		},
+		{
+			name: "Greater compact",
+			fn:   func(val int, _ bool) bool { return val > 10 },
+			out:  []bool{false, false, true, false, true, false, true, true, false, false},
 		},
 		{
 			name: "func(_ int, val int, _ bool) bool {return val == 2}",

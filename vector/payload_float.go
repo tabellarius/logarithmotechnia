@@ -6,6 +6,9 @@ import (
 	"strconv"
 )
 
+type FloatWhicherFunc = func(int, float64, bool) bool
+type FloatWhicherCompactFunc = func(float64, bool) bool
+
 type FloatPrinter struct {
 	Precision int
 }
@@ -45,7 +48,11 @@ func (p *floatPayload) ByIndices(indices []int) Payload {
 }
 
 func (p *floatPayload) SupportsWhicher(whicher interface{}) bool {
-	if _, ok := whicher.(func(int, float64, bool) bool); ok {
+	if _, ok := whicher.(FloatWhicherFunc); ok {
+		return true
+	}
+
+	if _, ok := whicher.(FloatWhicherCompactFunc); ok {
 		return true
 	}
 
@@ -53,18 +60,34 @@ func (p *floatPayload) SupportsWhicher(whicher interface{}) bool {
 }
 
 func (p *floatPayload) Which(whicher interface{}) []bool {
-	if byFunc, ok := whicher.(func(int, float64, bool) bool); ok {
+	if byFunc, ok := whicher.(FloatWhicherFunc); ok {
 		return p.selectByFunc(byFunc)
+	}
+
+	if byFunc, ok := whicher.(FloatWhicherCompactFunc); ok {
+		return p.selectByCompactFunc(byFunc)
 	}
 
 	return make([]bool, p.length)
 }
 
-func (p *floatPayload) selectByFunc(byFunc func(int, float64, bool) bool) []bool {
+func (p *floatPayload) selectByFunc(byFunc FloatWhicherFunc) []bool {
 	booleans := make([]bool, p.length)
 
 	for idx, val := range p.data {
 		if byFunc(idx+1, val, p.na[idx]) {
+			booleans[idx] = true
+		}
+	}
+
+	return booleans
+}
+
+func (p *floatPayload) selectByCompactFunc(byFunc FloatWhicherCompactFunc) []bool {
+	booleans := make([]bool, p.length)
+
+	for idx, val := range p.data {
+		if byFunc(val, p.na[idx]) {
 			booleans[idx] = true
 		}
 	}

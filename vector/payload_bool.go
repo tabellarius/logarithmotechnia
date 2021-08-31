@@ -5,6 +5,9 @@ import (
 	"math/cmplx"
 )
 
+type BooleanWhicherFunc = func(int, bool, bool) bool
+type BooleanWhicherCompactFunc = func(bool, bool) bool
+
 type booleanPayload struct {
 	length int
 	data   []bool
@@ -38,7 +41,11 @@ func (p *booleanPayload) ByIndices(indices []int) Payload {
 }
 
 func (p *booleanPayload) SupportsWhicher(whicher interface{}) bool {
-	if _, ok := whicher.(func(int, bool, bool) bool); ok {
+	if _, ok := whicher.(BooleanWhicherFunc); ok {
+		return true
+	}
+
+	if _, ok := whicher.(BooleanWhicherCompactFunc); ok {
 		return true
 	}
 
@@ -46,18 +53,34 @@ func (p *booleanPayload) SupportsWhicher(whicher interface{}) bool {
 }
 
 func (p *booleanPayload) Which(whicher interface{}) []bool {
-	if byFunc, ok := whicher.(func(int, bool, bool) bool); ok {
+	if byFunc, ok := whicher.(BooleanWhicherFunc); ok {
 		return p.selectByFunc(byFunc)
+	}
+
+	if byFunc, ok := whicher.(BooleanWhicherCompactFunc); ok {
+		return p.selectByCompactFunc(byFunc)
 	}
 
 	return make([]bool, p.length)
 }
 
-func (p *booleanPayload) selectByFunc(byFunc func(int, bool, bool) bool) []bool {
+func (p *booleanPayload) selectByFunc(byFunc BooleanWhicherFunc) []bool {
 	booleans := make([]bool, p.length)
 
 	for idx, val := range p.data {
 		if byFunc(idx+1, val, p.na[idx]) {
+			booleans[idx] = true
+		}
+	}
+
+	return booleans
+}
+
+func (p *booleanPayload) selectByCompactFunc(byFunc BooleanWhicherCompactFunc) []bool {
+	booleans := make([]bool, p.length)
+
+	for idx, val := range p.data {
+		if byFunc(val, p.na[idx]) {
 			booleans[idx] = true
 		}
 	}
