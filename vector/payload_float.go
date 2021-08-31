@@ -8,6 +8,9 @@ import (
 
 type FloatWhicherFunc = func(int, float64, bool) bool
 type FloatWhicherCompactFunc = func(float64, bool) bool
+type FloatToFloatApplierFunc = func(int, float64, bool) (float64, bool)
+type FloatToFloatApplierCompactFunc = func(float64, bool) (float64, bool)
+type FloatSummarizerFunc = func(int, float64, float64, bool) (float64, bool)
 
 type FloatPrinter struct {
 	Precision int
@@ -96,7 +99,11 @@ func (p *floatPayload) selectByCompactFunc(byFunc FloatWhicherCompactFunc) []boo
 }
 
 func (p *floatPayload) SupportsApplier(applier interface{}) bool {
-	if _, ok := applier.(func(int, float64, bool) (float64, bool)); ok {
+	if _, ok := applier.(FloatToFloatApplierFunc); ok {
+		return true
+	}
+
+	if _, ok := applier.(FloatToFloatApplierCompactFunc); ok {
 		return true
 	}
 
@@ -104,26 +111,18 @@ func (p *floatPayload) SupportsApplier(applier interface{}) bool {
 }
 
 func (p *floatPayload) Apply(applier interface{}) Payload {
-	var data []float64
-	var na []bool
-
-	if applyFunc, ok := applier.(func(int, float64, bool) (float64, bool)); ok {
-		data, na = p.applyByFunc(applyFunc)
-	} else {
-		return NAPayload(p.length)
+	if applyFunc, ok := applier.(FloatToFloatApplierFunc); ok {
+		return p.applyToFloatByFunc(applyFunc)
 	}
 
-	return &floatPayload{
-		length:  p.length,
-		data:    data,
-		printer: p.printer,
-		DefNAble: DefNAble{
-			na: na,
-		},
+	if applyFunc, ok := applier.(FloatToFloatApplierCompactFunc); ok {
+		return p.applyToFloatByCompactFunc(applyFunc)
 	}
+
+	return NAPayload(p.length)
 }
 
-func (p *floatPayload) applyByFunc(applyFunc func(int, float64, bool) (float64, bool)) ([]float64, []bool) {
+func (p *floatPayload) applyToFloatByFunc(applyFunc FloatToFloatApplierFunc) Payload {
 	data := make([]float64, p.length)
 	na := make([]bool, p.length)
 
@@ -136,7 +135,23 @@ func (p *floatPayload) applyByFunc(applyFunc func(int, float64, bool) (float64, 
 		na[i] = naVal
 	}
 
-	return data, na
+	return FloatPayload(data, na)
+}
+
+func (p *floatPayload) applyToFloatByCompactFunc(applyFunc FloatToFloatApplierCompactFunc) Payload {
+	data := make([]float64, p.length)
+	na := make([]bool, p.length)
+
+	for i := 0; i < p.length; i++ {
+		dataVal, naVal := applyFunc(p.data[i], p.na[i])
+		if naVal {
+			dataVal = math.NaN()
+		}
+		data[i] = dataVal
+		na[i] = naVal
+	}
+
+	return FloatPayload(data, na)
 }
 
 func (p *floatPayload) SupportsSummarizer(summarizer interface{}) bool {
@@ -148,7 +163,7 @@ func (p *floatPayload) SupportsSummarizer(summarizer interface{}) bool {
 }
 
 func (p *floatPayload) Summarize(summarizer interface{}) Payload {
-	fn, ok := summarizer.(func(int, float64, float64, bool) (float64, bool))
+	fn, ok := summarizer.(FloatSummarizerFunc)
 	if !ok {
 		return NAPayload(1)
 	}

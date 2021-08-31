@@ -6,5 +6,9 @@ Helpers for payloads
 Rework Config
 (?) Move payload to payloads dir
 (?) Make all payload public
-Convertor (transform values into []interface{})
+(?) Convertor (transform values into []interface{})
 String functions
+Comparator
+Default NA Values
+R-style reuse of vector and boolean slices
+Vector's element indices as uint32

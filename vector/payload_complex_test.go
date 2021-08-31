@@ -170,7 +170,7 @@ func TestComplexPayload_ByIndices(t *testing.T) {
 	}
 }
 
-func TestComplexPayload_Supportswhicher(t *testing.T) {
+func TestComplexPayload_SupportsWhicher(t *testing.T) {
 	testData := []struct {
 		name        string
 		filter      interface{}
@@ -225,7 +225,7 @@ func TestComplexPayload_Whicher(t *testing.T) {
 			out:  []bool{false, false, true, false, false, true, false, false, true, false},
 		},
 		{
-			name: "Nth(3)",
+			name: "compact",
 			fn:   func(val complex128, _ bool) bool { return val == 1 || val == 4 },
 			out:  []bool{true, false, false, true, false, false, false, false, true, false},
 		},
@@ -260,6 +260,11 @@ func TestComplexPayload_SupportsApplier(t *testing.T) {
 			isSupported: true,
 		},
 		{
+			name:        "func(complex128, bool) (complex128, bool)",
+			applier:     func(complex128, bool) (complex128, bool) { return 0, true },
+			isSupported: true,
+		},
+		{
 			name:        "func(int, complex128, bool) bool",
 			applier:     func(int, complex128, bool) bool { return true },
 			isSupported: false,
@@ -289,6 +294,17 @@ func TestComplexPayload_Apply(t *testing.T) {
 		{
 			name: "regular",
 			applier: func(_ int, val complex128, na bool) (complex128, bool) {
+				return val * 2, na
+			},
+			dataIn:      []complex128{1, 9, 3, 5, 7},
+			naIn:        []bool{false, true, false, true, false},
+			dataOut:     []complex128{2, cmplx.NaN(), 6, cmplx.NaN(), 14},
+			naOut:       []bool{false, true, false, true, false},
+			isNAPayload: false,
+		},
+		{
+			name: "regular compact",
+			applier: func(val complex128, na bool) (complex128, bool) {
 				return val * 2, na
 			},
 			dataIn:      []complex128{1, 9, 3, 5, 7},

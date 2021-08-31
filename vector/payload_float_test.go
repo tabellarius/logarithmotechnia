@@ -544,6 +544,11 @@ func TestFloatPayload_SupportsApplier(t *testing.T) {
 			isSupported: true,
 		},
 		{
+			name:        "func(float64, bool) (float64, bool)",
+			applier:     func(float64, bool) (float64, bool) { return 0, true },
+			isSupported: true,
+		},
+		{
 			name:        "func(int, float64, bool) bool",
 			applier:     func(int, float64, bool) bool { return true },
 			isSupported: false,
@@ -573,6 +578,17 @@ func TestFloatPayload_Apply(t *testing.T) {
 		{
 			name: "regular",
 			applier: func(_ int, val float64, na bool) (float64, bool) {
+				return val * 2, na
+			},
+			dataIn:      []float64{1, 9, 3, 5, 7},
+			naIn:        []bool{false, true, false, true, false},
+			dataOut:     []float64{2, math.NaN(), 6, math.NaN(), 14},
+			naOut:       []bool{false, true, false, true, false},
+			isNAPayload: false,
+		},
+		{
+			name: "regular compact",
+			applier: func(val float64, na bool) (float64, bool) {
 				return val * 2, na
 			},
 			dataIn:      []float64{1, 9, 3, 5, 7},

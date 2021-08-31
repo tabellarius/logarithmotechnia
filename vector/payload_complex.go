@@ -8,6 +8,9 @@ import (
 
 type ComplexWhicherFunc = func(int, complex128, bool) bool
 type ComplexWhicherCompactFunc = func(complex128, bool) bool
+type ComplexToComplexApplierFunc = func(int, complex128, bool) (complex128, bool)
+type ComplexToComplexApplierCompactFunc = func(complex128, bool) (complex128, bool)
+type CompexSummarizerFunc = func(int, complex128, complex128, bool) (complex128, bool)
 
 type ComplexPrinter struct {
 	Precision int
@@ -96,7 +99,11 @@ func (p *complexPayload) selectByCompactFunc(byFunc ComplexWhicherCompactFunc) [
 }
 
 func (p *complexPayload) SupportsApplier(applier interface{}) bool {
-	if _, ok := applier.(func(int, complex128, bool) (complex128, bool)); ok {
+	if _, ok := applier.(ComplexToComplexApplierFunc); ok {
+		return true
+	}
+
+	if _, ok := applier.(ComplexToComplexApplierCompactFunc); ok {
 		return true
 	}
 
@@ -104,25 +111,19 @@ func (p *complexPayload) SupportsApplier(applier interface{}) bool {
 }
 
 func (p *complexPayload) Apply(applier interface{}) Payload {
-	var data []complex128
-	var na []bool
-
-	if applyFunc, ok := applier.(func(int, complex128, bool) (complex128, bool)); ok {
-		data, na = p.applyByFunc(applyFunc)
-	} else {
-		return NAPayload(p.length)
+	if applyFunc, ok := applier.(ComplexToComplexApplierFunc); ok {
+		return p.applyToComplexByFunc(applyFunc)
 	}
 
-	return &complexPayload{
-		length: p.length,
-		data:   data,
-		DefNAble: DefNAble{
-			na: na,
-		},
+	if applyFunc, ok := applier.(ComplexToComplexApplierCompactFunc); ok {
+		return p.applyToComplexByCompactFunc(applyFunc)
 	}
+
+	return NAPayload(p.length)
+
 }
 
-func (p *complexPayload) applyByFunc(applyFunc func(int, complex128, bool) (complex128, bool)) ([]complex128, []bool) {
+func (p *complexPayload) applyToComplexByFunc(applyFunc ComplexToComplexApplierFunc) Payload {
 	data := make([]complex128, p.length)
 	na := make([]bool, p.length)
 
@@ -135,7 +136,23 @@ func (p *complexPayload) applyByFunc(applyFunc func(int, complex128, bool) (comp
 		na[i] = naVal
 	}
 
-	return data, na
+	return ComplexPayload(data, na)
+}
+
+func (p *complexPayload) applyToComplexByCompactFunc(applyFunc ComplexToComplexApplierCompactFunc) Payload {
+	data := make([]complex128, p.length)
+	na := make([]bool, p.length)
+
+	for i := 0; i < p.length; i++ {
+		dataVal, naVal := applyFunc(p.data[i], p.na[i])
+		if naVal {
+			dataVal = cmplx.NaN()
+		}
+		data[i] = dataVal
+		na[i] = naVal
+	}
+
+	return ComplexPayload(data, na)
 }
 
 func (p *complexPayload) SupportsSummarizer(summarizer interface{}) bool {

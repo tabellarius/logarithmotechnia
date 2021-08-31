@@ -536,6 +536,11 @@ func TestBooleanPayload_SupportsApplier(t *testing.T) {
 			isSupported: true,
 		},
 		{
+			name:        "func(bool, bool) (bool, bool)",
+			applier:     func(bool, bool) (bool, bool) { return true, true },
+			isSupported: true,
+		},
+		{
 			name:        "func(int, float64, bool) bool",
 			applier:     func(int, int, bool) bool { return true },
 			isSupported: false,
@@ -589,6 +594,15 @@ func TestBooleanPayload_Apply(t *testing.T) {
 			naIn:        []bool{false, true, false, true, false},
 			dataOut:     []bool{true, false, false, false, false},
 			naOut:       []bool{false, true, false, true, true},
+			isNAPayload: false,
+		},
+		{
+			name:        "regular compact",
+			applier:     func(val bool, na bool) (bool, bool) { return !val, na },
+			dataIn:      []bool{true, true, true, false, false},
+			naIn:        []bool{false, true, false, true, false},
+			dataOut:     []bool{false, false, false, false, true},
+			naOut:       []bool{false, true, false, true, false},
 			isNAPayload: false,
 		},
 		{
