@@ -381,6 +381,11 @@ func TestTimePayload_SupportsApplier(t *testing.T) {
 			isSupported: true,
 		},
 		{
+			name:        "func(time.Time, bool) (time.Time, bool)",
+			applier:     func(time.Time, bool) (time.Time, bool) { return time.Time{}, true },
+			isSupported: true,
+		},
+		{
 			name:        "func(int, time.Time, bool) bool",
 			applier:     func(int, time.Time, bool) bool { return true },
 			isSupported: false,
@@ -410,6 +415,17 @@ func TestTimePayload_Apply(t *testing.T) {
 		{
 			name: "regular",
 			applier: func(_ int, val time.Time, na bool) (time.Time, bool) {
+				return val.Add(24 * time.Hour), na
+			},
+			dataIn:      toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z"}),
+			naIn:        []bool{false, true, false},
+			dataOut:     toTimeData([]string{"2006-01-03T15:04:05+07:00", "0001-01-01T00:00:00Z", "1800-06-11T11:00:00Z"}),
+			naOut:       []bool{false, true, false},
+			isNAPayload: false,
+		},
+		{
+			name: "regular compact",
+			applier: func(val time.Time, na bool) (time.Time, bool) {
 				return val.Add(24 * time.Hour), na
 			},
 			dataIn:      toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z"}),

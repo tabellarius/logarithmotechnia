@@ -539,6 +539,11 @@ func TestIntegerPayload_SupportsApplier(t *testing.T) {
 			isSupported: true,
 		},
 		{
+			name:        "func(int, bool) (int, bool)",
+			applier:     func(int, bool) (int, bool) { return 0, true },
+			isSupported: true,
+		},
+		{
 			name:        "func(int, float64, bool) bool",
 			applier:     func(int, int, bool) bool { return true },
 			isSupported: false,
@@ -568,6 +573,17 @@ func TestIntegerPayload_Apply(t *testing.T) {
 		{
 			name: "regular",
 			applier: func(_ int, val int, na bool) (int, bool) {
+				return val * 2, na
+			},
+			dataIn:      []int{1, 9, 3, 5, 7},
+			naIn:        []bool{false, true, false, true, false},
+			dataOut:     []int{2, 0, 6, 0, 14},
+			naOut:       []bool{false, true, false, true, false},
+			isNAPayload: false,
+		},
+		{
+			name: "regular compact",
+			applier: func(val int, na bool) (int, bool) {
 				return val * 2, na
 			},
 			dataIn:      []int{1, 9, 3, 5, 7},

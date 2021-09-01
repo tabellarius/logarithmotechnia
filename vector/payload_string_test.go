@@ -531,6 +531,11 @@ func TestStringPayload_SupportsApplier(t *testing.T) {
 			isSupported: true,
 		},
 		{
+			name:        "func(string, bool) (string, bool)",
+			applier:     func(string, bool) (string, bool) { return "", true },
+			isSupported: true,
+		},
+		{
 			name:        "func(int, string, bool) bool",
 			applier:     func(int, string, bool) bool { return true },
 			isSupported: false,
@@ -560,6 +565,17 @@ func TestStringPayload_Apply(t *testing.T) {
 		{
 			name: "regular",
 			applier: func(_ int, val string, na bool) (string, bool) {
+				return fmt.Sprintf("%s.%s", val, val), na
+			},
+			dataIn:      []string{"1", "9", "3", "5", "7"},
+			naIn:        []bool{false, true, false, true, false},
+			dataOut:     []string{"1.1", "", "3.3", "", "7.7"},
+			naOut:       []bool{false, true, false, true, false},
+			isNAPayload: false,
+		},
+		{
+			name: "regular compact",
+			applier: func(val string, na bool) (string, bool) {
 				return fmt.Sprintf("%s.%s", val, val), na
 			},
 			dataIn:      []string{"1", "9", "3", "5", "7"},

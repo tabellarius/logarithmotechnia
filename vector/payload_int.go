@@ -10,6 +10,9 @@ const maxIntPrint = 5
 
 type IntegerWhicherFunc = func(int, int, bool) bool
 type IntegerWhicherCompactFunc = func(int, bool) bool
+type IntegerToIntegerApplierFunc = func(int, int, bool) (int, bool)
+type IntegerToIntegerApplierCompactFunc = func(int, bool) (int, bool)
+type IntegerSummarizerFunc = func(int, int, int, bool) (int, bool)
 
 // integerPayload is a structure, subsisting Integer vectors
 type integerPayload struct {
@@ -35,13 +38,7 @@ func (p *integerPayload) ByIndices(indices []int) Payload {
 		na = append(na, p.na[idx-1])
 	}
 
-	return &integerPayload{
-		length: len(data),
-		data:   data,
-		DefNAble: DefNAble{
-			na: na,
-		},
-	}
+	return IntegerPayload(data, na)
 }
 
 func (p *integerPayload) SupportsWhicher(whicher interface{}) bool {
@@ -93,7 +90,11 @@ func (p *integerPayload) selectByCompactFunc(byFunc IntegerWhicherCompactFunc) [
 }
 
 func (p *integerPayload) SupportsApplier(applier interface{}) bool {
-	if _, ok := applier.(func(int, int, bool) (int, bool)); ok {
+	if _, ok := applier.(IntegerToIntegerApplierFunc); ok {
+		return true
+	}
+
+	if _, ok := applier.(IntegerToIntegerApplierCompactFunc); ok {
 		return true
 	}
 
@@ -101,25 +102,19 @@ func (p *integerPayload) SupportsApplier(applier interface{}) bool {
 }
 
 func (p *integerPayload) Apply(applier interface{}) Payload {
-	var data []int
-	var na []bool
-
-	if applyFunc, ok := applier.(func(int, int, bool) (int, bool)); ok {
-		data, na = p.applyByFunc(applyFunc)
-	} else {
-		return NAPayload(p.length)
+	if applyFunc, ok := applier.(IntegerToIntegerApplierFunc); ok {
+		return p.applyToIntegerByFunc(applyFunc)
 	}
 
-	return &integerPayload{
-		length: p.length,
-		data:   data,
-		DefNAble: DefNAble{
-			na: na,
-		},
+	if applyFunc, ok := applier.(IntegerToIntegerApplierCompactFunc); ok {
+		return p.applyToIntegerByCompactFunc(applyFunc)
 	}
+
+	return NAPayload(p.length)
+
 }
 
-func (p *integerPayload) applyByFunc(applyFunc func(int, int, bool) (int, bool)) ([]int, []bool) {
+func (p *integerPayload) applyToIntegerByFunc(applyFunc IntegerToIntegerApplierFunc) Payload {
 	data := make([]int, p.length)
 	na := make([]bool, p.length)
 
@@ -132,11 +127,27 @@ func (p *integerPayload) applyByFunc(applyFunc func(int, int, bool) (int, bool))
 		na[i] = naVal
 	}
 
-	return data, na
+	return IntegerPayload(data, na)
+}
+
+func (p *integerPayload) applyToIntegerByCompactFunc(applyFunc IntegerToIntegerApplierCompactFunc) Payload {
+	data := make([]int, p.length)
+	na := make([]bool, p.length)
+
+	for i := 0; i < p.length; i++ {
+		dataVal, naVal := applyFunc(p.data[i], p.na[i])
+		if naVal {
+			dataVal = 0
+		}
+		data[i] = dataVal
+		na[i] = naVal
+	}
+
+	return IntegerPayload(data, na)
 }
 
 func (p *integerPayload) SupportsSummarizer(summarizer interface{}) bool {
-	if _, ok := summarizer.(func(int, int, int, bool) (int, bool)); ok {
+	if _, ok := summarizer.(IntegerSummarizerFunc); ok {
 		return true
 	}
 
@@ -144,7 +155,7 @@ func (p *integerPayload) SupportsSummarizer(summarizer interface{}) bool {
 }
 
 func (p *integerPayload) Summarize(summarizer interface{}) Payload {
-	fn, ok := summarizer.(func(int, int, int, bool) (int, bool))
+	fn, ok := summarizer.(IntegerSummarizerFunc)
 	if !ok {
 		return NAPayload(1)
 	}

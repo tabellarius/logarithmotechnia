@@ -7,6 +7,9 @@ import (
 
 type BooleanWhicherFunc = func(int, bool, bool) bool
 type BooleanWhicherCompactFunc = func(bool, bool) bool
+type BooleanToBooleanApplierFunc = func(int, bool, bool) (bool, bool)
+type BooleanToBooleanApplierCompactFunc = func(bool, bool) (bool, bool)
+type BooleanSummarizerFunc = func(int, bool, bool, bool) (bool, bool)
 
 type booleanPayload struct {
 	length int
@@ -89,7 +92,11 @@ func (p *booleanPayload) selectByCompactFunc(byFunc BooleanWhicherCompactFunc) [
 }
 
 func (p *booleanPayload) SupportsApplier(applier interface{}) bool {
-	if _, ok := applier.(func(int, bool, bool) (bool, bool)); ok {
+	if _, ok := applier.(BooleanToBooleanApplierFunc); ok {
+		return true
+	}
+
+	if _, ok := applier.(BooleanToBooleanApplierCompactFunc); ok {
 		return true
 	}
 
@@ -97,25 +104,18 @@ func (p *booleanPayload) SupportsApplier(applier interface{}) bool {
 }
 
 func (p *booleanPayload) Apply(applier interface{}) Payload {
-	var data []bool
-	var na []bool
-
-	if applyFunc, ok := applier.(func(int, bool, bool) (bool, bool)); ok {
-		data, na = p.applyByFunc(applyFunc)
-	} else {
-		return NAPayload(p.length)
+	if applyFunc, ok := applier.(BooleanToBooleanApplierFunc); ok {
+		return p.applyToBooleanByFunc(applyFunc)
 	}
 
-	return &booleanPayload{
-		length: p.length,
-		data:   data,
-		DefNAble: DefNAble{
-			na: na,
-		},
+	if applyFunc, ok := applier.(BooleanToBooleanApplierCompactFunc); ok {
+		return p.applyToBooleanByCompactFunc(applyFunc)
 	}
+
+	return NAPayload(p.length)
 }
 
-func (p *booleanPayload) applyByFunc(applyFunc func(int, bool, bool) (bool, bool)) ([]bool, []bool) {
+func (p *booleanPayload) applyToBooleanByFunc(applyFunc BooleanToBooleanApplierFunc) Payload {
 	data := make([]bool, p.length)
 	na := make([]bool, p.length)
 
@@ -128,11 +128,27 @@ func (p *booleanPayload) applyByFunc(applyFunc func(int, bool, bool) (bool, bool
 		na[i] = naVal
 	}
 
-	return data, na
+	return BooleanPayload(data, na)
+}
+
+func (p *booleanPayload) applyToBooleanByCompactFunc(applyFunc BooleanToBooleanApplierCompactFunc) Payload {
+	data := make([]bool, p.length)
+	na := make([]bool, p.length)
+
+	for i := 0; i < p.length; i++ {
+		dataVal, naVal := applyFunc(p.data[i], p.na[i])
+		if naVal {
+			dataVal = false
+		}
+		data[i] = dataVal
+		na[i] = naVal
+	}
+
+	return BooleanPayload(data, na)
 }
 
 func (p *booleanPayload) SupportsSummarizer(summarizer interface{}) bool {
-	if _, ok := summarizer.(func(int, bool, bool, bool) (bool, bool)); ok {
+	if _, ok := summarizer.(BooleanSummarizerFunc); ok {
 		return true
 	}
 
@@ -140,7 +156,7 @@ func (p *booleanPayload) SupportsSummarizer(summarizer interface{}) bool {
 }
 
 func (p *booleanPayload) Summarize(summarizer interface{}) Payload {
-	fn, ok := summarizer.(func(int, bool, bool, bool) (bool, bool))
+	fn, ok := summarizer.(BooleanSummarizerFunc)
 	if !ok {
 		return NAPayload(1)
 	}

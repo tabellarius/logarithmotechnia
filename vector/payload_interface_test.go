@@ -251,6 +251,11 @@ func TestInterfacePayload_SupportsApplier(t *testing.T) {
 			isSupported: true,
 		},
 		{
+			name:        "func(interface{}, bool) (bool, bool)",
+			applier:     func(interface{}, bool) (interface{}, bool) { return 1, true },
+			isSupported: true,
+		},
+		{
 			name:        "func(int, float64, bool) bool",
 			applier:     func(int, int, bool) bool { return true },
 			isSupported: false,
@@ -288,6 +293,21 @@ func TestInterfacePayload_Apply(t *testing.T) {
 			dataIn:      []interface{}{true, true, true, false, false},
 			naIn:        []bool{false, true, false, true, false},
 			dataOut:     []interface{}{true, nil, true, nil, 5},
+			naOut:       []bool{false, true, false, true, false},
+			isNAPayload: false,
+		},
+		{
+			name: "regular compact",
+			applier: func(val interface{}, na bool) (interface{}, bool) {
+				if val == false {
+					return 0, na
+				}
+
+				return val, na
+			},
+			dataIn:      []interface{}{true, true, true, false, false},
+			naIn:        []bool{false, true, false, true, false},
+			dataOut:     []interface{}{true, nil, true, nil, 0},
 			naOut:       []bool{false, true, false, true, false},
 			isNAPayload: false,
 		},
