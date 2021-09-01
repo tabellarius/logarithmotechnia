@@ -84,12 +84,7 @@ func TestFloat(t *testing.T) {
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
 			var v Vector
-			if data.names == nil {
-				v = Float(data.data, data.na)
-			} else {
-				config := Config{NamesMap: data.names}
-				v = Float(data.data, data.na, config).(*vector)
-			}
+			v = Float(data.data, data.na)
 
 			vv := v.(*vector)
 
@@ -785,6 +780,39 @@ func TestFloatPayload_Append(t *testing.T) {
 			if !reflect.DeepEqual(data.outNA, outPayload.na) {
 				t.Error(fmt.Sprintf("Output NA (%v) does not match expected (%v)",
 					outPayload.na, data.outNA))
+			}
+		})
+	}
+}
+
+func TestFloatPayload_PrecisionOption(t *testing.T) {
+	testData := []struct {
+		name              string
+		payload           *floatPayload
+		expectedPrecision int
+	}{
+		{
+			name:              "precision 4",
+			payload:           FloatPayload(nil, nil, OptionPrecision(4)).(*floatPayload),
+			expectedPrecision: 4,
+		},
+		{
+			name:              "precision 5",
+			payload:           FloatPayload(nil, nil, OptionPrecision(5)).(*floatPayload),
+			expectedPrecision: 5,
+		},
+		{
+			name:              "default precision",
+			payload:           FloatPayload(nil, nil).(*floatPayload),
+			expectedPrecision: 3,
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			if data.payload.printer.Precision != data.expectedPrecision {
+				t.Error(fmt.Sprintf("Precision (%v) does not match expected (%v)",
+					data.payload.printer.Precision, data.expectedPrecision))
 			}
 		})
 	}

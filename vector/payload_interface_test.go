@@ -394,7 +394,7 @@ func TestInterfacePayload_Integers(t *testing.T) {
 			naOut:     []bool{false, false, true, true, true, false},
 		},
 		{
-			name:      "without converter",
+			name:      "without convertor",
 			dataIn:    []interface{}{1, 2.5, "three", 4 + 3i, 5, 0},
 			naIn:      []bool{false, false, false, false, true, false},
 			convertor: nil,
@@ -413,7 +413,8 @@ func TestInterfacePayload_Integers(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			vec := Interface(data.dataIn, data.naIn, OptionConvertors(InterfaceConvertors{Intabler: data.convertor}))
+			vec := Interface(data.dataIn, data.naIn,
+				OptionInterfaceConvertors(&InterfaceConvertors{Intabler: data.convertor}))
 			payload := vec.(*vector).payload.(*interfacePayload)
 
 			integers, na := payload.Integers()
@@ -460,7 +461,7 @@ func TestInterfacePayload_Floats(t *testing.T) {
 			naOut:     []bool{false, false, true, true, true, false},
 		},
 		{
-			name:      "without converter",
+			name:      "without convertor",
 			dataIn:    []interface{}{1, 2.5, "three", 4 + 3i, 5, 0},
 			naIn:      []bool{false, false, false, false, true, false},
 			convertor: nil,
@@ -479,7 +480,8 @@ func TestInterfacePayload_Floats(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			vec := Interface(data.dataIn, data.naIn, OptionConvertors(InterfaceConvertors{Floatabler: data.convertor}))
+			vec := Interface(data.dataIn, data.naIn,
+				OptionInterfaceConvertors(&InterfaceConvertors{Floatabler: data.convertor}))
 			payload := vec.(*vector).payload.(*interfacePayload)
 
 			floats, na := payload.Floats()
@@ -528,7 +530,7 @@ func TestInterfacePayload_Complexes(t *testing.T) {
 			naOut:     []bool{false, false, true, false, true, false},
 		},
 		{
-			name:      "without converter",
+			name:      "without convertor",
 			dataIn:    []interface{}{1, 2.5, "three", 4 + 3i, 5, 0},
 			naIn:      []bool{false, false, false, false, true, false},
 			convertor: nil,
@@ -547,7 +549,8 @@ func TestInterfacePayload_Complexes(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			vec := Interface(data.dataIn, data.naIn, OptionConvertors(InterfaceConvertors{Complexabler: data.convertor}))
+			vec := Interface(data.dataIn, data.naIn,
+				OptionInterfaceConvertors(&InterfaceConvertors{Complexabler: data.convertor}))
 			payload := vec.(*vector).payload.(*interfacePayload)
 
 			complexes, na := payload.Complexes()
@@ -594,7 +597,7 @@ func TestInterfacePayload_Booleans(t *testing.T) {
 			naOut:     []bool{false, false, true, false, true, false},
 		},
 		{
-			name:      "without converter",
+			name:      "without convertor",
 			dataIn:    []interface{}{1, -2, "three", 4 + 3i, 5, 0},
 			naIn:      []bool{false, false, false, false, true, false},
 			convertor: nil,
@@ -613,7 +616,8 @@ func TestInterfacePayload_Booleans(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			vec := Interface(data.dataIn, data.naIn, OptionConvertors(InterfaceConvertors{Boolabler: data.convertor}))
+			vec := Interface(data.dataIn, data.naIn,
+				OptionInterfaceConvertors(&InterfaceConvertors{Boolabler: data.convertor}))
 			payload := vec.(*vector).payload.(*interfacePayload)
 
 			bools, na := payload.Booleans()
@@ -660,7 +664,7 @@ func TestInterfacePayload_Strings(t *testing.T) {
 			naOut:     []bool{false, true, false, true, true, false},
 		},
 		{
-			name:      "without converter",
+			name:      "without convertor",
 			dataIn:    []interface{}{1, 2.5, "three", 4 + 3i, 5, 0},
 			naIn:      []bool{false, false, false, false, true, false},
 			convertor: nil,
@@ -679,7 +683,8 @@ func TestInterfacePayload_Strings(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			vec := Interface(data.dataIn, data.naIn, OptionConvertors(InterfaceConvertors{Stringabler: data.convertor}))
+			vec := Interface(data.dataIn, data.naIn,
+				OptionInterfaceConvertors(&InterfaceConvertors{Stringabler: data.convertor}))
 			payload := vec.(*vector).payload.(*interfacePayload)
 
 			strings, na := payload.Strings()
@@ -724,7 +729,7 @@ func TestInterfacePayload_Times(t *testing.T) {
 			naOut:     []bool{false, true, true},
 		},
 		{
-			name:      "without converter",
+			name:      "without convertor",
 			dataIn:    []interface{}{1625270725, "three", 1625270725},
 			naIn:      []bool{false, false, true},
 			convertor: nil,
@@ -743,7 +748,8 @@ func TestInterfacePayload_Times(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			vec := Interface(data.dataIn, data.naIn, OptionConvertors(InterfaceConvertors{Timeabler: data.convertor}))
+			vec := Interface(data.dataIn, data.naIn,
+				OptionInterfaceConvertors(&InterfaceConvertors{Timeabler: data.convertor}))
 			payload := vec.(*vector).payload.(*interfacePayload)
 
 			times, na := payload.Times()
@@ -801,7 +807,8 @@ func TestInterfacePayload_Interfaces(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			vec := Interface(data.dataIn, data.naIn, OptionConvertors(InterfaceConvertors{Intabler: data.convertor}))
+			vec := Interface(data.dataIn, data.naIn,
+				OptionInterfaceConvertors(&InterfaceConvertors{Intabler: data.convertor}))
 			payload := vec.(*vector).payload.(*interfacePayload)
 
 			interfaces, na := payload.Interfaces()

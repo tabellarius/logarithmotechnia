@@ -345,8 +345,6 @@ func IntegerPayload(data []int, na []bool) Payload {
 	}
 }
 
-func Integer(data []int, na []bool, options ...Config) Vector {
-	config := mergeConfigs(options)
-
-	return New(IntegerPayload(data, na), config)
+func Integer(data []int, na []bool) Vector {
+	return New(IntegerPayload(data, na))
 }

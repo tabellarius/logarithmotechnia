@@ -1,10 +1,6 @@
-Compact whichers and appliers
-+ SetOptions() + config() (сбор опций с Payload и Vector для лёгкого создания векторов) + добавить в функции, возвращающие Payload
 Appliers for different return types
 Factors
-Helpers for payloads
-Rework Config
-(?) Move payload to payloads dir
+Remove report
 (?) Make all payload public
 (?) Convertor (transform values into []interface{})
 String functions

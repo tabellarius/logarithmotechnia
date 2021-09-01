@@ -1,7 +1,12 @@
 package vector
 
+const OPTION_PRECISION = "precision"
+const OPTION_FORMAT = "format"
+const OPTION_INTERFACE_PRINTER_FUNC = "interface_printer_func"
+const OPTION_INTERFACE_CONVERTORS = "interface_convertors"
+
+//deprecated
 type Config struct {
-	NamesMap         map[string]int
 	FloatPrinter     *FloatPrinter
 	ComplexPrinter   *ComplexPrinter
 	TimePrinter      *TimePrinter
@@ -9,54 +14,62 @@ type Config struct {
 	Convertors       *InterfaceConvertors
 }
 
-func OptionNamesMap(namesMap map[string]int) Config {
-	return Config{NamesMap: namesMap}
+type Option interface {
+	Key() string
+	Value() interface{}
 }
 
-func OptionFloatPrinter(printer FloatPrinter) Config {
-	return Config{FloatPrinter: &printer}
+type confOption struct {
+	key   string
+	value interface{}
 }
 
-func OptionComplexPrinter(printer ComplexPrinter) Config {
-	return Config{ComplexPrinter: &printer}
+func (o confOption) Key() string {
+	return o.key
 }
 
-func OptionTimePrinter(printer TimePrinter) Config {
-	return Config{TimePrinter: &printer}
+func (o confOption) Value() interface{} {
+	return o.value
 }
 
-func OptionInterfacePrinter(printer func(payload interface{}) string) Config {
-	return Config{InterfacePrinter: printer}
+type Configuration struct {
+	options map[string]interface{}
 }
 
-func OptionConvertors(convertors InterfaceConvertors) Config {
-	return Config{Convertors: &convertors}
+func (conf Configuration) HasOption(name string) bool {
+	_, ok := conf.options[name]
+
+	return ok
 }
 
-func mergeConfigs(configs []Config) Config {
-	config := Config{}
+func (conf Configuration) Value(name string) interface{} {
+	return conf.options[name]
+}
 
-	for _, c := range configs {
-		if c.NamesMap != nil {
-			config.NamesMap = c.NamesMap
-		}
-
-		if c.FloatPrinter != nil {
-			config.FloatPrinter = c.FloatPrinter
-		}
-
-		if c.TimePrinter != nil {
-			config.TimePrinter = c.TimePrinter
-		}
-
-		if c.InterfacePrinter != nil {
-			config.InterfacePrinter = c.InterfacePrinter
-		}
-
-		if c.Convertors != nil {
-			config.Convertors = c.Convertors
-		}
+func mergeOptions(options []Option) Configuration {
+	conf := Configuration{
+		options: map[string]interface{}{},
 	}
 
-	return config
+	for _, option := range options {
+		conf.options[option.Key()] = option.Value()
+	}
+
+	return conf
+}
+
+func OptionPrecision(precision int) Option {
+	return confOption{OPTION_PRECISION, precision}
+}
+
+func OptionFormat(format string) Option {
+	return confOption{OPTION_FORMAT, format}
+}
+
+func OptionInterfacePrinterFunc(fn InterfacePrinterFunc) Option {
+	return confOption{OPTION_INTERFACE_PRINTER_FUNC, fn}
+}
+
+func OptionInterfaceConvertors(convertors *InterfaceConvertors) Option {
+	return confOption{OPTION_INTERFACE_CONVERTORS, convertors}
 }

@@ -399,7 +399,6 @@ func TestVector_Filter(t *testing.T) {
 	vec := Integer(
 		[]int{1, 2, 3, 4, 5},
 		[]bool{false, false, true, false, false},
-		OptionNamesMap(map[string]int{"one": 1, "three": 3, "five": 5}),
 	)
 	testData := []struct {
 		name    string
@@ -686,33 +685,33 @@ func TestVector_Clone(t *testing.T) {
 	}
 }
 
-func TestVector_Supportswhicher(t *testing.T) {
+func TestVector_SupportsWhicher(t *testing.T) {
 	testData := []struct {
 		name            string
 		vec             Vector
 		whicher         interface{}
-		supportswhicher bool
+		supportsWhicher bool
 	}{
 		{
 			name:            "integerPayload vector + valid whicher",
 			vec:             Integer([]int{1, 2, 3}, nil),
 			whicher:         func(_ int, val int, _ bool) bool { return val == 1 || val == 3 },
-			supportswhicher: true,
+			supportsWhicher: true,
 		},
 		{
 			name:            "integerPayload vector + invalid whicher",
 			vec:             Integer([]int{1, 2, 3}, nil),
 			whicher:         true,
-			supportswhicher: false,
+			supportsWhicher: false,
 		},
 	}
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			supportswhicher := data.vec.SupportsWhicher(data.whicher)
-			if supportswhicher != data.supportswhicher {
+			supportsWhicher := data.vec.SupportsWhicher(data.whicher)
+			if supportsWhicher != data.supportsWhicher {
 				t.Error(fmt.Sprintf("data.vec.Which() (%v) is not equal to data.selected (%v)",
-					supportswhicher, data.supportswhicher))
+					supportsWhicher, data.supportsWhicher))
 			}
 		})
 	}

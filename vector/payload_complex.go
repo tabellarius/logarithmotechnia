@@ -40,14 +40,7 @@ func (p *complexPayload) ByIndices(indices []int) Payload {
 		na = append(na, p.na[idx-1])
 	}
 
-	return &complexPayload{
-		length:  len(data),
-		data:    data,
-		printer: p.printer,
-		DefNAble: DefNAble{
-			na: na,
-		},
-	}
+	return ComplexPayload(data, na, p.options()...)
 }
 
 func (p *complexPayload) SupportsWhicher(whicher interface{}) bool {
@@ -136,7 +129,7 @@ func (p *complexPayload) applyToComplexByFunc(applyFunc ComplexToComplexApplierF
 		na[i] = naVal
 	}
 
-	return ComplexPayload(data, na)
+	return ComplexPayload(data, na, p.options()...)
 }
 
 func (p *complexPayload) applyToComplexByCompactFunc(applyFunc ComplexToComplexApplierCompactFunc) Payload {
@@ -152,7 +145,7 @@ func (p *complexPayload) applyToComplexByCompactFunc(applyFunc ComplexToComplexA
 		na[i] = naVal
 	}
 
-	return ComplexPayload(data, na)
+	return ComplexPayload(data, na, p.options()...)
 }
 
 func (p *complexPayload) SupportsSummarizer(summarizer interface{}) bool {
@@ -179,7 +172,7 @@ func (p *complexPayload) Summarize(summarizer interface{}) Payload {
 		}
 	}
 
-	return ComplexPayload([]complex128{val}, nil)
+	return ComplexPayload([]complex128{val}, nil, p.options()...)
 }
 
 func (p *complexPayload) Integers() ([]int, []bool) {
@@ -308,7 +301,7 @@ func (p *complexPayload) Append(vec Vector) Payload {
 	copy(newNA, p.na)
 	copy(newNA[p.length:], na)
 
-	return ComplexPayload(newVals, newNA, OptionComplexPrinter(p.printer))
+	return ComplexPayload(newVals, newNA, p.options()...)
 }
 
 func (p *complexPayload) StrForElem(idx int) string {
@@ -329,10 +322,15 @@ func (p *complexPayload) StrForElem(idx int) string {
 	return strconv.FormatComplex(p.data[i], 'f', p.printer.Precision, 128)
 }
 
-func ComplexPayload(data []complex128, na []bool, options ...Config) Payload {
-	config := mergeConfigs(options)
+func (p *complexPayload) options() []Option {
+	return []Option{
+		OptionPrecision(p.printer.Precision),
+	}
+}
 
+func ComplexPayload(data []complex128, na []bool, options ...Option) Payload {
 	length := len(data)
+	conf := mergeOptions(options)
 
 	vecNA := make([]bool, length)
 	if len(na) > 0 {
@@ -353,9 +351,12 @@ func ComplexPayload(data []complex128, na []bool, options ...Config) Payload {
 		}
 	}
 
-	printer := ComplexPrinter{Precision: 3}
-	if config.FloatPrinter != nil {
-		printer = *config.ComplexPrinter
+	printer := ComplexPrinter{
+		Precision: 3,
+	}
+
+	if conf.HasOption(OPTION_PRECISION) {
+		printer.Precision = conf.Value(OPTION_PRECISION).(int)
 	}
 
 	return &complexPayload{
@@ -368,8 +369,6 @@ func ComplexPayload(data []complex128, na []bool, options ...Config) Payload {
 	}
 }
 
-func Complex(data []complex128, na []bool, options ...Config) Vector {
-	config := mergeConfigs(options)
-
-	return New(ComplexPayload(data, na), config)
+func Complex(data []complex128, na []bool, options ...Option) Vector {
+	return New(ComplexPayload(data, na, options...))
 }

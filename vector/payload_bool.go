@@ -356,8 +356,6 @@ func BooleanPayload(data []bool, na []bool) Payload {
 	}
 }
 
-func Boolean(data []bool, na []bool, options ...Config) Vector {
-	config := mergeConfigs(options)
-
-	return New(BooleanPayload(data, na), config)
+func Boolean(data []bool, na []bool) Vector {
+	return New(BooleanPayload(data, na))
 }
