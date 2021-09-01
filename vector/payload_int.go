@@ -147,7 +147,7 @@ func (p *integerPayload) applyToIntegerByCompactFunc(applyFunc IntegerToIntegerA
 }
 
 func (p *integerPayload) SupportsSummarizer(summarizer interface{}) bool {
-	if _, ok := summarizer.(func(int, int, int, bool) (int, bool)); ok {
+	if _, ok := summarizer.(IntegerSummarizerFunc); ok {
 		return true
 	}
 

@@ -10,6 +10,7 @@ type InterfaceWhicherFunc = func(int, interface{}, bool) bool
 type InterfaceWhicherCompactFunc = func(interface{}, bool) bool
 type InterfaceToInterfaceApplierFunc = func(int, interface{}, bool) (interface{}, bool)
 type InterfaceToInterfaceApplierCompactFunc = func(interface{}, bool) (interface{}, bool)
+type InterfaceSummarizerFunc = func(int, interface{}, interface{}, bool) (interface{}, bool)
 
 type InterfaceConvertors struct {
 	Intabler     func(idx int, val interface{}, na bool) (int, bool)
@@ -172,7 +173,7 @@ func (p *interfacePayload) applyToInterfaceByCompactFunc(applyFunc InterfaceToIn
 }
 
 func (p *interfacePayload) SupportsSummarizer(summarizer interface{}) bool {
-	if _, ok := summarizer.(func(int, interface{}, interface{}, bool) (interface{}, bool)); ok {
+	if _, ok := summarizer.(InterfaceSummarizerFunc); ok {
 		return true
 	}
 
@@ -180,7 +181,7 @@ func (p *interfacePayload) SupportsSummarizer(summarizer interface{}) bool {
 }
 
 func (p *interfacePayload) Summarize(summarizer interface{}) Payload {
-	fn, ok := summarizer.(func(int, interface{}, interface{}, bool) (interface{}, bool))
+	fn, ok := summarizer.(InterfaceSummarizerFunc)
 	if !ok {
 		return NAPayload(1)
 	}

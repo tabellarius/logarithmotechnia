@@ -155,7 +155,7 @@ func (p *floatPayload) applyToFloatByCompactFunc(applyFunc FloatToFloatApplierCo
 }
 
 func (p *floatPayload) SupportsSummarizer(summarizer interface{}) bool {
-	if _, ok := summarizer.(func(int, float64, float64, bool) (float64, bool)); ok {
+	if _, ok := summarizer.(FloatSummarizerFunc); ok {
 		return true
 	}
 

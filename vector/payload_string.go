@@ -8,6 +8,9 @@ import (
 
 type StringWhicherFunc = func(int, string, bool) bool
 type StringWhicherCompactFunc = func(string, bool) bool
+type StringToStringApplierFunc = func(int, string, bool) (string, bool)
+type StringToStringApplierCompactFunc = func(string, bool) (string, bool)
+type StringSummarizerFunc = func(int, string, string, bool) (string, bool)
 
 type stringPayload struct {
 	length int
@@ -90,7 +93,11 @@ func (p *stringPayload) selectByCompactFunc(byFunc StringWhicherCompactFunc) []b
 }
 
 func (p *stringPayload) SupportsApplier(applier interface{}) bool {
-	if _, ok := applier.(func(int, string, bool) (string, bool)); ok {
+	if _, ok := applier.(StringToStringApplierFunc); ok {
+		return true
+	}
+
+	if _, ok := applier.(StringToStringApplierCompactFunc); ok {
 		return true
 	}
 
@@ -98,25 +105,18 @@ func (p *stringPayload) SupportsApplier(applier interface{}) bool {
 }
 
 func (p *stringPayload) Apply(applier interface{}) Payload {
-	var data []string
-	var na []bool
-
-	if applyFunc, ok := applier.(func(int, string, bool) (string, bool)); ok {
-		data, na = p.applyByFunc(applyFunc)
-	} else {
-		return NAPayload(p.length)
+	if applyFunc, ok := applier.(StringToStringApplierFunc); ok {
+		return p.applyToStringByFunc(applyFunc)
 	}
 
-	return &stringPayload{
-		length: p.length,
-		data:   data,
-		DefNAble: DefNAble{
-			na: na,
-		},
+	if applyFunc, ok := applier.(StringToStringApplierCompactFunc); ok {
+		return p.applyToStringByCompactFunc(applyFunc)
 	}
+
+	return NAPayload(p.length)
 }
 
-func (p *stringPayload) applyByFunc(applyFunc func(int, string, bool) (string, bool)) ([]string, []bool) {
+func (p *stringPayload) applyToStringByFunc(applyFunc StringToStringApplierFunc) Payload {
 	data := make([]string, p.length)
 	na := make([]bool, p.length)
 
@@ -129,11 +129,27 @@ func (p *stringPayload) applyByFunc(applyFunc func(int, string, bool) (string, b
 		na[i] = naVal
 	}
 
-	return data, na
+	return StringPayload(data, na)
+}
+
+func (p *stringPayload) applyToStringByCompactFunc(applyFunc StringToStringApplierCompactFunc) Payload {
+	data := make([]string, p.length)
+	na := make([]bool, p.length)
+
+	for i := 0; i < p.length; i++ {
+		dataVal, naVal := applyFunc(p.data[i], p.na[i])
+		if naVal {
+			dataVal = ""
+		}
+		data[i] = dataVal
+		na[i] = naVal
+	}
+
+	return StringPayload(data, na)
 }
 
 func (p *stringPayload) SupportsSummarizer(summarizer interface{}) bool {
-	if _, ok := summarizer.(func(int, string, string, bool) (string, bool)); ok {
+	if _, ok := summarizer.(StringSummarizerFunc); ok {
 		return true
 	}
 
@@ -141,7 +157,7 @@ func (p *stringPayload) SupportsSummarizer(summarizer interface{}) bool {
 }
 
 func (p *stringPayload) Summarize(summarizer interface{}) Payload {
-	fn, ok := summarizer.(func(int, string, string, bool) (string, bool))
+	fn, ok := summarizer.(StringSummarizerFunc)
 	if !ok {
 		return NAPayload(1)
 	}

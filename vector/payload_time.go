@@ -6,6 +6,9 @@ import (
 
 type TimeWhicherFunc = func(int, time.Time, bool) bool
 type TimeWhicherCompactFunc = func(time.Time, bool) bool
+type TimeToTimeApplierFunc = func(int, time.Time, bool) (time.Time, bool)
+type TimeToTimeApplierCompactFunc = func(time.Time, bool) (time.Time, bool)
+type TimeSummarizerFunc = func(int, time.Time, time.Time, bool) (time.Time, bool)
 
 type TimePrinter struct {
 	Format string
@@ -94,7 +97,11 @@ func (p *timePayload) selectByCompactFunc(byFunc TimeWhicherCompactFunc) []bool 
 }
 
 func (p *timePayload) SupportsApplier(applier interface{}) bool {
-	if _, ok := applier.(func(int, time.Time, bool) (time.Time, bool)); ok {
+	if _, ok := applier.(TimeToTimeApplierFunc); ok {
+		return true
+	}
+
+	if _, ok := applier.(TimeToTimeApplierCompactFunc); ok {
 		return true
 	}
 
@@ -102,26 +109,18 @@ func (p *timePayload) SupportsApplier(applier interface{}) bool {
 }
 
 func (p *timePayload) Apply(applier interface{}) Payload {
-	var data []time.Time
-	var na []bool
-
-	if applyFunc, ok := applier.(func(int, time.Time, bool) (time.Time, bool)); ok {
-		data, na = p.applyByFunc(applyFunc)
-	} else {
-		return NAPayload(p.length)
+	if applyFunc, ok := applier.(TimeToTimeApplierFunc); ok {
+		return p.applyToTimeByFunc(applyFunc)
 	}
 
-	return &timePayload{
-		length:  p.length,
-		data:    data,
-		printer: p.printer,
-		DefNAble: DefNAble{
-			na: na,
-		},
+	if applyFunc, ok := applier.(TimeToTimeApplierCompactFunc); ok {
+		return p.applyToTimeByCompactFunc(applyFunc)
 	}
+
+	return NAPayload(p.length)
 }
 
-func (p *timePayload) applyByFunc(applyFunc func(int, time.Time, bool) (time.Time, bool)) ([]time.Time, []bool) {
+func (p *timePayload) applyToTimeByFunc(applyFunc TimeToTimeApplierFunc) Payload {
 	data := make([]time.Time, p.length)
 	na := make([]bool, p.length)
 
@@ -134,11 +133,27 @@ func (p *timePayload) applyByFunc(applyFunc func(int, time.Time, bool) (time.Tim
 		na[i] = naVal
 	}
 
-	return data, na
+	return TimePayload(data, na)
+}
+
+func (p *timePayload) applyToTimeByCompactFunc(applyFunc TimeToTimeApplierCompactFunc) Payload {
+	data := make([]time.Time, p.length)
+	na := make([]bool, p.length)
+
+	for i := 0; i < p.length; i++ {
+		dataVal, naVal := applyFunc(p.data[i], p.na[i])
+		if naVal {
+			dataVal = time.Time{}
+		}
+		data[i] = dataVal
+		na[i] = naVal
+	}
+
+	return TimePayload(data, na)
 }
 
 func (p *timePayload) SupportsSummarizer(summarizer interface{}) bool {
-	if _, ok := summarizer.(func(int, time.Time, time.Time, bool) (time.Time, bool)); ok {
+	if _, ok := summarizer.(TimeSummarizerFunc); ok {
 		return true
 	}
 
@@ -146,7 +161,7 @@ func (p *timePayload) SupportsSummarizer(summarizer interface{}) bool {
 }
 
 func (p *timePayload) Summarize(summarizer interface{}) Payload {
-	fn, ok := summarizer.(func(int, time.Time, time.Time, bool) (time.Time, bool))
+	fn, ok := summarizer.(TimeSummarizerFunc)
 	if !ok {
 		return NAPayload(1)
 	}

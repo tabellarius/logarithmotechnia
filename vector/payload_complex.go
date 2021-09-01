@@ -10,7 +10,7 @@ type ComplexWhicherFunc = func(int, complex128, bool) bool
 type ComplexWhicherCompactFunc = func(complex128, bool) bool
 type ComplexToComplexApplierFunc = func(int, complex128, bool) (complex128, bool)
 type ComplexToComplexApplierCompactFunc = func(complex128, bool) (complex128, bool)
-type CompexSummarizerFunc = func(int, complex128, complex128, bool) (complex128, bool)
+type ComplexSummarizerFunc = func(int, complex128, complex128, bool) (complex128, bool)
 
 type ComplexPrinter struct {
 	Precision int
@@ -156,7 +156,7 @@ func (p *complexPayload) applyToComplexByCompactFunc(applyFunc ComplexToComplexA
 }
 
 func (p *complexPayload) SupportsSummarizer(summarizer interface{}) bool {
-	if _, ok := summarizer.(func(int, complex128, complex128, bool) (complex128, bool)); ok {
+	if _, ok := summarizer.(ComplexSummarizerFunc); ok {
 		return true
 	}
 
@@ -164,7 +164,7 @@ func (p *complexPayload) SupportsSummarizer(summarizer interface{}) bool {
 }
 
 func (p *complexPayload) Summarize(summarizer interface{}) Payload {
-	fn, ok := summarizer.(func(int, complex128, complex128, bool) (complex128, bool))
+	fn, ok := summarizer.(ComplexSummarizerFunc)
 	if !ok {
 		return NAPayload(1)
 	}
