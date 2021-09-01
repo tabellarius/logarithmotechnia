@@ -784,3 +784,36 @@ func TestFloatPayload_Append(t *testing.T) {
 		})
 	}
 }
+
+func TestFloatPayload_PrecisionOption(t *testing.T) {
+	testData := []struct {
+		name              string
+		payload           *floatPayload
+		expectedPrecision int
+	}{
+		{
+			name:              "precision 4",
+			payload:           FloatPayload(nil, nil, OptionPrecision(4)).(*floatPayload),
+			expectedPrecision: 4,
+		},
+		{
+			name:              "precision 5",
+			payload:           FloatPayload(nil, nil, OptionPrecision(5)).(*floatPayload),
+			expectedPrecision: 5,
+		},
+		{
+			name:              "default precision",
+			payload:           FloatPayload(nil, nil).(*floatPayload),
+			expectedPrecision: 3,
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			if data.payload.printer.Precision != data.expectedPrecision {
+				t.Error(fmt.Sprintf("Precision (%v) does not match expected (%v)",
+					data.payload.printer.Precision, data.expectedPrecision))
+			}
+		})
+	}
+}

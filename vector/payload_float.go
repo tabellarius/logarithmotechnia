@@ -135,7 +135,7 @@ func (p *floatPayload) applyToFloatByFunc(applyFunc FloatToFloatApplierFunc) Pay
 		na[i] = naVal
 	}
 
-	return FloatPayload(data, na)
+	return FloatPayload(data, na, p.options()...)
 }
 
 func (p *floatPayload) applyToFloatByCompactFunc(applyFunc FloatToFloatApplierCompactFunc) Payload {
@@ -151,7 +151,7 @@ func (p *floatPayload) applyToFloatByCompactFunc(applyFunc FloatToFloatApplierCo
 		na[i] = naVal
 	}
 
-	return FloatPayload(data, na)
+	return FloatPayload(data, na, p.options()...)
 }
 
 func (p *floatPayload) SupportsSummarizer(summarizer interface{}) bool {
@@ -178,7 +178,7 @@ func (p *floatPayload) Summarize(summarizer interface{}) Payload {
 		}
 	}
 
-	return FloatPayload([]float64{val}, nil)
+	return FloatPayload([]float64{val}, nil, p.options()...)
 }
 
 func (p *floatPayload) Integers() ([]int, []bool) {
@@ -332,11 +332,18 @@ func (p *floatPayload) Append(vec Vector) Payload {
 	copy(newNA, p.na)
 	copy(newNA[p.length:], na)
 
-	return FloatPayload(newVals, newNA)
+	return FloatPayload(newVals, newNA, p.options()...)
 }
 
-func FloatPayload(data []float64, na []bool) Payload {
+func (p *floatPayload) options() []Option {
+	return []Option{
+		OptionPrecision(p.printer.Precision),
+	}
+}
+
+func FloatPayload(data []float64, na []bool, options ...Option) Payload {
 	length := len(data)
+	conf := mergeOptions(options)
 
 	vecNA := make([]bool, length)
 	if len(na) > 0 {
@@ -357,7 +364,13 @@ func FloatPayload(data []float64, na []bool) Payload {
 		}
 	}
 
-	printer := FloatPrinter{Precision: 3}
+	printer := FloatPrinter{
+		Precision: 3,
+	}
+
+	if conf.HasOption(OPTION_PRECISION) {
+		printer.Precision = conf.Value(OPTION_PRECISION).(int)
+	}
 
 	return &floatPayload{
 		length:  length,
@@ -369,6 +382,6 @@ func FloatPayload(data []float64, na []bool) Payload {
 	}
 }
 
-func Float(data []float64, na []bool) Vector {
-	return New(FloatPayload(data, na))
+func Float(data []float64, na []bool, options ...Option) Vector {
+	return New(FloatPayload(data, na, options...))
 }

@@ -11,6 +11,7 @@ type InterfaceWhicherCompactFunc = func(interface{}, bool) bool
 type InterfaceToInterfaceApplierFunc = func(int, interface{}, bool) (interface{}, bool)
 type InterfaceToInterfaceApplierCompactFunc = func(interface{}, bool) (interface{}, bool)
 type InterfaceSummarizerFunc = func(int, interface{}, interface{}, bool) (interface{}, bool)
+type InterfacePrinterFunc = func(interface{}) string
 
 type InterfaceConvertors struct {
 	Intabler     func(idx int, val interface{}, na bool) (int, bool)
@@ -24,7 +25,7 @@ type InterfaceConvertors struct {
 type interfacePayload struct {
 	length     int
 	data       []interface{}
-	printer    func(payload interface{}) string
+	printer    InterfacePrinterFunc
 	convertors *InterfaceConvertors
 	DefNAble
 }
@@ -349,8 +350,9 @@ func (p *interfacePayload) Append(vec Vector) Payload {
 	return InterfacePayload(newVals, newNA)
 }
 
-func InterfacePayload(data []interface{}, na []bool) Payload {
+func InterfacePayload(data []interface{}, na []bool, options ...Option) Payload {
 	length := len(data)
+	conf := mergeOptions(options)
 
 	vecNA := make([]bool, length)
 	if len(na) > 0 {
@@ -371,7 +373,7 @@ func InterfacePayload(data []interface{}, na []bool) Payload {
 		}
 	}
 
-	return &interfacePayload{
+	payload := &interfacePayload{
 		length:     length,
 		data:       vecData,
 		printer:    nil,
@@ -381,8 +383,18 @@ func InterfacePayload(data []interface{}, na []bool) Payload {
 		},
 	}
 
+	if conf.HasOption(OPTION_INTERFACE_PRINTER_FUNC) {
+		payload.printer = conf.Value(OPTION_INTERFACE_PRINTER_FUNC).(InterfacePrinterFunc)
+	}
+
+	if conf.HasOption(OPTION_INTERFACE_CONVERTORS) {
+		payload.convertors = conf.Value(OPTION_INTERFACE_CONVERTORS).(*InterfaceConvertors)
+	}
+
+	return payload
+
 }
 
-func Interface(data []interface{}, na []bool) Vector {
-	return New(InterfacePayload(data, na))
+func Interface(data []interface{}, na []bool, options ...Option) Vector {
+	return New(InterfacePayload(data, na, options...))
 }

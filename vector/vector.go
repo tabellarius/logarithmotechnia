@@ -88,6 +88,10 @@ type Interfaceable interface {
 	Interfaces() ([]interface{}, []bool)
 }
 
+type Configurable interface {
+	Options() []Option
+}
+
 // vector holds data and functions shared by all vectors
 type vector struct {
 	length  int

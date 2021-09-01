@@ -1,9 +1,6 @@
-+ SetOptions() + config() (сбор опций с Payload и Vector для лёгкого создания векторов) + добавить в функции, возвращающие Payload
-Remove report
 Appliers for different return types
 Factors
-Helpers for payloads
-Rework Config
+Remove report
 (?) Make all payload public
 (?) Convertor (transform values into []interface{})
 String functions

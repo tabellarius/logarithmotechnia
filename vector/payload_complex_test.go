@@ -764,3 +764,36 @@ func TestComplexPayload_Append(t *testing.T) {
 		})
 	}
 }
+
+func TestComplexPayload_PrecisionOption(t *testing.T) {
+	testData := []struct {
+		name              string
+		payload           *complexPayload
+		expectedPrecision int
+	}{
+		{
+			name:              "precision 4",
+			payload:           ComplexPayload(nil, nil, OptionPrecision(4)).(*complexPayload),
+			expectedPrecision: 4,
+		},
+		{
+			name:              "precision 5",
+			payload:           ComplexPayload(nil, nil, OptionPrecision(5)).(*complexPayload),
+			expectedPrecision: 5,
+		},
+		{
+			name:              "default precision",
+			payload:           ComplexPayload(nil, nil).(*complexPayload),
+			expectedPrecision: 3,
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			if data.payload.printer.Precision != data.expectedPrecision {
+				t.Error(fmt.Sprintf("Precision (%v) does not match expected (%v)",
+					data.payload.printer.Precision, data.expectedPrecision))
+			}
+		})
+	}
+}

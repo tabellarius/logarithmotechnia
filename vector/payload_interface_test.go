@@ -2,9 +2,13 @@ package vector
 
 import (
 	"fmt"
+	"logarithmotechnia/util"
+	"math"
+	"math/cmplx"
 	"reflect"
 	"strconv"
 	"testing"
+	"time"
 )
 
 func TestInterface(t *testing.T) {
@@ -357,7 +361,6 @@ func TestInterfacePayload_Apply(t *testing.T) {
 	}
 }
 
-/*
 func TestInterfacePayload_Integers(t *testing.T) {
 	convertor := func(idx int, val interface{}, na bool) (int, bool) {
 		if na {
@@ -410,7 +413,8 @@ func TestInterfacePayload_Integers(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			vec := Interface(data.dataIn, data.naIn, OptionConvertors(InterfaceConvertors{Intabler: data.convertor}))
+			vec := Interface(data.dataIn, data.naIn,
+				OptionInterfaceConvertors(&InterfaceConvertors{Intabler: data.convertor}))
 			payload := vec.(*vector).payload.(*interfacePayload)
 
 			integers, na := payload.Integers()
@@ -476,7 +480,8 @@ func TestInterfacePayload_Floats(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			vec := Interface(data.dataIn, data.naIn, OptionConvertors(InterfaceConvertors{Floatabler: data.convertor}))
+			vec := Interface(data.dataIn, data.naIn,
+				OptionInterfaceConvertors(&InterfaceConvertors{Floatabler: data.convertor}))
 			payload := vec.(*vector).payload.(*interfacePayload)
 
 			floats, na := payload.Floats()
@@ -544,7 +549,8 @@ func TestInterfacePayload_Complexes(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			vec := Interface(data.dataIn, data.naIn, OptionConvertors(InterfaceConvertors{Complexabler: data.convertor}))
+			vec := Interface(data.dataIn, data.naIn,
+				OptionInterfaceConvertors(&InterfaceConvertors{Complexabler: data.convertor}))
 			payload := vec.(*vector).payload.(*interfacePayload)
 
 			complexes, na := payload.Complexes()
@@ -610,7 +616,8 @@ func TestInterfacePayload_Booleans(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			vec := Interface(data.dataIn, data.naIn, OptionConvertors(InterfaceConvertors{Boolabler: data.convertor}))
+			vec := Interface(data.dataIn, data.naIn,
+				OptionInterfaceConvertors(&InterfaceConvertors{Boolabler: data.convertor}))
 			payload := vec.(*vector).payload.(*interfacePayload)
 
 			bools, na := payload.Booleans()
@@ -676,7 +683,8 @@ func TestInterfacePayload_Strings(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			vec := Interface(data.dataIn, data.naIn, OptionConvertors(InterfaceConvertors{Stringabler: data.convertor}))
+			vec := Interface(data.dataIn, data.naIn,
+				OptionInterfaceConvertors(&InterfaceConvertors{Stringabler: data.convertor}))
 			payload := vec.(*vector).payload.(*interfacePayload)
 
 			strings, na := payload.Strings()
@@ -740,7 +748,8 @@ func TestInterfacePayload_Times(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			vec := Interface(data.dataIn, data.naIn, OptionConvertors(InterfaceConvertors{Timeabler: data.convertor}))
+			vec := Interface(data.dataIn, data.naIn,
+				OptionInterfaceConvertors(&InterfaceConvertors{Timeabler: data.convertor}))
 			payload := vec.(*vector).payload.(*interfacePayload)
 
 			times, na := payload.Times()
@@ -798,7 +807,8 @@ func TestInterfacePayload_Interfaces(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			vec := Interface(data.dataIn, data.naIn, OptionConvertors(InterfaceConvertors{Intabler: data.convertor}))
+			vec := Interface(data.dataIn, data.naIn,
+				OptionInterfaceConvertors(&InterfaceConvertors{Intabler: data.convertor}))
 			payload := vec.(*vector).payload.(*interfacePayload)
 
 			interfaces, na := payload.Interfaces()
@@ -811,7 +821,7 @@ func TestInterfacePayload_Interfaces(t *testing.T) {
 		})
 	}
 }
-*/
+
 func TestInterfacePayload_SupportsSummarizer(t *testing.T) {
 	testData := []struct {
 		name        string
