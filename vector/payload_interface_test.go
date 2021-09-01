@@ -2,13 +2,9 @@ package vector
 
 import (
 	"fmt"
-	"logarithmotechnia/util"
-	"math"
-	"math/cmplx"
 	"reflect"
 	"strconv"
 	"testing"
-	"time"
 )
 
 func TestInterface(t *testing.T) {
@@ -361,6 +357,7 @@ func TestInterfacePayload_Apply(t *testing.T) {
 	}
 }
 
+/*
 func TestInterfacePayload_Integers(t *testing.T) {
 	convertor := func(idx int, val interface{}, na bool) (int, bool) {
 		if na {
@@ -394,7 +391,7 @@ func TestInterfacePayload_Integers(t *testing.T) {
 			naOut:     []bool{false, false, true, true, true, false},
 		},
 		{
-			name:      "without converter",
+			name:      "without convertor",
 			dataIn:    []interface{}{1, 2.5, "three", 4 + 3i, 5, 0},
 			naIn:      []bool{false, false, false, false, true, false},
 			convertor: nil,
@@ -460,7 +457,7 @@ func TestInterfacePayload_Floats(t *testing.T) {
 			naOut:     []bool{false, false, true, true, true, false},
 		},
 		{
-			name:      "without converter",
+			name:      "without convertor",
 			dataIn:    []interface{}{1, 2.5, "three", 4 + 3i, 5, 0},
 			naIn:      []bool{false, false, false, false, true, false},
 			convertor: nil,
@@ -528,7 +525,7 @@ func TestInterfacePayload_Complexes(t *testing.T) {
 			naOut:     []bool{false, false, true, false, true, false},
 		},
 		{
-			name:      "without converter",
+			name:      "without convertor",
 			dataIn:    []interface{}{1, 2.5, "three", 4 + 3i, 5, 0},
 			naIn:      []bool{false, false, false, false, true, false},
 			convertor: nil,
@@ -594,7 +591,7 @@ func TestInterfacePayload_Booleans(t *testing.T) {
 			naOut:     []bool{false, false, true, false, true, false},
 		},
 		{
-			name:      "without converter",
+			name:      "without convertor",
 			dataIn:    []interface{}{1, -2, "three", 4 + 3i, 5, 0},
 			naIn:      []bool{false, false, false, false, true, false},
 			convertor: nil,
@@ -660,7 +657,7 @@ func TestInterfacePayload_Strings(t *testing.T) {
 			naOut:     []bool{false, true, false, true, true, false},
 		},
 		{
-			name:      "without converter",
+			name:      "without convertor",
 			dataIn:    []interface{}{1, 2.5, "three", 4 + 3i, 5, 0},
 			naIn:      []bool{false, false, false, false, true, false},
 			convertor: nil,
@@ -724,7 +721,7 @@ func TestInterfacePayload_Times(t *testing.T) {
 			naOut:     []bool{false, true, true},
 		},
 		{
-			name:      "without converter",
+			name:      "without convertor",
 			dataIn:    []interface{}{1625270725, "three", 1625270725},
 			naIn:      []bool{false, false, true},
 			convertor: nil,
@@ -814,7 +811,7 @@ func TestInterfacePayload_Interfaces(t *testing.T) {
 		})
 	}
 }
-
+*/
 func TestInterfacePayload_SupportsSummarizer(t *testing.T) {
 	testData := []struct {
 		name        string

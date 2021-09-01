@@ -361,8 +361,6 @@ func StringPayload(data []string, na []bool) Payload {
 	}
 }
 
-func String(data []string, na []bool, options ...Config) Vector {
-	config := mergeConfigs(options)
-
-	return New(StringPayload(data, na), config)
+func String(data []string, na []bool) Vector {
+	return New(StringPayload(data, na))
 }

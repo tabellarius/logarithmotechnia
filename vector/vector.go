@@ -428,7 +428,7 @@ func (v *vector) Interfaces() ([]interface{}, []bool) {
 
 // New creates a vector part of the future vector. This function is used by public functions which create
 // typed vectors
-func New(payload Payload, _ ...Config) Vector {
+func New(payload Payload) Vector {
 	vec := vector{
 		length:  payload.Len(),
 		payload: payload,

@@ -349,9 +349,7 @@ func (p *interfacePayload) Append(vec Vector) Payload {
 	return InterfacePayload(newVals, newNA)
 }
 
-func InterfacePayload(data []interface{}, na []bool, options ...Config) Payload {
-	config := mergeConfigs(options)
-
+func InterfacePayload(data []interface{}, na []bool) Payload {
 	length := len(data)
 
 	vecNA := make([]bool, length)
@@ -376,8 +374,8 @@ func InterfacePayload(data []interface{}, na []bool, options ...Config) Payload 
 	return &interfacePayload{
 		length:     length,
 		data:       vecData,
-		printer:    config.InterfacePrinter,
-		convertors: config.Convertors,
+		printer:    nil,
+		convertors: nil,
 		DefNAble: DefNAble{
 			na: vecNA,
 		},
@@ -385,8 +383,6 @@ func InterfacePayload(data []interface{}, na []bool, options ...Config) Payload 
 
 }
 
-func Interface(data []interface{}, na []bool, options ...Config) Vector {
-	config := mergeConfigs(options)
-
-	return New(InterfacePayload(data, na, options...), config)
+func Interface(data []interface{}, na []bool) Vector {
+	return New(InterfacePayload(data, na))
 }

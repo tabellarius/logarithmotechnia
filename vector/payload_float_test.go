@@ -84,12 +84,7 @@ func TestFloat(t *testing.T) {
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
 			var v Vector
-			if data.names == nil {
-				v = Float(data.data, data.na)
-			} else {
-				config := Config{NamesMap: data.names}
-				v = Float(data.data, data.na, config).(*vector)
-			}
+			v = Float(data.data, data.na)
 
 			vv := v.(*vector)
 

@@ -332,12 +332,10 @@ func (p *floatPayload) Append(vec Vector) Payload {
 	copy(newNA, p.na)
 	copy(newNA[p.length:], na)
 
-	return FloatPayload(newVals, newNA, OptionFloatPrinter(p.printer))
+	return FloatPayload(newVals, newNA)
 }
 
-func FloatPayload(data []float64, na []bool, options ...Config) Payload {
-	config := mergeConfigs(options)
-
+func FloatPayload(data []float64, na []bool) Payload {
 	length := len(data)
 
 	vecNA := make([]bool, length)
@@ -360,9 +358,6 @@ func FloatPayload(data []float64, na []bool, options ...Config) Payload {
 	}
 
 	printer := FloatPrinter{Precision: 3}
-	if config.FloatPrinter != nil {
-		printer = *config.FloatPrinter
-	}
 
 	return &floatPayload{
 		length:  length,
@@ -374,8 +369,6 @@ func FloatPayload(data []float64, na []bool, options ...Config) Payload {
 	}
 }
 
-func Float(data []float64, na []bool, options ...Config) Vector {
-	config := mergeConfigs(options)
-
-	return New(FloatPayload(data, na, options...), config)
+func Float(data []float64, na []bool) Vector {
+	return New(FloatPayload(data, na))
 }

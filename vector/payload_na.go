@@ -181,5 +181,5 @@ func NAPayload(length int) Payload {
 }
 
 func NA(length int) Vector {
-	return New(NAPayload(length), Config{})
+	return New(NAPayload(length))
 }

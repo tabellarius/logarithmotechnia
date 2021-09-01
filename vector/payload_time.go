@@ -254,9 +254,7 @@ func (p *timePayload) StrForElem(idx int) string {
 	return p.data[idx-1].Format(p.printer.Format)
 }
 
-func TimePayload(data []time.Time, na []bool, options ...Config) Payload {
-	config := mergeConfigs(options)
-
+func TimePayload(data []time.Time, na []bool) Payload {
 	length := len(data)
 
 	vecNA := make([]bool, length)
@@ -279,9 +277,6 @@ func TimePayload(data []time.Time, na []bool, options ...Config) Payload {
 	}
 
 	printer := TimePrinter{Format: time.RFC3339}
-	if config.TimePrinter != nil {
-		printer = *config.TimePrinter
-	}
 
 	return &timePayload{
 		length:  length,
@@ -293,8 +288,6 @@ func TimePayload(data []time.Time, na []bool, options ...Config) Payload {
 	}
 }
 
-func Time(data []time.Time, na []bool, options ...Config) Vector {
-	config := mergeConfigs(options)
-
-	return New(TimePayload(data, na), config)
+func Time(data []time.Time, na []bool) Vector {
+	return New(TimePayload(data, na))
 }
