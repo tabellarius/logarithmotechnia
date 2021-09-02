@@ -330,6 +330,39 @@ func (p *stringPayload) StrForElem(idx int) string {
 	return p.data[idx-1]
 }
 
+/* Finder interface */
+
+func (p *stringPayload) Find(needle interface{}) int {
+	val, ok := needle.(string)
+	if !ok {
+		return 0
+	}
+
+	for i, datum := range p.data {
+		if val == datum {
+			return i + 1
+		}
+	}
+
+	return 0
+}
+
+func (p *stringPayload) FindAll(needle interface{}) []int {
+	val, ok := needle.(string)
+	if !ok {
+		return []int{}
+	}
+
+	found := []int{}
+	for i, datum := range p.data {
+		if val == datum {
+			found = append(found, i+1)
+		}
+	}
+
+	return found
+}
+
 func StringPayload(data []string, na []bool) Payload {
 	length := len(data)
 

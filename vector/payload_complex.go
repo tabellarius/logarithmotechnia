@@ -328,6 +328,55 @@ func (p *complexPayload) options() []Option {
 	}
 }
 
+/* Finder interface */
+
+func (p *complexPayload) Find(needle interface{}) int {
+	var val complex128
+
+	switch v := needle.(type) {
+	case complex128:
+		val = v
+	case float64:
+		val = complex(v, 0)
+	case int:
+		val = complex(float64(v), 0)
+	default:
+		return 0
+	}
+
+	for i, datum := range p.data {
+		if val == datum {
+			return i + 1
+		}
+	}
+
+	return 0
+}
+
+func (p *complexPayload) FindAll(needle interface{}) []int {
+	var val complex128
+
+	switch v := needle.(type) {
+	case complex128:
+		val = v
+	case float64:
+		val = complex(v, 0)
+	case int:
+		val = complex(float64(v), 0)
+	default:
+		return []int{}
+	}
+
+	found := []int{}
+	for i, datum := range p.data {
+		if val == datum {
+			found = append(found, i+1)
+		}
+	}
+
+	return found
+}
+
 func ComplexPayload(data []complex128, na []bool, options ...Option) Payload {
 	length := len(data)
 	conf := mergeOptions(options)

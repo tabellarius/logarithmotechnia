@@ -254,6 +254,39 @@ func (p *timePayload) StrForElem(idx int) string {
 	return p.data[idx-1].Format(p.printer.Format)
 }
 
+/* Finder interface */
+
+func (p *timePayload) Find(needle interface{}) int {
+	val, ok := needle.(time.Time)
+	if !ok {
+		return 0
+	}
+
+	for i, datum := range p.data {
+		if val.Equal(datum) {
+			return i + 1
+		}
+	}
+
+	return 0
+}
+
+func (p *timePayload) FindAll(needle interface{}) []int {
+	val, ok := needle.(time.Time)
+	if !ok {
+		return []int{}
+	}
+
+	found := []int{}
+	for i, datum := range p.data {
+		if val.Equal(datum) {
+			found = append(found, i+1)
+		}
+	}
+
+	return found
+}
+
 func TimePayload(data []time.Time, na []bool) Payload {
 	length := len(data)
 
