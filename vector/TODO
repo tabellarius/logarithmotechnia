@@ -2,7 +2,6 @@ Appliers for different return types
 Factors
 Remove report
 (?) Make all payload public
-(?) Convertor (transform values into []interface{})
 String functions
 Comparator
 Finder interface for InterfacePayload
