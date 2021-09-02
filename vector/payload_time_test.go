@@ -662,3 +662,63 @@ func TestTimePayload_Append(t *testing.T) {
 		})
 	}
 }
+
+func TestTimePayload_Find(t *testing.T) {
+	payload := TimePayload(toTimeData(
+		[]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "2006-01-02T15:04:05+07:00"},
+	), nil).(*timePayload)
+
+	existent, _ := time.Parse(time.RFC3339, "2021-01-01T12:30:00+03:00")
+	nonExistent, _ := time.Parse(time.RFC3339, "2026-05-12T10:00:00+00:00")
+
+	testData := []struct {
+		name   string
+		needle interface{}
+		pos    int
+	}{
+		{"existent", existent, 2},
+		{"non-existent", nonExistent, 0},
+		{"incorrect type", true, 0},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			pos := payload.Find(data.needle)
+
+			if pos != data.pos {
+				t.Error(fmt.Sprintf("Position (%v) does not match expected (%v)",
+					pos, data.pos))
+			}
+		})
+	}
+}
+
+func TestTimePayload_FindAll(t *testing.T) {
+	payload := TimePayload(toTimeData(
+		[]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "2006-01-02T15:04:05+07:00"},
+	), nil).(*timePayload)
+
+	existent, _ := time.Parse(time.RFC3339, "2006-01-02T15:04:05+07:00")
+	nonExistent, _ := time.Parse(time.RFC3339, "2026-05-12T10:00:00+00:00")
+
+	testData := []struct {
+		name   string
+		needle interface{}
+		pos    []int
+	}{
+		{"existent", existent, []int{1, 3}},
+		{"non-existent", nonExistent, []int{}},
+		{"incorrect type", false, []int{}},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			pos := payload.FindAll(data.needle)
+
+			if !reflect.DeepEqual(pos, data.pos) {
+				t.Error(fmt.Sprintf("Positions (%v) does not match expected (%v)",
+					pos, data.pos))
+			}
+		})
+	}
+}

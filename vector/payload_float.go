@@ -341,6 +341,51 @@ func (p *floatPayload) options() []Option {
 	}
 }
 
+/* Finder interface */
+
+func (p *floatPayload) Find(needle interface{}) int {
+	var val float64
+
+	switch v := needle.(type) {
+	case float64:
+		val = v
+	case int:
+		val = float64(v)
+	default:
+		return 0
+	}
+
+	for i, datum := range p.data {
+		if val == datum {
+			return i + 1
+		}
+	}
+
+	return 0
+}
+
+func (p *floatPayload) FindAll(needle interface{}) []int {
+	var val float64
+
+	switch v := needle.(type) {
+	case float64:
+		val = v
+	case int:
+		val = float64(v)
+	default:
+		return []int{}
+	}
+
+	found := []int{}
+	for i, datum := range p.data {
+		if val == datum {
+			found = append(found, i+1)
+		}
+	}
+
+	return found
+}
+
 func FloatPayload(data []float64, na []bool, options ...Option) Payload {
 	length := len(data)
 	conf := mergeOptions(options)

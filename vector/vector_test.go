@@ -826,7 +826,7 @@ func TestVector_Apply(t *testing.T) {
 	}
 }
 
-func TestVectorPayload_Append(t *testing.T) {
+func TestVector_Append(t *testing.T) {
 	vec := Integer([]int{1, 2, 3}, nil)
 
 	testData := []struct {
@@ -877,6 +877,58 @@ func TestVectorPayload_Append(t *testing.T) {
 			if !reflect.DeepEqual(data.outNA, outPayload.na) {
 				t.Error(fmt.Sprintf("Output NA (%v) does not match expected (%v)",
 					outPayload.na, data.outNA))
+			}
+		})
+	}
+}
+
+func TestVector_Find(t *testing.T) {
+	vec := Integer([]int{1, 2, 1, 4, 0}, nil)
+
+	testData := []struct {
+		name   string
+		needle interface{}
+		pos    int
+	}{
+		{"existent", 4, 4},
+		{"float64", 2.1, 2},
+		{"non-existent", -10, 0},
+		{"incorrect type", "true", 0},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			pos := vec.Find(data.needle)
+
+			if pos != data.pos {
+				t.Error(fmt.Sprintf("Position (%v) does not match expected (%v)",
+					pos, data.pos))
+			}
+		})
+	}
+}
+
+func TestVector_FindAll(t *testing.T) {
+	vec := Integer([]int{1, 2, 1, 4, 0}, nil)
+
+	testData := []struct {
+		name   string
+		needle interface{}
+		pos    []int
+	}{
+		{"existent", 1, []int{1, 3}},
+		{"float", 1.2, []int{1, 3}},
+		{"non-existent", -10, []int{}},
+		{"incorrect type", false, []int{}},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			pos := vec.FindAll(data.needle)
+
+			if !reflect.DeepEqual(pos, data.pos) {
+				t.Error(fmt.Sprintf("Positions (%v) does not match expected (%v)",
+					pos, data.pos))
 			}
 		})
 	}

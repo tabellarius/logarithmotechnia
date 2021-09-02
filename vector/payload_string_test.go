@@ -772,3 +772,53 @@ func TestStringPayload_Append(t *testing.T) {
 		})
 	}
 }
+
+func TestStringPayload_Find(t *testing.T) {
+	payload := StringPayload([]string{"1", "2", "1", "4", "0"}, nil).(*stringPayload)
+
+	testData := []struct {
+		name   string
+		needle interface{}
+		pos    int
+	}{
+		{"existent", "4", 4},
+		{"non-existent", "non", 0},
+		{"incorrect type", true, 0},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			pos := payload.Find(data.needle)
+
+			if pos != data.pos {
+				t.Error(fmt.Sprintf("Position (%v) does not match expected (%v)",
+					pos, data.pos))
+			}
+		})
+	}
+}
+
+func TestStringPayload_FindAll(t *testing.T) {
+	payload := StringPayload([]string{"1", "2", "1", "4", "0"}, nil).(*stringPayload)
+
+	testData := []struct {
+		name   string
+		needle interface{}
+		pos    []int
+	}{
+		{"existent", "1", []int{1, 3}},
+		{"non-existent", -10, []int{}},
+		{"incorrect type", false, []int{}},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			pos := payload.FindAll(data.needle)
+
+			if !reflect.DeepEqual(pos, data.pos) {
+				t.Error(fmt.Sprintf("Positions (%v) does not match expected (%v)",
+					pos, data.pos))
+			}
+		})
+	}
+}

@@ -314,6 +314,51 @@ func (p *integerPayload) StrForElem(idx int) string {
 	return strconv.Itoa(p.data[idx-1])
 }
 
+/* Finder interface */
+
+func (p *integerPayload) Find(needle interface{}) int {
+	var val int
+
+	switch v := needle.(type) {
+	case int:
+		val = v
+	case float64:
+		val = int(v)
+	default:
+		return 0
+	}
+
+	for i, datum := range p.data {
+		if val == datum {
+			return i + 1
+		}
+	}
+
+	return 0
+}
+
+func (p *integerPayload) FindAll(needle interface{}) []int {
+	var val int
+
+	switch v := needle.(type) {
+	case int:
+		val = v
+	case float64:
+		val = int(v)
+	default:
+		return []int{}
+	}
+
+	found := []int{}
+	for i, datum := range p.data {
+		if val == datum {
+			found = append(found, i+1)
+		}
+	}
+
+	return found
+}
+
 func IntegerPayload(data []int, na []bool) Payload {
 	length := len(data)
 

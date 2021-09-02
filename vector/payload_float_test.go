@@ -817,3 +817,55 @@ func TestFloatPayload_PrecisionOption(t *testing.T) {
 		})
 	}
 }
+
+func TestFloatPayload_Find(t *testing.T) {
+	payload := FloatPayload([]float64{1, 2, 1.0, 4.1, 0}, nil).(*floatPayload)
+
+	testData := []struct {
+		name   string
+		needle interface{}
+		pos    int
+	}{
+		{"existent", 4.1, 4},
+		{"int", 2, 2},
+		{"non-existent", -10, 0},
+		{"incorrect type", "true", 0},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			pos := payload.Find(data.needle)
+
+			if pos != data.pos {
+				t.Error(fmt.Sprintf("Position (%v) does not match expected (%v)",
+					pos, data.pos))
+			}
+		})
+	}
+}
+
+func TestFloatPayload_FindAll(t *testing.T) {
+	payload := FloatPayload([]float64{1, 2, 1.0, 4.1, 0}, nil).(*floatPayload)
+
+	testData := []struct {
+		name   string
+		needle interface{}
+		pos    []int
+	}{
+		{"existent", 1, []int{1, 3}},
+		{"int", 1, []int{1, 3}},
+		{"non-existent", -10.5, []int{}},
+		{"incorrect type", false, []int{}},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			pos := payload.FindAll(data.needle)
+
+			if !reflect.DeepEqual(pos, data.pos) {
+				t.Error(fmt.Sprintf("Positions (%v) does not match expected (%v)",
+					pos, data.pos))
+			}
+		})
+	}
+}

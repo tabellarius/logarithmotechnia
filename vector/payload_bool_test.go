@@ -792,3 +792,60 @@ func TestBooleanPayload_Append(t *testing.T) {
 		})
 	}
 }
+
+func TestBooleanPayload_Find(t *testing.T) {
+	payload := BooleanPayload([]bool{true, true, true, true, true}, nil).(*booleanPayload)
+
+	testData := []struct {
+		name   string
+		needle interface{}
+		pos    int
+	}{
+		{"existent", true, 1},
+		{"non-existent", false, 0},
+		{"incorrect type", "true", 0},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			pos := payload.Find(data.needle)
+
+			if pos != data.pos {
+				t.Error(fmt.Sprintf("Position (%v) does not match expected (%v)",
+					pos, data.pos))
+			}
+		})
+	}
+}
+
+func TestBooleanPayload_FindAll(t *testing.T) {
+	payload := BooleanPayload([]bool{true, false, true, false, true}, nil).(*booleanPayload)
+
+	testData := []struct {
+		name   string
+		needle interface{}
+		pos    []int
+	}{
+		{"existent", true, []int{1, 3, 5}},
+		{"incorrect type", "true", []int{}},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			pos := payload.FindAll(data.needle)
+
+			if !reflect.DeepEqual(pos, data.pos) {
+				t.Error(fmt.Sprintf("Positions (%v) does not match expected (%v)",
+					pos, data.pos))
+			}
+		})
+	}
+
+	payload = BooleanPayload([]bool{true, true, true}, nil).(*booleanPayload)
+	pos := payload.FindAll(false)
+
+	if !reflect.DeepEqual(pos, []int{}) {
+		t.Error(fmt.Sprintf("Positions (%v) does not match expected (%v)",
+			pos, []int{}))
+	}
+}

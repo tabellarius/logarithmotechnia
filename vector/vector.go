@@ -34,6 +34,8 @@ type Vector interface {
 	Timeable
 	Interfaceable
 
+	Finder
+
 	Report() Report
 }
 
@@ -90,6 +92,11 @@ type Interfaceable interface {
 
 type Configurable interface {
 	Options() []Option
+}
+
+type Finder interface {
+	Find(interface{}) int
+	FindAll(interface{}) []int
 }
 
 // vector holds data and functions shared by all vectors
@@ -428,6 +435,24 @@ func (v *vector) Interfaces() ([]interface{}, []bool) {
 	}
 
 	return NA(v.length).Interfaces()
+}
+
+/* Finder Interface */
+
+func (v *vector) Find(needle interface{}) int {
+	if finder, ok := v.payload.(Finder); ok {
+		return finder.Find(needle)
+	}
+
+	return 0
+}
+
+func (v *vector) FindAll(needle interface{}) []int {
+	if finder, ok := v.payload.(Finder); ok {
+		return finder.FindAll(needle)
+	}
+
+	return []int{}
 }
 
 // New creates a vector part of the future vector. This function is used by public functions which create

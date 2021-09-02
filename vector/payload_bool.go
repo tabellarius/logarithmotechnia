@@ -325,6 +325,39 @@ func (p *booleanPayload) StrForElem(idx int) string {
 	return "false"
 }
 
+/* Finder interface */
+
+func (p *booleanPayload) Find(needle interface{}) int {
+	val, ok := needle.(bool)
+	if !ok {
+		return 0
+	}
+
+	for i, datum := range p.data {
+		if val == datum {
+			return i + 1
+		}
+	}
+
+	return 0
+}
+
+func (p *booleanPayload) FindAll(needle interface{}) []int {
+	val, ok := needle.(bool)
+	if !ok {
+		return []int{}
+	}
+
+	found := []int{}
+	for i, datum := range p.data {
+		if val == datum {
+			found = append(found, i+1)
+		}
+	}
+
+	return found
+}
+
 func BooleanPayload(data []bool, na []bool) Payload {
 	length := len(data)
 

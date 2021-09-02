@@ -5,6 +5,7 @@ Remove report
 (?) Convertor (transform values into []interface{})
 String functions
 Comparator
+Finder interface for InterfacePayload
 Default NA Values
 R-style reuse of vector and boolean slices
 Vector's element indices as uint32

@@ -797,3 +797,57 @@ func TestComplexPayload_PrecisionOption(t *testing.T) {
 		})
 	}
 }
+
+func TestComlexPayload_Find(t *testing.T) {
+	payload := ComplexPayload([]complex128{1 + 0i, 2, 1 + 0i, 3 + 2i, 0 + 0i}, nil).(*complexPayload)
+
+	testData := []struct {
+		name   string
+		needle interface{}
+		pos    int
+	}{
+		{"existent", 3 + 2i, 4},
+		{"float64", 2.0, 2},
+		{"int", 2, 2},
+		{"non-existent", 5i, 0},
+		{"incorrect type", "true", 0},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			pos := payload.Find(data.needle)
+
+			if pos != data.pos {
+				t.Error(fmt.Sprintf("Position (%v) does not match expected (%v)",
+					pos, data.pos))
+			}
+		})
+	}
+}
+
+func TestComplexPayload_FindAll(t *testing.T) {
+	payload := ComplexPayload([]complex128{1 + 0i, 2, 1 + 0i, 3 + 2i, 0 + 0i}, nil).(*complexPayload)
+
+	testData := []struct {
+		name   string
+		needle interface{}
+		pos    []int
+	}{
+		{"existent", 1 + 0i, []int{1, 3}},
+		{"float64", 1.0, []int{1, 3}},
+		{"int", 1, []int{1, 3}},
+		{"non-existent", 5i, []int{}},
+		{"incorrect type", false, []int{}},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			pos := payload.FindAll(data.needle)
+
+			if !reflect.DeepEqual(pos, data.pos) {
+				t.Error(fmt.Sprintf("Positions (%v) does not match expected (%v)",
+					pos, data.pos))
+			}
+		})
+	}
+}
