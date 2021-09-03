@@ -4,7 +4,7 @@ import (
 	"logarithmotechnia/vector"
 )
 
-func (df *Dataframe) Mutate(columns map[string]vector.Vector, options ...vector.Option) *Dataframe {
+func (df *Dataframe) Mutate(columns []Column, options ...vector.Option) *Dataframe {
 	conf := vector.MergeOptions(options)
 
 	afterColumnIndex := df.colNum - 1
@@ -29,11 +29,11 @@ func (df *Dataframe) Mutate(columns map[string]vector.Vector, options ...vector.
 	}
 
 	uniqueNewNames := []string{}
-	for name, column := range columns {
-		if _, ok := columnMap[name]; ok {
-			uniqueNewNames = append(uniqueNewNames, name)
+	for _, column := range columns {
+		if _, ok := columnMap[column.name]; ok {
+			uniqueNewNames = append(uniqueNewNames, column.name)
 		}
-		columnMap[name] = column
+		columnMap[column.name] = column.vector
 	}
 
 	newNames := []string{}
@@ -50,5 +50,7 @@ func (df *Dataframe) Mutate(columns map[string]vector.Vector, options ...vector.
 }
 
 func (df *Dataframe) Transmute(map[string]vector.Vector) *Dataframe {
+	df.Mutate([]Column{})
+
 	return nil
 }

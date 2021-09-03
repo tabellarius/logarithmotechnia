@@ -1,3 +1,7 @@
+Rework dataframe creation
+df.C() (uses Cn() or Ci() depending on the type of argument)
+Adjust (expand or contract a vector to the given size)
+Remove SupportsWhicher() and SupportsFilter()
 Appliers for different return types
 Factors
 Remove report
@@ -8,3 +12,5 @@ Finder interface for InterfacePayload
 Default NA Values
 R-style reuse of vector and boolean slices
 Vector's element indices as uint32
+Add df.Err and logger
+Update() + Clone()

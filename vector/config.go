@@ -6,6 +6,7 @@ const KeyOptionInterfacePrinterFunc = "interface_printer_func"
 const KeyOptionInterfaceConvertors = "interface_convertors"
 const KeyOptionBeforeColumn = "before_column"
 const KeyOptionAfterColumn = "after_column"
+const KeyOptionColumnNames = "column_names"
 
 //deprecated
 type Config struct {
@@ -82,4 +83,8 @@ func OptionBeforeColumn(name string) Option {
 
 func OptionAfterColumn(name string) Option {
 	return ConfOption{KeyOptionAfterColumn, name}
+}
+
+func OptionColumnNames(names []string) Option {
+	return ConfOption{KeyOptionColumnNames, names}
 }

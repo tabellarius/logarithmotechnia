@@ -5,6 +5,11 @@ import (
 	"strconv"
 )
 
+type Column struct {
+	name   string
+	vector vector.Vector
+}
+
 type Dataframe struct {
 	rowNum  int
 	colNum  int
@@ -137,8 +142,17 @@ func (df *Dataframe) columnIndexByName(name string) int {
 	return 0
 }
 
-func New(data interface{}, options ...Config) *Dataframe {
+func New(data interface{}, options ...vector.Option) *Dataframe {
 	var df *Dataframe
+	switch data.(type) {
+	case []vector.Vector:
+		df = dataframeFromVectors(data.([]vector.Vector), options...)
+	case []Column:
+		df = dateframeFromColumns(data.([]Column), options...)
+	default:
+		df = dataframeFromVectors([]vector.Vector{})
+	}
+
 	if vectors, ok := data.([]vector.Vector); ok {
 		df = dataframeFromVectors(vectors, options...)
 	} else {
@@ -148,7 +162,12 @@ func New(data interface{}, options ...Config) *Dataframe {
 	return df
 }
 
-func dataframeFromVectors(vectors []vector.Vector, options ...Config) *Dataframe {
+func dateframeFromColumns(columns []Column, options ...vector.Option) *Dataframe {
+
+	return nil
+}
+
+func dataframeFromVectors(vectors []vector.Vector, options ...vector.Option) *Dataframe {
 	maxLen := 0
 
 	for _, v := range vectors {
@@ -167,21 +186,26 @@ func dataframeFromVectors(vectors []vector.Vector, options ...Config) *Dataframe
 
 	colNum := len(vectors)
 
-	config := mergeConfigs(options)
+	conf := vector.MergeOptions(options)
 
 	columnNames := generateColumnNames(colNum)
-	if colNum >= len(config.columnNames) {
-		copy(columnNames, config.columnNames)
-	} else {
-		copy(columnNames, config.columnNames[0:colNum])
+	if conf.HasOption(vector.KeyOptionColumnNames) {
+		names := conf.Value(vector.KeyOptionColumnNames).([]string)
+		if colNum >= len(names) {
+			copy(columnNames, names)
+		} else {
+			copy(columnNames, names[0:colNum])
+		}
 	}
-	config.columnNames = columnNames
 
 	return &Dataframe{
 		rowNum:  maxLen,
 		colNum:  colNum,
 		columns: vectors,
-		config:  config,
+		config: Config{
+			columnNames:       columnNames,
+			columnNamesVector: vector.String(columnNames, nil),
+		},
 	}
 }
 
