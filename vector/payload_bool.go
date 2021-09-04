@@ -313,6 +313,48 @@ func (p *booleanPayload) Append(vec Vector) Payload {
 	return BooleanPayload(newVals, newNA)
 }
 
+func (p *booleanPayload) Adjust(size int) Payload {
+	if size < p.length {
+		return p.adjustToLesserSize(size)
+	}
+
+	if size > p.length {
+		return p.adjustToBiggerSize(size)
+	}
+
+	return p
+}
+
+func (p *booleanPayload) adjustToLesserSize(size int) Payload {
+	data := make([]bool, size)
+	na := make([]bool, size)
+
+	copy(data, p.data)
+	copy(na, p.na)
+
+	return BooleanPayload(data, na)
+}
+
+func (p *booleanPayload) adjustToBiggerSize(size int) Payload {
+	cycles := size / p.length
+	if size%p.length > 0 {
+		cycles++
+	}
+
+	data := make([]bool, cycles*p.length)
+	na := make([]bool, cycles*p.length)
+
+	for i := 0; i < cycles; i++ {
+		copy(data[i*p.length:], p.data)
+		copy(na[i*p.length:], p.na)
+	}
+
+	data = data[:size]
+	na = na[:size]
+
+	return BooleanPayload(data, na)
+}
+
 func (p *booleanPayload) StrForElem(idx int) string {
 	if p.na[idx-1] {
 		return "NA"

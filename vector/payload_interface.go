@@ -350,6 +350,48 @@ func (p *interfacePayload) Append(vec Vector) Payload {
 	return InterfacePayload(newVals, newNA)
 }
 
+func (p *interfacePayload) Adjust(size int) Payload {
+	if size < p.length {
+		return p.adjustToLesserSize(size)
+	}
+
+	if size > p.length {
+		return p.adjustToBiggerSize(size)
+	}
+
+	return p
+}
+
+func (p *interfacePayload) adjustToLesserSize(size int) Payload {
+	data := make([]interface{}, size)
+	na := make([]bool, size)
+
+	copy(data, p.data)
+	copy(na, p.na)
+
+	return InterfacePayload(data, na)
+}
+
+func (p *interfacePayload) adjustToBiggerSize(size int) Payload {
+	cycles := size / p.length
+	if size%p.length > 0 {
+		cycles++
+	}
+
+	data := make([]interface{}, cycles*p.length)
+	na := make([]bool, cycles*p.length)
+
+	for i := 0; i < cycles; i++ {
+		copy(data[i*p.length:], p.data)
+		copy(na[i*p.length:], p.na)
+	}
+
+	data = data[:size]
+	na = na[:size]
+
+	return InterfacePayload(data, na)
+}
+
 func InterfacePayload(data []interface{}, na []bool, options ...Option) Payload {
 	length := len(data)
 	conf := MergeOptions(options)

@@ -786,6 +786,53 @@ func TestIntegerPayload_Append(t *testing.T) {
 	}
 }
 
+func TestIntegerPayload_Adjust(t *testing.T) {
+	payload5 := IntegerPayload([]int{1, 2, 3, 4, 5}, nil).(*integerPayload)
+	payload3 := IntegerPayload([]int{1, 2, 3}, []bool{false, false, true}).(*integerPayload)
+
+	testData := []struct {
+		name       string
+		inPayload  *integerPayload
+		size       int
+		outPaylout *integerPayload
+	}{
+		{
+			inPayload:  payload5,
+			name:       "same",
+			size:       5,
+			outPaylout: IntegerPayload([]int{1, 2, 3, 4, 5}, nil).(*integerPayload),
+		},
+		{
+			inPayload:  payload5,
+			name:       "lesser",
+			size:       3,
+			outPaylout: IntegerPayload([]int{1, 2, 3}, nil).(*integerPayload),
+		},
+		{
+			inPayload: payload3,
+			name:      "bigger",
+			size:      10,
+			outPaylout: IntegerPayload([]int{1, 2, 0, 1, 2, 0, 1, 2, 0, 1},
+				[]bool{false, false, true, false, false, true, false, false, true, false}).(*integerPayload),
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			outPayload := data.inPayload.Adjust(data.size).(*integerPayload)
+
+			if !reflect.DeepEqual(outPayload.data, data.outPaylout.data) {
+				t.Error(fmt.Sprintf("Output data (%v) does not match expected (%v)",
+					outPayload.data, data.outPaylout.data))
+			}
+			if !reflect.DeepEqual(outPayload.na, data.outPaylout.na) {
+				t.Error(fmt.Sprintf("Output NA (%v) does not match expected (%v)",
+					outPayload.na, data.outPaylout.na))
+			}
+		})
+	}
+}
+
 func TestIntegerPayload_Find(t *testing.T) {
 	payload := IntegerPayload([]int{1, 2, 1, 4, 0}, nil).(*integerPayload)
 

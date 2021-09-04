@@ -785,6 +785,54 @@ func TestFloatPayload_Append(t *testing.T) {
 	}
 }
 
+func TestFloatPayload_Adjust(t *testing.T) {
+	payload5 := FloatPayload([]float64{1, 2.5, 5.5, 0, -2}, nil).(*floatPayload)
+	payload3 := FloatPayload([]float64{1, 2.5, 5.5}, []bool{false, false, true}).(*floatPayload)
+
+	testData := []struct {
+		name       string
+		inPayload  *floatPayload
+		size       int
+		outPaylout *floatPayload
+	}{
+		{
+			inPayload:  payload5,
+			name:       "same",
+			size:       5,
+			outPaylout: FloatPayload([]float64{1 + 0i, 2.5, 5.5, 0, -2}, nil).(*floatPayload),
+		},
+		{
+			inPayload:  payload5,
+			name:       "lesser",
+			size:       3,
+			outPaylout: FloatPayload([]float64{1 + 0i, 2.5, 5.5}, nil).(*floatPayload),
+		},
+		{
+			inPayload: payload3,
+			name:      "bigger",
+			size:      10,
+			outPaylout: FloatPayload([]float64{1 + 0i, 2.5, math.NaN(), 1 + 0i, 2.5, math.NaN(),
+				1 + 0i, 2.5, math.NaN(), 1 + 0i},
+				[]bool{false, false, true, false, false, true, false, false, true, false}).(*floatPayload),
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			outPayload := data.inPayload.Adjust(data.size).(*floatPayload)
+
+			if !util.EqualFloatArrays(outPayload.data, data.outPaylout.data) {
+				t.Error(fmt.Sprintf("Output data (%v) does not match expected (%v)",
+					outPayload.data, data.outPaylout.data))
+			}
+			if !reflect.DeepEqual(outPayload.na, data.outPaylout.na) {
+				t.Error(fmt.Sprintf("Output NA (%v) does not match expected (%v)",
+					outPayload.na, data.outPaylout.na))
+			}
+		})
+	}
+}
+
 func TestFloatPayload_PrecisionOption(t *testing.T) {
 	testData := []struct {
 		name              string

@@ -793,6 +793,53 @@ func TestBooleanPayload_Append(t *testing.T) {
 	}
 }
 
+func TestBooleanPayload_Adjust(t *testing.T) {
+	payload5 := BooleanPayload([]bool{true, false, true, false, true}, nil).(*booleanPayload)
+	payload3 := BooleanPayload([]bool{true, false, true}, []bool{false, false, true}).(*booleanPayload)
+
+	testData := []struct {
+		name       string
+		inPayload  *booleanPayload
+		size       int
+		outPaylout *booleanPayload
+	}{
+		{
+			inPayload:  payload5,
+			name:       "same",
+			size:       5,
+			outPaylout: BooleanPayload([]bool{true, false, true, false, true}, nil).(*booleanPayload),
+		},
+		{
+			inPayload:  payload5,
+			name:       "lesser",
+			size:       3,
+			outPaylout: BooleanPayload([]bool{true, false, true}, nil).(*booleanPayload),
+		},
+		{
+			inPayload: payload3,
+			name:      "bigger",
+			size:      10,
+			outPaylout: BooleanPayload([]bool{true, false, false, true, false, false, true, false, false, true},
+				[]bool{false, false, true, false, false, true, false, false, true, false}).(*booleanPayload),
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			outPayload := data.inPayload.Adjust(data.size).(*booleanPayload)
+
+			if !reflect.DeepEqual(outPayload.data, data.outPaylout.data) {
+				t.Error(fmt.Sprintf("Output data (%v) does not match expected (%v)",
+					outPayload.data, data.outPaylout.data))
+			}
+			if !reflect.DeepEqual(outPayload.na, data.outPaylout.na) {
+				t.Error(fmt.Sprintf("Output NA (%v) does not match expected (%v)",
+					outPayload.na, data.outPaylout.na))
+			}
+		})
+	}
+}
+
 func TestBooleanPayload_Find(t *testing.T) {
 	payload := BooleanPayload([]bool{true, true, true, true, true}, nil).(*booleanPayload)
 

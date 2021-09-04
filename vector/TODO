@@ -1,5 +1,4 @@
 Adjust (expand or contract a vector to the given size)
-Remove SupportsWhicher() and SupportsFilter()
 Appliers for different return types
 Factors
 Remove report
@@ -12,3 +11,7 @@ R-style reuse of vector and boolean slices
 Vector's element indices as uint32
 Add df.Err and logger
 Update() + Clone()
+(?) Remove SupportsWhicher() and SupportsFilter()
+Options() + unified *Payload()
+Convertor() - install convertors to arbitrary payloads
+Change Append(Vector) to Append(Payload) for payloads

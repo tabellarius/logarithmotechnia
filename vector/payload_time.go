@@ -250,6 +250,48 @@ func (p *timePayload) Append(vec Vector) Payload {
 	return TimePayload(newVals, newNA)
 }
 
+func (p *timePayload) Adjust(size int) Payload {
+	if size < p.length {
+		return p.adjustToLesserSize(size)
+	}
+
+	if size > p.length {
+		return p.adjustToBiggerSize(size)
+	}
+
+	return p
+}
+
+func (p *timePayload) adjustToLesserSize(size int) Payload {
+	data := make([]time.Time, size)
+	na := make([]bool, size)
+
+	copy(data, p.data)
+	copy(na, p.na)
+
+	return TimePayload(data, na)
+}
+
+func (p *timePayload) adjustToBiggerSize(size int) Payload {
+	cycles := size / p.length
+	if size%p.length > 0 {
+		cycles++
+	}
+
+	data := make([]time.Time, cycles*p.length)
+	na := make([]bool, cycles*p.length)
+
+	for i := 0; i < cycles; i++ {
+		copy(data[i*p.length:], p.data)
+		copy(na[i*p.length:], p.na)
+	}
+
+	data = data[:size]
+	na = na[:size]
+
+	return TimePayload(data, na)
+}
+
 func (p *timePayload) StrForElem(idx int) string {
 	return p.data[idx-1].Format(p.printer.Format)
 }

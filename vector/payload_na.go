@@ -42,6 +42,10 @@ func (p *naPayload) Append(vec Vector) Payload {
 	return NAPayload(length)
 }
 
+func (p *naPayload) Adjust(size int) Payload {
+	return NAPayload(size)
+}
+
 /* NAble interface */
 
 func (p *naPayload) IsNA() []bool {

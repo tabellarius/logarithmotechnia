@@ -965,3 +965,50 @@ func TestInterfacePayload_Append(t *testing.T) {
 		})
 	}
 }
+
+func TestInterfacePayload_Adjust(t *testing.T) {
+	payload5 := InterfacePayload([]interface{}{1, 2, 3, 4, 5}, nil).(*interfacePayload)
+	payload3 := InterfacePayload([]interface{}{1, 2, 3}, []bool{false, false, true}).(*interfacePayload)
+
+	testData := []struct {
+		name       string
+		inPayload  *interfacePayload
+		size       int
+		outPaylout *interfacePayload
+	}{
+		{
+			inPayload:  payload5,
+			name:       "same",
+			size:       5,
+			outPaylout: InterfacePayload([]interface{}{1, 2, 3, 4, 5}, nil).(*interfacePayload),
+		},
+		{
+			inPayload:  payload5,
+			name:       "lesser",
+			size:       3,
+			outPaylout: InterfacePayload([]interface{}{1, 2, 3}, nil).(*interfacePayload),
+		},
+		{
+			inPayload: payload3,
+			name:      "bigger",
+			size:      10,
+			outPaylout: InterfacePayload([]interface{}{1, 2, 0, 1, 2, 0, 1, 2, 0, 1},
+				[]bool{false, false, true, false, false, true, false, false, true, false}).(*interfacePayload),
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			outPayload := data.inPayload.Adjust(data.size).(*interfacePayload)
+
+			if !reflect.DeepEqual(outPayload.data, data.outPaylout.data) {
+				t.Error(fmt.Sprintf("Output data (%v) does not match expected (%v)",
+					outPayload.data, data.outPaylout.data))
+			}
+			if !reflect.DeepEqual(outPayload.na, data.outPaylout.na) {
+				t.Error(fmt.Sprintf("Output NA (%v) does not match expected (%v)",
+					outPayload.na, data.outPaylout.na))
+			}
+		})
+	}
+}
