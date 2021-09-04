@@ -10,25 +10,25 @@ import (
 
 func TestNew(t *testing.T) {
 	testData := []struct {
-		name      string
-		columns   []vector.Vector
-		config    []Config
-		dfColumns []vector.Vector
-		dfConfig  Config
+		name          string
+		columns       []vector.Vector
+		columnNames   []string
+		dfColumns     []vector.Vector
+		dfColumnNames []string
 	}{
 		{
-			name:      "empty",
-			columns:   []vector.Vector{},
-			config:    []Config{},
-			dfColumns: []vector.Vector{},
-			dfConfig:  Config{columnNames: []string{}},
+			name:          "empty",
+			columns:       []vector.Vector{},
+			columnNames:   []string{},
+			dfColumns:     []vector.Vector{},
+			dfColumnNames: []string{},
 		},
 		{
-			name:      "empty with column names",
-			columns:   []vector.Vector{},
-			config:    []Config{OptionColumnNames([]string{"one", "two", "three"})},
-			dfColumns: []vector.Vector{},
-			dfConfig:  Config{columnNames: []string{}},
+			name:          "empty with column names",
+			columns:       []vector.Vector{},
+			columnNames:   []string{"one", "two", "three"},
+			dfColumns:     []vector.Vector{},
+			dfColumnNames: []string{},
 		},
 		{
 			name: "normal",
@@ -37,13 +37,12 @@ func TestNew(t *testing.T) {
 				vector.String([]string{"1", "2", "3"}, nil),
 				vector.Boolean([]bool{true, true, false}, nil),
 			},
-			config: []Config{},
 			dfColumns: []vector.Vector{
 				vector.Integer([]int{1, 2, 3}, nil),
 				vector.String([]string{"1", "2", "3"}, nil),
 				vector.Boolean([]bool{true, true, false}, nil),
 			},
-			dfConfig: Config{columnNames: []string{"1", "2", "3"}},
+			dfColumnNames: []string{"1", "2", "3"},
 		},
 		{
 			name: "normal with column names",
@@ -52,13 +51,13 @@ func TestNew(t *testing.T) {
 				vector.String([]string{"1", "2", "3"}, nil),
 				vector.Boolean([]bool{true, true, false}, nil),
 			},
-			config: []Config{OptionColumnNames([]string{"int", "string", "bool"})},
+			columnNames: []string{"int", "string", "bool"},
 			dfColumns: []vector.Vector{
 				vector.Integer([]int{1, 2, 3}, nil),
 				vector.String([]string{"1", "2", "3"}, nil),
 				vector.Boolean([]bool{true, true, false}, nil),
 			},
-			dfConfig: Config{columnNames: []string{"int", "string", "bool"}},
+			dfColumnNames: []string{"int", "string", "bool"},
 		},
 		{
 			name: "normal with partial column names",
@@ -67,13 +66,13 @@ func TestNew(t *testing.T) {
 				vector.String([]string{"1", "2", "3"}, nil),
 				vector.Boolean([]bool{true, true, false}, nil),
 			},
-			config: []Config{OptionColumnNames([]string{"int", "string"})},
+			columnNames: []string{"int", "string"},
 			dfColumns: []vector.Vector{
 				vector.Integer([]int{1, 2, 3}, nil),
 				vector.String([]string{"1", "2", "3"}, nil),
 				vector.Boolean([]bool{true, true, false}, nil),
 			},
-			dfConfig: Config{columnNames: []string{"int", "string", "3"}},
+			dfColumnNames: []string{"int", "string", "3"},
 		},
 		{
 			name: "different columns' length",
@@ -82,26 +81,30 @@ func TestNew(t *testing.T) {
 				vector.String([]string{"1", "2", "3"}, nil),
 				vector.Boolean([]bool{true, true}, nil),
 			},
-			config: []Config{},
 			dfColumns: []vector.Vector{
 				vector.Integer([]int{1, 2, 3, 4, 5}, nil),
 				vector.String([]string{"1", "2", "3", "", ""}, []bool{false, false, false, true, true}),
 				vector.Boolean([]bool{true, true, false, false, false}, []bool{false, false, true, true, true}),
 			},
-			dfConfig: Config{columnNames: []string{"1", "2", "3"}},
+			dfColumnNames: []string{"1", "2", "3"},
 		},
 	}
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			df := New(data.columns, data.config...)
+			var df *Dataframe
+			if data.columnNames != nil {
+				df = New(data.columns, vector.OptionColumnNames(data.columnNames))
+			} else {
+				df = New(data.columns)
+			}
 
 			if !reflect.DeepEqual(df.columns, data.dfColumns) {
 				t.Error(fmt.Sprintf("Columns (%v) are not equal to expected (%v)", df.columns, data.dfColumns))
 			}
-			if !reflect.DeepEqual(df.config, data.dfConfig) {
-				t.Error(fmt.Sprintf("Config (%v) are not equal to expected (%v)",
-					df.config, data.dfConfig))
+			if !reflect.DeepEqual(df.columnNames, data.dfColumnNames) {
+				t.Error(fmt.Sprintf("Column names (%v) are not equal to expected (%v)",
+					df.columnNames, data.dfColumnNames))
 			}
 		})
 	}
@@ -197,7 +200,7 @@ func TestDataframe_Ci(t *testing.T) {
 		vector.Integer([]int{1, 2, 3, 4, 5}, nil),
 		vector.String([]string{"1", "2", "3"}, nil),
 		vector.Boolean([]bool{true, true}, nil),
-	}, OptionColumnNames([]string{"int", "string", "bool"}))
+	}, vector.OptionColumnNames([]string{"int", "string", "bool"}))
 
 	testData := []struct {
 		index  int
@@ -227,7 +230,7 @@ func TestDataframe_Cn(t *testing.T) {
 		vector.Integer([]int{1, 2, 3, 4, 5}, nil),
 		vector.String([]string{"1", "2", "3"}, nil),
 		vector.Boolean([]bool{true, true}, nil),
-	}, OptionColumnNames([]string{"int", "string", "bool"}))
+	}, vector.OptionColumnNames([]string{"int", "string", "bool"}))
 
 	testData := []struct {
 		name   string
@@ -256,7 +259,7 @@ func TestDataframe_C(t *testing.T) {
 		vector.Integer([]int{1, 2, 3}, nil),
 		vector.String([]string{"1", "2", "3"}, nil),
 		vector.Boolean([]bool{true, false, true}, nil),
-	}, OptionColumnNames([]string{"int", "string", "bool"}))
+	}, vector.OptionColumnNames([]string{"int", "string", "bool"}))
 
 	testData := []struct {
 		selector interface{}
@@ -292,7 +295,7 @@ func TestDataframe_NamesAsStrings(t *testing.T) {
 				vector.Integer([]int{1, 2, 3}, nil),
 				vector.String([]string{"1", "2", "3"}, nil),
 				vector.Boolean([]bool{true, false, true}, nil),
-			}, OptionColumnNames([]string{"int", "string", "bool"})),
+			}, vector.OptionColumnNames([]string{"int", "string", "bool"})),
 			columnNames: []string{"int", "string", "bool"},
 		},
 	}
@@ -326,7 +329,7 @@ func TestDataframe_IsEmpty(t *testing.T) {
 				vector.Integer([]int{1, 2, 3}, nil),
 				vector.String([]string{"1", "2", "3"}, nil),
 				vector.Boolean([]bool{true, false, true}, nil),
-			}, OptionColumnNames([]string{"int", "string", "bool"})),
+			}, vector.OptionColumnNames([]string{"int", "string", "bool"})),
 			isEmpty: false,
 		},
 	}
@@ -392,14 +395,14 @@ func TestDataframe_SetColumnName(t *testing.T) {
 		t.Run(data.name, func(t *testing.T) {
 			df.SetColumnName(data.index, data.name)
 
-			if !reflect.DeepEqual(df.config.columnNames, data.columnNames) {
+			if !reflect.DeepEqual(df.columnNames, data.columnNames) {
 				t.Error(fmt.Sprintf("Column names (%v) is not equal to expected (%v)",
-					df.config.columnNames, data.columnNames))
+					df.columnNames, data.columnNames))
 			}
 
-			if !reflect.DeepEqual(df.config.columnNamesVector, data.columnNamesVector) {
+			if !reflect.DeepEqual(df.columnNamesVector, data.columnNamesVector) {
 				t.Error(fmt.Sprintf("Column names vector (%v) is not equal to expected (%v)",
-					df.config.columnNamesVector, data.columnNamesVector))
+					df.columnNamesVector, data.columnNamesVector))
 			}
 		})
 	}
@@ -426,9 +429,9 @@ func TestDataframe_SetColumnNames(t *testing.T) {
 
 			df.SetColumnNames(data.columnNames)
 
-			if !reflect.DeepEqual(df.config.columnNames, data.resultNames) {
+			if !reflect.DeepEqual(df.columnNames, data.resultNames) {
 				t.Error(fmt.Sprintf("Column names (%v) is not equal to expected (%v)",
-					df.config.columnNames, data.resultNames))
+					df.columnNames, data.resultNames))
 			}
 		})
 	}
@@ -451,7 +454,7 @@ func TestDataframe_Clone(t *testing.T) {
 				vector.Integer([]int{1, 2, 3}, nil),
 				vector.String([]string{"1", "2", "3"}, nil),
 				vector.Boolean([]bool{true, false, true}, nil),
-			}, OptionColumnNames([]string{"int", "string", "bool"})),
+			}, vector.OptionColumnNames([]string{"int", "string", "bool"})),
 			isEmpty: false,
 		},
 	}
@@ -464,9 +467,9 @@ func TestDataframe_Clone(t *testing.T) {
 				t.Error(fmt.Sprintf("Columns (%v) are not equal to expected (%v)",
 					newDf.columns, data.dataframe.columns))
 			}
-			if !reflect.DeepEqual(newDf.config, data.dataframe.config) {
-				t.Error(fmt.Sprintf("Config (%v) is not equal to expected (%v)",
-					newDf.config, data.dataframe.config))
+			if !reflect.DeepEqual(newDf.columnNames, data.dataframe.columnNames) {
+				t.Error(fmt.Sprintf("Column names (%v) is not equal to expected (%v)",
+					newDf.columnNames, data.dataframe.columnNames))
 			}
 		})
 	}
@@ -495,7 +498,7 @@ func TestDataframe_HasColumn(t *testing.T) {
 		vector.Integer([]int{1, 2, 3}, nil),
 		vector.String([]string{"1", "2", "3"}, nil),
 		vector.Boolean([]bool{true, false, true}, nil),
-	}, OptionColumnNames([]string{"int", "string", "bool"}))
+	}, vector.OptionColumnNames([]string{"int", "string", "bool"}))
 
 	testData := []struct {
 		name      string
@@ -536,7 +539,7 @@ func TestDataframe_IsValidColumnIndex(t *testing.T) {
 		vector.Integer([]int{1, 2, 3}, nil),
 		vector.String([]string{"1", "2", "3"}, nil),
 		vector.Boolean([]bool{true, false, true}, nil),
-	}, OptionColumnNames([]string{"int", "string", "bool"}))
+	}, vector.OptionColumnNames([]string{"int", "string", "bool"}))
 
 	testData := []struct {
 		name  string

@@ -19,7 +19,6 @@ type Vector interface {
 	Which(whicher interface{}) []bool
 	SupportsApplier(applier interface{}) bool
 	Apply(applier interface{}) Vector
-
 	Append(vec Vector) Vector
 
 	IsEmpty() bool

@@ -41,7 +41,7 @@ func (df *Dataframe) Select(selectors ...interface{}) *Dataframe {
 	}
 
 	columnMap := map[string]int{}
-	for i, name := range df.config.columnNames {
+	for i, name := range df.columnNames {
 		columnMap[name] = i
 	}
 
@@ -51,7 +51,7 @@ func (df *Dataframe) Select(selectors ...interface{}) *Dataframe {
 		vectors = append(vectors, df.columns[columnMap[name]])
 	}
 
-	return New(vectors, OptionColumnNames(names))
+	return New(vectors, vector.OptionColumnNames(names))
 }
 
 func (df *Dataframe) selectByName(colNames []string, name string) []string {
@@ -69,7 +69,7 @@ func (df *Dataframe) selectByName(colNames []string, name string) []string {
 	if remove {
 		if len(colNames) == 0 {
 			colNames = make([]string, df.colNum)
-			copy(colNames, df.config.columnNames)
+			copy(colNames, df.columnNames)
 		}
 		pos := strPosInSlice(colNames, name)
 		if pos != -1 {
@@ -94,7 +94,7 @@ func (df *Dataframe) selectByNames(colNames []string, names []string) []string {
 
 func (df *Dataframe) selectByIndex(colNames []string, index int) []string {
 	if index >= 1 && index <= df.colNum {
-		colNames = df.selectByName(colNames, df.config.columnNames[index-1])
+		colNames = df.selectByName(colNames, df.columnNames[index-1])
 	}
 
 	return colNames
@@ -118,12 +118,12 @@ func (df *Dataframe) selectByFromToColNames(colNames []string, fromTo FromToColN
 	fromIndex := -1
 	toIndex := -1
 
-	fromIndex = strPosInSlice(df.config.columnNames, fromTo.from)
+	fromIndex = strPosInSlice(df.columnNames, fromTo.from)
 	if fromIndex == -1 {
 		return colNames
 	}
 
-	toIndex = strPosInSlice(df.config.columnNames, fromTo.to)
+	toIndex = strPosInSlice(df.columnNames, fromTo.to)
 	if toIndex == -1 {
 		return colNames
 	}
@@ -135,9 +135,9 @@ func (df *Dataframe) selectByFromToColNames(colNames []string, fromTo FromToColN
 	}
 
 	for i := fromIndex; i != toIndex; i = i + inc {
-		colNames = df.selectByName(colNames, df.config.columnNames[i])
+		colNames = df.selectByName(colNames, df.columnNames[i])
 	}
-	colNames = df.selectByName(colNames, df.config.columnNames[toIndex])
+	colNames = df.selectByName(colNames, df.columnNames[toIndex])
 
 	return colNames
 }
@@ -153,9 +153,9 @@ func (df *Dataframe) selectByFromToColIndices(colNames []string, fromTo FromToCo
 	}
 
 	for i := fromTo.from; i != fromTo.to; i = i + inc {
-		colNames = df.selectByName(colNames, df.config.columnNames[i-1])
+		colNames = df.selectByName(colNames, df.columnNames[i-1])
 	}
-	colNames = df.selectByName(colNames, df.config.columnNames[fromTo.to-1])
+	colNames = df.selectByName(colNames, df.columnNames[fromTo.to-1])
 
 	return colNames
 }

@@ -352,7 +352,7 @@ func (p *interfacePayload) Append(vec Vector) Payload {
 
 func InterfacePayload(data []interface{}, na []bool, options ...Option) Payload {
 	length := len(data)
-	conf := mergeOptions(options)
+	conf := MergeOptions(options)
 
 	vecNA := make([]bool, length)
 	if len(na) > 0 {
@@ -383,12 +383,12 @@ func InterfacePayload(data []interface{}, na []bool, options ...Option) Payload 
 		},
 	}
 
-	if conf.HasOption(OPTION_INTERFACE_PRINTER_FUNC) {
-		payload.printer = conf.Value(OPTION_INTERFACE_PRINTER_FUNC).(InterfacePrinterFunc)
+	if conf.HasOption(KeyOptionInterfacePrinterFunc) {
+		payload.printer = conf.Value(KeyOptionInterfacePrinterFunc).(InterfacePrinterFunc)
 	}
 
-	if conf.HasOption(OPTION_INTERFACE_CONVERTORS) {
-		payload.convertors = conf.Value(OPTION_INTERFACE_CONVERTORS).(*InterfaceConvertors)
+	if conf.HasOption(KeyOptionInterfaceConvertors) {
+		payload.convertors = conf.Value(KeyOptionInterfaceConvertors).(*InterfaceConvertors)
 	}
 
 	return payload

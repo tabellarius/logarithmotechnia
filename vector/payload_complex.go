@@ -379,7 +379,7 @@ func (p *complexPayload) FindAll(needle interface{}) []int {
 
 func ComplexPayload(data []complex128, na []bool, options ...Option) Payload {
 	length := len(data)
-	conf := mergeOptions(options)
+	conf := MergeOptions(options)
 
 	vecNA := make([]bool, length)
 	if len(na) > 0 {
@@ -404,8 +404,8 @@ func ComplexPayload(data []complex128, na []bool, options ...Option) Payload {
 		Precision: 3,
 	}
 
-	if conf.HasOption(OPTION_PRECISION) {
-		printer.Precision = conf.Value(OPTION_PRECISION).(int)
+	if conf.HasOption(KeyOptionPrecision) {
+		printer.Precision = conf.Value(KeyOptionPrecision).(int)
 	}
 
 	return &complexPayload{

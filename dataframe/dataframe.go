@@ -5,11 +5,17 @@ import (
 	"strconv"
 )
 
+type Column struct {
+	name   string
+	vector vector.Vector
+}
+
 type Dataframe struct {
-	rowNum  int
-	colNum  int
-	columns []vector.Vector
-	config  Config
+	rowNum            int
+	colNum            int
+	columns           []vector.Vector
+	columnNames       []string
+	columnNamesVector vector.Vector
 }
 
 func (df *Dataframe) RowNum() int {
@@ -21,7 +27,7 @@ func (df *Dataframe) ColNum() int {
 }
 
 func (df *Dataframe) Clone() *Dataframe {
-	return New(df.columns, df.config)
+	return New(df.columns, df.Options()...)
 }
 
 func (df *Dataframe) Cn(name string) vector.Vector {
@@ -56,7 +62,7 @@ func (df *Dataframe) Ci(index int) vector.Vector {
 
 func (df *Dataframe) SetColumnName(index int, name string) *Dataframe {
 	df.setColumnName(index, name)
-	df.config.columnNamesVector = vector.String(df.config.columnNames, nil)
+	df.columnNamesVector = vector.String(df.columnNames, nil)
 
 	return df
 }
@@ -64,7 +70,7 @@ func (df *Dataframe) SetColumnName(index int, name string) *Dataframe {
 func (df *Dataframe) setColumnName(index int, name string) {
 	if df.IsValidColumnIndex(index) {
 		if !df.HasColumn(name) {
-			df.config.columnNames[index-1] = name
+			df.columnNames[index-1] = name
 		}
 	}
 }
@@ -78,18 +84,18 @@ func (df *Dataframe) SetColumnNames(names []string) *Dataframe {
 			break
 		}
 	}
-	df.config.columnNamesVector = vector.String(df.config.columnNames, nil)
+	df.columnNamesVector = vector.String(df.columnNames, nil)
 
 	return df
 }
 
 func (df *Dataframe) Names() vector.Vector {
-	return df.config.columnNamesVector
+	return df.columnNamesVector
 }
 
 func (df *Dataframe) NamesAsStrings() []string {
 	names := make([]string, df.colNum)
-	copy(names, df.config.columnNames)
+	copy(names, df.columnNames)
 
 	return names
 }
@@ -101,7 +107,7 @@ func (df *Dataframe) ByIndices(indices []int) *Dataframe {
 		newColumns[i] = column.ByIndices(indices)
 	}
 
-	return New(newColumns, df.config)
+	return New(newColumns, df.Options()...)
 }
 
 func (df *Dataframe) Columns() []vector.Vector {
@@ -121,13 +127,13 @@ func (df *Dataframe) IsValidColumnIndex(index int) bool {
 }
 
 func (df *Dataframe) HasColumn(name string) bool {
-	return strPosInSlice(df.config.columnNames, name) != -1
+	return strPosInSlice(df.columnNames, name) != -1
 }
 
 func (df *Dataframe) columnIndexByName(name string) int {
 	index := 1
 
-	for _, columnName := range df.config.columnNames {
+	for _, columnName := range df.columnNames {
 		if columnName == name {
 			return index
 		}
@@ -137,18 +143,35 @@ func (df *Dataframe) columnIndexByName(name string) int {
 	return 0
 }
 
-func New(data interface{}, options ...Config) *Dataframe {
+func New(data interface{}, options ...vector.Option) *Dataframe {
 	var df *Dataframe
-	if vectors, ok := data.([]vector.Vector); ok {
-		df = dataframeFromVectors(vectors, options...)
-	} else {
+	switch data.(type) {
+	case []vector.Vector:
+		df = dataframeFromVectors(data.([]vector.Vector), options...)
+	case []Column:
+		df = dateframeFromColumns(data.([]Column), options...)
+	default:
 		df = dataframeFromVectors([]vector.Vector{})
 	}
 
 	return df
 }
 
-func dataframeFromVectors(vectors []vector.Vector, options ...Config) *Dataframe {
+func dateframeFromColumns(columns []Column, options ...vector.Option) *Dataframe {
+	vectors := []vector.Vector{}
+	names := []string{}
+
+	for _, column := range columns {
+		vectors = append(vectors, column.vector)
+		names = append(names, column.name)
+	}
+
+	options = append(options, vector.OptionColumnNames(names))
+
+	return dataframeFromVectors(vectors, options...)
+}
+
+func dataframeFromVectors(vectors []vector.Vector, options ...vector.Option) *Dataframe {
 	maxLen := 0
 
 	for _, v := range vectors {
@@ -167,21 +190,30 @@ func dataframeFromVectors(vectors []vector.Vector, options ...Config) *Dataframe
 
 	colNum := len(vectors)
 
-	config := mergeConfigs(options)
+	conf := vector.MergeOptions(options)
 
 	columnNames := generateColumnNames(colNum)
-	if colNum >= len(config.columnNames) {
-		copy(columnNames, config.columnNames)
-	} else {
-		copy(columnNames, config.columnNames[0:colNum])
+	if conf.HasOption(vector.KeyOptionColumnNames) {
+		names := conf.Value(vector.KeyOptionColumnNames).([]string)
+		if colNum >= len(names) {
+			copy(columnNames, names)
+		} else {
+			copy(columnNames, names[0:colNum])
+		}
 	}
-	config.columnNames = columnNames
 
 	return &Dataframe{
-		rowNum:  maxLen,
-		colNum:  colNum,
-		columns: vectors,
-		config:  config,
+		rowNum:            maxLen,
+		colNum:            colNum,
+		columns:           vectors,
+		columnNames:       columnNames,
+		columnNamesVector: vector.String(columnNames, nil),
+	}
+}
+
+func (df *Dataframe) Options() []vector.Option {
+	return []vector.Option{
+		vector.OptionColumnNames(df.columnNames),
 	}
 }
 

@@ -1,9 +1,12 @@
 package vector
 
-const OPTION_PRECISION = "precision"
-const OPTION_FORMAT = "format"
-const OPTION_INTERFACE_PRINTER_FUNC = "interface_printer_func"
-const OPTION_INTERFACE_CONVERTORS = "interface_convertors"
+const KeyOptionPrecision = "precision"
+const KeyOptionFormat = "format"
+const KeyOptionInterfacePrinterFunc = "interface_printer_func"
+const KeyOptionInterfaceConvertors = "interface_convertors"
+const KeyOptionBeforeColumn = "before_column"
+const KeyOptionAfterColumn = "after_column"
+const KeyOptionColumnNames = "column_names"
 
 //deprecated
 type Config struct {
@@ -19,16 +22,16 @@ type Option interface {
 	Value() interface{}
 }
 
-type confOption struct {
+type ConfOption struct {
 	key   string
 	value interface{}
 }
 
-func (o confOption) Key() string {
+func (o ConfOption) Key() string {
 	return o.key
 }
 
-func (o confOption) Value() interface{} {
+func (o ConfOption) Value() interface{} {
 	return o.value
 }
 
@@ -46,7 +49,7 @@ func (conf Configuration) Value(name string) interface{} {
 	return conf.options[name]
 }
 
-func mergeOptions(options []Option) Configuration {
+func MergeOptions(options []Option) Configuration {
 	conf := Configuration{
 		options: map[string]interface{}{},
 	}
@@ -59,17 +62,29 @@ func mergeOptions(options []Option) Configuration {
 }
 
 func OptionPrecision(precision int) Option {
-	return confOption{OPTION_PRECISION, precision}
+	return ConfOption{KeyOptionPrecision, precision}
 }
 
 func OptionFormat(format string) Option {
-	return confOption{OPTION_FORMAT, format}
+	return ConfOption{KeyOptionFormat, format}
 }
 
 func OptionInterfacePrinterFunc(fn InterfacePrinterFunc) Option {
-	return confOption{OPTION_INTERFACE_PRINTER_FUNC, fn}
+	return ConfOption{KeyOptionInterfacePrinterFunc, fn}
 }
 
 func OptionInterfaceConvertors(convertors *InterfaceConvertors) Option {
-	return confOption{OPTION_INTERFACE_CONVERTORS, convertors}
+	return ConfOption{KeyOptionInterfaceConvertors, convertors}
+}
+
+func OptionBeforeColumn(name string) Option {
+	return ConfOption{KeyOptionBeforeColumn, name}
+}
+
+func OptionAfterColumn(name string) Option {
+	return ConfOption{KeyOptionAfterColumn, name}
+}
+
+func OptionColumnNames(names []string) Option {
+	return ConfOption{KeyOptionColumnNames, names}
 }

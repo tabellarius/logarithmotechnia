@@ -388,7 +388,7 @@ func (p *floatPayload) FindAll(needle interface{}) []int {
 
 func FloatPayload(data []float64, na []bool, options ...Option) Payload {
 	length := len(data)
-	conf := mergeOptions(options)
+	conf := MergeOptions(options)
 
 	vecNA := make([]bool, length)
 	if len(na) > 0 {
@@ -413,8 +413,8 @@ func FloatPayload(data []float64, na []bool, options ...Option) Payload {
 		Precision: 3,
 	}
 
-	if conf.HasOption(OPTION_PRECISION) {
-		printer.Precision = conf.Value(OPTION_PRECISION).(int)
+	if conf.HasOption(KeyOptionPrecision) {
+		printer.Precision = conf.Value(KeyOptionPrecision).(int)
 	}
 
 	return &floatPayload{
