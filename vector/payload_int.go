@@ -306,6 +306,48 @@ func (p *integerPayload) Append(vec Vector) Payload {
 	return IntegerPayload(newVals, newNA)
 }
 
+func (p *integerPayload) Adjust(size int) Payload {
+	if size < p.length {
+		return p.adjustToLesserSize(size)
+	}
+
+	if size > p.length {
+		return p.adjustToBiggerSize(size)
+	}
+
+	return p
+}
+
+func (p *integerPayload) adjustToLesserSize(size int) Payload {
+	data := make([]int, size)
+	na := make([]bool, size)
+
+	copy(data, p.data)
+	copy(na, p.na)
+
+	return IntegerPayload(data, na)
+}
+
+func (p *integerPayload) adjustToBiggerSize(size int) Payload {
+	cycles := size / p.length
+	if size%p.length > 0 {
+		cycles++
+	}
+
+	data := make([]int, cycles*p.length)
+	na := make([]bool, cycles*p.length)
+
+	for i := 0; i < cycles; i++ {
+		copy(data[i*p.length:], p.data)
+		copy(na[i*p.length:], p.na)
+	}
+
+	data = data[:size]
+	na = na[:size]
+
+	return IntegerPayload(data, na)
+}
+
 func (p *integerPayload) StrForElem(idx int) string {
 	if p.na[idx-1] {
 		return "NA"

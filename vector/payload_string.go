@@ -330,6 +330,48 @@ func (p *stringPayload) StrForElem(idx int) string {
 	return p.data[idx-1]
 }
 
+func (p *stringPayload) Adjust(size int) Payload {
+	if size < p.length {
+		return p.adjustToLesserSize(size)
+	}
+
+	if size > p.length {
+		return p.adjustToBiggerSize(size)
+	}
+
+	return p
+}
+
+func (p *stringPayload) adjustToLesserSize(size int) Payload {
+	data := make([]string, size)
+	na := make([]bool, size)
+
+	copy(data, p.data)
+	copy(na, p.na)
+
+	return StringPayload(data, na)
+}
+
+func (p *stringPayload) adjustToBiggerSize(size int) Payload {
+	cycles := size / p.length
+	if size%p.length > 0 {
+		cycles++
+	}
+
+	data := make([]string, cycles*p.length)
+	na := make([]bool, cycles*p.length)
+
+	for i := 0; i < cycles; i++ {
+		copy(data[i*p.length:], p.data)
+		copy(na[i*p.length:], p.na)
+	}
+
+	data = data[:size]
+	na = na[:size]
+
+	return StringPayload(data, na)
+}
+
 /* Finder interface */
 
 func (p *stringPayload) Find(needle interface{}) int {

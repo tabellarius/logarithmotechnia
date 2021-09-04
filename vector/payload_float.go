@@ -335,6 +335,48 @@ func (p *floatPayload) Append(vec Vector) Payload {
 	return FloatPayload(newVals, newNA, p.options()...)
 }
 
+func (p *floatPayload) Adjust(size int) Payload {
+	if size < p.length {
+		return p.adjustToLesserSize(size)
+	}
+
+	if size > p.length {
+		return p.adjustToBiggerSize(size)
+	}
+
+	return p
+}
+
+func (p *floatPayload) adjustToLesserSize(size int) Payload {
+	data := make([]float64, size)
+	na := make([]bool, size)
+
+	copy(data, p.data)
+	copy(na, p.na)
+
+	return FloatPayload(data, na, p.options()...)
+}
+
+func (p *floatPayload) adjustToBiggerSize(size int) Payload {
+	cycles := size / p.length
+	if size%p.length > 0 {
+		cycles++
+	}
+
+	data := make([]float64, cycles*p.length)
+	na := make([]bool, cycles*p.length)
+
+	for i := 0; i < cycles; i++ {
+		copy(data[i*p.length:], p.data)
+		copy(na[i*p.length:], p.na)
+	}
+
+	data = data[:size]
+	na = na[:size]
+
+	return FloatPayload(data, na, p.options()...)
+}
+
 func (p *floatPayload) options() []Option {
 	return []Option{
 		OptionPrecision(p.printer.Precision),

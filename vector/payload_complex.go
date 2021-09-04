@@ -304,6 +304,48 @@ func (p *complexPayload) Append(vec Vector) Payload {
 	return ComplexPayload(newVals, newNA, p.options()...)
 }
 
+func (p *complexPayload) Adjust(size int) Payload {
+	if size < p.length {
+		return p.adjustToLesserSize(size)
+	}
+
+	if size > p.length {
+		return p.adjustToBiggerSize(size)
+	}
+
+	return p
+}
+
+func (p *complexPayload) adjustToLesserSize(size int) Payload {
+	data := make([]complex128, size)
+	na := make([]bool, size)
+
+	copy(data, p.data)
+	copy(na, p.na)
+
+	return ComplexPayload(data, na, p.options()...)
+}
+
+func (p *complexPayload) adjustToBiggerSize(size int) Payload {
+	cycles := size / p.length
+	if size%p.length > 0 {
+		cycles++
+	}
+
+	data := make([]complex128, cycles*p.length)
+	na := make([]bool, cycles*p.length)
+
+	for i := 0; i < cycles; i++ {
+		copy(data[i*p.length:], p.data)
+		copy(na[i*p.length:], p.na)
+	}
+
+	data = data[:size]
+	na = na[:size]
+
+	return ComplexPayload(data, na, p.options()...)
+}
+
 func (p *complexPayload) StrForElem(idx int) string {
 	i := idx - 1
 

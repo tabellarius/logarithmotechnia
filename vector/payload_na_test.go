@@ -598,3 +598,12 @@ func TestNaPayload_Append(t *testing.T) {
 		})
 	}
 }
+
+func TestNaPayload_Adjust(t *testing.T) {
+	payload := NAPayload(3).(*naPayload)
+	newPayload := payload.Adjust(5).(*naPayload)
+
+	if newPayload.length != 5 {
+		t.Error(fmt.Sprintf("New payload's length is wrong (%v instead of %v)", newPayload.length, 5))
+	}
+}

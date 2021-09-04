@@ -663,6 +663,60 @@ func TestTimePayload_Append(t *testing.T) {
 	}
 }
 
+func TestTimePayload_Adjust(t *testing.T) {
+	payload5 := TimePayload(toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z",
+		"0001-01-01T00:00:00Z", "0001-01-01T00:00:00Z"}), nil).(*timePayload)
+	payload3 := TimePayload(toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z"}),
+		[]bool{false, false, true}).(*timePayload)
+
+	testData := []struct {
+		name       string
+		inPayload  *timePayload
+		size       int
+		outPaylout *timePayload
+	}{
+		{
+			inPayload: payload5,
+			name:      "same",
+			size:      5,
+			outPaylout: TimePayload(toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z",
+				"0001-01-01T00:00:00Z", "0001-01-01T00:00:00Z"}), nil).(*timePayload),
+		},
+		{
+			inPayload: payload5,
+			name:      "lesser",
+			size:      3,
+			outPaylout: TimePayload(toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z"}),
+				nil).(*timePayload),
+		},
+		{
+			inPayload: payload3,
+			name:      "bigger",
+			size:      10,
+			outPaylout: TimePayload(toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "0001-01-01T00:00:00Z",
+				"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "0001-01-01T00:00:00Z",
+				"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "0001-01-01T00:00:00Z",
+				"2006-01-02T15:04:05+07:00"}),
+				[]bool{false, false, true, false, false, true, false, false, true, false}).(*timePayload),
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			outPayload := data.inPayload.Adjust(data.size).(*timePayload)
+
+			if !reflect.DeepEqual(outPayload.data, data.outPaylout.data) {
+				t.Error(fmt.Sprintf("Output data (%v) does not match expected (%v)",
+					outPayload.data, data.outPaylout.data))
+			}
+			if !reflect.DeepEqual(outPayload.na, data.outPaylout.na) {
+				t.Error(fmt.Sprintf("Output NA (%v) does not match expected (%v)",
+					outPayload.na, data.outPaylout.na))
+			}
+		})
+	}
+}
+
 func TestTimePayload_Find(t *testing.T) {
 	payload := TimePayload(toTimeData(
 		[]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "2006-01-02T15:04:05+07:00"},

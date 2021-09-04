@@ -765,6 +765,54 @@ func TestComplexPayload_Append(t *testing.T) {
 	}
 }
 
+func TestComplexPayload_Adjust(t *testing.T) {
+	payload5 := ComplexPayload([]complex128{1 + 0i, 2.5 + 1i, 5.5i, 0, -2 - 1.5i}, nil).(*complexPayload)
+	payload3 := ComplexPayload([]complex128{1 + 0i, 2.5 + 1i, 5.5i}, []bool{false, false, true}).(*complexPayload)
+
+	testData := []struct {
+		name       string
+		inPayload  *complexPayload
+		size       int
+		outPaylout *complexPayload
+	}{
+		{
+			inPayload:  payload5,
+			name:       "same",
+			size:       5,
+			outPaylout: ComplexPayload([]complex128{1 + 0i, 2.5 + 1i, 5.5i, 0, -2 - 1.5i}, nil).(*complexPayload),
+		},
+		{
+			inPayload:  payload5,
+			name:       "lesser",
+			size:       3,
+			outPaylout: ComplexPayload([]complex128{1 + 0i, 2.5 + 1i, 5.5i}, nil).(*complexPayload),
+		},
+		{
+			inPayload: payload3,
+			name:      "bigger",
+			size:      10,
+			outPaylout: ComplexPayload([]complex128{1 + 0i, 2.5 + 1i, cmplx.NaN(), 1 + 0i, 2.5 + 1i, cmplx.NaN(),
+				1 + 0i, 2.5 + 1i, cmplx.NaN(), 1 + 0i},
+				[]bool{false, false, true, false, false, true, false, false, true, false}).(*complexPayload),
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			outPayload := data.inPayload.Adjust(data.size).(*complexPayload)
+
+			if !util.EqualComplexArrays(outPayload.data, data.outPaylout.data) {
+				t.Error(fmt.Sprintf("Output data (%v) does not match expected (%v)",
+					outPayload.data, data.outPaylout.data))
+			}
+			if !reflect.DeepEqual(outPayload.na, data.outPaylout.na) {
+				t.Error(fmt.Sprintf("Output NA (%v) does not match expected (%v)",
+					outPayload.na, data.outPaylout.na))
+			}
+		})
+	}
+}
+
 func TestComplexPayload_PrecisionOption(t *testing.T) {
 	testData := []struct {
 		name              string
