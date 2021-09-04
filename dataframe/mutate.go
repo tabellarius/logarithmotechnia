@@ -7,7 +7,7 @@ import (
 func (df *Dataframe) Mutate(columns []Column, options ...vector.Option) *Dataframe {
 	conf := vector.MergeOptions(options)
 
-	afterColumnIndex := df.colNum - 1
+	afterColumnIndex := df.colNum
 
 	if conf.HasOption(vector.KeyOptionAfterColumn) {
 		pos := df.Names().Find(conf.Value(vector.KeyOptionAfterColumn))
@@ -25,32 +25,26 @@ func (df *Dataframe) Mutate(columns []Column, options ...vector.Option) *Datafra
 
 	columnMap := map[string]vector.Vector{}
 	for i, column := range df.columns {
-		columnMap[df.config.columnNames[i]] = column
+		columnMap[df.columnNames[i]] = column
 	}
 
 	uniqueNewNames := []string{}
 	for _, column := range columns {
-		if _, ok := columnMap[column.name]; ok {
+		if _, ok := columnMap[column.name]; !ok {
 			uniqueNewNames = append(uniqueNewNames, column.name)
 		}
 		columnMap[column.name] = column.vector
 	}
 
 	newNames := []string{}
-	newNames = append(newNames, df.config.columnNames[:afterColumnIndex]...)
+	newNames = append(newNames, df.columnNames[:afterColumnIndex]...)
 	newNames = append(newNames, uniqueNewNames...)
-	newNames = append(newNames, df.config.columnNames[afterColumnIndex:]...)
+	newNames = append(newNames, df.columnNames[afterColumnIndex:]...)
 
 	newColumns := []vector.Vector{}
 	for _, name := range newNames {
 		newColumns = append(newColumns, columnMap[name])
 	}
 
-	return New(newColumns, OptionColumnNames(newNames))
-}
-
-func (df *Dataframe) Transmute(map[string]vector.Vector) *Dataframe {
-	df.Mutate([]Column{})
-
-	return nil
+	return New(newColumns, vector.OptionColumnNames(newNames))
 }

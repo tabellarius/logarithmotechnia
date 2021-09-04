@@ -1,1 +1,4 @@
 Select by func
+Rework dataframe creation
+df.C() (uses Cn() or Ci() depending on the type of argument)
+Move df.config.columnNames into df.ColumnNames (vector)

@@ -15,7 +15,7 @@ func getTestDataFrame() *Dataframe {
 		vector.Integer([]int{110000, 0, 50000, 120000, 80000}, nil),
 		vector.Boolean([]bool{true, true, true, false, true}, nil),
 		vector.String([]string{"damage", "heavy", "support", "damage", "healer"}, nil),
-	}, OptionColumnNames([]string{"name", "age", "gender", "salary", "active", "-class"}))
+	}, vector.OptionColumnNames([]string{"name", "age", "gender", "salary", "active", "-class"}))
 
 }
 

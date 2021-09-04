@@ -1,5 +1,3 @@
-Rework dataframe creation
-df.C() (uses Cn() or Ci() depending on the type of argument)
 Adjust (expand or contract a vector to the given size)
 Remove SupportsWhicher() and SupportsFilter()
 Appliers for different return types
