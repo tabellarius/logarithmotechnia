@@ -21,6 +21,7 @@ type Vector interface {
 	SupportsApplier(applier interface{}) bool
 	Apply(applier interface{}) Vector
 	Append(vec Vector) Vector
+	Adjust(size int) Vector
 
 	IsEmpty() bool
 
@@ -45,6 +46,7 @@ type Payload interface {
 	ByIndices(indices []int) Payload
 	StrForElem(idx int) string
 	Append(payload Payload) Payload
+	Adjust(size int) Payload
 }
 
 type Whichable interface {
@@ -298,6 +300,12 @@ func (v *vector) byFromToWithRemove(from, to int) []int {
 
 func (v *vector) Append(vec Vector) Vector {
 	newPayload := v.payload.Append(vec.Payload())
+
+	return New(newPayload)
+}
+
+func (v *vector) Adjust(size int) Vector {
+	newPayload := v.payload.Adjust(size)
 
 	return New(newPayload)
 }

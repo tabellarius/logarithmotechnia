@@ -882,6 +882,51 @@ func TestVector_Append(t *testing.T) {
 	}
 }
 
+func TestVector_Adjust(t *testing.T) {
+	vec := Integer([]int{1, 2, 3, 4, 5}, []bool{false, false, true, false, false})
+
+	testData := []struct {
+		name    string
+		size    int
+		outData []int
+		outNA   []bool
+	}{
+		{
+			name:    "same",
+			size:    5,
+			outData: []int{1, 2, 0, 4, 5},
+			outNA:   []bool{false, false, true, false, false},
+		},
+		{
+			name:    "less",
+			size:    3,
+			outData: []int{1, 2, 0},
+			outNA:   []bool{false, false, true},
+		},
+		{
+			name:    "more",
+			size:    12,
+			outData: []int{1, 2, 0, 4, 5, 1, 2, 0, 4, 5, 1, 2},
+			outNA:   []bool{false, false, true, false, false, false, false, true, false, false, false, false},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			outPayload := vec.Adjust(data.size).Payload().(*integerPayload)
+
+			if !reflect.DeepEqual(data.outData, outPayload.data) {
+				t.Error(fmt.Sprintf("Output data (%v) does not match expected (%v)",
+					outPayload.data, data.outData))
+			}
+			if !reflect.DeepEqual(data.outNA, outPayload.na) {
+				t.Error(fmt.Sprintf("Output NA (%v) does not match expected (%v)",
+					outPayload.na, data.outNA))
+			}
+		})
+	}
+}
+
 func TestVector_Find(t *testing.T) {
 	vec := Integer([]int{1, 2, 1, 4, 0}, nil)
 
