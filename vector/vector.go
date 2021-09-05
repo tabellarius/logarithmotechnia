@@ -10,6 +10,7 @@ import (
 type Vector interface {
 	Type() string
 	Len() int
+	Payload() Payload
 	Clone() Vector
 
 	ByIndices(indices []int) Vector
@@ -43,7 +44,7 @@ type Payload interface {
 	Len() int
 	ByIndices(indices []int) Payload
 	StrForElem(idx int) string
-	Append(vec Vector) Payload
+	Append(payload Payload) Payload
 }
 
 type Whichable interface {
@@ -112,6 +113,10 @@ func (v *vector) Type() string {
 // Len returns length of vector
 func (v *vector) Len() int {
 	return v.length
+}
+
+func (v *vector) Payload() Payload {
+	return v.payload
 }
 
 func (v *vector) Clone() Vector {
@@ -292,7 +297,7 @@ func (v *vector) byFromToWithRemove(from, to int) []int {
 }
 
 func (v *vector) Append(vec Vector) Vector {
-	newPayload := v.payload.Append(vec)
+	newPayload := v.payload.Append(vec.Payload())
 
 	return New(newPayload)
 }

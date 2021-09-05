@@ -751,7 +751,7 @@ func TestComplexPayload_Append(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			outPayload := payload.Append(data.vec).(*complexPayload)
+			outPayload := payload.Append(data.vec.Payload()).(*complexPayload)
 
 			if !util.EqualComplexArrays(data.outData, outPayload.data) {
 				t.Error(fmt.Sprintf("Output data (%v) does not match expected (%v)",

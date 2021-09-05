@@ -306,10 +306,17 @@ func (p *stringPayload) Interfaces() ([]interface{}, []bool) {
 	return data, na
 }
 
-func (p *stringPayload) Append(vec Vector) Payload {
-	length := p.length + vec.Len()
+func (p *stringPayload) Append(payload Payload) Payload {
+	length := p.length + payload.Len()
 
-	vals, na := vec.Strings()
+	var vals []string
+	var na []bool
+
+	if stringable, ok := payload.(Stringable); ok {
+		vals, na = stringable.Strings()
+	} else {
+		vals, na = NAPayload(payload.Len()).(Stringable).Strings()
+	}
 
 	newVals := make([]string, length)
 	newNA := make([]bool, length)

@@ -234,10 +234,17 @@ func (p *timePayload) Interfaces() ([]interface{}, []bool) {
 	return data, na
 }
 
-func (p *timePayload) Append(vec Vector) Payload {
-	length := p.length + vec.Len()
+func (p *timePayload) Append(payload Payload) Payload {
+	length := p.length + payload.Len()
 
-	vals, na := vec.Times()
+	var vals []time.Time
+	var na []bool
+
+	if timeable, ok := payload.(Timeable); ok {
+		vals, na = timeable.Times()
+	} else {
+		vals, na = NAPayload(payload.Len()).(Timeable).Times()
+	}
 
 	newVals := make([]time.Time, length)
 	newNA := make([]bool, length)

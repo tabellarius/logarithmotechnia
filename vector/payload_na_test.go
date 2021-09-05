@@ -589,7 +589,7 @@ func TestNaPayload_Append(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			outPayload := payload.Append(data.vec).(*naPayload)
+			outPayload := payload.Append(data.vec.Payload()).(*naPayload)
 
 			if outPayload.length != data.outLen {
 				t.Error(fmt.Sprintf("Out length (%d) is not equal to expected (%d)",
