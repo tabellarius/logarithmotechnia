@@ -159,13 +159,3 @@ func (df *Dataframe) selectByFromToColIndices(colNames []string, fromTo FromToCo
 
 	return colNames
 }
-
-func strPosInSlice(slice []string, str string) int {
-	for i, elem := range slice {
-		if str == elem {
-			return i
-		}
-	}
-
-	return -1
-}
