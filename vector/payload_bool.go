@@ -297,10 +297,17 @@ func (p *booleanPayload) Interfaces() ([]interface{}, []bool) {
 	return data, na
 }
 
-func (p *booleanPayload) Append(vec Vector) Payload {
-	length := p.length + vec.Len()
+func (p *booleanPayload) Append(payload Payload) Payload {
+	length := p.length + payload.Len()
 
-	vals, na := vec.Booleans()
+	var vals []bool
+	var na []bool
+
+	if boolable, ok := payload.(Boolable); ok {
+		vals, na = boolable.Booleans()
+	} else {
+		vals, na = NAPayload(payload.Len()).(Boolable).Booleans()
+	}
 
 	newVals := make([]bool, length)
 	newNA := make([]bool, length)

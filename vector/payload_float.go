@@ -319,10 +319,17 @@ func (p *floatPayload) StrForElem(idx int) string {
 	return strconv.FormatFloat(p.data[i], 'f', p.printer.Precision, 64)
 }
 
-func (p *floatPayload) Append(vec Vector) Payload {
-	length := p.length + vec.Len()
+func (p *floatPayload) Append(payload Payload) Payload {
+	length := p.length + payload.Len()
 
-	vals, na := vec.Floats()
+	var vals []float64
+	var na []bool
+
+	if floatable, ok := payload.(Floatable); ok {
+		vals, na = floatable.Floats()
+	} else {
+		vals, na = NAPayload(payload.Len()).(Floatable).Floats()
+	}
 
 	newVals := make([]float64, length)
 	newNA := make([]bool, length)

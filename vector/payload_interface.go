@@ -334,10 +334,17 @@ func (p *interfacePayload) Interfaces() ([]interface{}, []bool) {
 	return data, na
 }
 
-func (p *interfacePayload) Append(vec Vector) Payload {
-	length := p.length + vec.Len()
+func (p *interfacePayload) Append(payload Payload) Payload {
+	length := p.length + payload.Len()
 
-	vals, na := vec.Interfaces()
+	var vals []interface{}
+	var na []bool
+
+	if interfaceable, ok := payload.(Interfaceable); ok {
+		vals, na = interfaceable.Interfaces()
+	} else {
+		vals, na = NAPayload(payload.Len()).(Interfaceable).Interfaces()
+	}
 
 	newVals := make([]interface{}, length)
 	newNA := make([]bool, length)

@@ -288,10 +288,17 @@ func (p *complexPayload) Interfaces() ([]interface{}, []bool) {
 	return data, na
 }
 
-func (p *complexPayload) Append(vec Vector) Payload {
-	length := p.length + vec.Len()
+func (p *complexPayload) Append(payload Payload) Payload {
+	length := p.length + payload.Len()
 
-	vals, na := vec.Complexes()
+	var vals []complex128
+	var na []bool
+
+	if complexable, ok := payload.(Complexable); ok {
+		vals, na = complexable.Complexes()
+	} else {
+		vals, na = NAPayload(payload.Len()).(Complexable).Complexes()
+	}
 
 	newVals := make([]complex128, length)
 	newNA := make([]bool, length)

@@ -290,10 +290,17 @@ func (p *integerPayload) Interfaces() ([]interface{}, []bool) {
 	return data, na
 }
 
-func (p *integerPayload) Append(vec Vector) Payload {
-	length := p.length + vec.Len()
+func (p *integerPayload) Append(payload Payload) Payload {
+	length := p.length + payload.Len()
 
-	vals, na := vec.Integers()
+	var vals []int
+	var na []bool
+
+	if intable, ok := payload.(Intable); ok {
+		vals, na = intable.Integers()
+	} else {
+		vals, na = NAPayload(payload.Len()).(Intable).Integers()
+	}
 
 	newVals := make([]int, length)
 	newNA := make([]bool, length)

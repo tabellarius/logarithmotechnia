@@ -36,8 +36,8 @@ func (p *naPayload) StrForElem(int) string {
 	return "NA"
 }
 
-func (p *naPayload) Append(vec Vector) Payload {
-	length := p.length + vec.Len()
+func (p *naPayload) Append(payload Payload) Payload {
+	length := p.length + payload.Len()
 
 	return NAPayload(length)
 }
