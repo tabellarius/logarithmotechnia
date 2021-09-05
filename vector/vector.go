@@ -34,6 +34,12 @@ type Vector interface {
 	Complexable
 	Timeable
 	Interfaceable
+	AsInteger() Vector
+	AsFloat() Vector
+	AsBoolean() Vector
+	AsString() Vector
+	AsTime() Vector
+	AsInterface() Vector
 
 	Finder
 
@@ -318,8 +324,6 @@ func (v *vector) IsNA() []bool {
 	return make([]bool, v.length)
 }
 
-/* Not Applicable-related */
-
 func (v *vector) NotNA() []bool {
 	if nable, ok := v.payload.(NAble); ok {
 		return nable.NotNA()
@@ -332,6 +336,8 @@ func (v *vector) NotNA() []bool {
 
 	return notNA
 }
+
+/* Not Applicable-related */
 
 func (v *vector) HasNA() bool {
 	if nable, ok := v.payload.(NAble); ok {
@@ -447,6 +453,66 @@ func (v *vector) Interfaces() ([]interface{}, []bool) {
 	}
 
 	return NA(v.length).Interfaces()
+}
+
+func (v *vector) AsInteger() Vector {
+	if payload, ok := v.payload.(Intable); ok {
+		values, na := payload.Integers()
+
+		return Integer(values, na)
+	}
+
+	return NA(v.length)
+}
+
+func (v *vector) AsFloat() Vector {
+	if payload, ok := v.payload.(Floatable); ok {
+		values, na := payload.Floats()
+
+		return Float(values, na)
+	}
+
+	return NA(v.length)
+}
+
+func (v *vector) AsBoolean() Vector {
+	if payload, ok := v.payload.(Boolable); ok {
+		values, na := payload.Booleans()
+
+		return Boolean(values, na)
+	}
+
+	return NA(v.length)
+}
+
+func (v *vector) AsString() Vector {
+	if payload, ok := v.payload.(Stringable); ok {
+		values, na := payload.Strings()
+
+		return String(values, na)
+	}
+
+	return NA(v.length)
+}
+
+func (v *vector) AsTime() Vector {
+	if payload, ok := v.payload.(Timeable); ok {
+		values, na := payload.Times()
+
+		return Time(values, na)
+	}
+
+	return NA(v.length)
+}
+
+func (v *vector) AsInterface() Vector {
+	if payload, ok := v.payload.(Interfaceable); ok {
+		values, na := payload.Interfaces()
+
+		return Interface(values, na)
+	}
+
+	return NA(v.length)
 }
 
 /* Finder Interface */
