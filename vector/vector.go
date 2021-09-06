@@ -41,6 +41,7 @@ type Vector interface {
 	AsString() Vector
 	AsTime() Vector
 	AsInterface() Vector
+	Transform(fn TransformFunc) Vector
 
 	Finder
 
@@ -98,6 +99,8 @@ type Timeable interface {
 type Interfaceable interface {
 	Interfaces() ([]interface{}, []bool)
 }
+
+type TransformFunc func([]interface{}, []bool) Payload
 
 type Configurable interface {
 	Options() []Option
@@ -521,6 +524,17 @@ func (v *vector) AsInterface() Vector {
 		values, na := payload.Interfaces()
 
 		return Interface(values, na)
+	}
+
+	return NA(v.length)
+}
+
+func (v *vector) Transform(fn TransformFunc) Vector {
+	if interfaceable, ok := v.Payload().(Interfaceable); ok {
+		values, na := interfaceable.Interfaces()
+		payload := fn(values, na)
+
+		return New(payload)
 	}
 
 	return NA(v.length)
