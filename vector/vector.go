@@ -35,7 +35,8 @@ type Vector interface {
 	Timeable
 	Interfaceable
 	AsInteger() Vector
-	AsFloat() Vector
+	AsFloat(options ...Option) Vector
+	AsComplex(options ...Option) Vector
 	AsBoolean() Vector
 	AsString() Vector
 	AsTime() Vector
@@ -465,11 +466,21 @@ func (v *vector) AsInteger() Vector {
 	return NA(v.length)
 }
 
-func (v *vector) AsFloat() Vector {
+func (v *vector) AsFloat(options ...Option) Vector {
 	if payload, ok := v.payload.(Floatable); ok {
 		values, na := payload.Floats()
 
-		return Float(values, na)
+		return Float(values, na, options...)
+	}
+
+	return NA(v.length)
+}
+
+func (v *vector) AsComplex(options ...Option) Vector {
+	if payload, ok := v.payload.(Complexable); ok {
+		values, na := payload.Complexes()
+
+		return Complex(values, na, options...)
 	}
 
 	return NA(v.length)

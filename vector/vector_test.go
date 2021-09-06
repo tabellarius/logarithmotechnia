@@ -2,6 +2,7 @@ package vector
 
 import (
 	"fmt"
+	"logarithmotechnia/util"
 	"math"
 	"math/cmplx"
 	"reflect"
@@ -249,6 +250,324 @@ func TestVector_Times(t *testing.T) {
 			}
 			if !reflect.DeepEqual(na, data.outNA) {
 				t.Error(fmt.Sprintf("Result (%v) is not equal to expected (%v)", na, data.outNA))
+			}
+		})
+	}
+}
+
+func TestVector_AsBoolean(t *testing.T) {
+	testData := []struct {
+		name      string
+		vec       Vector
+		outValues []bool
+		outNA     []bool
+		isNA      bool
+	}{
+		{
+			name:      "booleanable",
+			vec:       Integer([]int{1, 2, 0, 5, 5}, []bool{false, false, false, false, true}),
+			outValues: []bool{true, true, false, true, false},
+			outNA:     []bool{false, false, false, false, true},
+			isNA:      false,
+		},
+		{
+			name: "non-booleanable",
+			vec: Time(toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00",
+				"1800-06-10T11:00:00Z"}), nil),
+			isNA: true,
+		},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			vec := data.vec.AsBoolean()
+			if data.isNA {
+				if _, ok := vec.Payload().(*naPayload); ok {
+					if vec.Len() != data.vec.Len() {
+						t.Error(fmt.Sprintf("NA vector length (%v) is not equal to expected (%v)", vec.Len(), data.vec.Len()))
+					}
+				} else {
+					t.Error("Vector is not NA")
+				}
+			} else {
+				payload := vec.Payload().(*booleanPayload)
+				if !reflect.DeepEqual(payload.data, data.outValues) {
+					t.Error(fmt.Sprintf("Payload data (%v) is not equal to expected (%v)", payload.data, data.outValues))
+				}
+				if !reflect.DeepEqual(payload.na, data.outNA) {
+					t.Error(fmt.Sprintf("Payload NA (%v) is not equal to expected (%v)", payload.na, data.outNA))
+				}
+			}
+		})
+	}
+}
+
+func TestVector_AsInteger(t *testing.T) {
+	testData := []struct {
+		name      string
+		vec       Vector
+		outValues []int
+		outNA     []bool
+		isNA      bool
+	}{
+		{
+			name:      "intable",
+			vec:       String([]string{"1", "2", "0", "5", "5"}, []bool{false, false, false, false, true}),
+			outValues: []int{1, 2, 0, 5, 0},
+			outNA:     []bool{false, false, false, false, true},
+			isNA:      false,
+		},
+		{
+			name: "non-intable",
+			vec: Time(toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00",
+				"1800-06-10T11:00:00Z"}), nil),
+			isNA: true,
+		},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			vec := data.vec.AsInteger()
+			if data.isNA {
+				if _, ok := vec.Payload().(*naPayload); ok {
+					if vec.Len() != data.vec.Len() {
+						t.Error(fmt.Sprintf("NA vector length (%v) is not equal to expected (%v)", vec.Len(), data.vec.Len()))
+					}
+				} else {
+					t.Error("Vector is not NA")
+				}
+			} else {
+				payload := vec.Payload().(*integerPayload)
+				if !reflect.DeepEqual(payload.data, data.outValues) {
+					t.Error(fmt.Sprintf("Payload data (%v) is not equal to expected (%v)", payload.data, data.outValues))
+				}
+				if !reflect.DeepEqual(payload.na, data.outNA) {
+					t.Error(fmt.Sprintf("Payload NA (%v) is not equal to expected (%v)", payload.na, data.outNA))
+				}
+			}
+		})
+	}
+}
+
+func TestVector_AsFloat(t *testing.T) {
+	testData := []struct {
+		name      string
+		vec       Vector
+		outValues []float64
+		outNA     []bool
+		isNA      bool
+	}{
+		{
+			name:      "floatable",
+			vec:       String([]string{"1.1", "2", "0", "5.5", "5"}, []bool{false, false, false, false, true}),
+			outValues: []float64{1.1, 2, 0, 5.5, math.NaN()},
+			outNA:     []bool{false, false, false, false, true},
+			isNA:      false,
+		},
+		{
+			name: "non-floatable",
+			vec: Time(toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00",
+				"1800-06-10T11:00:00Z"}), nil),
+			isNA: true,
+		},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			vec := data.vec.AsFloat()
+			if data.isNA {
+				if _, ok := vec.Payload().(*naPayload); ok {
+					if vec.Len() != data.vec.Len() {
+						t.Error(fmt.Sprintf("NA vector length (%v) is not equal to expected (%v)", vec.Len(), data.vec.Len()))
+					}
+				} else {
+					t.Error("Vector is not NA")
+				}
+			} else {
+				payload := vec.Payload().(*floatPayload)
+				if !util.EqualFloatArrays(payload.data, data.outValues) {
+					t.Error(fmt.Sprintf("Payload data (%v) is not equal to expected (%v)", payload.data, data.outValues))
+				}
+				if !reflect.DeepEqual(payload.na, data.outNA) {
+					t.Error(fmt.Sprintf("Payload NA (%v) is not equal to expected (%v)", payload.na, data.outNA))
+				}
+			}
+		})
+	}
+}
+
+func TestVector_AsComplex(t *testing.T) {
+	testData := []struct {
+		name      string
+		vec       Vector
+		outValues []complex128
+		outNA     []bool
+		isNA      bool
+	}{
+		{
+			name:      "complexable",
+			vec:       String([]string{"1.1+1.1i", "2", "0", "5.5-2.5i", "5"}, []bool{false, false, false, false, true}),
+			outValues: []complex128{1.1 + 1.1i, 2, 0, 5.5 - 2.5i, cmplx.NaN()},
+			outNA:     []bool{false, false, false, false, true},
+			isNA:      false,
+		},
+		{
+			name: "non-complexable",
+			vec: Time(toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00",
+				"1800-06-10T11:00:00Z"}), nil),
+			isNA: true,
+		},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			vec := data.vec.AsComplex()
+			if data.isNA {
+				if _, ok := vec.Payload().(*naPayload); ok {
+					if vec.Len() != data.vec.Len() {
+						t.Error(fmt.Sprintf("NA vector length (%v) is not equal to expected (%v)", vec.Len(), data.vec.Len()))
+					}
+				} else {
+					t.Error("Vector is not NA")
+				}
+			} else {
+				payload := vec.Payload().(*complexPayload)
+				if !util.EqualComplexArrays(payload.data, data.outValues) {
+					t.Error(fmt.Sprintf("Payload data (%v) is not equal to expected (%v)", payload.data, data.outValues))
+				}
+				if !reflect.DeepEqual(payload.na, data.outNA) {
+					t.Error(fmt.Sprintf("Payload NA (%v) is not equal to expected (%v)", payload.na, data.outNA))
+				}
+			}
+		})
+	}
+}
+
+func TestVector_AsString(t *testing.T) {
+	testData := []struct {
+		name      string
+		vec       Vector
+		outValues []string
+		outNA     []bool
+		isNA      bool
+	}{
+		{
+			name:      "stringable",
+			vec:       Integer([]int{1, 2, 0, 5, 5}, []bool{false, false, false, false, true}),
+			outValues: []string{"1", "2", "0", "5", ""},
+			outNA:     []bool{false, false, false, false, true},
+			isNA:      false,
+		},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			vec := data.vec.AsString()
+			if data.isNA {
+				if _, ok := vec.Payload().(*naPayload); ok {
+					if vec.Len() != data.vec.Len() {
+						t.Error(fmt.Sprintf("NA vector length (%v) is not equal to expected (%v)", vec.Len(), data.vec.Len()))
+					}
+				} else {
+					t.Error("Vector is not NA")
+				}
+			} else {
+				payload := vec.Payload().(*stringPayload)
+				if !reflect.DeepEqual(payload.data, data.outValues) {
+					t.Error(fmt.Sprintf("Payload data (%v) is not equal to expected (%v)", payload.data, data.outValues))
+				}
+				if !reflect.DeepEqual(payload.na, data.outNA) {
+					t.Error(fmt.Sprintf("Payload NA (%v) is not equal to expected (%v)", payload.na, data.outNA))
+				}
+			}
+		})
+	}
+}
+
+func TestVector_AsInterface(t *testing.T) {
+	testData := []struct {
+		name      string
+		vec       Vector
+		outValues []interface{}
+		outNA     []bool
+		isNA      bool
+	}{
+		{
+			name:      "interfaceable",
+			vec:       Integer([]int{1, 2, 0, 5, 5}, []bool{false, false, false, false, true}),
+			outValues: []interface{}{1, 2, 0, 5, nil},
+			outNA:     []bool{false, false, false, false, true},
+			isNA:      false,
+		},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			vec := data.vec.AsInterface()
+			if data.isNA {
+				if _, ok := vec.Payload().(*naPayload); ok {
+					if vec.Len() != data.vec.Len() {
+						t.Error(fmt.Sprintf("NA vector length (%v) is not equal to expected (%v)", vec.Len(), data.vec.Len()))
+					}
+				} else {
+					t.Error("Vector is not NA")
+				}
+			} else {
+				payload := vec.Payload().(*interfacePayload)
+				if !reflect.DeepEqual(payload.data, data.outValues) {
+					t.Error(fmt.Sprintf("Payload data (%v) is not equal to expected (%v)", payload.data, data.outValues))
+				}
+				if !reflect.DeepEqual(payload.na, data.outNA) {
+					t.Error(fmt.Sprintf("Payload NA (%v) is not equal to expected (%v)", payload.na, data.outNA))
+				}
+			}
+		})
+	}
+}
+
+func TestVector_AsTime(t *testing.T) {
+	testData := []struct {
+		name      string
+		vec       Vector
+		outValues []time.Time
+		outNA     []bool
+		isNA      bool
+	}{
+		{
+			name: "timeable",
+			vec: Time(toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00",
+				"1800-06-10T11:00:00Z"}), nil),
+			outValues: toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00",
+				"1800-06-10T11:00:00Z"}),
+			outNA: []bool{false, false, false},
+			isNA:  false,
+		},
+		{
+			name: "non-timeable",
+			vec:  Integer([]int{1, 2, 0, 5, 5}, []bool{false, false, false, false, true}),
+			isNA: true,
+		},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			vec := data.vec.AsTime()
+			if data.isNA {
+				if _, ok := vec.Payload().(*naPayload); ok {
+					if vec.Len() != data.vec.Len() {
+						t.Error(fmt.Sprintf("NA vector length (%v) is not equal to expected (%v)", vec.Len(), data.vec.Len()))
+					}
+				} else {
+					t.Error("Vector is not NA")
+				}
+			} else {
+				payload := vec.Payload().(*timePayload)
+				if !reflect.DeepEqual(payload.data, data.outValues) {
+					t.Error(fmt.Sprintf("Payload data (%v) is not equal to expected (%v)", payload.data, data.outValues))
+				}
+				if !reflect.DeepEqual(payload.na, data.outNA) {
+					t.Error(fmt.Sprintf("Payload NA (%v) is not equal to expected (%v)", payload.na, data.outNA))
+				}
 			}
 		})
 	}
