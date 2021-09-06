@@ -1,5 +1,4 @@
-Change Append(Vector) to Append(Payload) for payloads
-Appliers for different return types
+Transform() to arbitrary payload
 Factors
 Remove report
 (?) Make all payload public
@@ -13,4 +12,3 @@ Add df.Err and logger
 Update() + Clone()
 (?) Remove SupportsWhicher() and SupportsFilter()
 Options() + unified *Payload()
-Convertor() - install convertors to arbitrary payloads
