@@ -8,6 +8,7 @@ Default NA Values
 R-style reuse of vector and boolean slices
 Vector's element indices as uint32
 Add df.Err and logger
-Update() + Clone()
+(?) Update() + Clone()
 (?) Remove SupportsWhicher() and SupportsFilter()
 Options() + unified *Payload()
+Rename
