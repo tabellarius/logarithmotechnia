@@ -1,11 +1,8 @@
 package dataframe
 
-import "logarithmotechnia/vector"
-
-type Rename struct {
-	Column  string
-	NewName string
-}
+import (
+	"logarithmotechnia/vector"
+)
 
 func (df *Dataframe) Relocate(arguments ...interface{}) *Dataframe {
 	selectors := []interface{}{}
@@ -20,8 +17,8 @@ func (df *Dataframe) Relocate(arguments ...interface{}) *Dataframe {
 		}
 	}
 
+	curNames, _ := df.Names().Strings()
 	columnsToRelocate := []string{}
-	columnsToRename := []Rename{}
 
 	for _, selector := range selectors {
 		names := []string{}
@@ -35,17 +32,39 @@ func (df *Dataframe) Relocate(arguments ...interface{}) *Dataframe {
 			boolSelector, _ := vector.Boolean(selector.([]bool), nil).Adjust(df.Names().Len()).Booleans()
 			strings, _ := df.Names().Filter(boolSelector).Strings()
 			names = append(names, strings...)
-		case Rename:
-			names = append(names, selector.(Rename).Column)
-			columnsToRename = append(columnsToRename, selector.(Rename))
 		}
 
 		for _, name := range names {
-			if strPosInSlice(columnsToRelocate, name) == 0 {
-				columnsToRelocate = append(columnsToRelocate)
+			pos := strPosInSlice(curNames, name)
+			if pos != -1 {
+				columnsToRelocate = append(columnsToRelocate, name)
+				curNames = append(curNames[:pos], curNames[pos+1:]...)
 			}
 		}
 	}
 
-	return nil
+	conf := vector.MergeOptions(options)
+	selectColumns := []string{}
+	insertPosition := len(curNames)
+
+	var pos int
+	if conf.HasOption(vector.KeyOptionBeforeColumn) {
+		pos = strPosInSlice(curNames, conf.Value(vector.KeyOptionBeforeColumn).(string))
+		if pos != -1 {
+			insertPosition = pos
+		}
+	}
+
+	if conf.HasOption(vector.KeyOptionAfterColumn) {
+		pos = strPosInSlice(curNames, conf.Value(vector.KeyOptionAfterColumn).(string))
+		if pos != -1 {
+			insertPosition = pos + 1
+		}
+	}
+
+	selectColumns = append(selectColumns, curNames[:insertPosition]...)
+	selectColumns = append(selectColumns, columnsToRelocate...)
+	selectColumns = append(selectColumns, curNames[insertPosition:]...)
+
+	return df.Select(selectColumns)
 }
