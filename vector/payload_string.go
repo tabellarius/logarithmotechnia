@@ -412,6 +412,153 @@ func (p *stringPayload) FindAll(needle interface{}) []int {
 	return found
 }
 
+/* Comparable interface */
+
+func (p *stringPayload) Eq(val interface{}) []bool {
+	cmp := make([]bool, p.length)
+
+	v, ok := p.convertComparator(val)
+	if !ok {
+		return cmp
+	}
+
+	for i, datum := range p.data {
+		if p.na[i] {
+			cmp[i] = false
+		} else {
+			cmp[i] = datum == v
+		}
+	}
+
+	return cmp
+}
+
+func (p *stringPayload) Neq(val interface{}) []bool {
+	cmp := make([]bool, p.length)
+
+	v, ok := p.convertComparator(val)
+	if !ok {
+		for i := range p.data {
+			cmp[i] = true
+		}
+
+		return cmp
+	}
+
+	for i, datum := range p.data {
+		if p.na[i] {
+			cmp[i] = true
+		} else {
+			cmp[i] = datum != v
+		}
+	}
+
+	return cmp
+}
+
+func (p *stringPayload) Gt(val interface{}) []bool {
+	cmp := make([]bool, p.length)
+
+	v, ok := p.convertComparator(val)
+	if !ok {
+		return cmp
+	}
+
+	for i, datum := range p.data {
+		if p.na[i] {
+			cmp[i] = false
+		} else {
+			cmp[i] = datum > v
+		}
+	}
+
+	return cmp
+}
+
+func (p *stringPayload) Lt(val interface{}) []bool {
+	cmp := make([]bool, p.length)
+
+	v, ok := p.convertComparator(val)
+	if !ok {
+		return cmp
+	}
+
+	for i, datum := range p.data {
+		if p.na[i] {
+			cmp[i] = false
+		} else {
+			cmp[i] = datum < v
+		}
+	}
+
+	return cmp
+}
+
+func (p *stringPayload) Gte(val interface{}) []bool {
+	cmp := make([]bool, p.length)
+
+	v, ok := p.convertComparator(val)
+	if !ok {
+		return cmp
+	}
+
+	for i, datum := range p.data {
+		if p.na[i] {
+			cmp[i] = false
+		} else {
+			cmp[i] = datum >= v
+		}
+	}
+
+	return cmp
+}
+
+func (p *stringPayload) Lte(val interface{}) []bool {
+	cmp := make([]bool, p.length)
+
+	v, ok := p.convertComparator(val)
+	if !ok {
+		return cmp
+	}
+
+	for i, datum := range p.data {
+		if p.na[i] {
+			cmp[i] = false
+		} else {
+			if p.na[i] {
+				cmp[i] = false
+			} else {
+				cmp[i] = datum <= v
+			}
+		}
+	}
+
+	return cmp
+}
+
+func (p *stringPayload) convertComparator(val interface{}) (string, bool) {
+	var v string
+	ok := true
+	switch val.(type) {
+	case int:
+		v = strconv.Itoa(val.(int))
+	case int64:
+		v = strconv.Itoa(int(val.(int64)))
+	case int32:
+		v = strconv.Itoa(int(val.(int32)))
+	case uint64:
+		v = strconv.Itoa(int(val.(uint64)))
+	case uint32:
+		v = strconv.Itoa(int(val.(uint32)))
+	case string:
+		v = val.(string)
+	default:
+		ok = false
+	}
+
+	return v, ok
+}
+
 func StringPayload(data []string, na []bool) Payload {
 	length := len(data)
 

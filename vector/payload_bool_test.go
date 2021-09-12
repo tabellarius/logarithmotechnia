@@ -896,3 +896,147 @@ func TestBooleanPayload_FindAll(t *testing.T) {
 			pos, []int{}))
 	}
 }
+
+func TestBooleanPayload_Eq(t *testing.T) {
+	payload := BooleanPayload([]bool{true, false, true, false, true}, nil).(*booleanPayload)
+
+	testData := []struct {
+		eq  interface{}
+		cmp []bool
+	}{
+		{true, []bool{true, false, true, false, true}},
+		{false, []bool{false, true, false, true, false}},
+		{1, []bool{false, false, false, false, false}},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			cmp := payload.Eq(data.eq)
+
+			if !reflect.DeepEqual(cmp, data.cmp) {
+				t.Error(fmt.Sprintf("Comparator results (%v) do not match expected (%v)",
+					cmp, data.cmp))
+			}
+		})
+	}
+}
+
+func TestBooleanPayload_Neq(t *testing.T) {
+	payload := BooleanPayload([]bool{true, false, true, false, true}, nil).(*booleanPayload)
+
+	testData := []struct {
+		val interface{}
+		cmp []bool
+	}{
+		{true, []bool{false, true, false, true, false}},
+		{false, []bool{true, false, true, false, true}},
+		{1, []bool{true, true, true, true, true}},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			cmp := payload.Neq(data.val)
+
+			if !reflect.DeepEqual(cmp, data.cmp) {
+				t.Error(fmt.Sprintf("Comparator results (%v) do not match expected (%v)",
+					cmp, data.cmp))
+			}
+		})
+	}
+}
+
+func TestBooleanPayload_Lt(t *testing.T) {
+	payload := BooleanPayload([]bool{true, false, true, false, true}, nil).(*booleanPayload)
+
+	testData := []struct {
+		val interface{}
+		cmp []bool
+	}{
+		{true, []bool{false, false, false, false, false}},
+		{false, []bool{false, false, false, false, false}},
+		{1, []bool{false, false, false, false, false}},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			cmp := payload.Lt(data.val)
+
+			if !reflect.DeepEqual(cmp, data.cmp) {
+				t.Error(fmt.Sprintf("Comparator results (%v) do not match expected (%v)",
+					cmp, data.cmp))
+			}
+		})
+	}
+}
+
+func TestBooleanPayload_Gt(t *testing.T) {
+	payload := BooleanPayload([]bool{true, false, true, false, true}, nil).(*booleanPayload)
+
+	testData := []struct {
+		val interface{}
+		cmp []bool
+	}{
+		{true, []bool{false, false, false, false, false}},
+		{false, []bool{false, false, false, false, false}},
+		{1, []bool{false, false, false, false, false}},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			cmp := payload.Gt(data.val)
+
+			if !reflect.DeepEqual(cmp, data.cmp) {
+				t.Error(fmt.Sprintf("Comparator results (%v) do not match expected (%v)",
+					cmp, data.cmp))
+			}
+		})
+	}
+}
+
+func TestBooleanPayload_Lte(t *testing.T) {
+	payload := BooleanPayload([]bool{true, false, true, false, true}, nil).(*booleanPayload)
+
+	testData := []struct {
+		val interface{}
+		cmp []bool
+	}{
+		{true, []bool{false, false, false, false, false}},
+		{false, []bool{false, false, false, false, false}},
+		{1, []bool{false, false, false, false, false}},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			cmp := payload.Lte(data.val)
+
+			if !reflect.DeepEqual(cmp, data.cmp) {
+				t.Error(fmt.Sprintf("Comparator results (%v) do not match expected (%v)",
+					cmp, data.cmp))
+			}
+		})
+	}
+}
+
+func TestBooleanPayload_Gte(t *testing.T) {
+	payload := BooleanPayload([]bool{true, false, true, false, true}, nil).(*booleanPayload)
+
+	testData := []struct {
+		val interface{}
+		cmp []bool
+	}{
+		{true, []bool{false, false, false, false, false}},
+		{false, []bool{false, false, false, false, false}},
+		{1, []bool{false, false, false, false, false}},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			cmp := payload.Gte(data.val)
+
+			if !reflect.DeepEqual(cmp, data.cmp) {
+				t.Error(fmt.Sprintf("Comparator results (%v) do not match expected (%v)",
+					cmp, data.cmp))
+			}
+		})
+	}
+}

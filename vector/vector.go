@@ -111,6 +111,15 @@ type Finder interface {
 	FindAll(interface{}) []int
 }
 
+type Comparable interface {
+	Eq(interface{}) []bool
+	Neq(interface{}) []bool
+	Gt(interface{}) []bool
+	Lt(interface{}) []bool
+	Gte(interface{}) []bool
+	Lte(interface{}) []bool
+}
+
 // vector holds data and functions shared by all vectors
 type vector struct {
 	length  int

@@ -2,7 +2,6 @@ Factors
 Remove report
 (?) Make all payload public
 String functions
-Comparator
 Finder interface for InterfacePayload
 Default NA Values
 R-style reuse of vector and boolean slices
@@ -11,4 +10,4 @@ Add df.Err and logger
 (?) Update() + Clone()
 (?) Remove SupportsWhicher() and SupportsFilter()
 Options() + unified *Payload()
-Rename
+Comparator for Interface payload
