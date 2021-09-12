@@ -919,7 +919,7 @@ func TestFloatPayload_FindAll(t *testing.T) {
 }
 
 func TestFloatPayload_Eq(t *testing.T) {
-	payload := FloatPayload([]float64{1.5, 0, -2.7, 1.5, 1}, nil).(*floatPayload)
+	payload := FloatPayload([]float64{1.5, 0, 1.5, 1.5, 1}, []bool{false, false, true, false, false}).(*floatPayload)
 
 	testData := []struct {
 		eq  interface{}
@@ -953,7 +953,7 @@ func TestFloatPayload_Eq(t *testing.T) {
 }
 
 func TestFloatPayload_Neq(t *testing.T) {
-	payload := FloatPayload([]float64{1.5, 0, -2.7, 1.5, 1}, nil).(*floatPayload)
+	payload := FloatPayload([]float64{1.5, 0, 1.5, 1.5, 1}, []bool{false, false, true, false, false}).(*floatPayload)
 
 	testData := []struct {
 		eq  interface{}
@@ -987,7 +987,7 @@ func TestFloatPayload_Neq(t *testing.T) {
 }
 
 func TestFloatPayload_Gt(t *testing.T) {
-	payload := FloatPayload([]float64{1.5, 0, -2.7, 1.5, 1}, nil).(*floatPayload)
+	payload := FloatPayload([]float64{1.5, 0, 1.5, 1.5, 1}, []bool{false, false, true, false, false}).(*floatPayload)
 
 	testData := []struct {
 		val interface{}
@@ -1010,13 +1010,13 @@ func TestFloatPayload_Gt(t *testing.T) {
 }
 
 func TestFloatPayload_Lt(t *testing.T) {
-	payload := FloatPayload([]float64{1.5, 0, -2.7, 1.5, 1}, nil).(*floatPayload)
+	payload := FloatPayload([]float64{1.5, 0, 1.5, 1.5, 1}, []bool{false, false, true, false, false}).(*floatPayload)
 
 	testData := []struct {
 		val interface{}
 		cmp []bool
 	}{
-		{1.0, []bool{false, true, true, false, false}},
+		{1.0, []bool{false, true, false, false, false}},
 		{true, []bool{false, false, false, false, false}},
 	}
 
@@ -1033,7 +1033,7 @@ func TestFloatPayload_Lt(t *testing.T) {
 }
 
 func TestFloatPayload_Gte(t *testing.T) {
-	payload := FloatPayload([]float64{1.5, 0, -2.7, 1.5, 1}, nil).(*floatPayload)
+	payload := FloatPayload([]float64{1.5, 0, 1.5, 1.5, 1}, []bool{false, false, true, false, false}).(*floatPayload)
 
 	testData := []struct {
 		val interface{}
@@ -1056,13 +1056,13 @@ func TestFloatPayload_Gte(t *testing.T) {
 }
 
 func TestFloatPayload_Lte(t *testing.T) {
-	payload := FloatPayload([]float64{1.5, 0, -2.7, 1.5, 1}, nil).(*floatPayload)
+	payload := FloatPayload([]float64{1.5, 0, 1.5, 1.5, 1}, []bool{false, false, true, false, false}).(*floatPayload)
 
 	testData := []struct {
 		val interface{}
 		cmp []bool
 	}{
-		{1.0, []bool{false, true, true, false, true}},
+		{1.0, []bool{false, true, false, false, true}},
 		{true, []bool{false, false, false, false, false}},
 	}
 

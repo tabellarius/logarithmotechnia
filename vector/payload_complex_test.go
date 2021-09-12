@@ -901,7 +901,8 @@ func TestComplexPayload_FindAll(t *testing.T) {
 }
 
 func TestComplexPayload_Eq(t *testing.T) {
-	payload := ComplexPayload([]complex128{1 + 1.5i, 0, 4 - 2i, 1 + 1.5i, 1}, nil).(*complexPayload)
+	payload := ComplexPayload([]complex128{1 + 1.5i, 0, 1 + 1.5i, 1 + 1.5i, 1},
+		[]bool{false, false, true, false, false}).(*complexPayload)
 
 	testData := []struct {
 		eq  interface{}
@@ -933,7 +934,8 @@ func TestComplexPayload_Eq(t *testing.T) {
 }
 
 func TestComplexPayload_Neq(t *testing.T) {
-	payload := ComplexPayload([]complex128{1 + 1.5i, 0, 4 - 2i, 1 + 1.5i, 1}, nil).(*complexPayload)
+	payload := ComplexPayload([]complex128{1 + 1.5i, 0, 1 + 1.5i, 1 + 1.5i, 1},
+		[]bool{false, false, true, false, false}).(*complexPayload)
 
 	testData := []struct {
 		val interface{}
@@ -965,7 +967,8 @@ func TestComplexPayload_Neq(t *testing.T) {
 }
 
 func TestComplexPayload_Lt(t *testing.T) {
-	payload := ComplexPayload([]complex128{1 + 1.5i, 0, 4 - 2i, 1 + 1.5i, -1}, nil).(*complexPayload)
+	payload := ComplexPayload([]complex128{1 + 1.5i, 0, 1 + 1.5i, 1 + 1.5i, 1},
+		[]bool{false, false, true, false, false}).(*complexPayload)
 
 	testData := []struct {
 		val interface{}
@@ -988,7 +991,8 @@ func TestComplexPayload_Lt(t *testing.T) {
 }
 
 func TestComplexPayload_Gt(t *testing.T) {
-	payload := ComplexPayload([]complex128{1 + 1.5i, 0, 4 - 2i, 1 + 1.5i, -1}, nil).(*complexPayload)
+	payload := ComplexPayload([]complex128{1 + 1.5i, 0, 1 + 1.5i, 1 + 1.5i, 1},
+		[]bool{false, false, true, false, false}).(*complexPayload)
 
 	testData := []struct {
 		val interface{}
@@ -1011,7 +1015,8 @@ func TestComplexPayload_Gt(t *testing.T) {
 }
 
 func TestComplexPayload_Lte(t *testing.T) {
-	payload := ComplexPayload([]complex128{1 + 1.5i, 0, 4 - 2i, 1 + 1.5i, -1}, nil).(*complexPayload)
+	payload := ComplexPayload([]complex128{1 + 1.5i, 0, 1 + 1.5i, 1 + 1.5i, 1},
+		[]bool{false, false, true, false, false}).(*complexPayload)
 
 	testData := []struct {
 		val interface{}
@@ -1034,7 +1039,8 @@ func TestComplexPayload_Lte(t *testing.T) {
 }
 
 func TestComplexPayload_Gte(t *testing.T) {
-	payload := ComplexPayload([]complex128{1 + 1.5i, 0, 4 - 2i, 1 + 1.5i, -1}, nil).(*complexPayload)
+	payload := ComplexPayload([]complex128{1 + 1.5i, 0, 1 + 1.5i, 1 + 1.5i, 1},
+		[]bool{false, false, true, false, false}).(*complexPayload)
 
 	testData := []struct {
 		val interface{}

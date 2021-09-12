@@ -886,7 +886,7 @@ func TestIntegerPayload_FindAll(t *testing.T) {
 }
 
 func TestIntegerPayload_Eq(t *testing.T) {
-	payload := IntegerPayload([]int{2, 0, -2, 2, 1}, nil).(*integerPayload)
+	payload := IntegerPayload([]int{2, 0, 2, 2, 1}, []bool{false, false, true, false, false}).(*integerPayload)
 
 	testData := []struct {
 		eq  interface{}
@@ -926,7 +926,7 @@ func TestIntegerPayload_Eq(t *testing.T) {
 }
 
 func TestIntegerPayload_Neq(t *testing.T) {
-	payload := IntegerPayload([]int{2, 0, -2, 2, 1}, nil).(*integerPayload)
+	payload := IntegerPayload([]int{2, 0, 2, 2, 1}, []bool{false, false, true, false, false}).(*integerPayload)
 
 	testData := []struct {
 		eq  interface{}
@@ -966,7 +966,7 @@ func TestIntegerPayload_Neq(t *testing.T) {
 }
 
 func TestIntegerPayload_Gt(t *testing.T) {
-	payload := IntegerPayload([]int{2, 0, -2, 2, 1}, nil).(*integerPayload)
+	payload := IntegerPayload([]int{2, 0, 2, 2, 1}, []bool{false, false, true, false, false}).(*integerPayload)
 
 	testData := []struct {
 		val interface{}
@@ -989,13 +989,13 @@ func TestIntegerPayload_Gt(t *testing.T) {
 }
 
 func TestIntegerPayload_Lt(t *testing.T) {
-	payload := IntegerPayload([]int{2, 0, -2, 2, 1}, nil).(*integerPayload)
+	payload := IntegerPayload([]int{2, 0, 2, 2, 1}, []bool{false, false, true, false, false}).(*integerPayload)
 
 	testData := []struct {
 		val interface{}
 		cmp []bool
 	}{
-		{1, []bool{false, true, true, false, false}},
+		{1, []bool{false, true, false, false, false}},
 		{true, []bool{false, false, false, false, false}},
 	}
 
@@ -1012,7 +1012,7 @@ func TestIntegerPayload_Lt(t *testing.T) {
 }
 
 func TestIntegerPayload_Gte(t *testing.T) {
-	payload := IntegerPayload([]int{2, 0, -2, 2, 1}, nil).(*integerPayload)
+	payload := IntegerPayload([]int{2, 0, 2, 2, 1}, []bool{false, false, true, false, false}).(*integerPayload)
 
 	testData := []struct {
 		val interface{}
@@ -1035,13 +1035,13 @@ func TestIntegerPayload_Gte(t *testing.T) {
 }
 
 func TestIntegerPayload_Lte(t *testing.T) {
-	payload := IntegerPayload([]int{2, 0, -2, 2, 1}, nil).(*integerPayload)
+	payload := IntegerPayload([]int{2, 0, 2, 2, 1}, []bool{false, false, true, false, false}).(*integerPayload)
 
 	testData := []struct {
 		val interface{}
 		cmp []bool
 	}{
-		{1, []bool{false, true, true, false, true}},
+		{1, []bool{false, true, false, false, true}},
 		{true, []bool{false, false, false, false, false}},
 	}
 

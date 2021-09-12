@@ -898,13 +898,14 @@ func TestBooleanPayload_FindAll(t *testing.T) {
 }
 
 func TestBooleanPayload_Eq(t *testing.T) {
-	payload := BooleanPayload([]bool{true, false, true, false, true}, nil).(*booleanPayload)
+	payload := BooleanPayload([]bool{true, false, true, false, true},
+		[]bool{false, false, true, false, false}).(*booleanPayload)
 
 	testData := []struct {
 		eq  interface{}
 		cmp []bool
 	}{
-		{true, []bool{true, false, true, false, true}},
+		{true, []bool{true, false, false, false, true}},
 		{false, []bool{false, true, false, true, false}},
 		{1, []bool{false, false, false, false, false}},
 	}
@@ -922,13 +923,14 @@ func TestBooleanPayload_Eq(t *testing.T) {
 }
 
 func TestBooleanPayload_Neq(t *testing.T) {
-	payload := BooleanPayload([]bool{true, false, true, false, true}, nil).(*booleanPayload)
+	payload := BooleanPayload([]bool{true, false, true, false, true},
+		[]bool{false, false, true, false, false}).(*booleanPayload)
 
 	testData := []struct {
 		val interface{}
 		cmp []bool
 	}{
-		{true, []bool{false, true, false, true, false}},
+		{true, []bool{false, true, true, true, false}},
 		{false, []bool{true, false, true, false, true}},
 		{1, []bool{true, true, true, true, true}},
 	}

@@ -1324,3 +1324,183 @@ func TestVector_FindAll(t *testing.T) {
 		})
 	}
 }
+
+func TestVector_Eq(t *testing.T) {
+	testData := []struct {
+		vec Vector
+		val interface{}
+		cmp []bool
+	}{
+		{
+			vec: Integer([]int{2, 0, 2, 2, 1}, []bool{false, false, true, false, false}),
+			val: 2,
+			cmp: []bool{true, false, false, true, false},
+		},
+		{
+			vec: NA(5),
+			val: 2,
+			cmp: []bool{false, false, false, false, false},
+		},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			cmp := data.vec.Eq(data.val)
+
+			if !reflect.DeepEqual(cmp, data.cmp) {
+				t.Error(fmt.Sprintf("Comparator results (%v) do not match expected (%v)",
+					cmp, data.cmp))
+			}
+		})
+	}
+}
+
+func TestVector_Neq(t *testing.T) {
+	testData := []struct {
+		vec Vector
+		val interface{}
+		cmp []bool
+	}{
+		{
+			vec: Integer([]int{2, 0, 1, 2, 1}, []bool{false, false, true, false, false}),
+			val: 2,
+			cmp: []bool{false, true, true, false, true},
+		},
+		{
+			vec: NA(5),
+			val: 2,
+			cmp: []bool{true, true, true, true, true},
+		},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			cmp := data.vec.Neq(data.val)
+
+			if !reflect.DeepEqual(cmp, data.cmp) {
+				t.Error(fmt.Sprintf("Comparator results (%v) do not match expected (%v)",
+					cmp, data.cmp))
+			}
+		})
+	}
+}
+
+func TestVector_Gt(t *testing.T) {
+	testData := []struct {
+		vec Vector
+		val interface{}
+		cmp []bool
+	}{
+		{
+			vec: Integer([]int{2, 0, 1, 2, 1}, []bool{false, false, true, false, false}),
+			val: 1,
+			cmp: []bool{true, false, false, true, false},
+		},
+		{
+			vec: NA(5),
+			val: 2,
+			cmp: []bool{false, false, false, false, false},
+		},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			cmp := data.vec.Gt(data.val)
+
+			if !reflect.DeepEqual(cmp, data.cmp) {
+				t.Error(fmt.Sprintf("Comparator results (%v) do not match expected (%v)",
+					cmp, data.cmp))
+			}
+		})
+	}
+}
+
+func TestVector_Lt(t *testing.T) {
+	testData := []struct {
+		vec Vector
+		val interface{}
+		cmp []bool
+	}{
+		{
+			vec: Integer([]int{2, 0, 1, 2, 1}, []bool{false, false, true, false, false}),
+			val: 2,
+			cmp: []bool{false, true, false, false, true},
+		},
+		{
+			vec: NA(5),
+			val: 2,
+			cmp: []bool{false, false, false, false, false},
+		},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			cmp := data.vec.Lt(data.val)
+
+			if !reflect.DeepEqual(cmp, data.cmp) {
+				t.Error(fmt.Sprintf("Comparator results (%v) do not match expected (%v)",
+					cmp, data.cmp))
+			}
+		})
+	}
+}
+
+func TestVector_Gte(t *testing.T) {
+	testData := []struct {
+		vec Vector
+		val interface{}
+		cmp []bool
+	}{
+		{
+			vec: Integer([]int{2, 0, 1, 2, 1}, []bool{false, false, true, false, false}),
+			val: 1,
+			cmp: []bool{true, false, false, true, true},
+		},
+		{
+			vec: NA(5),
+			val: 2,
+			cmp: []bool{false, false, false, false, false},
+		},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			cmp := data.vec.Gte(data.val)
+
+			if !reflect.DeepEqual(cmp, data.cmp) {
+				t.Error(fmt.Sprintf("Comparator results (%v) do not match expected (%v)",
+					cmp, data.cmp))
+			}
+		})
+	}
+}
+
+func TestVector_Lte(t *testing.T) {
+	testData := []struct {
+		vec Vector
+		val interface{}
+		cmp []bool
+	}{
+		{
+			vec: Integer([]int{2, 0, 2, 2, 1}, []bool{false, false, true, false, false}),
+			val: 2,
+			cmp: []bool{true, true, false, true, true},
+		},
+		{
+			vec: NA(5),
+			val: 2,
+			cmp: []bool{false, false, false, false, false},
+		},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			cmp := data.vec.Lte(data.val)
+
+			if !reflect.DeepEqual(cmp, data.cmp) {
+				t.Error(fmt.Sprintf("Comparator results (%v) do not match expected (%v)",
+					cmp, data.cmp))
+			}
+		})
+	}
+}

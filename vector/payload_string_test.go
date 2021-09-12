@@ -871,7 +871,8 @@ func TestStringPayload_FindAll(t *testing.T) {
 }
 
 func TestStringPayload_Eq(t *testing.T) {
-	payload := StringPayload([]string{"2", "zero", "minus", "2", "1"}, nil).(*stringPayload)
+	payload := StringPayload([]string{"2", "zero", "2", "2", "1"},
+		[]bool{false, false, true, false, false}).(*stringPayload)
 
 	testData := []struct {
 		eq  interface{}
@@ -902,7 +903,8 @@ func TestStringPayload_Eq(t *testing.T) {
 }
 
 func TestStringPayload_Neq(t *testing.T) {
-	payload := StringPayload([]string{"2", "zero", "minus", "2", "1"}, nil).(*stringPayload)
+	payload := StringPayload([]string{"2", "zero", "2", "2", "1"},
+		[]bool{false, false, true, false, false}).(*stringPayload)
 
 	testData := []struct {
 		eq  interface{}
@@ -932,7 +934,8 @@ func TestStringPayload_Neq(t *testing.T) {
 }
 
 func TestStringPayload_Gt(t *testing.T) {
-	payload := StringPayload([]string{"alpha", "zero", "zeroth", "betha", "gamma"}, nil).(*stringPayload)
+	payload := StringPayload([]string{"alpha", "zero", "zeroth", "zero", "gamma"},
+		[]bool{false, false, false, true, false}).(*stringPayload)
 
 	testData := []struct {
 		val interface{}
@@ -955,13 +958,14 @@ func TestStringPayload_Gt(t *testing.T) {
 }
 
 func TestStringPayload_Lt(t *testing.T) {
-	payload := StringPayload([]string{"alpha", "zero", "zeroth", "betha", "gamma"}, nil).(*stringPayload)
+	payload := StringPayload([]string{"alpha", "zero", "zeroth", "zeroth", "gamma"},
+		[]bool{false, false, false, true, false}).(*stringPayload)
 
 	testData := []struct {
 		val interface{}
 		cmp []bool
 	}{
-		{"zero", []bool{true, false, false, true, true}},
+		{"zero", []bool{true, false, false, false, true}},
 		{true, []bool{false, false, false, false, false}},
 	}
 
@@ -978,7 +982,8 @@ func TestStringPayload_Lt(t *testing.T) {
 }
 
 func TestStringPayload_Gte(t *testing.T) {
-	payload := StringPayload([]string{"alpha", "zero", "zeroth", "betha", "gamma"}, nil).(*stringPayload)
+	payload := StringPayload([]string{"alpha", "zero", "zeroth", "zero", "gamma"},
+		[]bool{false, false, false, true, false}).(*stringPayload)
 
 	testData := []struct {
 		val interface{}
@@ -1001,13 +1006,14 @@ func TestStringPayload_Gte(t *testing.T) {
 }
 
 func TestStringPayload_Lte(t *testing.T) {
-	payload := StringPayload([]string{"alpha", "zero", "zeroth", "betha", "gamma"}, nil).(*stringPayload)
+	payload := StringPayload([]string{"alpha", "zero", "zeroth", "zero", "gamma"},
+		[]bool{false, false, false, true, false}).(*stringPayload)
 
 	testData := []struct {
 		val interface{}
 		cmp []bool
 	}{
-		{"zero", []bool{true, true, false, true, true}},
+		{"zero", []bool{true, true, false, false, true}},
 		{true, []bool{false, false, false, false, false}},
 	}
 
