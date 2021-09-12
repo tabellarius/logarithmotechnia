@@ -435,6 +435,171 @@ func (p *floatPayload) FindAll(needle interface{}) []int {
 	return found
 }
 
+/* Comparable interface */
+
+func (p *floatPayload) Eq(val interface{}) []bool {
+	cmp := make([]bool, p.length)
+
+	v, ok := p.convertComparator(val)
+	if !ok {
+		return cmp
+	}
+
+	for i, datum := range p.data {
+		if p.na[i] {
+			cmp[i] = false
+		} else {
+			cmp[i] = datum == v
+		}
+	}
+
+	return cmp
+}
+
+func (p *floatPayload) Neq(val interface{}) []bool {
+	cmp := make([]bool, p.length)
+
+	v, ok := p.convertComparator(val)
+	if !ok {
+		for i := range p.data {
+			cmp[i] = true
+		}
+
+		return cmp
+	}
+
+	for i, datum := range p.data {
+		if p.na[i] {
+			cmp[i] = true
+		} else {
+			cmp[i] = datum != v
+		}
+	}
+
+	return cmp
+}
+
+func (p *floatPayload) Gt(val interface{}) []bool {
+	cmp := make([]bool, p.length)
+
+	v, ok := p.convertComparator(val)
+	if !ok {
+		return cmp
+	}
+
+	for i, datum := range p.data {
+		if p.na[i] {
+			cmp[i] = false
+		} else {
+			cmp[i] = datum > v
+		}
+	}
+
+	return cmp
+}
+
+func (p *floatPayload) Lt(val interface{}) []bool {
+	cmp := make([]bool, p.length)
+
+	v, ok := p.convertComparator(val)
+	if !ok {
+		return cmp
+	}
+
+	for i, datum := range p.data {
+		if p.na[i] {
+			cmp[i] = false
+		} else {
+			cmp[i] = datum < v
+		}
+	}
+
+	return cmp
+}
+
+func (p *floatPayload) Gte(val interface{}) []bool {
+	cmp := make([]bool, p.length)
+
+	v, ok := p.convertComparator(val)
+	if !ok {
+		return cmp
+	}
+
+	for i, datum := range p.data {
+		if p.na[i] {
+			cmp[i] = false
+		} else {
+			cmp[i] = datum >= v
+		}
+	}
+
+	return cmp
+}
+
+func (p *floatPayload) Lte(val interface{}) []bool {
+	cmp := make([]bool, p.length)
+
+	v, ok := p.convertComparator(val)
+	if !ok {
+		return cmp
+	}
+
+	for i, datum := range p.data {
+		if p.na[i] {
+			cmp[i] = false
+		} else {
+			cmp[i] = datum <= v
+		}
+	}
+
+	return cmp
+}
+
+func (p *floatPayload) convertComparator(val interface{}) (float64, bool) {
+	var v float64
+	var err error
+	ok := true
+	switch val.(type) {
+	case complex128:
+		ip := imag(val.(complex128))
+		if ip == 0 {
+			v = real(val.(complex128))
+		} else {
+			ok = false
+		}
+	case complex64:
+		ip := imag(val.(complex64))
+		if ip == 0 {
+			v = float64(real(val.(complex64)))
+		} else {
+			ok = false
+		}
+	case float64:
+		v = val.(float64)
+	case float32:
+		v = float64(val.(float32))
+	case int:
+		v = float64(val.(int))
+	case int64:
+		v = float64(val.(int64))
+	case int32:
+		v = float64(val.(int32))
+	case uint64:
+		v = float64(val.(uint64))
+	case uint32:
+		v = float64(val.(uint32))
+	case string:
+		v, err = strconv.ParseFloat(val.(string), 64)
+		if err != nil {
+			ok = false
+		}
+	default:
+		ok = false
+	}
+
+	return v, ok
+}
+
 func FloatPayload(data []float64, na []bool, options ...Option) Payload {
 	length := len(data)
 	conf := MergeOptions(options)

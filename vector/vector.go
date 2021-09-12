@@ -44,6 +44,7 @@ type Vector interface {
 	Transform(fn TransformFunc) Vector
 
 	Finder
+	Comparable
 
 	Report() Report
 }
@@ -109,6 +110,15 @@ type Configurable interface {
 type Finder interface {
 	Find(interface{}) int
 	FindAll(interface{}) []int
+}
+
+type Comparable interface {
+	Eq(interface{}) []bool
+	Neq(interface{}) []bool
+	Gt(interface{}) []bool
+	Lt(interface{}) []bool
+	Gte(interface{}) []bool
+	Lte(interface{}) []bool
 }
 
 // vector holds data and functions shared by all vectors
@@ -540,7 +550,7 @@ func (v *vector) Transform(fn TransformFunc) Vector {
 	return NA(v.length)
 }
 
-/* Finder Interface */
+/* Finder interface */
 
 func (v *vector) Find(needle interface{}) int {
 	if finder, ok := v.payload.(Finder); ok {
@@ -556,6 +566,61 @@ func (v *vector) FindAll(needle interface{}) []int {
 	}
 
 	return []int{}
+}
+
+/* Comparable interface */
+
+func (v *vector) Eq(val interface{}) []bool {
+	if comparable, ok := v.payload.(Comparable); ok {
+		return comparable.Eq(val)
+	}
+
+	return make([]bool, v.length)
+}
+
+func (v *vector) Neq(val interface{}) []bool {
+	if comparable, ok := v.payload.(Comparable); ok {
+		return comparable.Neq(val)
+	}
+
+	cmp := make([]bool, v.length)
+	for i := range cmp {
+		cmp[i] = true
+	}
+
+	return cmp
+}
+
+func (v *vector) Gt(val interface{}) []bool {
+	if comparable, ok := v.payload.(Comparable); ok {
+		return comparable.Gt(val)
+	}
+
+	return make([]bool, v.length)
+}
+
+func (v *vector) Lt(val interface{}) []bool {
+	if comparable, ok := v.payload.(Comparable); ok {
+		return comparable.Lt(val)
+	}
+
+	return make([]bool, v.length)
+}
+
+func (v *vector) Gte(val interface{}) []bool {
+	if comparable, ok := v.payload.(Comparable); ok {
+		return comparable.Gte(val)
+	}
+
+	return make([]bool, v.length)
+}
+
+func (v *vector) Lte(val interface{}) []bool {
+	if comparable, ok := v.payload.(Comparable); ok {
+		return comparable.Lte(val)
+	}
+
+	return make([]bool, v.length)
 }
 
 // New creates a vector part of the future vector. This function is used by public functions which create

@@ -336,6 +336,134 @@ func (p *timePayload) FindAll(needle interface{}) []int {
 	return found
 }
 
+/* Comparable interface */
+
+func (p *timePayload) Eq(val interface{}) []bool {
+	cmp := make([]bool, p.length)
+
+	v, ok := val.(time.Time)
+	if !ok {
+		return cmp
+	}
+
+	for i, datum := range p.data {
+		if p.na[i] {
+			cmp[i] = false
+		} else {
+			cmp[i] = datum.Equal(v)
+		}
+	}
+
+	return cmp
+}
+
+func (p *timePayload) Neq(val interface{}) []bool {
+	cmp := make([]bool, p.length)
+
+	v, ok := val.(time.Time)
+	if !ok {
+		for i := range p.data {
+			cmp[i] = true
+		}
+
+		return cmp
+	}
+
+	for i, datum := range p.data {
+		if p.na[i] {
+			cmp[i] = true
+		} else {
+			cmp[i] = !datum.Equal(v)
+		}
+	}
+
+	return cmp
+}
+
+func (p *timePayload) Gt(val interface{}) []bool {
+	cmp := make([]bool, p.length)
+
+	v, ok := val.(time.Time)
+	if !ok {
+		return cmp
+	}
+
+	for i, datum := range p.data {
+		if p.na[i] {
+			cmp[i] = false
+		} else {
+			if p.na[i] {
+				cmp[i] = false
+			} else {
+				cmp[i] = datum.After(v)
+			}
+		}
+	}
+
+	return cmp
+}
+
+func (p *timePayload) Lt(val interface{}) []bool {
+	cmp := make([]bool, p.length)
+
+	v, ok := val.(time.Time)
+	if !ok {
+		return cmp
+	}
+
+	for i, datum := range p.data {
+		if p.na[i] {
+			cmp[i] = false
+		} else {
+			if p.na[i] {
+				cmp[i] = false
+			} else {
+				cmp[i] = datum.Before(v)
+			}
+		}
+	}
+
+	return cmp
+}
+
+func (p *timePayload) Gte(val interface{}) []bool {
+	cmp := make([]bool, p.length)
+
+	v, ok := val.(time.Time)
+	if !ok {
+		return cmp
+	}
+
+	for i, datum := range p.data {
+		if p.na[i] {
+			cmp[i] = false
+		} else {
+			cmp[i] = datum.After(v) || datum.Equal(v)
+		}
+	}
+
+	return cmp
+}
+
+func (p *timePayload) Lte(val interface{}) []bool {
+	cmp := make([]bool, p.length)
+
+	v, ok := val.(time.Time)
+	if !ok {
+		return cmp
+	}
+
+	for i, datum := range p.data {
+		if p.na[i] {
+			cmp[i] = false
+		} else {
+			cmp[i] = datum.Before(v) || datum.Equal(v)
+		}
+	}
+
+	return cmp
+}
+
 func TimePayload(data []time.Time, na []bool) Payload {
 	length := len(data)
 

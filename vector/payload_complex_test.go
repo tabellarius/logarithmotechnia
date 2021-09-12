@@ -899,3 +899,165 @@ func TestComplexPayload_FindAll(t *testing.T) {
 		})
 	}
 }
+
+func TestComplexPayload_Eq(t *testing.T) {
+	payload := ComplexPayload([]complex128{1 + 1.5i, 0, 1 + 1.5i, 1 + 1.5i, 1},
+		[]bool{false, false, true, false, false}).(*complexPayload)
+
+	testData := []struct {
+		eq  interface{}
+		cmp []bool
+	}{
+		{1 + 1.5i, []bool{true, false, false, true, false}},
+		{0 + 0i, []bool{false, true, false, false, false}},
+		{1, []bool{false, false, false, false, true}},
+		{complex64(1 + 1.5i), []bool{true, false, false, true, false}},
+		{float64(1), []bool{false, false, false, false, true}},
+		{float32(1), []bool{false, false, false, false, true}},
+		{int64(1), []bool{false, false, false, false, true}},
+		{int32(1), []bool{false, false, false, false, true}},
+		{uint64(1), []bool{false, false, false, false, true}},
+		{uint32(1), []bool{false, false, false, false, true}},
+		{true, []bool{false, false, false, false, false}},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			cmp := payload.Eq(data.eq)
+
+			if !reflect.DeepEqual(cmp, data.cmp) {
+				t.Error(fmt.Sprintf("Comparator results (%v) do not match expected (%v)",
+					cmp, data.cmp))
+			}
+		})
+	}
+}
+
+func TestComplexPayload_Neq(t *testing.T) {
+	payload := ComplexPayload([]complex128{1 + 1.5i, 0, 1 + 1.5i, 1 + 1.5i, 1},
+		[]bool{false, false, true, false, false}).(*complexPayload)
+
+	testData := []struct {
+		val interface{}
+		cmp []bool
+	}{
+		{1 + 1.5i, []bool{false, true, true, false, true}},
+		{0 + 0i, []bool{true, false, true, true, true}},
+		{1, []bool{true, true, true, true, false}},
+		{complex64(1 + 1.5i), []bool{false, true, true, false, true}},
+		{float64(1), []bool{true, true, true, true, false}},
+		{float32(1), []bool{true, true, true, true, false}},
+		{int64(1), []bool{true, true, true, true, false}},
+		{int32(1), []bool{true, true, true, true, false}},
+		{uint64(1), []bool{true, true, true, true, false}},
+		{uint32(1), []bool{true, true, true, true, false}},
+		{true, []bool{true, true, true, true, true}},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			cmp := payload.Neq(data.val)
+
+			if !reflect.DeepEqual(cmp, data.cmp) {
+				t.Error(fmt.Sprintf("Comparator results (%v) do not match expected (%v)",
+					cmp, data.cmp))
+			}
+		})
+	}
+}
+
+func TestComplexPayload_Lt(t *testing.T) {
+	payload := ComplexPayload([]complex128{1 + 1.5i, 0, 1 + 1.5i, 1 + 1.5i, 1},
+		[]bool{false, false, true, false, false}).(*complexPayload)
+
+	testData := []struct {
+		val interface{}
+		cmp []bool
+	}{
+		{1 + 1.5i, []bool{false, false, false, false, false}},
+		{true, []bool{false, false, false, false, false}},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			cmp := payload.Lt(data.val)
+
+			if !reflect.DeepEqual(cmp, data.cmp) {
+				t.Error(fmt.Sprintf("Comparator results (%v) do not match expected (%v)",
+					cmp, data.cmp))
+			}
+		})
+	}
+}
+
+func TestComplexPayload_Gt(t *testing.T) {
+	payload := ComplexPayload([]complex128{1 + 1.5i, 0, 1 + 1.5i, 1 + 1.5i, 1},
+		[]bool{false, false, true, false, false}).(*complexPayload)
+
+	testData := []struct {
+		val interface{}
+		cmp []bool
+	}{
+		{1 + 1.5i, []bool{false, false, false, false, false}},
+		{true, []bool{false, false, false, false, false}},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			cmp := payload.Gt(data.val)
+
+			if !reflect.DeepEqual(cmp, data.cmp) {
+				t.Error(fmt.Sprintf("Comparator results (%v) do not match expected (%v)",
+					cmp, data.cmp))
+			}
+		})
+	}
+}
+
+func TestComplexPayload_Lte(t *testing.T) {
+	payload := ComplexPayload([]complex128{1 + 1.5i, 0, 1 + 1.5i, 1 + 1.5i, 1},
+		[]bool{false, false, true, false, false}).(*complexPayload)
+
+	testData := []struct {
+		val interface{}
+		cmp []bool
+	}{
+		{1 + 1.5i, []bool{false, false, false, false, false}},
+		{true, []bool{false, false, false, false, false}},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			cmp := payload.Lte(data.val)
+
+			if !reflect.DeepEqual(cmp, data.cmp) {
+				t.Error(fmt.Sprintf("Comparator results (%v) do not match expected (%v)",
+					cmp, data.cmp))
+			}
+		})
+	}
+}
+
+func TestComplexPayload_Gte(t *testing.T) {
+	payload := ComplexPayload([]complex128{1 + 1.5i, 0, 1 + 1.5i, 1 + 1.5i, 1},
+		[]bool{false, false, true, false, false}).(*complexPayload)
+
+	testData := []struct {
+		val interface{}
+		cmp []bool
+	}{
+		{1 + 1.5i, []bool{false, false, false, false, false}},
+		{true, []bool{false, false, false, false, false}},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			cmp := payload.Gte(data.val)
+
+			if !reflect.DeepEqual(cmp, data.cmp) {
+				t.Error(fmt.Sprintf("Comparator results (%v) do not match expected (%v)",
+					cmp, data.cmp))
+			}
+		})
+	}
+}

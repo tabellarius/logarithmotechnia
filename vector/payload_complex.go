@@ -426,6 +426,103 @@ func (p *complexPayload) FindAll(needle interface{}) []int {
 	return found
 }
 
+/* Comparable interface */
+
+func (p *complexPayload) Eq(val interface{}) []bool {
+	cmp := make([]bool, p.length)
+
+	v, ok := p.convertComparator(val)
+	if !ok {
+		return cmp
+	}
+
+	for i, datum := range p.data {
+		if p.na[i] {
+			cmp[i] = false
+		} else {
+			cmp[i] = datum == v
+		}
+	}
+
+	return cmp
+}
+
+func (p *complexPayload) Neq(val interface{}) []bool {
+	cmp := make([]bool, p.length)
+
+	v, ok := p.convertComparator(val)
+	if !ok {
+		for i := range p.data {
+			cmp[i] = true
+		}
+
+		return cmp
+	}
+
+	for i, datum := range p.data {
+		if p.na[i] {
+			cmp[i] = true
+		} else {
+			cmp[i] = datum != v
+		}
+	}
+
+	return cmp
+}
+
+func (p *complexPayload) Gt(interface{}) []bool {
+	cmp := make([]bool, p.length)
+
+	return cmp
+}
+
+func (p *complexPayload) Lt(interface{}) []bool {
+	cmp := make([]bool, p.length)
+
+	return cmp
+}
+
+func (p *complexPayload) Gte(interface{}) []bool {
+	cmp := make([]bool, p.length)
+
+	return cmp
+}
+
+func (p *complexPayload) Lte(interface{}) []bool {
+	cmp := make([]bool, p.length)
+
+	return cmp
+}
+
+func (p *complexPayload) convertComparator(val interface{}) (complex128, bool) {
+	var v complex128
+	ok := true
+	switch val.(type) {
+	case complex128:
+		v = val.(complex128)
+	case complex64:
+		v = complex128(val.(complex64))
+	case float64:
+		v = complex(val.(float64), 0)
+	case float32:
+		v = complex(float64(val.(float32)), 0)
+	case int:
+		v = complex(float64(val.(int)), 0)
+	case int64:
+		v = complex(float64(val.(int64)), 0)
+	case int32:
+		v = complex(float64(val.(int32)), 0)
+	case uint64:
+		v = complex(float64(val.(uint64)), 0)
+	case uint32:
+		v = complex(float64(val.(uint32)), 0)
+	default:
+		ok = false
+	}
+
+	return v, ok
+}
+
 func ComplexPayload(data []complex128, na []bool, options ...Option) Payload {
 	length := len(data)
 	conf := MergeOptions(options)

@@ -917,3 +917,163 @@ func TestFloatPayload_FindAll(t *testing.T) {
 		})
 	}
 }
+
+func TestFloatPayload_Eq(t *testing.T) {
+	payload := FloatPayload([]float64{1.5, 0, 1.5, 1.5, 1}, []bool{false, false, true, false, false}).(*floatPayload)
+
+	testData := []struct {
+		eq  interface{}
+		cmp []bool
+	}{
+		{1.5, []bool{true, false, false, true, false}},
+		{1.5 + 0i, []bool{true, false, false, true, false}},
+		{complex64(1.5 + 0i), []bool{true, false, false, true, false}},
+		{"1.5", []bool{true, false, false, true, false}},
+		{float32(1), []bool{false, false, false, false, true}},
+		{int64(1), []bool{false, false, false, false, true}},
+		{int32(1), []bool{false, false, false, false, true}},
+		{uint64(1), []bool{false, false, false, false, true}},
+		{uint32(1), []bool{false, false, false, false, true}},
+		{true, []bool{false, false, false, false, false}},
+		{1.5 + 1i, []bool{false, false, false, false, false}},
+		{complex64(1.5 + 1i), []bool{false, false, false, false, false}},
+		{"three", []bool{false, false, false, false, false}},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			cmp := payload.Eq(data.eq)
+
+			if !reflect.DeepEqual(cmp, data.cmp) {
+				t.Error(fmt.Sprintf("Comparator results (%v) do not match expected (%v)",
+					cmp, data.cmp))
+			}
+		})
+	}
+}
+
+func TestFloatPayload_Neq(t *testing.T) {
+	payload := FloatPayload([]float64{1.5, 0, 1.5, 1.5, 1}, []bool{false, false, true, false, false}).(*floatPayload)
+
+	testData := []struct {
+		eq  interface{}
+		cmp []bool
+	}{
+		{1.5, []bool{false, true, true, false, true}},
+		{1.5 + 0i, []bool{false, true, true, false, true}},
+		{complex64(1.5 + 0i), []bool{false, true, true, false, true}},
+
+		{float32(1), []bool{true, true, true, true, false}},
+		{int64(1), []bool{true, true, true, true, false}},
+		{int32(1), []bool{true, true, true, true, false}},
+		{uint64(1), []bool{true, true, true, true, false}},
+		{uint32(1), []bool{true, true, true, true, false}},
+
+		{true, []bool{true, true, true, true, true}},
+		{1.5 + 1i, []bool{true, true, true, true, true}},
+		{complex64(1.5 + 1i), []bool{true, true, true, true, true}},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			cmp := payload.Neq(data.eq)
+
+			if !reflect.DeepEqual(cmp, data.cmp) {
+				t.Error(fmt.Sprintf("Comparator results (%v) do not match expected (%v)",
+					cmp, data.cmp))
+			}
+		})
+	}
+}
+
+func TestFloatPayload_Gt(t *testing.T) {
+	payload := FloatPayload([]float64{1.5, 0, 1.5, 1.5, 1}, []bool{false, false, true, false, false}).(*floatPayload)
+
+	testData := []struct {
+		val interface{}
+		cmp []bool
+	}{
+		{1.0, []bool{true, false, false, true, false}},
+		{true, []bool{false, false, false, false, false}},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			cmp := payload.Gt(data.val)
+
+			if !reflect.DeepEqual(cmp, data.cmp) {
+				t.Error(fmt.Sprintf("Comparator results (%v) do not match expected (%v)",
+					cmp, data.cmp))
+			}
+		})
+	}
+}
+
+func TestFloatPayload_Lt(t *testing.T) {
+	payload := FloatPayload([]float64{1.5, 0, 1.5, 1.5, 1}, []bool{false, false, true, false, false}).(*floatPayload)
+
+	testData := []struct {
+		val interface{}
+		cmp []bool
+	}{
+		{1.0, []bool{false, true, false, false, false}},
+		{true, []bool{false, false, false, false, false}},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			cmp := payload.Lt(data.val)
+
+			if !reflect.DeepEqual(cmp, data.cmp) {
+				t.Error(fmt.Sprintf("Comparator results (%v) do not match expected (%v)",
+					cmp, data.cmp))
+			}
+		})
+	}
+}
+
+func TestFloatPayload_Gte(t *testing.T) {
+	payload := FloatPayload([]float64{1.5, 0, 1.5, 1.5, 1}, []bool{false, false, true, false, false}).(*floatPayload)
+
+	testData := []struct {
+		val interface{}
+		cmp []bool
+	}{
+		{1.0, []bool{true, false, false, true, true}},
+		{true, []bool{false, false, false, false, false}},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			cmp := payload.Gte(data.val)
+
+			if !reflect.DeepEqual(cmp, data.cmp) {
+				t.Error(fmt.Sprintf("Comparator results (%v) do not match expected (%v)",
+					cmp, data.cmp))
+			}
+		})
+	}
+}
+
+func TestFloatPayload_Lte(t *testing.T) {
+	payload := FloatPayload([]float64{1.5, 0, 1.5, 1.5, 1}, []bool{false, false, true, false, false}).(*floatPayload)
+
+	testData := []struct {
+		val interface{}
+		cmp []bool
+	}{
+		{1.0, []bool{false, true, false, false, true}},
+		{true, []bool{false, false, false, false, false}},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			cmp := payload.Lte(data.val)
+
+			if !reflect.DeepEqual(cmp, data.cmp) {
+				t.Error(fmt.Sprintf("Comparator results (%v) do not match expected (%v)",
+					cmp, data.cmp))
+			}
+		})
+	}
+}

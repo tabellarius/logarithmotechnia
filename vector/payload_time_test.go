@@ -776,3 +776,159 @@ func TestTimePayload_FindAll(t *testing.T) {
 		})
 	}
 }
+
+func TestTimePayload_Eq(t *testing.T) {
+	payload := TimePayload(toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00",
+		"2020-01-01T12:30:00+03:00", "2020-01-01T12:30:00+03:00"}), []bool{false, false, true, false}).(*timePayload)
+	date, _ := time.Parse(time.RFC3339, "2020-01-01T12:30:00+03:00")
+
+	testData := []struct {
+		eq  interface{}
+		cmp []bool
+	}{
+		{date, []bool{false, false, false, true}},
+
+		{true, []bool{false, false, false, false}},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			cmp := payload.Eq(data.eq)
+
+			if !reflect.DeepEqual(cmp, data.cmp) {
+				t.Error(fmt.Sprintf("Comparator results (%v) do not match expected (%v)",
+					cmp, data.cmp))
+			}
+		})
+	}
+}
+
+func TestTimePayload_Neq(t *testing.T) {
+	payload := TimePayload(toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00",
+		"2020-01-01T12:30:00+03:00", "2020-01-01T12:30:00+03:00"}), []bool{false, false, true, false}).(*timePayload)
+	date, _ := time.Parse(time.RFC3339, "2020-01-01T12:30:00+03:00")
+
+	testData := []struct {
+		eq  interface{}
+		cmp []bool
+	}{
+		{date, []bool{true, true, true, false}},
+
+		{true, []bool{true, true, true, true}},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			cmp := payload.Neq(data.eq)
+
+			if !reflect.DeepEqual(cmp, data.cmp) {
+				t.Error(fmt.Sprintf("Comparator results (%v) do not match expected (%v)",
+					cmp, data.cmp))
+			}
+		})
+	}
+}
+
+func TestTimePayload_Gt(t *testing.T) {
+	payload := TimePayload(toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00",
+		"2006-01-02T15:04:05+07:00", "2020-01-01T12:30:00+03:00"}), []bool{false, false, true, false}).(*timePayload)
+	date, _ := time.Parse(time.RFC3339, "2020-01-01T12:30:00+03:00")
+
+	testData := []struct {
+		eq  interface{}
+		cmp []bool
+	}{
+		{date, []bool{false, true, false, false}},
+
+		{true, []bool{false, false, false, false}},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			cmp := payload.Gt(data.eq)
+
+			if !reflect.DeepEqual(cmp, data.cmp) {
+				t.Error(fmt.Sprintf("Comparator results (%v) do not match expected (%v)",
+					cmp, data.cmp))
+			}
+		})
+	}
+}
+
+func TestTimePayload_Lt(t *testing.T) {
+	payload := TimePayload(toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00",
+		"2021-01-01T12:30:00+03:00", "2020-01-01T12:30:00+03:00"}), []bool{false, false, true, false}).(*timePayload)
+	date, _ := time.Parse(time.RFC3339, "2020-01-01T12:30:00+03:00")
+
+	testData := []struct {
+		eq  interface{}
+		cmp []bool
+	}{
+		{date, []bool{true, false, false, false}},
+
+		{true, []bool{false, false, false, false}},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			cmp := payload.Lt(data.eq)
+
+			if !reflect.DeepEqual(cmp, data.cmp) {
+				t.Error(fmt.Sprintf("Comparator results (%v) do not match expected (%v)",
+					cmp, data.cmp))
+			}
+		})
+	}
+}
+
+func TestTimePayload_Gte(t *testing.T) {
+	payload := TimePayload(toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00",
+		"2020-01-01T12:30:00+03:00", "2020-01-01T12:30:00+03:00"}), []bool{false, false, true, false}).(*timePayload)
+	date, _ := time.Parse(time.RFC3339, "2020-01-01T12:30:00+03:00")
+
+	testData := []struct {
+		eq  interface{}
+		cmp []bool
+	}{
+		{date, []bool{false, true, false, true}},
+
+		{true, []bool{false, false, false, false}},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			cmp := payload.Gte(data.eq)
+
+			if !reflect.DeepEqual(cmp, data.cmp) {
+				t.Error(fmt.Sprintf("Comparator results (%v) do not match expected (%v)",
+					cmp, data.cmp))
+			}
+		})
+	}
+}
+
+func TestTimePayload_Lte(t *testing.T) {
+	payload := TimePayload(toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00",
+		"2020-01-01T12:30:00+03:00", "2020-01-01T12:30:00+03:00"}), []bool{false, false, true, false}).(*timePayload)
+	date, _ := time.Parse(time.RFC3339, "2020-01-01T12:30:00+03:00")
+
+	testData := []struct {
+		eq  interface{}
+		cmp []bool
+	}{
+		{date, []bool{true, false, false, true}},
+
+		{true, []bool{false, false, false, false}},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			cmp := payload.Lte(data.eq)
+
+			if !reflect.DeepEqual(cmp, data.cmp) {
+				t.Error(fmt.Sprintf("Comparator results (%v) do not match expected (%v)",
+					cmp, data.cmp))
+			}
+		})
+	}
+}
