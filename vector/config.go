@@ -7,6 +7,8 @@ const KeyOptionInterfaceConvertors = "interface_convertors"
 const KeyOptionBeforeColumn = "before_column"
 const KeyOptionAfterColumn = "after_column"
 const KeyOptionColumnNames = "column_names"
+const KeyOptionArrangeReverse = "arrange_reverse"
+const KeyOptionArrangeReverseColumns = "arrange_reverse_columns"
 
 //deprecated
 type Config struct {
@@ -87,4 +89,12 @@ func OptionAfterColumn(name string) Option {
 
 func OptionColumnNames(names []string) Option {
 	return ConfOption{KeyOptionColumnNames, names}
+}
+
+func OptionArrangeReverse(reverse bool) Option {
+	return ConfOption{KeyOptionArrangeReverse, reverse}
+}
+
+func OptionArrangeReverseColumns(columns []string) Option {
+	return ConfOption{KeyOptionArrangeReverseColumns, columns}
 }

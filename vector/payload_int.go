@@ -6,7 +6,7 @@ import (
 	"strconv"
 )
 
-const maxIntPrint = 5
+const maxIntPrint = 15
 
 type IntegerWhicherFunc = func(int, int, bool) bool
 type IntegerWhicherCompactFunc = func(int, bool) bool
@@ -19,6 +19,7 @@ type integerPayload struct {
 	length int
 	data   []int
 	DefNAble
+	DefArrangeable
 }
 
 func (p *integerPayload) Type() string {
@@ -363,8 +364,6 @@ func (p *integerPayload) StrForElem(idx int) string {
 	return strconv.Itoa(p.data[idx-1])
 }
 
-/* Finder interface */
-
 func (p *integerPayload) Find(needle interface{}) int {
 	var val int
 
@@ -385,6 +384,8 @@ func (p *integerPayload) Find(needle interface{}) int {
 
 	return 0
 }
+
+/* Finder interface */
 
 func (p *integerPayload) FindAll(needle interface{}) []int {
 	var val int
@@ -408,8 +409,6 @@ func (p *integerPayload) FindAll(needle interface{}) []int {
 	return found
 }
 
-/* Comparable interface */
-
 func (p *integerPayload) Eq(val interface{}) []bool {
 	cmp := make([]bool, p.length)
 
@@ -428,6 +427,8 @@ func (p *integerPayload) Eq(val interface{}) []bool {
 
 	return cmp
 }
+
+/* Comparable interface */
 
 func (p *integerPayload) Neq(val interface{}) []bool {
 	cmp := make([]bool, p.length)
@@ -585,6 +586,73 @@ func (p *integerPayload) convertComparator(val interface{}) (int, bool) {
 	return v, ok
 }
 
+/* Arrangeable interface */
+/*
+func (p *integerPayload) sortedIndices() []int {
+	indices := indicesArray(p.length)
+
+	var fn func(i, j int) bool
+	if p.HasNA() {
+		fn = func (i, j int) bool {
+			if p.na[indices[i]] && p.na[indices[j]] {
+				return i < j
+			}
+
+			if p.na[indices[i]] {
+				return true
+			}
+
+			if p.na[indices[j]] {
+				return false
+			}
+
+			return p.data[indices[i]] < p.data[indices[j]]
+		}
+	} else {
+		fn = func (i, j int) bool {
+			return p.data[indices[i]] < p.data[indices[j]]
+		}
+	}
+
+	sort.Slice(indices, fn)
+
+	return indices
+}
+
+func (p *integerPayload) SortedIndices() []int {
+	return incIndices(p.sortedIndices())
+}
+
+func (p *integerPayload) SortedIndicesWithRanks() ([]int, []int) {
+	indices := p.sortedIndices()
+
+	if len(indices) == 0 {
+		return indices, []int{}
+	}
+
+	if len(indices) == 1 {
+		return indices, []int{1}
+	}
+
+	rank := 1
+	ranks := make([]int, p.length)
+	if p.na[0] {
+		rank = 0
+	}
+	ranks[0] = rank
+	for i := 1; i < p.length; i++ {
+		if p.data[indices[i]] != p.data[indices[i-1]] || p.na[indices[i]] != p.na[indices[i-1]] {
+			rank++
+			ranks[i] = rank
+		} else {
+			ranks[i] = rank
+		}
+	}
+
+	return incIndices(indices), ranks
+}
+*/
+
 func IntegerPayload(data []int, na []bool) Payload {
 	length := len(data)
 
@@ -607,13 +675,26 @@ func IntegerPayload(data []int, na []bool) Payload {
 		}
 	}
 
-	return &integerPayload{
+	payload := &integerPayload{
 		length: length,
 		data:   vecData,
 		DefNAble: DefNAble{
 			na: vecNA,
 		},
 	}
+
+	payload.DefArrangeable = DefArrangeable{
+		length:   payload.length,
+		DefNAble: payload.DefNAble,
+		fnLess: func(i, j int) bool {
+			return payload.data[i] < payload.data[j]
+		},
+		fnEqual: func(i, j int) bool {
+			return payload.data[i] == payload.data[j]
+		},
+	}
+
+	return payload
 }
 
 func Integer(data []int, na []bool) Vector {

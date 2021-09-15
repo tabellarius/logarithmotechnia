@@ -21,6 +21,7 @@ type floatPayload struct {
 	data    []float64
 	printer FloatPrinter
 	DefNAble
+	DefArrangeable
 }
 
 func (p *floatPayload) Type() string {
@@ -631,7 +632,7 @@ func FloatPayload(data []float64, na []bool, options ...Option) Payload {
 		printer.Precision = conf.Value(KeyOptionPrecision).(int)
 	}
 
-	return &floatPayload{
+	payload := &floatPayload{
 		length:  length,
 		data:    vecData,
 		printer: printer,
@@ -639,6 +640,19 @@ func FloatPayload(data []float64, na []bool, options ...Option) Payload {
 			na: vecNA,
 		},
 	}
+
+	payload.DefArrangeable = DefArrangeable{
+		length:   payload.length,
+		DefNAble: payload.DefNAble,
+		fnLess: func(i, j int) bool {
+			return payload.data[i] < payload.data[j]
+		},
+		fnEqual: func(i, j int) bool {
+			return payload.data[i] == payload.data[j]
+		},
+	}
+
+	return payload
 }
 
 func Float(data []float64, na []bool, options ...Option) Vector {

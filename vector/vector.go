@@ -45,6 +45,7 @@ type Vector interface {
 
 	Finder
 	Comparable
+	Arrangeable
 
 	Report() Report
 }
@@ -119,6 +120,11 @@ type Comparable interface {
 	Lt(interface{}) []bool
 	Gte(interface{}) []bool
 	Lte(interface{}) []bool
+}
+
+type Arrangeable interface {
+	SortedIndices() []int
+	SortedIndicesWithRanks() ([]int, []int)
 }
 
 // vector holds data and functions shared by all vectors
@@ -621,6 +627,26 @@ func (v *vector) Lte(val interface{}) []bool {
 	}
 
 	return make([]bool, v.length)
+}
+
+/* Arrangeable interface */
+
+func (v *vector) SortedIndices() []int {
+	if arrangeable, ok := v.payload.(Arrangeable); ok {
+		return arrangeable.SortedIndices()
+	}
+
+	return indicesArray(v.length)
+}
+
+func (v *vector) SortedIndicesWithRanks() ([]int, []int) {
+	if arrangeable, ok := v.payload.(Arrangeable); ok {
+		return arrangeable.SortedIndicesWithRanks()
+	}
+
+	indices := indicesArray(v.length)
+
+	return indices, indices
 }
 
 // New creates a vector part of the future vector. This function is used by public functions which create

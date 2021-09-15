@@ -46,12 +46,11 @@ func (df *Dataframe) Select(selectors ...interface{}) *Dataframe {
 	}
 
 	vectors := []vector.Vector{}
-	names := []string{}
 	for _, name := range colNames {
 		vectors = append(vectors, df.columns[columnMap[name]])
 	}
 
-	return New(vectors, vector.OptionColumnNames(names))
+	return New(vectors, vector.OptionColumnNames(colNames))
 }
 
 func (df *Dataframe) selectByName(colNames []string, name string) []string {

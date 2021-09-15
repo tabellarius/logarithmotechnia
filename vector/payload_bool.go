@@ -15,6 +15,7 @@ type booleanPayload struct {
 	length int
 	data   []bool
 	DefNAble
+	DefArrangeable
 }
 
 func (p *booleanPayload) Type() string {
@@ -496,13 +497,26 @@ func BooleanPayload(data []bool, na []bool) Payload {
 		}
 	}
 
-	return &booleanPayload{
+	payload := &booleanPayload{
 		length: length,
 		data:   vecData,
 		DefNAble: DefNAble{
 			na: vecNA,
 		},
 	}
+
+	payload.DefArrangeable = DefArrangeable{
+		length:   payload.length,
+		DefNAble: payload.DefNAble,
+		fnLess: func(i, j int) bool {
+			return !payload.data[i] && payload.data[j]
+		},
+		fnEqual: func(i, j int) bool {
+			return payload.data[i] == payload.data[j]
+		},
+	}
+
+	return payload
 }
 
 func Boolean(data []bool, na []bool) Vector {
