@@ -565,5 +565,5 @@ func ComplexPayload(data []complex128, na []bool, options ...Option) Payload {
 }
 
 func Complex(data []complex128, na []bool, options ...Option) Vector {
-	return New(ComplexPayload(data, na, options...))
+	return New(ComplexPayload(data, na, options...), options...)
 }

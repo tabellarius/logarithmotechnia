@@ -602,6 +602,6 @@ func StringPayload(data []string, na []bool, _ ...Option) Payload {
 	return payload
 }
 
-func String(data []string, na []bool) Vector {
-	return New(StringPayload(data, na))
+func String(data []string, na []bool, options ...Option) Vector {
+	return New(StringPayload(data, na, options...), options...)
 }

@@ -188,6 +188,6 @@ func NAPayload(length int, _ ...Option) Payload {
 	return payload
 }
 
-func NA(length int) Vector {
-	return New(NAPayload(length))
+func NA(length int, options ...Option) Vector {
+	return New(NAPayload(length, options...), options...)
 }
