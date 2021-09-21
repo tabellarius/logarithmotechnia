@@ -35,13 +35,7 @@ func (p *booleanPayload) ByIndices(indices []int) Payload {
 		na = append(na, p.na[idx-1])
 	}
 
-	return &booleanPayload{
-		length: len(data),
-		data:   data,
-		DefNAble: DefNAble{
-			na: na,
-		},
-	}
+	return BooleanPayload(data, na, p.Options()...)
 }
 
 func (p *booleanPayload) SupportsWhicher(whicher interface{}) bool {
@@ -129,7 +123,7 @@ func (p *booleanPayload) applyToBooleanByFunc(applyFunc BooleanToBooleanApplierF
 		na[i] = naVal
 	}
 
-	return BooleanPayload(data, na)
+	return BooleanPayload(data, na, p.Options()...)
 }
 
 func (p *booleanPayload) applyToBooleanByCompactFunc(applyFunc BooleanToBooleanApplierCompactFunc) Payload {
@@ -145,7 +139,7 @@ func (p *booleanPayload) applyToBooleanByCompactFunc(applyFunc BooleanToBooleanA
 		na[i] = naVal
 	}
 
-	return BooleanPayload(data, na)
+	return BooleanPayload(data, na, p.Options()...)
 }
 
 func (p *booleanPayload) SupportsSummarizer(summarizer interface{}) bool {
@@ -171,7 +165,7 @@ func (p *booleanPayload) Summarize(summarizer interface{}) Payload {
 		}
 	}
 
-	return BooleanPayload([]bool{val}, nil)
+	return BooleanPayload([]bool{val}, nil, p.Options()...)
 }
 
 func (p *booleanPayload) Integers() ([]int, []bool) {
@@ -475,7 +469,11 @@ func (p *booleanPayload) Lte(interface{}) []bool {
 	return cmp
 }
 
-func BooleanPayload(data []bool, na []bool) Payload {
+func (p *booleanPayload) Options() []Option {
+	return []Option{}
+}
+
+func BooleanPayload(data []bool, na []bool, _ ...Option) Payload {
 	length := len(data)
 
 	vecNA := make([]bool, length)

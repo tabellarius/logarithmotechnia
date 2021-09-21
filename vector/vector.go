@@ -58,6 +58,7 @@ type Payload interface {
 	StrForElem(idx int) string
 	Append(payload Payload) Payload
 	Adjust(size int) Payload
+	Options() []Option
 }
 
 type Whichable interface {

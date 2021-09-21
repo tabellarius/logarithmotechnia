@@ -40,7 +40,7 @@ func (p *complexPayload) ByIndices(indices []int) Payload {
 		na = append(na, p.na[idx-1])
 	}
 
-	return ComplexPayload(data, na, p.options()...)
+	return ComplexPayload(data, na, p.Options()...)
 }
 
 func (p *complexPayload) SupportsWhicher(whicher interface{}) bool {
@@ -129,7 +129,7 @@ func (p *complexPayload) applyToComplexByFunc(applyFunc ComplexToComplexApplierF
 		na[i] = naVal
 	}
 
-	return ComplexPayload(data, na, p.options()...)
+	return ComplexPayload(data, na, p.Options()...)
 }
 
 func (p *complexPayload) applyToComplexByCompactFunc(applyFunc ComplexToComplexApplierCompactFunc) Payload {
@@ -145,7 +145,7 @@ func (p *complexPayload) applyToComplexByCompactFunc(applyFunc ComplexToComplexA
 		na[i] = naVal
 	}
 
-	return ComplexPayload(data, na, p.options()...)
+	return ComplexPayload(data, na, p.Options()...)
 }
 
 func (p *complexPayload) SupportsSummarizer(summarizer interface{}) bool {
@@ -172,7 +172,7 @@ func (p *complexPayload) Summarize(summarizer interface{}) Payload {
 		}
 	}
 
-	return ComplexPayload([]complex128{val}, nil, p.options()...)
+	return ComplexPayload([]complex128{val}, nil, p.Options()...)
 }
 
 func (p *complexPayload) Integers() ([]int, []bool) {
@@ -308,7 +308,7 @@ func (p *complexPayload) Append(payload Payload) Payload {
 	copy(newNA, p.na)
 	copy(newNA[p.length:], na)
 
-	return ComplexPayload(newVals, newNA, p.options()...)
+	return ComplexPayload(newVals, newNA, p.Options()...)
 }
 
 func (p *complexPayload) Adjust(size int) Payload {
@@ -330,7 +330,7 @@ func (p *complexPayload) adjustToLesserSize(size int) Payload {
 	copy(data, p.data)
 	copy(na, p.na)
 
-	return ComplexPayload(data, na, p.options()...)
+	return ComplexPayload(data, na, p.Options()...)
 }
 
 func (p *complexPayload) adjustToBiggerSize(size int) Payload {
@@ -350,7 +350,13 @@ func (p *complexPayload) adjustToBiggerSize(size int) Payload {
 	data = data[:size]
 	na = na[:size]
 
-	return ComplexPayload(data, na, p.options()...)
+	return ComplexPayload(data, na, p.Options()...)
+}
+
+func (p *complexPayload) Options() []Option {
+	return []Option{
+		OptionPrecision(p.printer.Precision),
+	}
 }
 
 func (p *complexPayload) StrForElem(idx int) string {
@@ -369,12 +375,6 @@ func (p *complexPayload) StrForElem(idx int) string {
 	}
 
 	return strconv.FormatComplex(p.data[i], 'f', p.printer.Precision, 128)
-}
-
-func (p *complexPayload) options() []Option {
-	return []Option{
-		OptionPrecision(p.printer.Precision),
-	}
 }
 
 /* Finder interface */

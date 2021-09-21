@@ -154,7 +154,7 @@ func (p *interfacePayload) applyToInterfaceByFunc(applyFunc InterfaceToInterface
 		na[i] = naVal
 	}
 
-	return InterfacePayload(data, na)
+	return InterfacePayload(data, na, p.Options()...)
 }
 
 func (p *interfacePayload) applyToInterfaceByCompactFunc(applyFunc InterfaceToInterfaceApplierCompactFunc) Payload {
@@ -170,7 +170,7 @@ func (p *interfacePayload) applyToInterfaceByCompactFunc(applyFunc InterfaceToIn
 		na[i] = naVal
 	}
 
-	return InterfacePayload(data, na)
+	return InterfacePayload(data, na, p.Options()...)
 }
 
 func (p *interfacePayload) SupportsSummarizer(summarizer interface{}) bool {
@@ -197,7 +197,7 @@ func (p *interfacePayload) Summarize(summarizer interface{}) Payload {
 		}
 	}
 
-	return InterfacePayload([]interface{}{val}, nil)
+	return InterfacePayload([]interface{}{val}, nil, p.Options()...)
 }
 
 func (p *interfacePayload) Integers() ([]int, []bool) {
@@ -354,7 +354,7 @@ func (p *interfacePayload) Append(payload Payload) Payload {
 	copy(newNA, p.na)
 	copy(newNA[p.length:], na)
 
-	return InterfacePayload(newVals, newNA)
+	return InterfacePayload(newVals, newNA, p.Options()...)
 }
 
 func (p *interfacePayload) Adjust(size int) Payload {
@@ -376,7 +376,7 @@ func (p *interfacePayload) adjustToLesserSize(size int) Payload {
 	copy(data, p.data)
 	copy(na, p.na)
 
-	return InterfacePayload(data, na)
+	return InterfacePayload(data, na, p.Options()...)
 }
 
 func (p *interfacePayload) adjustToBiggerSize(size int) Payload {
@@ -396,7 +396,11 @@ func (p *interfacePayload) adjustToBiggerSize(size int) Payload {
 	data = data[:size]
 	na = na[:size]
 
-	return InterfacePayload(data, na)
+	return InterfacePayload(data, na, p.Options()...)
+}
+
+func (p *interfacePayload) Options() []Option {
+	return []Option{}
 }
 
 func InterfacePayload(data []interface{}, na []bool, options ...Option) Payload {
