@@ -95,6 +95,6 @@ func OptionArrangeReverse(reverse bool) Option {
 	return ConfOption{KeyOptionArrangeReverse, reverse}
 }
 
-func OptionArrangeReverseColumns(columns []string) Option {
+func OptionArrangeReverseColumns(columns ...string) Option {
 	return ConfOption{KeyOptionArrangeReverseColumns, columns}
 }

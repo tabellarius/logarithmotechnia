@@ -19,6 +19,13 @@ func (df *Dataframe) Arrange(args ...interface{}) *Dataframe {
 		}
 	}
 
+	conf := vector.MergeOptions(options)
+	reverseColumns := []string{}
+	if conf.HasOption(vector.KeyOptionArrangeReverseColumns) {
+		reverseColumns = conf.Value(vector.KeyOptionArrangeReverseColumns).([]string)
+	}
+	rcVec := vector.String(reverseColumns, nil)
+
 	columns := []string{}
 	for _, column := range potentialColumns {
 		if df.HasColumn(column) {
@@ -35,27 +42,27 @@ func (df *Dataframe) Arrange(args ...interface{}) *Dataframe {
 	var indices []int
 	if len(columns) == 1 || df.rowNum <= 1 {
 		indices = df.C(arrangeBy).SortedIndices()
+		if rcVec.Has(arrangeBy) {
+			indices = reverseIndices(indices)
+		}
 	} else {
-		indices = df.arrangeByMultiple(arrangeBy, columns[1:])
+		indices = df.arrangeByMultiple(arrangeBy, columns[1:], rcVec)
 	}
 
-	conf := vector.MergeOptions(options)
 	if conf.HasOption(vector.KeyOptionArrangeReverse) && conf.Value(vector.KeyOptionArrangeReverse).(bool) {
-		newIndices := make([]int, len(indices))
-		idx := 0
-		for i := len(indices) - 1; i >= 0; i-- {
-			newIndices[idx] = indices[i]
-			idx++
-		}
-		indices = newIndices
+		indices = reverseIndices(indices)
 	}
 
 	return df.ByIndices(indices)
 }
 
-func (df *Dataframe) arrangeByMultiple(arrangeBy string, additional []string) []int {
+func (df *Dataframe) arrangeByMultiple(arrangeBy string, additional []string, reverse vector.Vector) []int {
 	if len(additional) == 0 {
-		return df.Cn(arrangeBy).SortedIndices()
+		indices := df.Cn(arrangeBy).SortedIndices()
+		if reverse.Has(arrangeBy) {
+			indices = reverseIndices(indices)
+		}
+		return indices
 	}
 
 	indices, ranks := df.C(arrangeBy).SortedIndicesWithRanks()
@@ -66,7 +73,7 @@ func (df *Dataframe) arrangeByMultiple(arrangeBy string, additional []string) []
 		if ranks[i] != ranks[i-1] {
 			if len(subIndices) > 1 {
 				subDf := df.Select(additional).ByIndices(subIndices)
-				reIndices := subDf.arrangeByMultiple(additional[0], additional[1:])
+				reIndices := subDf.arrangeByMultiple(additional[0], additional[1:], reverse)
 
 				newSubIndices := make([]int, len(subIndices))
 				for j, reidx := range reIndices {
@@ -86,6 +93,10 @@ func (df *Dataframe) arrangeByMultiple(arrangeBy string, additional []string) []
 		} else {
 			subIndices = append(subIndices, indices[i])
 		}
+	}
+
+	if reverse.Has(arrangeBy) {
+		indices = reverseIndices(indices)
 	}
 
 	return indices

@@ -44,6 +44,7 @@ type Vector interface {
 	Transform(fn TransformFunc) Vector
 
 	Finder
+	Has(interface{}) bool
 	Comparable
 	Arrangeable
 
@@ -572,6 +573,14 @@ func (v *vector) FindAll(needle interface{}) []int {
 	}
 
 	return []int{}
+}
+
+func (v *vector) Has(needle interface{}) bool {
+	if finder, ok := v.payload.(Finder); ok {
+		return finder.Find(needle) > 0
+	}
+
+	return false
 }
 
 /* Comparable interface */

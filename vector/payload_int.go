@@ -365,14 +365,8 @@ func (p *integerPayload) StrForElem(idx int) string {
 }
 
 func (p *integerPayload) Find(needle interface{}) int {
-	var val int
-
-	switch v := needle.(type) {
-	case int:
-		val = v
-	case float64:
-		val = int(v)
-	default:
+	val, ok := p.convertComparator(needle)
+	if !ok {
 		return 0
 	}
 
@@ -388,14 +382,8 @@ func (p *integerPayload) Find(needle interface{}) int {
 /* Finder interface */
 
 func (p *integerPayload) FindAll(needle interface{}) []int {
-	var val int
-
-	switch v := needle.(type) {
-	case int:
-		val = v
-	case float64:
-		val = int(v)
-	default:
+	val, ok := p.convertComparator(needle)
+	if !ok {
 		return []int{}
 	}
 
@@ -585,73 +573,6 @@ func (p *integerPayload) convertComparator(val interface{}) (int, bool) {
 
 	return v, ok
 }
-
-/* Arrangeable interface */
-/*
-func (p *integerPayload) sortedIndices() []int {
-	indices := indicesArray(p.length)
-
-	var fn func(i, j int) bool
-	if p.HasNA() {
-		fn = func (i, j int) bool {
-			if p.na[indices[i]] && p.na[indices[j]] {
-				return i < j
-			}
-
-			if p.na[indices[i]] {
-				return true
-			}
-
-			if p.na[indices[j]] {
-				return false
-			}
-
-			return p.data[indices[i]] < p.data[indices[j]]
-		}
-	} else {
-		fn = func (i, j int) bool {
-			return p.data[indices[i]] < p.data[indices[j]]
-		}
-	}
-
-	sort.Slice(indices, fn)
-
-	return indices
-}
-
-func (p *integerPayload) SortedIndices() []int {
-	return incIndices(p.sortedIndices())
-}
-
-func (p *integerPayload) SortedIndicesWithRanks() ([]int, []int) {
-	indices := p.sortedIndices()
-
-	if len(indices) == 0 {
-		return indices, []int{}
-	}
-
-	if len(indices) == 1 {
-		return indices, []int{1}
-	}
-
-	rank := 1
-	ranks := make([]int, p.length)
-	if p.na[0] {
-		rank = 0
-	}
-	ranks[0] = rank
-	for i := 1; i < p.length; i++ {
-		if p.data[indices[i]] != p.data[indices[i-1]] || p.na[indices[i]] != p.na[indices[i-1]] {
-			rank++
-			ranks[i] = rank
-		} else {
-			ranks[i] = rank
-		}
-	}
-
-	return incIndices(indices), ranks
-}
-*/
 
 func IntegerPayload(data []int, na []bool) Payload {
 	length := len(data)
