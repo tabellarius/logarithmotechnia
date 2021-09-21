@@ -109,7 +109,7 @@ func TestDataframe_Mutate(t *testing.T) {
 		t.Run(data.name, func(t *testing.T) {
 			newDf := data.df.Mutate(data.columns, data.options...)
 
-			if !reflect.DeepEqual(newDf.columns, data.expected.columns) {
+			if !vector.CompareVectorArrs(newDf.columns, data.expected.columns) {
 				t.Error(fmt.Sprintf("Columns (%v) are not equal to expected (%v)",
 					newDf.columns, data.expected.columns))
 			}

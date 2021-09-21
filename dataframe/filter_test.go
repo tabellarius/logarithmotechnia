@@ -3,7 +3,6 @@ package dataframe
 import (
 	"fmt"
 	"logarithmotechnia/vector"
-	"reflect"
 	"testing"
 )
 
@@ -58,7 +57,7 @@ func TestDataframe_Filter(t *testing.T) {
 				newDf = df.Filter(data.selectorBool)
 			}
 
-			if !reflect.DeepEqual(newDf.columns, data.dfColumns) {
+			if !vector.CompareVectorArrs(newDf.columns, data.dfColumns) {
 				t.Error(fmt.Sprintf("Columns (%v) are not equal to expected (%v)", newDf.columns, data.dfColumns))
 			}
 		})

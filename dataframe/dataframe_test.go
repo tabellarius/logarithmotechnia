@@ -99,13 +99,14 @@ func TestNew(t *testing.T) {
 				df = New(data.columns)
 			}
 
-			if !reflect.DeepEqual(df.columns, data.dfColumns) {
+			if !vector.CompareVectorArrs(df.columns, data.dfColumns) {
 				t.Error(fmt.Sprintf("Columns (%v) are not equal to expected (%v)", df.columns, data.dfColumns))
 			}
 			if !reflect.DeepEqual(df.columnNames, data.dfColumnNames) {
 				t.Error(fmt.Sprintf("Column names (%v) are not equal to expected (%v)",
 					df.columnNames, data.dfColumnNames))
 			}
+
 		})
 	}
 }
@@ -164,7 +165,7 @@ func TestDataframe_ByIndices(t *testing.T) {
 		t.Run(data.name, func(t *testing.T) {
 			newDf := df.ByIndices(data.indices)
 
-			if !reflect.DeepEqual(newDf.columns, data.dfColumns) {
+			if !vector.CompareVectorArrs(newDf.columns, data.dfColumns) {
 				t.Error(fmt.Sprintf("Columns (%v) are not equal to expected (%v)", newDf.columns, data.dfColumns))
 			}
 		})
@@ -218,7 +219,7 @@ func TestDataframe_Ci(t *testing.T) {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			column := df.Ci(data.index)
 
-			if !reflect.DeepEqual(column, data.column) {
+			if !vector.CompareVectorsForTest(column, data.column) {
 				t.Error(fmt.Sprintf("Columns (%v) are not equal to expected (%v)", column, data.column))
 			}
 		})
@@ -247,7 +248,7 @@ func TestDataframe_Cn(t *testing.T) {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			column := df.Cn(data.name)
 
-			if !reflect.DeepEqual(column, data.column) {
+			if !vector.CompareVectorsForTest(column, data.column) {
 				t.Error(fmt.Sprintf("Columns (%v) are not equal to expected (%v)", column, data.column))
 			}
 		})
@@ -276,7 +277,7 @@ func TestDataframe_C(t *testing.T) {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			column := df.C(data.selector)
 
-			if !reflect.DeepEqual(column, data.column) {
+			if !vector.CompareVectorsForTest(column, data.column) {
 				t.Error(fmt.Sprintf("Columns (%v) are not equal to expected (%v)", column, data.column))
 			}
 		})
@@ -400,7 +401,7 @@ func TestDataframe_SetColumnName(t *testing.T) {
 					df.columnNames, data.columnNames))
 			}
 
-			if !reflect.DeepEqual(df.columnNamesVector, data.columnNamesVector) {
+			if !vector.CompareVectorsForTest(df.columnNamesVector, data.columnNamesVector) {
 				t.Error(fmt.Sprintf("Column names vector (%v) is not equal to expected (%v)",
 					df.columnNamesVector, data.columnNamesVector))
 			}

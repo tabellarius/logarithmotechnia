@@ -842,7 +842,8 @@ func TestIntegerPayload_Find(t *testing.T) {
 		pos    int
 	}{
 		{"existent", 4, 4},
-		{"float64", 2.1, 2},
+		{"float64", 2.0, 2},
+		{"float64", 2.1, 0},
 		{"non-existent", -10, 0},
 		{"incorrect type", "true", 0},
 	}
@@ -868,7 +869,8 @@ func TestIntegerPayload_FindAll(t *testing.T) {
 		pos    []int
 	}{
 		{"existent", 1, []int{1, 3}},
-		{"float", 1.2, []int{1, 3}},
+		{"float", 1.0, []int{1, 3}},
+		{"float", 1.2, []int{}},
 		{"non-existent", -10, []int{}},
 		{"incorrect type", false, []int{}},
 	}

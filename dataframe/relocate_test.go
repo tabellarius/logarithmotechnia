@@ -3,7 +3,6 @@ package dataframe
 import (
 	"fmt"
 	"logarithmotechnia/vector"
-	"reflect"
 	"testing"
 )
 
@@ -121,7 +120,7 @@ func TestDataframe_Relocate(t *testing.T) {
 			parameters := append(data.selectors, data.options...)
 			newDf := df.Relocate(parameters...)
 
-			if !reflect.DeepEqual(newDf.columns, data.columns) {
+			if !vector.CompareVectorArrs(newDf.columns, data.columns) {
 				t.Error(fmt.Sprintf("Columns (%v) are not equal to expected (%v)",
 					newDf.columns, data.columns))
 			}

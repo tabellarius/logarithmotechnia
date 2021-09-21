@@ -6,7 +6,7 @@ import (
 	"strconv"
 )
 
-const maxIntPrint = 5
+const maxIntPrint = 15
 
 type IntegerWhicherFunc = func(int, int, bool) bool
 type IntegerWhicherCompactFunc = func(int, bool) bool
@@ -19,6 +19,7 @@ type integerPayload struct {
 	length int
 	data   []int
 	DefNAble
+	DefArrangeable
 }
 
 func (p *integerPayload) Type() string {
@@ -363,17 +364,9 @@ func (p *integerPayload) StrForElem(idx int) string {
 	return strconv.Itoa(p.data[idx-1])
 }
 
-/* Finder interface */
-
 func (p *integerPayload) Find(needle interface{}) int {
-	var val int
-
-	switch v := needle.(type) {
-	case int:
-		val = v
-	case float64:
-		val = int(v)
-	default:
+	val, ok := p.convertComparator(needle)
+	if !ok {
 		return 0
 	}
 
@@ -386,15 +379,11 @@ func (p *integerPayload) Find(needle interface{}) int {
 	return 0
 }
 
-func (p *integerPayload) FindAll(needle interface{}) []int {
-	var val int
+/* Finder interface */
 
-	switch v := needle.(type) {
-	case int:
-		val = v
-	case float64:
-		val = int(v)
-	default:
+func (p *integerPayload) FindAll(needle interface{}) []int {
+	val, ok := p.convertComparator(needle)
+	if !ok {
 		return []int{}
 	}
 
@@ -407,8 +396,6 @@ func (p *integerPayload) FindAll(needle interface{}) []int {
 
 	return found
 }
-
-/* Comparable interface */
 
 func (p *integerPayload) Eq(val interface{}) []bool {
 	cmp := make([]bool, p.length)
@@ -428,6 +415,8 @@ func (p *integerPayload) Eq(val interface{}) []bool {
 
 	return cmp
 }
+
+/* Comparable interface */
 
 func (p *integerPayload) Neq(val interface{}) []bool {
 	cmp := make([]bool, p.length)
@@ -607,13 +596,26 @@ func IntegerPayload(data []int, na []bool) Payload {
 		}
 	}
 
-	return &integerPayload{
+	payload := &integerPayload{
 		length: length,
 		data:   vecData,
 		DefNAble: DefNAble{
 			na: vecNA,
 		},
 	}
+
+	payload.DefArrangeable = DefArrangeable{
+		length:   payload.length,
+		DefNAble: payload.DefNAble,
+		fnLess: func(i, j int) bool {
+			return payload.data[i] < payload.data[j]
+		},
+		fnEqual: func(i, j int) bool {
+			return payload.data[i] == payload.data[j]
+		},
+	}
+
+	return payload
 }
 
 func Integer(data []int, na []bool) Vector {

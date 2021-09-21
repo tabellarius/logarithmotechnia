@@ -1282,7 +1282,8 @@ func TestVector_Find(t *testing.T) {
 		pos    int
 	}{
 		{"existent", 4, 4},
-		{"float64", 2.1, 2},
+		{"float64", 2.0, 2},
+		{"float64 with floating part", 2.1, 0},
 		{"non-existent", -10, 0},
 		{"incorrect type", "true", 0},
 	}
@@ -1308,7 +1309,8 @@ func TestVector_FindAll(t *testing.T) {
 		pos    []int
 	}{
 		{"existent", 1, []int{1, 3}},
-		{"float", 1.2, []int{1, 3}},
+		{"float", 1.0, []int{1, 3}},
+		{"float with floating part", 1.2, []int{}},
 		{"non-existent", -10, []int{}},
 		{"incorrect type", false, []int{}},
 	}
@@ -1320,6 +1322,33 @@ func TestVector_FindAll(t *testing.T) {
 			if !reflect.DeepEqual(pos, data.pos) {
 				t.Error(fmt.Sprintf("Positions (%v) does not match expected (%v)",
 					pos, data.pos))
+			}
+		})
+	}
+}
+
+func TestVector_Has(t *testing.T) {
+	vec := Integer([]int{1, 2, 1, 4, 0}, nil)
+
+	testData := []struct {
+		name   string
+		needle interface{}
+		has    bool
+	}{
+		{"existent", 4, true},
+		{"float64", 2.0, true},
+		{"float64 with floating part", 2.1, false},
+		{"non-existent", -10, false},
+		{"incorrect type", "true", false},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			has := vec.Has(data.needle)
+
+			if has != data.has {
+				t.Error(fmt.Sprintf("Result (%v) does not match expected (%v)",
+					has, data.has))
 			}
 		})
 	}
@@ -1500,6 +1529,66 @@ func TestVector_Lte(t *testing.T) {
 			if !reflect.DeepEqual(cmp, data.cmp) {
 				t.Error(fmt.Sprintf("Comparator results (%v) do not match expected (%v)",
 					cmp, data.cmp))
+			}
+		})
+	}
+}
+
+func TestVector_SortedIndices(t *testing.T) {
+	testData := []struct {
+		name          string
+		vec           Vector
+		sortedIndices []int
+	}{
+		{
+			name:          "integer with NA",
+			vec:           Integer([]int{12, -8, 0, -4, 5}, []bool{false, false, true, false, false}),
+			sortedIndices: []int{3, 2, 4, 5, 1},
+		},
+		{
+			name:          "integer without NA",
+			vec:           Integer([]int{12, -8, 0, -4, 5}, nil),
+			sortedIndices: []int{2, 4, 3, 5, 1},
+		},
+		{
+			name:          "boolean with NA",
+			vec:           Boolean([]bool{true, true, false, false, true}, []bool{false, false, false, true, true}),
+			sortedIndices: []int{4, 5, 3, 1, 2},
+		},
+		{
+			name:          "boolean without NA",
+			vec:           Boolean([]bool{true, true, false, false, true}, nil),
+			sortedIndices: []int{3, 4, 1, 2, 5},
+		},
+		{
+			name:          "float with NA",
+			vec:           Float([]float64{12, -8, 0, -4, 5}, []bool{false, false, true, false, false}),
+			sortedIndices: []int{3, 2, 4, 5, 1},
+		},
+		{
+			name:          "float without NA",
+			vec:           Float([]float64{12, -8, 0, -4, 5}, nil),
+			sortedIndices: []int{2, 4, 3, 5, 1},
+		},
+		{
+			name:          "string with NA",
+			vec:           String([]string{"delta", "beta", "alpha", "zeroth", "zero"}, []bool{false, false, true, true, false}),
+			sortedIndices: []int{3, 4, 2, 1, 5},
+		},
+		{
+			name:          "string without NA",
+			vec:           String([]string{"delta", "beta", "alpha", "zeroth", "zero"}, nil),
+			sortedIndices: []int{3, 2, 1, 5, 4},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			sortedIndices := data.vec.SortedIndices()
+
+			if !reflect.DeepEqual(sortedIndices, data.sortedIndices) {
+				t.Error(fmt.Sprintf("Comparator results (%v) do not match expected (%v)",
+					sortedIndices, data.sortedIndices))
 			}
 		})
 	}

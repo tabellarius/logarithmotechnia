@@ -19,6 +19,7 @@ type timePayload struct {
 	data    []time.Time
 	printer TimePrinter
 	DefNAble
+	DefArrangeable
 }
 
 func (p *timePayload) Type() string {
@@ -488,7 +489,7 @@ func TimePayload(data []time.Time, na []bool) Payload {
 
 	printer := TimePrinter{Format: time.RFC3339}
 
-	return &timePayload{
+	payload := &timePayload{
 		length:  length,
 		data:    vecData,
 		printer: printer,
@@ -496,6 +497,19 @@ func TimePayload(data []time.Time, na []bool) Payload {
 			na: vecNA,
 		},
 	}
+
+	payload.DefArrangeable = DefArrangeable{
+		length:   payload.length,
+		DefNAble: payload.DefNAble,
+		fnLess: func(i, j int) bool {
+			return payload.data[i].Before(payload.data[j])
+		},
+		fnEqual: func(i, j int) bool {
+			return payload.data[i].Equal(payload.data[j])
+		},
+	}
+
+	return payload
 }
 
 func Time(data []time.Time, na []bool) Vector {

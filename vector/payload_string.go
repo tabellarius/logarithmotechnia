@@ -16,6 +16,7 @@ type stringPayload struct {
 	length int
 	data   []string
 	DefNAble
+	DefArrangeable
 }
 
 func (p *stringPayload) Type() string {
@@ -581,13 +582,26 @@ func StringPayload(data []string, na []bool) Payload {
 		}
 	}
 
-	return &stringPayload{
+	payload := &stringPayload{
 		length: length,
 		data:   vecData,
 		DefNAble: DefNAble{
 			na: vecNA,
 		},
 	}
+
+	payload.DefArrangeable = DefArrangeable{
+		length:   payload.length,
+		DefNAble: payload.DefNAble,
+		fnLess: func(i, j int) bool {
+			return payload.data[i] < payload.data[j]
+		},
+		fnEqual: func(i, j int) bool {
+			return payload.data[i] == payload.data[j]
+		},
+	}
+
+	return payload
 }
 
 func String(data []string, na []bool) Vector {

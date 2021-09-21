@@ -44,7 +44,9 @@ type Vector interface {
 	Transform(fn TransformFunc) Vector
 
 	Finder
+	Has(interface{}) bool
 	Comparable
+	Arrangeable
 
 	Report() Report
 }
@@ -119,6 +121,11 @@ type Comparable interface {
 	Lt(interface{}) []bool
 	Gte(interface{}) []bool
 	Lte(interface{}) []bool
+}
+
+type Arrangeable interface {
+	SortedIndices() []int
+	SortedIndicesWithRanks() ([]int, []int)
 }
 
 // vector holds data and functions shared by all vectors
@@ -568,6 +575,14 @@ func (v *vector) FindAll(needle interface{}) []int {
 	return []int{}
 }
 
+func (v *vector) Has(needle interface{}) bool {
+	if finder, ok := v.payload.(Finder); ok {
+		return finder.Find(needle) > 0
+	}
+
+	return false
+}
+
 /* Comparable interface */
 
 func (v *vector) Eq(val interface{}) []bool {
@@ -621,6 +636,26 @@ func (v *vector) Lte(val interface{}) []bool {
 	}
 
 	return make([]bool, v.length)
+}
+
+/* Arrangeable interface */
+
+func (v *vector) SortedIndices() []int {
+	if arrangeable, ok := v.payload.(Arrangeable); ok {
+		return arrangeable.SortedIndices()
+	}
+
+	return indicesArray(v.length)
+}
+
+func (v *vector) SortedIndicesWithRanks() ([]int, []int) {
+	if arrangeable, ok := v.payload.(Arrangeable); ok {
+		return arrangeable.SortedIndicesWithRanks()
+	}
+
+	indices := indicesArray(v.length)
+
+	return indices, indices
 }
 
 // New creates a vector part of the future vector. This function is used by public functions which create
