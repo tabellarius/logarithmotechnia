@@ -39,7 +39,7 @@ func (p *integerPayload) ByIndices(indices []int) Payload {
 		na = append(na, p.na[idx-1])
 	}
 
-	return IntegerPayload(data, na)
+	return IntegerPayload(data, na, p.Options()...)
 }
 
 func (p *integerPayload) SupportsWhicher(whicher interface{}) bool {
@@ -128,7 +128,7 @@ func (p *integerPayload) applyToIntegerByFunc(applyFunc IntegerToIntegerApplierF
 		na[i] = naVal
 	}
 
-	return IntegerPayload(data, na)
+	return IntegerPayload(data, na, p.Options()...)
 }
 
 func (p *integerPayload) applyToIntegerByCompactFunc(applyFunc IntegerToIntegerApplierCompactFunc) Payload {
@@ -144,7 +144,7 @@ func (p *integerPayload) applyToIntegerByCompactFunc(applyFunc IntegerToIntegerA
 		na[i] = naVal
 	}
 
-	return IntegerPayload(data, na)
+	return IntegerPayload(data, na, p.Options()...)
 }
 
 func (p *integerPayload) SupportsSummarizer(summarizer interface{}) bool {
@@ -171,7 +171,7 @@ func (p *integerPayload) Summarize(summarizer interface{}) Payload {
 		}
 	}
 
-	return IntegerPayload([]int{val}, nil)
+	return IntegerPayload([]int{val}, nil, p.Options()...)
 }
 
 func (p *integerPayload) Integers() ([]int, []bool) {
@@ -311,7 +311,7 @@ func (p *integerPayload) Append(payload Payload) Payload {
 	copy(newNA, p.na)
 	copy(newNA[p.length:], na)
 
-	return IntegerPayload(newVals, newNA)
+	return IntegerPayload(newVals, newNA, p.Options()...)
 }
 
 func (p *integerPayload) Adjust(size int) Payload {
@@ -333,7 +333,7 @@ func (p *integerPayload) adjustToLesserSize(size int) Payload {
 	copy(data, p.data)
 	copy(na, p.na)
 
-	return IntegerPayload(data, na)
+	return IntegerPayload(data, na, p.Options()...)
 }
 
 func (p *integerPayload) adjustToBiggerSize(size int) Payload {
@@ -353,7 +353,7 @@ func (p *integerPayload) adjustToBiggerSize(size int) Payload {
 	data = data[:size]
 	na = na[:size]
 
-	return IntegerPayload(data, na)
+	return IntegerPayload(data, na, p.Options()...)
 }
 
 func (p *integerPayload) StrForElem(idx int) string {
@@ -574,7 +574,11 @@ func (p *integerPayload) convertComparator(val interface{}) (int, bool) {
 	return v, ok
 }
 
-func IntegerPayload(data []int, na []bool) Payload {
+func (p *integerPayload) Options() []Option {
+	return []Option{}
+}
+
+func IntegerPayload(data []int, na []bool, _ ...Option) Payload {
 	length := len(data)
 
 	vecNA := make([]bool, length)
@@ -618,6 +622,6 @@ func IntegerPayload(data []int, na []bool) Payload {
 	return payload
 }
 
-func Integer(data []int, na []bool) Vector {
-	return New(IntegerPayload(data, na))
+func Integer(data []int, na []bool, options ...Option) Vector {
+	return New(IntegerPayload(data, na, options...), options...)
 }

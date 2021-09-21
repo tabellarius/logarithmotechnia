@@ -49,6 +49,7 @@ type Vector interface {
 	Arrangeable
 
 	Report() Report
+	Options() []Option
 }
 
 type Payload interface {
@@ -58,6 +59,7 @@ type Payload interface {
 	StrForElem(idx int) string
 	Append(payload Payload) Payload
 	Adjust(size int) Payload
+	Options() []Option
 }
 
 type Whichable interface {
@@ -328,13 +330,13 @@ func (v *vector) byFromToWithRemove(from, to int) []int {
 func (v *vector) Append(vec Vector) Vector {
 	newPayload := v.payload.Append(vec.Payload())
 
-	return New(newPayload)
+	return New(newPayload, v.Options()...)
 }
 
 func (v *vector) Adjust(size int) Vector {
 	newPayload := v.payload.Adjust(size)
 
-	return New(newPayload)
+	return New(newPayload, v.Options()...)
 }
 
 func (v *vector) IsNA() []bool {
@@ -551,7 +553,7 @@ func (v *vector) Transform(fn TransformFunc) Vector {
 		values, na := interfaceable.Interfaces()
 		payload := fn(values, na)
 
-		return New(payload)
+		return New(payload, v.Options()...)
 	}
 
 	return NA(v.length)
@@ -658,9 +660,13 @@ func (v *vector) SortedIndicesWithRanks() ([]int, []int) {
 	return indices, indices
 }
 
+func (v *vector) Options() []Option {
+	return []Option{}
+}
+
 // New creates a vector part of the future vector. This function is used by public functions which create
 // typed vectors
-func New(payload Payload) Vector {
+func New(payload Payload, _ ...Option) Vector {
 	vec := vector{
 		length:  payload.Len(),
 		payload: payload,

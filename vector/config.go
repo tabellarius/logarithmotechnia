@@ -2,6 +2,7 @@ package vector
 
 const KeyOptionPrecision = "precision"
 const KeyOptionFormat = "format"
+const KeyOptionTimeFormat = "time_format"
 const KeyOptionInterfacePrinterFunc = "interface_printer_func"
 const KeyOptionInterfaceConvertors = "interface_convertors"
 const KeyOptionBeforeColumn = "before_column"
@@ -69,6 +70,10 @@ func OptionPrecision(precision int) Option {
 
 func OptionFormat(format string) Option {
 	return ConfOption{KeyOptionFormat, format}
+}
+
+func OptionTimeFormat(format string) Option {
+	return ConfOption{KeyOptionTimeFormat, format}
 }
 
 func OptionInterfacePrinterFunc(fn InterfacePrinterFunc) Option {

@@ -39,14 +39,7 @@ func (p *timePayload) ByIndices(indices []int) Payload {
 		na = append(na, p.na[idx-1])
 	}
 
-	return &timePayload{
-		length:  len(data),
-		data:    data,
-		printer: p.printer,
-		DefNAble: DefNAble{
-			na: na,
-		},
-	}
+	return TimePayload(data, na, p.Options()...)
 }
 
 func (p *timePayload) SupportsWhicher(whicher interface{}) bool {
@@ -465,8 +458,15 @@ func (p *timePayload) Lte(val interface{}) []bool {
 	return cmp
 }
 
-func TimePayload(data []time.Time, na []bool) Payload {
+func (p *timePayload) Options() []Option {
+	return []Option{
+		OptionTimeFormat(p.printer.Format),
+	}
+}
+
+func TimePayload(data []time.Time, na []bool, options ...Option) Payload {
 	length := len(data)
+	conf := MergeOptions(options)
 
 	vecNA := make([]bool, length)
 	if len(na) > 0 {
@@ -488,6 +488,9 @@ func TimePayload(data []time.Time, na []bool) Payload {
 	}
 
 	printer := TimePrinter{Format: time.RFC3339}
+	if conf.HasOption(KeyOptionTimeFormat) {
+		printer.Format = conf.Value(KeyOptionTimeFormat).(string)
+	}
 
 	payload := &timePayload{
 		length:  length,
@@ -512,6 +515,6 @@ func TimePayload(data []time.Time, na []bool) Payload {
 	return payload
 }
 
-func Time(data []time.Time, na []bool) Vector {
-	return New(TimePayload(data, na))
+func Time(data []time.Time, na []bool, options ...Option) Vector {
+	return New(TimePayload(data, na, options...), options...)
 }

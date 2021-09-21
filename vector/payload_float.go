@@ -136,7 +136,7 @@ func (p *floatPayload) applyToFloatByFunc(applyFunc FloatToFloatApplierFunc) Pay
 		na[i] = naVal
 	}
 
-	return FloatPayload(data, na, p.options()...)
+	return FloatPayload(data, na, p.Options()...)
 }
 
 func (p *floatPayload) applyToFloatByCompactFunc(applyFunc FloatToFloatApplierCompactFunc) Payload {
@@ -152,7 +152,7 @@ func (p *floatPayload) applyToFloatByCompactFunc(applyFunc FloatToFloatApplierCo
 		na[i] = naVal
 	}
 
-	return FloatPayload(data, na, p.options()...)
+	return FloatPayload(data, na, p.Options()...)
 }
 
 func (p *floatPayload) SupportsSummarizer(summarizer interface{}) bool {
@@ -179,7 +179,7 @@ func (p *floatPayload) Summarize(summarizer interface{}) Payload {
 		}
 	}
 
-	return FloatPayload([]float64{val}, nil, p.options()...)
+	return FloatPayload([]float64{val}, nil, p.Options()...)
 }
 
 func (p *floatPayload) Integers() ([]int, []bool) {
@@ -340,7 +340,7 @@ func (p *floatPayload) Append(payload Payload) Payload {
 	copy(newNA, p.na)
 	copy(newNA[p.length:], na)
 
-	return FloatPayload(newVals, newNA, p.options()...)
+	return FloatPayload(newVals, newNA, p.Options()...)
 }
 
 func (p *floatPayload) Adjust(size int) Payload {
@@ -362,7 +362,7 @@ func (p *floatPayload) adjustToLesserSize(size int) Payload {
 	copy(data, p.data)
 	copy(na, p.na)
 
-	return FloatPayload(data, na, p.options()...)
+	return FloatPayload(data, na, p.Options()...)
 }
 
 func (p *floatPayload) adjustToBiggerSize(size int) Payload {
@@ -382,13 +382,7 @@ func (p *floatPayload) adjustToBiggerSize(size int) Payload {
 	data = data[:size]
 	na = na[:size]
 
-	return FloatPayload(data, na, p.options()...)
-}
-
-func (p *floatPayload) options() []Option {
-	return []Option{
-		OptionPrecision(p.printer.Precision),
-	}
+	return FloatPayload(data, na, p.Options()...)
 }
 
 /* Finder interface */
@@ -601,6 +595,12 @@ func (p *floatPayload) convertComparator(val interface{}) (float64, bool) {
 	return v, ok
 }
 
+func (p *floatPayload) Options() []Option {
+	return []Option{
+		OptionPrecision(p.printer.Precision),
+	}
+}
+
 func FloatPayload(data []float64, na []bool, options ...Option) Payload {
 	length := len(data)
 	conf := MergeOptions(options)
@@ -656,5 +656,5 @@ func FloatPayload(data []float64, na []bool, options ...Option) Payload {
 }
 
 func Float(data []float64, na []bool, options ...Option) Vector {
-	return New(FloatPayload(data, na, options...))
+	return New(FloatPayload(data, na, options...), options...)
 }

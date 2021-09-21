@@ -36,13 +36,7 @@ func (p *stringPayload) ByIndices(indices []int) Payload {
 		na = append(na, p.na[idx-1])
 	}
 
-	return &stringPayload{
-		length: len(data),
-		data:   data,
-		DefNAble: DefNAble{
-			na: na,
-		},
-	}
+	return StringPayload(data, na, p.Options()...)
 }
 
 func (p *stringPayload) SupportsWhicher(whicher interface{}) bool {
@@ -130,7 +124,7 @@ func (p *stringPayload) applyToStringByFunc(applyFunc StringToStringApplierFunc)
 		na[i] = naVal
 	}
 
-	return StringPayload(data, na)
+	return StringPayload(data, na, p.Options()...)
 }
 
 func (p *stringPayload) applyToStringByCompactFunc(applyFunc StringToStringApplierCompactFunc) Payload {
@@ -146,7 +140,7 @@ func (p *stringPayload) applyToStringByCompactFunc(applyFunc StringToStringAppli
 		na[i] = naVal
 	}
 
-	return StringPayload(data, na)
+	return StringPayload(data, na, p.Options()...)
 }
 
 func (p *stringPayload) SupportsSummarizer(summarizer interface{}) bool {
@@ -173,7 +167,7 @@ func (p *stringPayload) Summarize(summarizer interface{}) Payload {
 		}
 	}
 
-	return StringPayload([]string{val}, nil)
+	return StringPayload([]string{val}, nil, p.Options()...)
 }
 
 func (p *stringPayload) Integers() ([]int, []bool) {
@@ -327,7 +321,7 @@ func (p *stringPayload) Append(payload Payload) Payload {
 	copy(newNA, p.na)
 	copy(newNA[p.length:], na)
 
-	return StringPayload(newVals, newNA)
+	return StringPayload(newVals, newNA, p.Options()...)
 }
 
 func (p *stringPayload) StrForElem(idx int) string {
@@ -357,7 +351,7 @@ func (p *stringPayload) adjustToLesserSize(size int) Payload {
 	copy(data, p.data)
 	copy(na, p.na)
 
-	return StringPayload(data, na)
+	return StringPayload(data, na, p.Options()...)
 }
 
 func (p *stringPayload) adjustToBiggerSize(size int) Payload {
@@ -377,7 +371,7 @@ func (p *stringPayload) adjustToBiggerSize(size int) Payload {
 	data = data[:size]
 	na = na[:size]
 
-	return StringPayload(data, na)
+	return StringPayload(data, na, p.Options()...)
 }
 
 /* Finder interface */
@@ -560,7 +554,11 @@ func (p *stringPayload) convertComparator(val interface{}) (string, bool) {
 	return v, ok
 }
 
-func StringPayload(data []string, na []bool) Payload {
+func (p *stringPayload) Options() []Option {
+	return []Option{}
+}
+
+func StringPayload(data []string, na []bool, _ ...Option) Payload {
 	length := len(data)
 
 	vecNA := make([]bool, length)
@@ -604,6 +602,6 @@ func StringPayload(data []string, na []bool) Payload {
 	return payload
 }
 
-func String(data []string, na []bool) Vector {
-	return New(StringPayload(data, na))
+func String(data []string, na []bool, options ...Option) Vector {
+	return New(StringPayload(data, na, options...), options...)
 }

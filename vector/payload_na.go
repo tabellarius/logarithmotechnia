@@ -39,11 +39,11 @@ func (p *naPayload) StrForElem(int) string {
 func (p *naPayload) Append(payload Payload) Payload {
 	length := p.length + payload.Len()
 
-	return NAPayload(length)
+	return NAPayload(length, p.Options()...)
 }
 
 func (p *naPayload) Adjust(size int) Payload {
-	return NAPayload(size)
+	return NAPayload(size, p.Options()...)
 }
 
 /* NAble interface */
@@ -172,7 +172,11 @@ func (p *naPayload) naArray() []bool {
 	return na
 }
 
-func NAPayload(length int) Payload {
+func (p *naPayload) Options() []Option {
+	return []Option{}
+}
+
+func NAPayload(length int, _ ...Option) Payload {
 	if length < 0 {
 		length = 0
 	}
@@ -184,6 +188,6 @@ func NAPayload(length int) Payload {
 	return payload
 }
 
-func NA(length int) Vector {
-	return New(NAPayload(length))
+func NA(length int, options ...Option) Vector {
+	return New(NAPayload(length, options...), options...)
 }
