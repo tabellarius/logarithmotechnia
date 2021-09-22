@@ -48,7 +48,6 @@ type Vector interface {
 	Comparable
 	Arrangeable
 
-	Report() Report
 	Options() []Option
 }
 
@@ -134,7 +133,6 @@ type Arrangeable interface {
 type vector struct {
 	length  int
 	payload Payload
-	report  Report
 }
 
 func (v *vector) Type() string {
@@ -154,7 +152,6 @@ func (v *vector) Clone() Vector {
 	return &vector{
 		length:  v.length,
 		payload: v.payload,
-		report:  v.report.Copy(),
 	}
 }
 
@@ -168,13 +165,8 @@ func (v *vector) ByIndices(indices []int) Vector {
 	}
 
 	newPayload := v.payload.ByIndices(selected)
-	vec := &vector{
-		length:  newPayload.Len(),
-		payload: v.payload.ByIndices(selected),
-		report:  Report{},
-	}
 
-	return vec
+	return New(newPayload, v.Options()...)
 }
 
 func (v *vector) normalizeFromTo(from, to int) (int, int) {
@@ -261,7 +253,6 @@ func (v *vector) filterByBooleans(booleans []bool) []int {
 func (v *vector) filterByFromTo(from int, to int) []int {
 	/* from and to have different signs */
 	if from*to < 0 {
-		v.Report().AddError("From and to can not have different signs.")
 		return []int{}
 	}
 
@@ -388,10 +379,6 @@ func (v *vector) WithoutNA() []int {
 
 func (v *vector) IsEmpty() bool {
 	return v.length == 0
-}
-
-func (v *vector) Report() Report {
-	return v.report
 }
 
 func (v *vector) String() string {
@@ -670,7 +657,6 @@ func New(payload Payload, _ ...Option) Vector {
 	vec := vector{
 		length:  payload.Len(),
 		payload: payload,
-		report:  Report{},
 	}
 
 	return &vec
