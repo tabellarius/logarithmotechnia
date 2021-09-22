@@ -30,7 +30,7 @@ func TestAnd(t *testing.T) {
 				{true, false, true, false, true},
 				{true, true, false},
 			},
-			result: []bool{true, false, false, false, false},
+			result: []bool{true, false, false, false, true},
 		},
 		{
 			name: "longer",
@@ -96,7 +96,7 @@ func TestOr(t *testing.T) {
 				{true, false, true, false, true},
 				{true, true, false},
 			},
-			result: []bool{true, true, true, false, true},
+			result: []bool{true, true, true, true, true},
 		},
 		{
 			name: "longer",
@@ -162,7 +162,7 @@ func TestXor(t *testing.T) {
 				{true, false, true, false, true},
 				{true, true, false},
 			},
-			result: []bool{false, true, true, false, true},
+			result: []bool{false, true, true, true, false},
 		},
 		{
 			name: "longer",
@@ -188,7 +188,7 @@ func TestXor(t *testing.T) {
 				{true, false, true},
 				{true, true, true, true, false},
 			},
-			result: []bool{false, false, true, true, false},
+			result: []bool{false, false, true, false, false},
 		},
 	}
 
