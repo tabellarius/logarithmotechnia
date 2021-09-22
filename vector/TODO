@@ -1,13 +1,11 @@
 Factors
 Remove report
-(?) Make all payload public
 String functions
 Finder interface for InterfacePayload
 Default NA Values
 R-style reuse of vector and boolean slices
 Vector's element indices as uint32
 Add df.Err and logger
+Comparator for Interface payload(?) Make all payload public
 (?) Update() + Clone()
 (?) Remove SupportsWhicher() and SupportsFilter()
-Options() + unified *Payload()
-Comparator for Interface payload
