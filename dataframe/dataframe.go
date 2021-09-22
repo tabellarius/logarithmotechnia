@@ -1,6 +1,7 @@
 package dataframe
 
 import (
+	"fmt"
 	"logarithmotechnia/vector"
 	"strconv"
 )
@@ -16,6 +17,7 @@ type Dataframe struct {
 	columns           []vector.Vector
 	columnNames       []string
 	columnNamesVector vector.Vector
+	groupedBy         []string
 }
 
 func (df *Dataframe) RowNum() int {
@@ -27,7 +29,7 @@ func (df *Dataframe) ColNum() int {
 }
 
 func (df *Dataframe) Clone() *Dataframe {
-	return New(df.columns, df.Options()...)
+	return New(df.columns, df.OptionsWithNames()...)
 }
 
 func (df *Dataframe) Cn(name string) vector.Vector {
@@ -107,7 +109,7 @@ func (df *Dataframe) ByIndices(indices []int) *Dataframe {
 		newColumns[i] = column.ByIndices(indices)
 	}
 
-	return New(newColumns, df.Options()...)
+	return New(newColumns, df.OptionsWithNames()...)
 }
 
 func (df *Dataframe) Columns() []vector.Vector {
@@ -130,6 +132,87 @@ func (df *Dataframe) HasColumn(name string) bool {
 	return strPosInSlice(df.columnNames, name) != -1
 }
 
+func (df *Dataframe) GroupBy(selectors ...interface{}) *Dataframe {
+	columns := []string{}
+	for _, selector := range selectors {
+		switch selector.(type) {
+		case string:
+			columns = append(columns, selector.(string))
+		case []string:
+			columns = append(columns, selector.([]string)...)
+		}
+	}
+
+	groupByColumns := []string{}
+	for _, column := range columns {
+		if df.Names().Has(column) {
+			groupByColumns = append(groupByColumns, column)
+		}
+	}
+
+	if len(groupByColumns) == 0 {
+		return df
+	}
+
+	var groups [][]int
+	for _, groupBy := range groupByColumns {
+		groups = df.groupByColumn(groupBy, groups)
+		fmt.Println(groups)
+	}
+
+	if len(groups) == 0 {
+		return df
+	}
+
+	newDf := New(df.columns, df.OptionsWithNames()...)
+	for i, column := range newDf.columns {
+		newDf.columns[i] = column.GroupByIndices(groups)
+	}
+	newDf.groupedBy = groupByColumns
+
+	return newDf
+}
+
+func (df *Dataframe) groupByColumn(groupBy string, curGroups [][]int) [][]int {
+	if len(curGroups) == 0 {
+		return df.Cn(groupBy).Groups()
+	}
+
+	newIndices := [][]int{}
+	for _, indices := range curGroups {
+		if len(indices) == 1 {
+			newIndices = append(newIndices, indices)
+			continue
+		}
+
+		subGroups := df.Cn(groupBy).ByIndices(indices).Groups()
+		replaceGroups := make([][]int, len(subGroups))
+		for j, subIndices := range subGroups {
+			newGroup := make([]int, len(subIndices))
+			for k, idx := range subIndices {
+				newGroup[k] = indices[idx-1]
+			}
+			replaceGroups[j] = newGroup
+		}
+
+		newIndices = append(newIndices, replaceGroups...)
+	}
+
+	return newIndices
+}
+
+func (df *Dataframe) IsGrouped() bool {
+	return len(df.groupedBy) > 0
+}
+
+func (df *Dataframe) Ungroup() *Dataframe {
+	if !df.IsGrouped() {
+		return df
+	}
+
+	return New(df.columns, df.OptionsWithNames()...)
+}
+
 func (df *Dataframe) columnIndexByName(name string) int {
 	index := 1
 
@@ -143,13 +226,31 @@ func (df *Dataframe) columnIndexByName(name string) int {
 	return 0
 }
 
+func (df *Dataframe) OptionsWithNames() []vector.Option {
+	return append(df.Options(), vector.OptionColumnNames(df.columnNames))
+}
+
+func (df *Dataframe) Options() []vector.Option {
+	return []vector.Option{}
+}
+
+func generateColumnNames(length int) []string {
+	names := make([]string, length)
+
+	for i := 1; i <= length; i++ {
+		names[i-1] = strconv.Itoa(i)
+	}
+
+	return names
+}
+
 func New(data interface{}, options ...vector.Option) *Dataframe {
 	var df *Dataframe
 	switch data.(type) {
 	case []vector.Vector:
 		df = dataframeFromVectors(data.([]vector.Vector), options...)
 	case []Column:
-		df = dateframeFromColumns(data.([]Column), options...)
+		df = dataframeFromColumns(data.([]Column), options...)
 	default:
 		df = dataframeFromVectors([]vector.Vector{})
 	}
@@ -157,7 +258,7 @@ func New(data interface{}, options ...vector.Option) *Dataframe {
 	return df
 }
 
-func dateframeFromColumns(columns []Column, options ...vector.Option) *Dataframe {
+func dataframeFromColumns(columns []Column, options ...vector.Option) *Dataframe {
 	vectors := []vector.Vector{}
 	names := []string{}
 
@@ -209,20 +310,4 @@ func dataframeFromVectors(vectors []vector.Vector, options ...vector.Option) *Da
 		columnNames:       columnNames,
 		columnNamesVector: vector.StringWithNA(columnNames, nil),
 	}
-}
-
-func (df *Dataframe) Options() []vector.Option {
-	return []vector.Option{
-		vector.OptionColumnNames(df.columnNames),
-	}
-}
-
-func generateColumnNames(length int) []string {
-	names := make([]string, length)
-
-	for i := 1; i <= length; i++ {
-		names[i-1] = strconv.Itoa(i)
-	}
-
-	return names
 }

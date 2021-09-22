@@ -565,3 +565,15 @@ func TestDataframe_IsValidColumnIndex(t *testing.T) {
 		})
 	}
 }
+
+func TestDataframe_GroupBy(t *testing.T) {
+	df := New([]Column{
+		{"item", vector.Integer([]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, nil)},
+		{"power", vector.Integer([]int{-20, 10, 4, -20, 7, 7, 10, -20, 4, 10}, nil)},
+		{"category", vector.String([]string{"armor", "arms", "arms", "armor", "heal",
+			"heal", "armor", "heal", "unique", "armor"}, nil)},
+	})
+
+	newDf := df.GroupBy("category", "power")
+	fmt.Println(newDf.columns[0].IsGrouped())
+}

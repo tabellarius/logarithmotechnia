@@ -356,6 +356,28 @@ func (p *integerPayload) adjustToBiggerSize(size int) Payload {
 	return IntegerPayload(data, na, p.Options()...)
 }
 
+func (p *integerPayload) Groups() [][]int {
+	groupMap := map[int][]int{}
+	ordered := []int{}
+
+	for i, val := range p.data {
+		idx := i + 1
+		if _, ok := groupMap[val]; !ok {
+			groupMap[val] = []int{}
+			ordered = append(ordered, val)
+		}
+
+		groupMap[val] = append(groupMap[val], idx)
+	}
+
+	groups := make([][]int, len(ordered))
+	for i, val := range ordered {
+		groups[i] = groupMap[val]
+	}
+
+	return groups
+}
+
 func (p *integerPayload) StrForElem(idx int) string {
 	if p.na[idx-1] {
 		return "NA"
