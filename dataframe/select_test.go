@@ -9,12 +9,12 @@ import (
 
 func getTestDataFrame() *Dataframe {
 	return New([]vector.Vector{
-		vector.String([]string{"Jim", "SPARC-001", "Anna", "Lucius", "Maria"}, nil),
-		vector.Integer([]int{31, 3, 24, 41, 33}, nil),
-		vector.String([]string{"m", "", "f", "m", "f"}, []bool{false, true, false, false, false}),
-		vector.Integer([]int{110000, 0, 50000, 120000, 80000}, nil),
-		vector.Boolean([]bool{true, true, true, false, true}, nil),
-		vector.String([]string{"damage", "heavy", "support", "damage", "healer"}, nil),
+		vector.StringWithNA([]string{"Jim", "SPARC-001", "Anna", "Lucius", "Maria"}, nil),
+		vector.IntegerWithNA([]int{31, 3, 24, 41, 33}, nil),
+		vector.StringWithNA([]string{"m", "", "f", "m", "f"}, []bool{false, true, false, false, false}),
+		vector.IntegerWithNA([]int{110000, 0, 50000, 120000, 80000}, nil),
+		vector.BooleanWithNA([]bool{true, true, true, false, true}, nil),
+		vector.StringWithNA([]string{"damage", "heavy", "support", "damage", "healer"}, nil),
 	}, vector.OptionColumnNames([]string{"name", "age", "gender", "salary", "active", "-class"}))
 
 }

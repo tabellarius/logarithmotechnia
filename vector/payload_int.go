@@ -622,6 +622,10 @@ func IntegerPayload(data []int, na []bool, _ ...Option) Payload {
 	return payload
 }
 
-func Integer(data []int, na []bool, options ...Option) Vector {
+func IntegerWithNA(data []int, na []bool, options ...Option) Vector {
 	return New(IntegerPayload(data, na, options...), options...)
+}
+
+func Integer(data []int, options ...Option) Vector {
+	return IntegerWithNA(data, nil, options...)
 }

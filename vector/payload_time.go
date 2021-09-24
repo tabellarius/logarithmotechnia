@@ -515,6 +515,10 @@ func TimePayload(data []time.Time, na []bool, options ...Option) Payload {
 	return payload
 }
 
-func Time(data []time.Time, na []bool, options ...Option) Vector {
+func TimeWithNA(data []time.Time, na []bool, options ...Option) Vector {
 	return New(TimePayload(data, na, options...), options...)
+}
+
+func Time(data []time.Time, options ...Option) Vector {
+	return TimeWithNA(data, nil, options...)
 }

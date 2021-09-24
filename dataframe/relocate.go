@@ -29,7 +29,7 @@ func (df *Dataframe) Relocate(arguments ...interface{}) *Dataframe {
 		case []string:
 			names = append(names, selector.([]string)...)
 		case []bool:
-			boolSelector, _ := vector.Boolean(selector.([]bool), nil).Adjust(df.Names().Len()).Booleans()
+			boolSelector, _ := vector.BooleanWithNA(selector.([]bool), nil).Adjust(df.Names().Len()).Booleans()
 			strings, _ := df.Names().Filter(boolSelector).Strings()
 			names = append(names, strings...)
 		}

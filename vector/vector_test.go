@@ -40,7 +40,7 @@ func TestVector_Len(t *testing.T) {
 
 	for i, data := range testData {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			vec := Integer(data.in, nil)
+			vec := IntegerWithNA(data.in, nil)
 			if vec.Len() != data.expectedLength {
 				t.Error(fmt.Sprintf("Length (%d) is not equal to expected (%d)",
 					vec.Len(), data.expectedLength))
@@ -56,7 +56,7 @@ func TestVector_Integers(t *testing.T) {
 		outNA     []bool
 	}{
 		{
-			vec:       Integer([]int{1, 2, 3, 4, 5}, []bool{false, false, true, false, false}),
+			vec:       IntegerWithNA([]int{1, 2, 3, 4, 5}, []bool{false, false, true, false, false}),
 			outValues: []int{1, 2, 0, 4, 5},
 			outNA:     []bool{false, false, true, false, false},
 		},
@@ -87,7 +87,7 @@ func TestVector_Floats(t *testing.T) {
 		outNA     []bool
 	}{
 		{
-			vec:       Integer([]int{1, 2, 3, 4, 5}, []bool{false, false, true, false, false}),
+			vec:       IntegerWithNA([]int{1, 2, 3, 4, 5}, []bool{false, false, true, false, false}),
 			outValues: []float64{1, 2, math.NaN(), 4, 5},
 			outNA:     []bool{false, false, true, false, false},
 		},
@@ -128,7 +128,7 @@ func TestVector_Complexes(t *testing.T) {
 		outNA     []bool
 	}{
 		{
-			vec:       Integer([]int{1, 2, 3, 4, 5}, []bool{false, false, true, false, false}),
+			vec:       IntegerWithNA([]int{1, 2, 3, 4, 5}, []bool{false, false, true, false, false}),
 			outValues: []complex128{1 + 0i, 2 + 0i, cmplx.NaN(), 4 + 0i, 5 + 0i},
 			outNA:     []bool{false, false, true, false, false},
 		},
@@ -169,7 +169,7 @@ func TestVector_Booleans(t *testing.T) {
 		outNA     []bool
 	}{
 		{
-			vec:       Integer([]int{0, 1, 2, 3, 4, 5}, []bool{false, false, false, true, false, false}),
+			vec:       IntegerWithNA([]int{0, 1, 2, 3, 4, 5}, []bool{false, false, false, true, false, false}),
 			outValues: []bool{false, true, true, false, true, true},
 			outNA:     []bool{false, false, false, true, false, false},
 		},
@@ -200,7 +200,7 @@ func TestVector_Strings(t *testing.T) {
 		outNA     []bool
 	}{
 		{
-			vec:       Integer([]int{1, 2, 3, 4, 5}, []bool{false, false, true, false, false}),
+			vec:       IntegerWithNA([]int{1, 2, 3, 4, 5}, []bool{false, false, true, false, false}),
 			outValues: []string{"1", "2", "", "4", "5"},
 			outNA:     []bool{false, false, true, false, false},
 		},
@@ -231,7 +231,7 @@ func TestVector_Times(t *testing.T) {
 		outNA     []bool
 	}{
 		{
-			vec:       Integer([]int{1, 2, 3, 4, 5}, []bool{false, false, true, false, false}),
+			vec:       IntegerWithNA([]int{1, 2, 3, 4, 5}, []bool{false, false, true, false, false}),
 			outValues: []time.Time{{}, {}, {}, {}, {}},
 			outNA:     []bool{true, true, true, true, true},
 		},
@@ -265,14 +265,14 @@ func TestVector_AsBoolean(t *testing.T) {
 	}{
 		{
 			name:      "booleanable",
-			vec:       Integer([]int{1, 2, 0, 5, 5}, []bool{false, false, false, false, true}),
+			vec:       IntegerWithNA([]int{1, 2, 0, 5, 5}, []bool{false, false, false, false, true}),
 			outValues: []bool{true, true, false, true, false},
 			outNA:     []bool{false, false, false, false, true},
 			isNA:      false,
 		},
 		{
 			name: "non-booleanable",
-			vec: Time(toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00",
+			vec: TimeWithNA(toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00",
 				"1800-06-10T11:00:00Z"}), nil),
 			isNA: true,
 		},
@@ -312,14 +312,14 @@ func TestVector_AsInteger(t *testing.T) {
 	}{
 		{
 			name:      "intable",
-			vec:       String([]string{"1", "2", "0", "5", "5"}, []bool{false, false, false, false, true}),
+			vec:       StringWithNA([]string{"1", "2", "0", "5", "5"}, []bool{false, false, false, false, true}),
 			outValues: []int{1, 2, 0, 5, 0},
 			outNA:     []bool{false, false, false, false, true},
 			isNA:      false,
 		},
 		{
 			name: "non-intable",
-			vec: Time(toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00",
+			vec: TimeWithNA(toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00",
 				"1800-06-10T11:00:00Z"}), nil),
 			isNA: true,
 		},
@@ -359,14 +359,14 @@ func TestVector_AsFloat(t *testing.T) {
 	}{
 		{
 			name:      "floatable",
-			vec:       String([]string{"1.1", "2", "0", "5.5", "5"}, []bool{false, false, false, false, true}),
+			vec:       StringWithNA([]string{"1.1", "2", "0", "5.5", "5"}, []bool{false, false, false, false, true}),
 			outValues: []float64{1.1, 2, 0, 5.5, math.NaN()},
 			outNA:     []bool{false, false, false, false, true},
 			isNA:      false,
 		},
 		{
 			name: "non-floatable",
-			vec: Time(toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00",
+			vec: TimeWithNA(toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00",
 				"1800-06-10T11:00:00Z"}), nil),
 			isNA: true,
 		},
@@ -406,14 +406,14 @@ func TestVector_AsComplex(t *testing.T) {
 	}{
 		{
 			name:      "complexable",
-			vec:       String([]string{"1.1+1.1i", "2", "0", "5.5-2.5i", "5"}, []bool{false, false, false, false, true}),
+			vec:       StringWithNA([]string{"1.1+1.1i", "2", "0", "5.5-2.5i", "5"}, []bool{false, false, false, false, true}),
 			outValues: []complex128{1.1 + 1.1i, 2, 0, 5.5 - 2.5i, cmplx.NaN()},
 			outNA:     []bool{false, false, false, false, true},
 			isNA:      false,
 		},
 		{
 			name: "non-complexable",
-			vec: Time(toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00",
+			vec: TimeWithNA(toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00",
 				"1800-06-10T11:00:00Z"}), nil),
 			isNA: true,
 		},
@@ -453,7 +453,7 @@ func TestVector_AsString(t *testing.T) {
 	}{
 		{
 			name:      "stringable",
-			vec:       Integer([]int{1, 2, 0, 5, 5}, []bool{false, false, false, false, true}),
+			vec:       IntegerWithNA([]int{1, 2, 0, 5, 5}, []bool{false, false, false, false, true}),
 			outValues: []string{"1", "2", "0", "5", ""},
 			outNA:     []bool{false, false, false, false, true},
 			isNA:      false,
@@ -494,7 +494,7 @@ func TestVector_AsInterface(t *testing.T) {
 	}{
 		{
 			name:      "interfaceable",
-			vec:       Integer([]int{1, 2, 0, 5, 5}, []bool{false, false, false, false, true}),
+			vec:       IntegerWithNA([]int{1, 2, 0, 5, 5}, []bool{false, false, false, false, true}),
 			outValues: []interface{}{1, 2, 0, 5, nil},
 			outNA:     []bool{false, false, false, false, true},
 			isNA:      false,
@@ -527,7 +527,7 @@ func TestVector_AsInterface(t *testing.T) {
 
 func TestVector_Transform(t *testing.T) {
 	na := []bool{false, false, true}
-	vec := Time(toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00",
+	vec := TimeWithNA(toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00",
 		"1800-06-10T11:00:00Z"}), na)
 	newVec := vec.Transform(func(values []interface{}, na []bool) Payload {
 		integers := make([]int, len(values))
@@ -562,7 +562,7 @@ func TestVector_AsTime(t *testing.T) {
 	}{
 		{
 			name: "timeable",
-			vec: Time(toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00",
+			vec: TimeWithNA(toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00",
 				"1800-06-10T11:00:00Z"}), nil),
 			outValues: toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00",
 				"1800-06-10T11:00:00Z"}),
@@ -571,7 +571,7 @@ func TestVector_AsTime(t *testing.T) {
 		},
 		{
 			name: "non-timeable",
-			vec:  Integer([]int{1, 2, 0, 5, 5}, []bool{false, false, false, false, true}),
+			vec:  IntegerWithNA([]int{1, 2, 0, 5, 5}, []bool{false, false, false, false, true}),
 			isNA: true,
 		},
 	}
@@ -601,7 +601,7 @@ func TestVector_AsTime(t *testing.T) {
 }
 
 func TestVector_ByIndices(t *testing.T) {
-	vec := Integer([]int{1, 2, 3, 4, 5}, []bool{false, false, true, false, false})
+	vec := IntegerWithNA([]int{1, 2, 3, 4, 5}, []bool{false, false, true, false, false})
 	testData := []struct {
 		name    string
 		indices []int
@@ -644,7 +644,7 @@ func TestVector_ByIndices(t *testing.T) {
 }
 
 func TestVector_FromTo(t *testing.T) {
-	vec := Integer(
+	vec := IntegerWithNA(
 		[]int{1, 2, 3, 4, 5},
 		[]bool{false, false, true, false, false},
 	)
@@ -742,7 +742,7 @@ func TestVector_FromTo(t *testing.T) {
 }
 
 func TestVector_Filter(t *testing.T) {
-	vec := Integer(
+	vec := IntegerWithNA(
 		[]int{1, 2, 3, 4, 5},
 		[]bool{false, false, true, false, false},
 	)
@@ -809,12 +809,12 @@ func TestVector_IsNA(t *testing.T) {
 	}{
 		{
 			name:  "with NA",
-			vec:   Integer([]int{1, 2, 3}, []bool{false, false, false}),
+			vec:   IntegerWithNA([]int{1, 2, 3}, []bool{false, false, false}),
 			notNA: []bool{false, false, false},
 		},
 		{
 			name:  "without NA",
-			vec:   Integer([]int{1, 2, 3}, []bool{false, true, false}),
+			vec:   IntegerWithNA([]int{1, 2, 3}, []bool{false, true, false}),
 			notNA: []bool{false, true, false},
 		},
 		{
@@ -839,12 +839,12 @@ func TestVector_NotNA(t *testing.T) {
 	}{
 		{
 			name:  "with NA",
-			vec:   Integer([]int{1, 2, 3}, []bool{false, false, false}),
+			vec:   IntegerWithNA([]int{1, 2, 3}, []bool{false, false, false}),
 			notNA: []bool{true, true, true},
 		},
 		{
 			name:  "without NA",
-			vec:   Integer([]int{1, 2, 3}, []bool{false, true, false}),
+			vec:   IntegerWithNA([]int{1, 2, 3}, []bool{false, true, false}),
 			notNA: []bool{true, false, true},
 		},
 		{
@@ -869,17 +869,17 @@ func TestVector_HasNA(t *testing.T) {
 	}{
 		{
 			name:  "regular with nil NA",
-			vec:   Integer([]int{1, 2, 3}, nil),
+			vec:   IntegerWithNA([]int{1, 2, 3}, nil),
 			hasNA: false,
 		},
 		{
 			name:  "regular without NA",
-			vec:   Integer([]int{1, 2, 3}, []bool{false, false, false}),
+			vec:   IntegerWithNA([]int{1, 2, 3}, []bool{false, false, false}),
 			hasNA: false,
 		},
 		{
 			name:  "regular with NA",
-			vec:   Integer([]int{1, 2, 3}, []bool{false, true, false}),
+			vec:   IntegerWithNA([]int{1, 2, 3}, []bool{false, true, false}),
 			hasNA: true,
 		},
 		{
@@ -907,17 +907,17 @@ func TestVector_WithNA(t *testing.T) {
 	}{
 		{
 			name:   "regular with nil NA",
-			vec:    Integer([]int{1, 2, 3}, nil),
+			vec:    IntegerWithNA([]int{1, 2, 3}, nil),
 			withNA: []int{},
 		},
 		{
 			name:   "regular without NA",
-			vec:    Integer([]int{1, 2, 3}, []bool{false, false, false}),
+			vec:    IntegerWithNA([]int{1, 2, 3}, []bool{false, false, false}),
 			withNA: []int{},
 		},
 		{
 			name:   "regular with NA",
-			vec:    Integer([]int{1, 2, 3}, []bool{false, true, true}),
+			vec:    IntegerWithNA([]int{1, 2, 3}, []bool{false, true, true}),
 			withNA: []int{2, 3},
 		},
 		{
@@ -945,17 +945,17 @@ func TestVector_WithoutNA(t *testing.T) {
 	}{
 		{
 			name:      "regular with nil NA",
-			vec:       Integer([]int{1, 2, 3}, nil),
+			vec:       IntegerWithNA([]int{1, 2, 3}, nil),
 			withoutNA: []int{1, 2, 3},
 		},
 		{
 			name:      "regular without NA",
-			vec:       Integer([]int{1, 2, 3}, []bool{false, false, false}),
+			vec:       IntegerWithNA([]int{1, 2, 3}, []bool{false, false, false}),
 			withoutNA: []int{1, 2, 3},
 		},
 		{
 			name:      "regular with NA",
-			vec:       Integer([]int{1, 2, 3}, []bool{false, true, true}),
+			vec:       IntegerWithNA([]int{1, 2, 3}, []bool{false, true, true}),
 			withoutNA: []int{1},
 		},
 		{
@@ -983,17 +983,17 @@ func TestVector_IsEmpty(t *testing.T) {
 	}{
 		{
 			name:    "zero integerPayload vector",
-			vec:     Integer([]int{}, nil),
+			vec:     IntegerWithNA([]int{}, nil),
 			isEmpty: true,
 		},
 		{
 			name:    "non-zero integerPayload vector",
-			vec:     Integer([]int{1, 2, 3}, nil),
+			vec:     IntegerWithNA([]int{1, 2, 3}, nil),
 			isEmpty: false,
 		},
 		{
 			name:    "empty vector",
-			vec:     Integer([]int{}, nil),
+			vec:     IntegerWithNA([]int{}, nil),
 			isEmpty: true,
 		},
 	}
@@ -1009,7 +1009,7 @@ func TestVector_IsEmpty(t *testing.T) {
 }
 
 func TestVector_Clone(t *testing.T) {
-	vec := Integer([]int{1, 2, 3, 4, 5}, []bool{false, true, false, true, false}).(*vector)
+	vec := IntegerWithNA([]int{1, 2, 3, 4, 5}, []bool{false, true, false, true, false}).(*vector)
 	newVec := vec.Clone().(*vector)
 
 	if vec.length != newVec.length {
@@ -1040,13 +1040,13 @@ func TestVector_SupportsWhicher(t *testing.T) {
 	}{
 		{
 			name:            "integerPayload vector + valid whicher",
-			vec:             Integer([]int{1, 2, 3}, nil),
+			vec:             IntegerWithNA([]int{1, 2, 3}, nil),
 			whicher:         func(_ int, val int, _ bool) bool { return val == 1 || val == 3 },
 			supportsWhicher: true,
 		},
 		{
 			name:            "integerPayload vector + invalid whicher",
-			vec:             Integer([]int{1, 2, 3}, nil),
+			vec:             IntegerWithNA([]int{1, 2, 3}, nil),
 			whicher:         true,
 			supportsWhicher: false,
 		},
@@ -1072,13 +1072,13 @@ func TestVector_Select(t *testing.T) {
 	}{
 		{
 			name:     "integerPayload vector + valid whicher",
-			vec:      Integer([]int{1, 2, 3}, nil),
+			vec:      IntegerWithNA([]int{1, 2, 3}, nil),
 			whicher:  func(_ int, val int, _ bool) bool { return val == 1 || val == 3 },
 			selected: []bool{true, false, true},
 		},
 		{
 			name:     "integerPayload vector + invalid whicher",
-			vec:      Integer([]int{1, 2, 3}, nil),
+			vec:      IntegerWithNA([]int{1, 2, 3}, nil),
 			whicher:  true,
 			selected: []bool{false, false, false},
 		},
@@ -1104,13 +1104,13 @@ func TestVector_SupportsApplier(t *testing.T) {
 	}{
 		{
 			name:            "integerPayload vector + valid applier",
-			vec:             Integer([]int{1, 2, 3}, nil),
+			vec:             IntegerWithNA([]int{1, 2, 3}, nil),
 			whicher:         func(_ int, val int, na bool) (int, bool) { return 10 * val, na },
 			supportsApplier: true,
 		},
 		{
 			name:            "integerPayload vector + invalid applier",
-			vec:             Integer([]int{1, 2, 3}, nil),
+			vec:             IntegerWithNA([]int{1, 2, 3}, nil),
 			whicher:         true,
 			supportsApplier: false,
 		},
@@ -1137,7 +1137,7 @@ func TestVector_Apply(t *testing.T) {
 	}{
 		{
 			name: "integerPayload vector + valid applier",
-			vec:  Integer([]int{1, 2, 3, 4, 5}, nil),
+			vec:  IntegerWithNA([]int{1, 2, 3, 4, 5}, nil),
 			applier: func(idx int, val int, na bool) (int, bool) {
 				if idx == 5 {
 					return val, true
@@ -1149,7 +1149,7 @@ func TestVector_Apply(t *testing.T) {
 		},
 		{
 			name:    "integerPayload vector + invalid applier",
-			vec:     Integer([]int{1, 2, 3, 4, 5}, nil),
+			vec:     IntegerWithNA([]int{1, 2, 3, 4, 5}, nil),
 			applier: true,
 			dataOut: []int{0, 0, 0, 0, 0},
 			NAOut:   []bool{true, true, true, true, true},
@@ -1173,7 +1173,7 @@ func TestVector_Apply(t *testing.T) {
 }
 
 func TestVector_Append(t *testing.T) {
-	vec := Integer([]int{1, 2, 3}, nil)
+	vec := IntegerWithNA([]int{1, 2, 3}, nil)
 
 	testData := []struct {
 		name    string
@@ -1183,19 +1183,19 @@ func TestVector_Append(t *testing.T) {
 	}{
 		{
 			name:    "boolean",
-			vec:     Boolean([]bool{true, true}, []bool{true, false}),
+			vec:     BooleanWithNA([]bool{true, true}, []bool{true, false}),
 			outData: []int{1, 2, 3, 0, 1},
 			outNA:   []bool{false, false, false, true, false},
 		},
 		{
 			name:    "integer",
-			vec:     Integer([]int{4, 5}, []bool{true, false}),
+			vec:     IntegerWithNA([]int{4, 5}, []bool{true, false}),
 			outData: []int{1, 2, 3, 0, 5},
 			outNA:   []bool{false, false, false, true, false},
 		},
 		{
 			name:    "empty",
-			vec:     Integer([]int{}, []bool{}),
+			vec:     IntegerWithNA([]int{}, []bool{}),
 			outData: []int{1, 2, 3},
 			outNA:   []bool{false, false, false},
 		},
@@ -1229,7 +1229,7 @@ func TestVector_Append(t *testing.T) {
 }
 
 func TestVector_Adjust(t *testing.T) {
-	vec := Integer([]int{1, 2, 3, 4, 5}, []bool{false, false, true, false, false})
+	vec := IntegerWithNA([]int{1, 2, 3, 4, 5}, []bool{false, false, true, false, false})
 
 	testData := []struct {
 		name    string
@@ -1274,7 +1274,7 @@ func TestVector_Adjust(t *testing.T) {
 }
 
 func TestVector_Find(t *testing.T) {
-	vec := Integer([]int{1, 2, 1, 4, 0}, nil)
+	vec := IntegerWithNA([]int{1, 2, 1, 4, 0}, nil)
 
 	testData := []struct {
 		name   string
@@ -1301,7 +1301,7 @@ func TestVector_Find(t *testing.T) {
 }
 
 func TestVector_FindAll(t *testing.T) {
-	vec := Integer([]int{1, 2, 1, 4, 0}, nil)
+	vec := IntegerWithNA([]int{1, 2, 1, 4, 0}, nil)
 
 	testData := []struct {
 		name   string
@@ -1328,7 +1328,7 @@ func TestVector_FindAll(t *testing.T) {
 }
 
 func TestVector_Has(t *testing.T) {
-	vec := Integer([]int{1, 2, 1, 4, 0}, nil)
+	vec := IntegerWithNA([]int{1, 2, 1, 4, 0}, nil)
 
 	testData := []struct {
 		name   string
@@ -1361,7 +1361,7 @@ func TestVector_Eq(t *testing.T) {
 		cmp []bool
 	}{
 		{
-			vec: Integer([]int{2, 0, 2, 2, 1}, []bool{false, false, true, false, false}),
+			vec: IntegerWithNA([]int{2, 0, 2, 2, 1}, []bool{false, false, true, false, false}),
 			val: 2,
 			cmp: []bool{true, false, false, true, false},
 		},
@@ -1391,7 +1391,7 @@ func TestVector_Neq(t *testing.T) {
 		cmp []bool
 	}{
 		{
-			vec: Integer([]int{2, 0, 1, 2, 1}, []bool{false, false, true, false, false}),
+			vec: IntegerWithNA([]int{2, 0, 1, 2, 1}, []bool{false, false, true, false, false}),
 			val: 2,
 			cmp: []bool{false, true, true, false, true},
 		},
@@ -1421,7 +1421,7 @@ func TestVector_Gt(t *testing.T) {
 		cmp []bool
 	}{
 		{
-			vec: Integer([]int{2, 0, 1, 2, 1}, []bool{false, false, true, false, false}),
+			vec: IntegerWithNA([]int{2, 0, 1, 2, 1}, []bool{false, false, true, false, false}),
 			val: 1,
 			cmp: []bool{true, false, false, true, false},
 		},
@@ -1451,7 +1451,7 @@ func TestVector_Lt(t *testing.T) {
 		cmp []bool
 	}{
 		{
-			vec: Integer([]int{2, 0, 1, 2, 1}, []bool{false, false, true, false, false}),
+			vec: IntegerWithNA([]int{2, 0, 1, 2, 1}, []bool{false, false, true, false, false}),
 			val: 2,
 			cmp: []bool{false, true, false, false, true},
 		},
@@ -1481,7 +1481,7 @@ func TestVector_Gte(t *testing.T) {
 		cmp []bool
 	}{
 		{
-			vec: Integer([]int{2, 0, 1, 2, 1}, []bool{false, false, true, false, false}),
+			vec: IntegerWithNA([]int{2, 0, 1, 2, 1}, []bool{false, false, true, false, false}),
 			val: 1,
 			cmp: []bool{true, false, false, true, true},
 		},
@@ -1511,7 +1511,7 @@ func TestVector_Lte(t *testing.T) {
 		cmp []bool
 	}{
 		{
-			vec: Integer([]int{2, 0, 2, 2, 1}, []bool{false, false, true, false, false}),
+			vec: IntegerWithNA([]int{2, 0, 2, 2, 1}, []bool{false, false, true, false, false}),
 			val: 2,
 			cmp: []bool{true, true, false, true, true},
 		},
@@ -1542,42 +1542,42 @@ func TestVector_SortedIndices(t *testing.T) {
 	}{
 		{
 			name:          "integer with NA",
-			vec:           Integer([]int{12, -8, 0, -4, 5}, []bool{false, false, true, false, false}),
+			vec:           IntegerWithNA([]int{12, -8, 0, -4, 5}, []bool{false, false, true, false, false}),
 			sortedIndices: []int{3, 2, 4, 5, 1},
 		},
 		{
 			name:          "integer without NA",
-			vec:           Integer([]int{12, -8, 0, -4, 5}, nil),
+			vec:           IntegerWithNA([]int{12, -8, 0, -4, 5}, nil),
 			sortedIndices: []int{2, 4, 3, 5, 1},
 		},
 		{
 			name:          "boolean with NA",
-			vec:           Boolean([]bool{true, true, false, false, true}, []bool{false, false, false, true, true}),
+			vec:           BooleanWithNA([]bool{true, true, false, false, true}, []bool{false, false, false, true, true}),
 			sortedIndices: []int{4, 5, 3, 1, 2},
 		},
 		{
 			name:          "boolean without NA",
-			vec:           Boolean([]bool{true, true, false, false, true}, nil),
+			vec:           BooleanWithNA([]bool{true, true, false, false, true}, nil),
 			sortedIndices: []int{3, 4, 1, 2, 5},
 		},
 		{
 			name:          "float with NA",
-			vec:           Float([]float64{12, -8, 0, -4, 5}, []bool{false, false, true, false, false}),
+			vec:           FloatWithNA([]float64{12, -8, 0, -4, 5}, []bool{false, false, true, false, false}),
 			sortedIndices: []int{3, 2, 4, 5, 1},
 		},
 		{
 			name:          "float without NA",
-			vec:           Float([]float64{12, -8, 0, -4, 5}, nil),
+			vec:           FloatWithNA([]float64{12, -8, 0, -4, 5}, nil),
 			sortedIndices: []int{2, 4, 3, 5, 1},
 		},
 		{
 			name:          "string with NA",
-			vec:           String([]string{"delta", "beta", "alpha", "zeroth", "zero"}, []bool{false, false, true, true, false}),
+			vec:           StringWithNA([]string{"delta", "beta", "alpha", "zeroth", "zero"}, []bool{false, false, true, true, false}),
 			sortedIndices: []int{3, 4, 2, 1, 5},
 		},
 		{
 			name:          "string without NA",
-			vec:           String([]string{"delta", "beta", "alpha", "zeroth", "zero"}, nil),
+			vec:           StringWithNA([]string{"delta", "beta", "alpha", "zeroth", "zero"}, nil),
 			sortedIndices: []int{3, 2, 1, 5, 4},
 		},
 	}

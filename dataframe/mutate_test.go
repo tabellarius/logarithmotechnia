@@ -9,14 +9,14 @@ import (
 
 func TestDataframe_Mutate(t *testing.T) {
 	df := New([]Column{
-		{"name", vector.String([]string{"Jim", "Lucius", "Alice", "Marcus", "Leticia"}, nil)},
-		{"salary", vector.Integer([]int{100000, 120000, 80000, 70000, 90000}, nil)},
-		{"active", vector.Boolean([]bool{true, false, true, false, true}, nil)},
+		{"name", vector.StringWithNA([]string{"Jim", "Lucius", "Alice", "Marcus", "Leticia"}, nil)},
+		{"salary", vector.IntegerWithNA([]int{100000, 120000, 80000, 70000, 90000}, nil)},
+		{"active", vector.BooleanWithNA([]bool{true, false, true, false, true}, nil)},
 	})
 
 	mutateColumns := []Column{
-		{"city", vector.String([]string{"London", "Rome", "Paris", "New York", "Tokyo"}, nil)},
-		{"missions", vector.Integer([]int{10, 27, 4, 6, 8}, nil)},
+		{"city", vector.StringWithNA([]string{"London", "Rome", "Paris", "New York", "Tokyo"}, nil)},
+		{"missions", vector.IntegerWithNA([]int{10, 27, 4, 6, 8}, nil)},
 	}
 
 	testData := []struct {
@@ -31,11 +31,11 @@ func TestDataframe_Mutate(t *testing.T) {
 			df:      df,
 			columns: mutateColumns,
 			expected: New([]Column{
-				{"name", vector.String([]string{"Jim", "Lucius", "Alice", "Marcus", "Leticia"}, nil)},
-				{"salary", vector.Integer([]int{100000, 120000, 80000, 70000, 90000}, nil)},
-				{"active", vector.Boolean([]bool{true, false, true, false, true}, nil)},
-				{"city", vector.String([]string{"London", "Rome", "Paris", "New York", "Tokyo"}, nil)},
-				{"missions", vector.Integer([]int{10, 27, 4, 6, 8}, nil)},
+				{"name", vector.StringWithNA([]string{"Jim", "Lucius", "Alice", "Marcus", "Leticia"}, nil)},
+				{"salary", vector.IntegerWithNA([]int{100000, 120000, 80000, 70000, 90000}, nil)},
+				{"active", vector.BooleanWithNA([]bool{true, false, true, false, true}, nil)},
+				{"city", vector.StringWithNA([]string{"London", "Rome", "Paris", "New York", "Tokyo"}, nil)},
+				{"missions", vector.IntegerWithNA([]int{10, 27, 4, 6, 8}, nil)},
 			}),
 		},
 		{
@@ -44,11 +44,11 @@ func TestDataframe_Mutate(t *testing.T) {
 			columns: mutateColumns,
 			options: []vector.Option{vector.OptionAfterColumn("name")},
 			expected: New([]Column{
-				{"name", vector.String([]string{"Jim", "Lucius", "Alice", "Marcus", "Leticia"}, nil)},
-				{"city", vector.String([]string{"London", "Rome", "Paris", "New York", "Tokyo"}, nil)},
-				{"missions", vector.Integer([]int{10, 27, 4, 6, 8}, nil)},
-				{"salary", vector.Integer([]int{100000, 120000, 80000, 70000, 90000}, nil)},
-				{"active", vector.Boolean([]bool{true, false, true, false, true}, nil)},
+				{"name", vector.StringWithNA([]string{"Jim", "Lucius", "Alice", "Marcus", "Leticia"}, nil)},
+				{"city", vector.StringWithNA([]string{"London", "Rome", "Paris", "New York", "Tokyo"}, nil)},
+				{"missions", vector.IntegerWithNA([]int{10, 27, 4, 6, 8}, nil)},
+				{"salary", vector.IntegerWithNA([]int{100000, 120000, 80000, 70000, 90000}, nil)},
+				{"active", vector.BooleanWithNA([]bool{true, false, true, false, true}, nil)},
 			}),
 		},
 		{
@@ -57,11 +57,11 @@ func TestDataframe_Mutate(t *testing.T) {
 			columns: mutateColumns,
 			options: []vector.Option{vector.OptionBeforeColumn("salary")},
 			expected: New([]Column{
-				{"name", vector.String([]string{"Jim", "Lucius", "Alice", "Marcus", "Leticia"}, nil)},
-				{"city", vector.String([]string{"London", "Rome", "Paris", "New York", "Tokyo"}, nil)},
-				{"missions", vector.Integer([]int{10, 27, 4, 6, 8}, nil)},
-				{"salary", vector.Integer([]int{100000, 120000, 80000, 70000, 90000}, nil)},
-				{"active", vector.Boolean([]bool{true, false, true, false, true}, nil)},
+				{"name", vector.StringWithNA([]string{"Jim", "Lucius", "Alice", "Marcus", "Leticia"}, nil)},
+				{"city", vector.StringWithNA([]string{"London", "Rome", "Paris", "New York", "Tokyo"}, nil)},
+				{"missions", vector.IntegerWithNA([]int{10, 27, 4, 6, 8}, nil)},
+				{"salary", vector.IntegerWithNA([]int{100000, 120000, 80000, 70000, 90000}, nil)},
+				{"active", vector.BooleanWithNA([]bool{true, false, true, false, true}, nil)},
 			}),
 		},
 		{
@@ -70,11 +70,11 @@ func TestDataframe_Mutate(t *testing.T) {
 			columns: mutateColumns,
 			options: []vector.Option{vector.OptionBeforeColumn("name")},
 			expected: New([]Column{
-				{"city", vector.String([]string{"London", "Rome", "Paris", "New York", "Tokyo"}, nil)},
-				{"missions", vector.Integer([]int{10, 27, 4, 6, 8}, nil)},
-				{"name", vector.String([]string{"Jim", "Lucius", "Alice", "Marcus", "Leticia"}, nil)},
-				{"salary", vector.Integer([]int{100000, 120000, 80000, 70000, 90000}, nil)},
-				{"active", vector.Boolean([]bool{true, false, true, false, true}, nil)},
+				{"city", vector.StringWithNA([]string{"London", "Rome", "Paris", "New York", "Tokyo"}, nil)},
+				{"missions", vector.IntegerWithNA([]int{10, 27, 4, 6, 8}, nil)},
+				{"name", vector.StringWithNA([]string{"Jim", "Lucius", "Alice", "Marcus", "Leticia"}, nil)},
+				{"salary", vector.IntegerWithNA([]int{100000, 120000, 80000, 70000, 90000}, nil)},
+				{"active", vector.BooleanWithNA([]bool{true, false, true, false, true}, nil)},
 			}),
 		},
 		{
@@ -83,11 +83,11 @@ func TestDataframe_Mutate(t *testing.T) {
 			columns: mutateColumns,
 			options: []vector.Option{vector.OptionAfterColumn("pods")},
 			expected: New([]Column{
-				{"name", vector.String([]string{"Jim", "Lucius", "Alice", "Marcus", "Leticia"}, nil)},
-				{"salary", vector.Integer([]int{100000, 120000, 80000, 70000, 90000}, nil)},
-				{"active", vector.Boolean([]bool{true, false, true, false, true}, nil)},
-				{"city", vector.String([]string{"London", "Rome", "Paris", "New York", "Tokyo"}, nil)},
-				{"missions", vector.Integer([]int{10, 27, 4, 6, 8}, nil)},
+				{"name", vector.StringWithNA([]string{"Jim", "Lucius", "Alice", "Marcus", "Leticia"}, nil)},
+				{"salary", vector.IntegerWithNA([]int{100000, 120000, 80000, 70000, 90000}, nil)},
+				{"active", vector.BooleanWithNA([]bool{true, false, true, false, true}, nil)},
+				{"city", vector.StringWithNA([]string{"London", "Rome", "Paris", "New York", "Tokyo"}, nil)},
+				{"missions", vector.IntegerWithNA([]int{10, 27, 4, 6, 8}, nil)},
 			}),
 		},
 		{
@@ -96,11 +96,11 @@ func TestDataframe_Mutate(t *testing.T) {
 			columns: mutateColumns,
 			options: []vector.Option{vector.OptionBeforeColumn("pods")},
 			expected: New([]Column{
-				{"name", vector.String([]string{"Jim", "Lucius", "Alice", "Marcus", "Leticia"}, nil)},
-				{"salary", vector.Integer([]int{100000, 120000, 80000, 70000, 90000}, nil)},
-				{"active", vector.Boolean([]bool{true, false, true, false, true}, nil)},
-				{"city", vector.String([]string{"London", "Rome", "Paris", "New York", "Tokyo"}, nil)},
-				{"missions", vector.Integer([]int{10, 27, 4, 6, 8}, nil)},
+				{"name", vector.StringWithNA([]string{"Jim", "Lucius", "Alice", "Marcus", "Leticia"}, nil)},
+				{"salary", vector.IntegerWithNA([]int{100000, 120000, 80000, 70000, 90000}, nil)},
+				{"active", vector.BooleanWithNA([]bool{true, false, true, false, true}, nil)},
+				{"city", vector.StringWithNA([]string{"London", "Rome", "Paris", "New York", "Tokyo"}, nil)},
+				{"missions", vector.IntegerWithNA([]int{10, 27, 4, 6, 8}, nil)},
 			}),
 		},
 	}

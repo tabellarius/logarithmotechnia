@@ -33,58 +33,58 @@ func TestNew(t *testing.T) {
 		{
 			name: "normal",
 			columns: []vector.Vector{
-				vector.Integer([]int{1, 2, 3}, nil),
-				vector.String([]string{"1", "2", "3"}, nil),
-				vector.Boolean([]bool{true, true, false}, nil),
+				vector.IntegerWithNA([]int{1, 2, 3}, nil),
+				vector.StringWithNA([]string{"1", "2", "3"}, nil),
+				vector.BooleanWithNA([]bool{true, true, false}, nil),
 			},
 			dfColumns: []vector.Vector{
-				vector.Integer([]int{1, 2, 3}, nil),
-				vector.String([]string{"1", "2", "3"}, nil),
-				vector.Boolean([]bool{true, true, false}, nil),
+				vector.IntegerWithNA([]int{1, 2, 3}, nil),
+				vector.StringWithNA([]string{"1", "2", "3"}, nil),
+				vector.BooleanWithNA([]bool{true, true, false}, nil),
 			},
 			dfColumnNames: []string{"1", "2", "3"},
 		},
 		{
 			name: "normal with column names",
 			columns: []vector.Vector{
-				vector.Integer([]int{1, 2, 3}, nil),
-				vector.String([]string{"1", "2", "3"}, nil),
-				vector.Boolean([]bool{true, true, false}, nil),
+				vector.IntegerWithNA([]int{1, 2, 3}, nil),
+				vector.StringWithNA([]string{"1", "2", "3"}, nil),
+				vector.BooleanWithNA([]bool{true, true, false}, nil),
 			},
 			columnNames: []string{"int", "string", "bool"},
 			dfColumns: []vector.Vector{
-				vector.Integer([]int{1, 2, 3}, nil),
-				vector.String([]string{"1", "2", "3"}, nil),
-				vector.Boolean([]bool{true, true, false}, nil),
+				vector.IntegerWithNA([]int{1, 2, 3}, nil),
+				vector.StringWithNA([]string{"1", "2", "3"}, nil),
+				vector.BooleanWithNA([]bool{true, true, false}, nil),
 			},
 			dfColumnNames: []string{"int", "string", "bool"},
 		},
 		{
 			name: "normal with partial column names",
 			columns: []vector.Vector{
-				vector.Integer([]int{1, 2, 3}, nil),
-				vector.String([]string{"1", "2", "3"}, nil),
-				vector.Boolean([]bool{true, true, false}, nil),
+				vector.IntegerWithNA([]int{1, 2, 3}, nil),
+				vector.StringWithNA([]string{"1", "2", "3"}, nil),
+				vector.BooleanWithNA([]bool{true, true, false}, nil),
 			},
 			columnNames: []string{"int", "string"},
 			dfColumns: []vector.Vector{
-				vector.Integer([]int{1, 2, 3}, nil),
-				vector.String([]string{"1", "2", "3"}, nil),
-				vector.Boolean([]bool{true, true, false}, nil),
+				vector.IntegerWithNA([]int{1, 2, 3}, nil),
+				vector.StringWithNA([]string{"1", "2", "3"}, nil),
+				vector.BooleanWithNA([]bool{true, true, false}, nil),
 			},
 			dfColumnNames: []string{"int", "string", "3"},
 		},
 		{
 			name: "different columns' length",
 			columns: []vector.Vector{
-				vector.Integer([]int{1, 2, 3, 4, 5}, nil),
-				vector.String([]string{"1", "2", "3"}, nil),
-				vector.Boolean([]bool{true, true}, nil),
+				vector.IntegerWithNA([]int{1, 2, 3, 4, 5}, nil),
+				vector.StringWithNA([]string{"1", "2", "3"}, nil),
+				vector.BooleanWithNA([]bool{true, true}, nil),
 			},
 			dfColumns: []vector.Vector{
-				vector.Integer([]int{1, 2, 3, 4, 5}, nil),
-				vector.String([]string{"1", "2", "3", "", ""}, []bool{false, false, false, true, true}),
-				vector.Boolean([]bool{true, true, false, false, false}, []bool{false, false, true, true, true}),
+				vector.IntegerWithNA([]int{1, 2, 3, 4, 5}, nil),
+				vector.StringWithNA([]string{"1", "2", "3", "", ""}, []bool{false, false, false, true, true}),
+				vector.BooleanWithNA([]bool{true, true, false, false, false}, []bool{false, false, true, true, true}),
 			},
 			dfColumnNames: []string{"1", "2", "3"},
 		},
@@ -113,9 +113,9 @@ func TestNew(t *testing.T) {
 
 func TestDataframe_ByIndices(t *testing.T) {
 	df := New([]vector.Vector{
-		vector.Integer([]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, nil),
-		vector.String([]string{"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"}, nil),
-		vector.Boolean([]bool{true, false, true, false, true, false, true, false, true, false}, nil),
+		vector.IntegerWithNA([]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, nil),
+		vector.StringWithNA([]string{"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"}, nil),
+		vector.BooleanWithNA([]bool{true, false, true, false, true, false, true, false, true, false}, nil),
 	})
 
 	testData := []struct {
@@ -127,36 +127,36 @@ func TestDataframe_ByIndices(t *testing.T) {
 			name:    "normal",
 			indices: []int{1, 3, 5, 8, 10},
 			dfColumns: []vector.Vector{
-				vector.Integer([]int{1, 3, 5, 8, 10}, nil),
-				vector.String([]string{"1", "3", "5", "8", "10"}, nil),
-				vector.Boolean([]bool{true, true, true, false, false}, nil),
+				vector.IntegerWithNA([]int{1, 3, 5, 8, 10}, nil),
+				vector.StringWithNA([]string{"1", "3", "5", "8", "10"}, nil),
+				vector.BooleanWithNA([]bool{true, true, true, false, false}, nil),
 			},
 		},
 		{
 			name:    "with invalid",
 			indices: []int{-1, 0, 1, 3, 5, 8, 10, 11, 100},
 			dfColumns: []vector.Vector{
-				vector.Integer([]int{1, 3, 5, 8, 10}, nil),
-				vector.String([]string{"1", "3", "5", "8", "10"}, nil),
-				vector.Boolean([]bool{true, true, true, false, false}, nil),
+				vector.IntegerWithNA([]int{1, 3, 5, 8, 10}, nil),
+				vector.StringWithNA([]string{"1", "3", "5", "8", "10"}, nil),
+				vector.BooleanWithNA([]bool{true, true, true, false, false}, nil),
 			},
 		},
 		{
 			name:    "reverse",
 			indices: []int{10, 8, 5, 3, 1},
 			dfColumns: []vector.Vector{
-				vector.Integer([]int{10, 8, 5, 3, 1}, nil),
-				vector.String([]string{"10", "8", "5", "3", "1"}, nil),
-				vector.Boolean([]bool{false, false, true, true, true}, nil),
+				vector.IntegerWithNA([]int{10, 8, 5, 3, 1}, nil),
+				vector.StringWithNA([]string{"10", "8", "5", "3", "1"}, nil),
+				vector.BooleanWithNA([]bool{false, false, true, true, true}, nil),
 			},
 		},
 		{
 			name:    "empty",
 			indices: []int{},
 			dfColumns: []vector.Vector{
-				vector.Integer([]int{}, nil),
-				vector.String([]string{}, nil),
-				vector.Boolean([]bool{}, nil),
+				vector.IntegerWithNA([]int{}, nil),
+				vector.StringWithNA([]string{}, nil),
+				vector.BooleanWithNA([]bool{}, nil),
 			},
 		},
 	}
@@ -174,9 +174,9 @@ func TestDataframe_ByIndices(t *testing.T) {
 
 func TestDataframe_ColNum(t *testing.T) {
 	df := New([]vector.Vector{
-		vector.Integer([]int{1, 2, 3, 4, 5}, nil),
-		vector.String([]string{"1", "2", "3"}, nil),
-		vector.Boolean([]bool{true, true}, nil),
+		vector.IntegerWithNA([]int{1, 2, 3, 4, 5}, nil),
+		vector.StringWithNA([]string{"1", "2", "3"}, nil),
+		vector.BooleanWithNA([]bool{true, true}, nil),
 	})
 
 	if df.ColNum() != 3 {
@@ -186,9 +186,9 @@ func TestDataframe_ColNum(t *testing.T) {
 
 func TestDataframe_RowNum(t *testing.T) {
 	df := New([]vector.Vector{
-		vector.Integer([]int{1, 2, 3, 4, 5}, nil),
-		vector.String([]string{"1", "2", "3"}, nil),
-		vector.Boolean([]bool{true, true}, nil),
+		vector.IntegerWithNA([]int{1, 2, 3, 4, 5}, nil),
+		vector.StringWithNA([]string{"1", "2", "3"}, nil),
+		vector.BooleanWithNA([]bool{true, true}, nil),
 	})
 
 	if df.RowNum() != 5 {
@@ -198,18 +198,18 @@ func TestDataframe_RowNum(t *testing.T) {
 
 func TestDataframe_Ci(t *testing.T) {
 	df := New([]vector.Vector{
-		vector.Integer([]int{1, 2, 3, 4, 5}, nil),
-		vector.String([]string{"1", "2", "3"}, nil),
-		vector.Boolean([]bool{true, true}, nil),
+		vector.IntegerWithNA([]int{1, 2, 3, 4, 5}, nil),
+		vector.StringWithNA([]string{"1", "2", "3"}, nil),
+		vector.BooleanWithNA([]bool{true, true}, nil),
 	}, vector.OptionColumnNames([]string{"int", "string", "bool"}))
 
 	testData := []struct {
 		index  int
 		column vector.Vector
 	}{
-		{1, vector.Integer([]int{1, 2, 3, 4, 5}, nil)},
-		{2, vector.String([]string{"1", "2", "3", "", ""}, []bool{false, false, false, true, true})},
-		{3, vector.Boolean([]bool{true, true, false, false, false}, []bool{false, false, true, true, true})},
+		{1, vector.IntegerWithNA([]int{1, 2, 3, 4, 5}, nil)},
+		{2, vector.StringWithNA([]string{"1", "2", "3", "", ""}, []bool{false, false, false, true, true})},
+		{3, vector.BooleanWithNA([]bool{true, true, false, false, false}, []bool{false, false, true, true, true})},
 		{0, nil},
 		{-1, nil},
 		{4, nil},
@@ -228,18 +228,18 @@ func TestDataframe_Ci(t *testing.T) {
 
 func TestDataframe_Cn(t *testing.T) {
 	df := New([]vector.Vector{
-		vector.Integer([]int{1, 2, 3, 4, 5}, nil),
-		vector.String([]string{"1", "2", "3"}, nil),
-		vector.Boolean([]bool{true, true}, nil),
+		vector.IntegerWithNA([]int{1, 2, 3, 4, 5}, nil),
+		vector.StringWithNA([]string{"1", "2", "3"}, nil),
+		vector.BooleanWithNA([]bool{true, true}, nil),
 	}, vector.OptionColumnNames([]string{"int", "string", "bool"}))
 
 	testData := []struct {
 		name   string
 		column vector.Vector
 	}{
-		{"int", vector.Integer([]int{1, 2, 3, 4, 5}, nil)},
-		{"string", vector.String([]string{"1", "2", "3", "", ""}, []bool{false, false, false, true, true})},
-		{"bool", vector.Boolean([]bool{true, true, false, false, false}, []bool{false, false, true, true, true})},
+		{"int", vector.IntegerWithNA([]int{1, 2, 3, 4, 5}, nil)},
+		{"string", vector.StringWithNA([]string{"1", "2", "3", "", ""}, []bool{false, false, false, true, true})},
+		{"bool", vector.BooleanWithNA([]bool{true, true, false, false, false}, []bool{false, false, true, true, true})},
 		{"", nil},
 		{"some", nil},
 	}
@@ -257,17 +257,17 @@ func TestDataframe_Cn(t *testing.T) {
 
 func TestDataframe_C(t *testing.T) {
 	df := New([]vector.Vector{
-		vector.Integer([]int{1, 2, 3}, nil),
-		vector.String([]string{"1", "2", "3"}, nil),
-		vector.Boolean([]bool{true, false, true}, nil),
+		vector.IntegerWithNA([]int{1, 2, 3}, nil),
+		vector.StringWithNA([]string{"1", "2", "3"}, nil),
+		vector.BooleanWithNA([]bool{true, false, true}, nil),
 	}, vector.OptionColumnNames([]string{"int", "string", "bool"}))
 
 	testData := []struct {
 		selector interface{}
 		column   vector.Vector
 	}{
-		{"int", vector.Integer([]int{1, 2, 3}, nil)},
-		{2, vector.String([]string{"1", "2", "3"}, nil)},
+		{"int", vector.IntegerWithNA([]int{1, 2, 3}, nil)},
+		{2, vector.StringWithNA([]string{"1", "2", "3"}, nil)},
 		{0, nil},
 		{4, nil},
 		{"some", nil},
@@ -293,9 +293,9 @@ func TestDataframe_NamesAsStrings(t *testing.T) {
 		{
 			name: "with names",
 			dataframe: New([]vector.Vector{
-				vector.Integer([]int{1, 2, 3}, nil),
-				vector.String([]string{"1", "2", "3"}, nil),
-				vector.Boolean([]bool{true, false, true}, nil),
+				vector.IntegerWithNA([]int{1, 2, 3}, nil),
+				vector.StringWithNA([]string{"1", "2", "3"}, nil),
+				vector.BooleanWithNA([]bool{true, false, true}, nil),
 			}, vector.OptionColumnNames([]string{"int", "string", "bool"})),
 			columnNames: []string{"int", "string", "bool"},
 		},
@@ -327,9 +327,9 @@ func TestDataframe_IsEmpty(t *testing.T) {
 		{
 			name: "non-empty",
 			dataframe: New([]vector.Vector{
-				vector.Integer([]int{1, 2, 3}, nil),
-				vector.String([]string{"1", "2", "3"}, nil),
-				vector.Boolean([]bool{true, false, true}, nil),
+				vector.IntegerWithNA([]int{1, 2, 3}, nil),
+				vector.StringWithNA([]string{"1", "2", "3"}, nil),
+				vector.BooleanWithNA([]bool{true, false, true}, nil),
 			}, vector.OptionColumnNames([]string{"int", "string", "bool"})),
 			isEmpty: false,
 		},
@@ -349,9 +349,9 @@ func TestDataframe_IsEmpty(t *testing.T) {
 
 func TestDataframe_SetColumnName(t *testing.T) {
 	df := New([]vector.Vector{
-		vector.Integer([]int{1, 2, 3}, nil),
-		vector.String([]string{"1", "2", "3"}, nil),
-		vector.Boolean([]bool{true, false, true}, nil),
+		vector.IntegerWithNA([]int{1, 2, 3}, nil),
+		vector.StringWithNA([]string{"1", "2", "3"}, nil),
+		vector.BooleanWithNA([]bool{true, false, true}, nil),
 	})
 
 	testData := []struct {
@@ -364,31 +364,31 @@ func TestDataframe_SetColumnName(t *testing.T) {
 			name:              "int",
 			index:             1,
 			columnNames:       []string{"int", "2", "3"},
-			columnNamesVector: vector.String([]string{"int", "2", "3"}, nil),
+			columnNamesVector: vector.StringWithNA([]string{"int", "2", "3"}, nil),
 		},
 		{
 			name:              "string",
 			index:             2,
 			columnNames:       []string{"int", "string", "3"},
-			columnNamesVector: vector.String([]string{"int", "string", "3"}, nil),
+			columnNamesVector: vector.StringWithNA([]string{"int", "string", "3"}, nil),
 		},
 		{
 			name:              "bool",
 			index:             3,
 			columnNames:       []string{"int", "string", "bool"},
-			columnNamesVector: vector.String([]string{"int", "string", "bool"}, nil),
+			columnNamesVector: vector.StringWithNA([]string{"int", "string", "bool"}, nil),
 		},
 		{
 			name:              "zero",
 			index:             0,
 			columnNames:       []string{"int", "string", "bool"},
-			columnNamesVector: vector.String([]string{"int", "string", "bool"}, nil),
+			columnNamesVector: vector.StringWithNA([]string{"int", "string", "bool"}, nil),
 		},
 		{
 			name:              "four",
 			index:             4,
 			columnNames:       []string{"int", "string", "bool"},
-			columnNamesVector: vector.String([]string{"int", "string", "bool"}, nil),
+			columnNamesVector: vector.StringWithNA([]string{"int", "string", "bool"}, nil),
 		},
 	}
 
@@ -423,9 +423,9 @@ func TestDataframe_SetColumnNames(t *testing.T) {
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
 			df := New([]vector.Vector{
-				vector.Integer([]int{1, 2, 3}, nil),
-				vector.String([]string{"1", "2", "3"}, nil),
-				vector.Boolean([]bool{true, false, true}, nil),
+				vector.IntegerWithNA([]int{1, 2, 3}, nil),
+				vector.StringWithNA([]string{"1", "2", "3"}, nil),
+				vector.BooleanWithNA([]bool{true, false, true}, nil),
 			})
 
 			df.SetColumnNames(data.columnNames)
@@ -452,9 +452,9 @@ func TestDataframe_Clone(t *testing.T) {
 		{
 			name: "non-empty",
 			dataframe: New([]vector.Vector{
-				vector.Integer([]int{1, 2, 3}, nil),
-				vector.String([]string{"1", "2", "3"}, nil),
-				vector.Boolean([]bool{true, false, true}, nil),
+				vector.IntegerWithNA([]int{1, 2, 3}, nil),
+				vector.StringWithNA([]string{"1", "2", "3"}, nil),
+				vector.BooleanWithNA([]bool{true, false, true}, nil),
 			}, vector.OptionColumnNames([]string{"int", "string", "bool"})),
 			isEmpty: false,
 		},
@@ -478,9 +478,9 @@ func TestDataframe_Clone(t *testing.T) {
 
 func TestDataframe_Columns(t *testing.T) {
 	columns := []vector.Vector{
-		vector.Integer([]int{1, 2, 3}, nil),
-		vector.String([]string{"1", "2", "3"}, nil),
-		vector.Boolean([]bool{true, false, true}, nil),
+		vector.IntegerWithNA([]int{1, 2, 3}, nil),
+		vector.StringWithNA([]string{"1", "2", "3"}, nil),
+		vector.BooleanWithNA([]bool{true, false, true}, nil),
 	}
 
 	df := New(columns)
@@ -496,9 +496,9 @@ func TestDataframe_Columns(t *testing.T) {
 
 func TestDataframe_HasColumn(t *testing.T) {
 	df := New([]vector.Vector{
-		vector.Integer([]int{1, 2, 3}, nil),
-		vector.String([]string{"1", "2", "3"}, nil),
-		vector.Boolean([]bool{true, false, true}, nil),
+		vector.IntegerWithNA([]int{1, 2, 3}, nil),
+		vector.StringWithNA([]string{"1", "2", "3"}, nil),
+		vector.BooleanWithNA([]bool{true, false, true}, nil),
 	}, vector.OptionColumnNames([]string{"int", "string", "bool"}))
 
 	testData := []struct {
@@ -537,9 +537,9 @@ func TestDataframe_HasColumn(t *testing.T) {
 
 func TestDataframe_IsValidColumnIndex(t *testing.T) {
 	df := New([]vector.Vector{
-		vector.Integer([]int{1, 2, 3}, nil),
-		vector.String([]string{"1", "2", "3"}, nil),
-		vector.Boolean([]bool{true, false, true}, nil),
+		vector.IntegerWithNA([]int{1, 2, 3}, nil),
+		vector.StringWithNA([]string{"1", "2", "3"}, nil),
+		vector.BooleanWithNA([]bool{true, false, true}, nil),
 	}, vector.OptionColumnNames([]string{"int", "string", "bool"}))
 
 	testData := []struct {

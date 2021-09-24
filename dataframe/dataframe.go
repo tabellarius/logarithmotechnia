@@ -62,7 +62,7 @@ func (df *Dataframe) Ci(index int) vector.Vector {
 
 func (df *Dataframe) SetColumnName(index int, name string) *Dataframe {
 	df.setColumnName(index, name)
-	df.columnNamesVector = vector.String(df.columnNames, nil)
+	df.columnNamesVector = vector.StringWithNA(df.columnNames, nil)
 
 	return df
 }
@@ -84,7 +84,7 @@ func (df *Dataframe) SetColumnNames(names []string) *Dataframe {
 			break
 		}
 	}
-	df.columnNamesVector = vector.String(df.columnNames, nil)
+	df.columnNamesVector = vector.StringWithNA(df.columnNames, nil)
 
 	return df
 }
@@ -207,7 +207,7 @@ func dataframeFromVectors(vectors []vector.Vector, options ...vector.Option) *Da
 		colNum:            colNum,
 		columns:           vectors,
 		columnNames:       columnNames,
-		columnNamesVector: vector.String(columnNames, nil),
+		columnNamesVector: vector.StringWithNA(columnNames, nil),
 	}
 }
 

@@ -59,7 +59,7 @@ func TestInteger(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			v := Integer(data.data, data.na)
+			v := IntegerWithNA(data.data, data.na)
 
 			vv := v.(*vector)
 
@@ -102,7 +102,7 @@ func TestInteger(t *testing.T) {
 }
 
 func TestIntegerPayload_Type(t *testing.T) {
-	vec := Integer([]int{}, nil)
+	vec := IntegerWithNA([]int{}, nil)
 	if vec.Type() != "integer" {
 		t.Error("Type is incorrect.")
 	}
@@ -121,7 +121,7 @@ func TestIntegerPayload_Len(t *testing.T) {
 
 	for i, data := range testData {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			payload := Integer(data.in, nil).(*vector).payload
+			payload := IntegerWithNA(data.in, nil).(*vector).payload
 			if payload.Len() != data.outLength {
 				t.Error(fmt.Sprintf("Payloads's length (%d) is not equal to out (%d)",
 					payload.Len(), data.outLength))
@@ -159,7 +159,7 @@ func TestIntegerPayload_Booleans(t *testing.T) {
 
 	for i, data := range testData {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			vec := Integer(data.in, data.inNA)
+			vec := IntegerWithNA(data.in, data.inNA)
 			payload := vec.(*vector).payload.(*integerPayload)
 
 			booleans, na := payload.Booleans()
@@ -202,7 +202,7 @@ func TestIntegerPayload_Integers(t *testing.T) {
 
 	for i, data := range testData {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			vec := Integer(data.in, data.inNA)
+			vec := IntegerWithNA(data.in, data.inNA)
 			payload := vec.(*vector).payload.(*integerPayload)
 
 			integers, na := payload.Integers()
@@ -245,7 +245,7 @@ func TestIntegerPayload_Interfaces(t *testing.T) {
 
 	for i, data := range testData {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			vec := Integer(data.in, data.inNA)
+			vec := IntegerWithNA(data.in, data.inNA)
 			payload := vec.(*vector).payload.(*integerPayload)
 
 			interfaces, na := payload.Interfaces()
@@ -288,7 +288,7 @@ func TestIntegerPayload_Floats(t *testing.T) {
 
 	for i, data := range testData {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			vec := Integer(data.in, data.inNA)
+			vec := IntegerWithNA(data.in, data.inNA)
 			payload := vec.(*vector).payload.(*integerPayload)
 
 			floats, na := payload.Floats()
@@ -331,7 +331,7 @@ func TestIntegerPayload_Complexes(t *testing.T) {
 
 	for i, data := range testData {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			vec := Integer(data.in, data.inNA)
+			vec := IntegerWithNA(data.in, data.inNA)
 			payload := vec.(*vector).payload.(*integerPayload)
 
 			complexes, na := payload.Complexes()
@@ -374,7 +374,7 @@ func TestIntegerPayload_Strings(t *testing.T) {
 
 	for i, data := range testData {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			vec := Integer(data.in, data.inNA)
+			vec := IntegerWithNA(data.in, data.inNA)
 			payload := vec.(*vector).payload.(*integerPayload)
 
 			strings, na := payload.Strings()
@@ -389,7 +389,7 @@ func TestIntegerPayload_Strings(t *testing.T) {
 }
 
 func TestIntegerPayload_ByIndices(t *testing.T) {
-	vec := Integer([]int{1, 2, 3, 4, 5}, []bool{false, false, false, false, true})
+	vec := IntegerWithNA([]int{1, 2, 3, 4, 5}, []bool{false, false, false, false, true})
 	testData := []struct {
 		name    string
 		indices []int
@@ -452,7 +452,7 @@ func TestIntegerPayload_SupportsWhicher(t *testing.T) {
 		},
 	}
 
-	payload := Integer([]int{1}, nil).(*vector).payload.(Whichable)
+	payload := IntegerWithNA([]int{1}, nil).(*vector).payload.(Whichable)
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
 			if payload.SupportsWhicher(data.filter) != data.isSupported {
@@ -515,7 +515,7 @@ func TestIntegerPayload_Whicher(t *testing.T) {
 		},
 	}
 
-	payload := Integer([]int{1, 2, 39, 4, 56, 2, 45, 90, 4, 3}, nil).(*vector).payload.(Whichable)
+	payload := IntegerWithNA([]int{1, 2, 39, 4, 56, 2, 45, 90, 4, 3}, nil).(*vector).payload.(Whichable)
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
@@ -550,7 +550,7 @@ func TestIntegerPayload_SupportsApplier(t *testing.T) {
 		},
 	}
 
-	payload := Integer([]int{1}, nil).(*vector).payload.(Appliable)
+	payload := IntegerWithNA([]int{1}, nil).(*vector).payload.(Appliable)
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
 			if payload.SupportsApplier(data.applier) != data.isSupported {
@@ -620,7 +620,7 @@ func TestIntegerPayload_Apply(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			payload := Integer(data.dataIn, data.naIn).(*vector).payload.(Appliable).Apply(data.applier)
+			payload := IntegerWithNA(data.dataIn, data.naIn).(*vector).payload.(Appliable).Apply(data.applier)
 
 			if !data.isNAPayload {
 				payloadOut := payload.(*integerPayload)
@@ -660,7 +660,7 @@ func TestIntegerPayload_SupportsSummarizer(t *testing.T) {
 		},
 	}
 
-	payload := Integer([]int{}, nil).(*vector).payload.(Summarizable)
+	payload := IntegerWithNA([]int{}, nil).(*vector).payload.(Summarizable)
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
 			if payload.SupportsSummarizer(data.summarizer) != data.isSupported {
@@ -715,7 +715,7 @@ func TestIntegerPayload_Summarize(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			payload := Integer(data.dataIn, data.naIn).(*vector).payload.(Summarizable).Summarize(data.summarizer)
+			payload := IntegerWithNA(data.dataIn, data.naIn).(*vector).payload.(Summarizable).Summarize(data.summarizer)
 
 			if !data.isNAPayload {
 				payloadOut := payload.(*integerPayload)
@@ -752,13 +752,13 @@ func TestIntegerPayload_Append(t *testing.T) {
 	}{
 		{
 			name:    "boolean",
-			vec:     Boolean([]bool{true, true}, []bool{true, false}),
+			vec:     BooleanWithNA([]bool{true, true}, []bool{true, false}),
 			outData: []int{1, 2, 3, 0, 1},
 			outNA:   []bool{false, false, false, true, false},
 		},
 		{
 			name:    "integer",
-			vec:     Integer([]int{4, 5}, []bool{true, false}),
+			vec:     IntegerWithNA([]int{4, 5}, []bool{true, false}),
 			outData: []int{1, 2, 3, 0, 5},
 			outNA:   []bool{false, false, false, true, false},
 		},

@@ -517,6 +517,10 @@ func BooleanPayload(data []bool, na []bool, _ ...Option) Payload {
 	return payload
 }
 
-func Boolean(data []bool, na []bool, options ...Option) Vector {
+func BooleanWithNA(data []bool, na []bool, options ...Option) Vector {
 	return New(BooleanPayload(data, na, options...), options...)
+}
+
+func Boolean(data []bool, options ...Option) Vector {
+	return BooleanWithNA(data, nil, options...)
 }

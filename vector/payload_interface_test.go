@@ -50,7 +50,7 @@ func TestInterface(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			v := Interface(data.data, data.na).(*vector)
+			v := InterfaceWithNA(data.data, data.na).(*vector)
 
 			length := len(data.data)
 			if v.length != length {
@@ -84,7 +84,7 @@ func TestInterface(t *testing.T) {
 }
 
 func testInterfaceEmpty(t *testing.T) {
-	vec := Interface([]interface{}{1, 2, 3, 4, 5}, []bool{false, false, true, false})
+	vec := InterfaceWithNA([]interface{}{1, 2, 3, 4, 5}, []bool{false, false, true, false})
 	naPayload, ok := vec.(*vector).payload.(*naPayload)
 	if !ok || naPayload.Len() > 0 {
 		t.Error("Vector's payload is not empty")
@@ -92,7 +92,7 @@ func testInterfaceEmpty(t *testing.T) {
 }
 
 func TestInterfacePayload_Type(t *testing.T) {
-	vec := Interface([]interface{}{}, nil)
+	vec := InterfaceWithNA([]interface{}{}, nil)
 	if vec.Type() != "interface" {
 		t.Error("Type is incorrect.")
 	}
@@ -111,7 +111,7 @@ func TestInterfacePayload_Len(t *testing.T) {
 
 	for i, data := range testData {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			payload := Interface(data.in, nil).(*vector).payload
+			payload := InterfaceWithNA(data.in, nil).(*vector).payload
 			if payload.Len() != data.outLength {
 				t.Error(fmt.Sprintf("Payloads's length (%d) is not equal to out (%d)",
 					payload.Len(), data.outLength))
@@ -121,7 +121,7 @@ func TestInterfacePayload_Len(t *testing.T) {
 }
 
 func TestInterfacePayload_ByIndices(t *testing.T) {
-	vec := Interface([]interface{}{1, 2, 3, 4, 5}, []bool{false, false, false, false, true})
+	vec := InterfaceWithNA([]interface{}{1, 2, 3, 4, 5}, []bool{false, false, false, false, true})
 	testData := []struct {
 		name    string
 		indices []int
@@ -184,7 +184,7 @@ func TestInterfacePayload_SupportsWhicher(t *testing.T) {
 		},
 	}
 
-	payload := Interface([]interface{}{1}, nil).(*vector).payload.(Whichable)
+	payload := InterfaceWithNA([]interface{}{1}, nil).(*vector).payload.(Whichable)
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
 			if payload.SupportsWhicher(data.filter) != data.isSupported {
@@ -227,7 +227,7 @@ func TestInterfacePayload_Which(t *testing.T) {
 		},
 	}
 
-	payload := Interface([]interface{}{true, false, 1, false, true, 2.5, true, false, "true", false}, nil).(*vector).payload.(Whichable)
+	payload := InterfaceWithNA([]interface{}{true, false, 1, false, true, 2.5, true, false, "true", false}, nil).(*vector).payload.(Whichable)
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
@@ -262,7 +262,7 @@ func TestInterfacePayload_SupportsApplier(t *testing.T) {
 		},
 	}
 
-	payload := Interface([]interface{}{}, nil).(*vector).payload.(Appliable)
+	payload := InterfaceWithNA([]interface{}{}, nil).(*vector).payload.(Appliable)
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
 			if payload.SupportsApplier(data.applier) != data.isSupported {
@@ -339,7 +339,7 @@ func TestInterfacePayload_Apply(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			payload := Interface(data.dataIn, data.naIn).(*vector).payload.(Appliable).Apply(data.applier)
+			payload := InterfaceWithNA(data.dataIn, data.naIn).(*vector).payload.(Appliable).Apply(data.applier)
 
 			if !data.isNAPayload {
 				payloadOut := payload.(*interfacePayload)
@@ -413,7 +413,7 @@ func TestInterfacePayload_Integers(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			vec := Interface(data.dataIn, data.naIn,
+			vec := InterfaceWithNA(data.dataIn, data.naIn,
 				OptionInterfaceConvertors(&InterfaceConvertors{Intabler: data.convertor}))
 			payload := vec.(*vector).payload.(*interfacePayload)
 
@@ -480,7 +480,7 @@ func TestInterfacePayload_Floats(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			vec := Interface(data.dataIn, data.naIn,
+			vec := InterfaceWithNA(data.dataIn, data.naIn,
 				OptionInterfaceConvertors(&InterfaceConvertors{Floatabler: data.convertor}))
 			payload := vec.(*vector).payload.(*interfacePayload)
 
@@ -549,7 +549,7 @@ func TestInterfacePayload_Complexes(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			vec := Interface(data.dataIn, data.naIn,
+			vec := InterfaceWithNA(data.dataIn, data.naIn,
 				OptionInterfaceConvertors(&InterfaceConvertors{Complexabler: data.convertor}))
 			payload := vec.(*vector).payload.(*interfacePayload)
 
@@ -616,7 +616,7 @@ func TestInterfacePayload_Booleans(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			vec := Interface(data.dataIn, data.naIn,
+			vec := InterfaceWithNA(data.dataIn, data.naIn,
 				OptionInterfaceConvertors(&InterfaceConvertors{Boolabler: data.convertor}))
 			payload := vec.(*vector).payload.(*interfacePayload)
 
@@ -683,7 +683,7 @@ func TestInterfacePayload_Strings(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			vec := Interface(data.dataIn, data.naIn,
+			vec := InterfaceWithNA(data.dataIn, data.naIn,
 				OptionInterfaceConvertors(&InterfaceConvertors{Stringabler: data.convertor}))
 			payload := vec.(*vector).payload.(*interfacePayload)
 
@@ -748,7 +748,7 @@ func TestInterfacePayload_Times(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			vec := Interface(data.dataIn, data.naIn,
+			vec := InterfaceWithNA(data.dataIn, data.naIn,
 				OptionInterfaceConvertors(&InterfaceConvertors{Timeabler: data.convertor}))
 			payload := vec.(*vector).payload.(*interfacePayload)
 
@@ -807,7 +807,7 @@ func TestInterfacePayload_Interfaces(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			vec := Interface(data.dataIn, data.naIn,
+			vec := InterfaceWithNA(data.dataIn, data.naIn,
 				OptionInterfaceConvertors(&InterfaceConvertors{Intabler: data.convertor}))
 			payload := vec.(*vector).payload.(*interfacePayload)
 
@@ -840,7 +840,7 @@ func TestInterfacePayload_SupportsSummarizer(t *testing.T) {
 		},
 	}
 
-	payload := Interface([]interface{}{}, nil).(*vector).payload.(Summarizable)
+	payload := InterfaceWithNA([]interface{}{}, nil).(*vector).payload.(Summarizable)
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
 			if payload.SupportsSummarizer(data.summarizer) != data.isSupported {
@@ -895,7 +895,7 @@ func TestInterfacePayload_Summarize(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			payload := Interface(data.dataIn, data.naIn).(*vector).payload.(Summarizable).Summarize(data.summarizer)
+			payload := InterfaceWithNA(data.dataIn, data.naIn).(*vector).payload.(Summarizable).Summarize(data.summarizer)
 
 			if !data.isNAPayload {
 				payloadOut := payload.(*interfacePayload)
@@ -932,13 +932,13 @@ func TestInterfacePayload_Append(t *testing.T) {
 	}{
 		{
 			name:    "boolean",
-			vec:     Boolean([]bool{true, true}, []bool{true, false}),
+			vec:     BooleanWithNA([]bool{true, true}, []bool{true, false}),
 			outData: []interface{}{1, 2, 3, nil, true},
 			outNA:   []bool{false, false, false, true, false},
 		},
 		{
 			name:    "integer",
-			vec:     Integer([]int{4, 5}, []bool{true, false}),
+			vec:     IntegerWithNA([]int{4, 5}, []bool{true, false}),
 			outData: []interface{}{1, 2, 3, nil, 5},
 			outNA:   []bool{false, false, false, true, false},
 		},

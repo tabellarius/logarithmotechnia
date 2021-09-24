@@ -57,7 +57,7 @@ func TestString(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			v := String(data.data, data.na)
+			v := StringWithNA(data.data, data.na)
 
 			vv := v.(*vector)
 
@@ -100,7 +100,7 @@ func TestString(t *testing.T) {
 }
 
 func TestStringPayload_Type(t *testing.T) {
-	vec := String([]string{}, nil)
+	vec := StringWithNA([]string{}, nil)
 	if vec.Type() != "string" {
 		t.Error("Type is incorrect.")
 	}
@@ -119,7 +119,7 @@ func TestStringPayload_Len(t *testing.T) {
 
 	for i, data := range testData {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			payload := String(data.in, nil).(*vector).payload
+			payload := StringWithNA(data.in, nil).(*vector).payload
 			if payload.Len() != data.outLength {
 				t.Error(fmt.Sprintf("Payloads's length (%d) is not equal to out (%d)",
 					payload.Len(), data.outLength))
@@ -157,7 +157,7 @@ func TestStringPayload_Booleans(t *testing.T) {
 
 	for i, data := range testData {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			vec := String(data.in, data.inNA)
+			vec := StringWithNA(data.in, data.inNA)
 			payload := vec.(*vector).payload.(*stringPayload)
 
 			booleans, na := payload.Booleans()
@@ -200,7 +200,7 @@ func TestStringPayload_Integers(t *testing.T) {
 
 	for i, data := range testData {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			vec := String(data.in, data.inNA)
+			vec := StringWithNA(data.in, data.inNA)
 			payload := vec.(*vector).payload.(*stringPayload)
 
 			integers, na := payload.Integers()
@@ -243,7 +243,7 @@ func TestStringPayload_Floats(t *testing.T) {
 
 	for i, data := range testData {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			vec := String(data.in, data.inNA)
+			vec := StringWithNA(data.in, data.inNA)
 			payload := vec.(*vector).payload.(*stringPayload)
 
 			floats, na := payload.Floats()
@@ -290,7 +290,7 @@ func TestStringPayload_Complexes(t *testing.T) {
 
 	for i, data := range testData {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			vec := String(data.in, data.inNA)
+			vec := StringWithNA(data.in, data.inNA)
 			payload := vec.(*vector).payload.(*stringPayload)
 
 			complexes, na := payload.Complexes()
@@ -343,7 +343,7 @@ func TestStringPayload_Strings(t *testing.T) {
 
 	for i, data := range testData {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			vec := String(data.in, data.inNA)
+			vec := StringWithNA(data.in, data.inNA)
 			payload := vec.(*vector).payload.(*stringPayload)
 
 			strings, na := payload.Strings()
@@ -386,7 +386,7 @@ func TestStringPayload_Interfaces(t *testing.T) {
 
 	for i, data := range testData {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			vec := String(data.in, data.inNA)
+			vec := StringWithNA(data.in, data.inNA)
 			payload := vec.(*vector).payload.(*stringPayload)
 
 			interfaces, na := payload.Interfaces()
@@ -401,7 +401,7 @@ func TestStringPayload_Interfaces(t *testing.T) {
 }
 
 func TestStringPayload_ByIndices(t *testing.T) {
-	vec := String([]string{"1", "2", "3", "4", "5"}, []bool{false, false, false, false, true})
+	vec := StringWithNA([]string{"1", "2", "3", "4", "5"}, []bool{false, false, false, false, true})
 	testData := []struct {
 		name    string
 		indices []int
@@ -464,7 +464,7 @@ func TestStringPayload_SupportsWhicher(t *testing.T) {
 		},
 	}
 
-	payload := String([]string{"one"}, nil).(*vector).payload.(Whichable)
+	payload := StringWithNA([]string{"one"}, nil).(*vector).payload.(Whichable)
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
 			if payload.SupportsWhicher(data.filter) != data.isSupported {
@@ -507,7 +507,7 @@ func TestStringPayload_Whicher(t *testing.T) {
 		},
 	}
 
-	payload := String([]string{"1", "2", "39", "4", "56", "2", "45", "90", "4", "3"}, nil).(*vector).payload.(Whichable)
+	payload := StringWithNA([]string{"1", "2", "39", "4", "56", "2", "45", "90", "4", "3"}, nil).(*vector).payload.(Whichable)
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
@@ -542,7 +542,7 @@ func TestStringPayload_SupportsApplier(t *testing.T) {
 		},
 	}
 
-	payload := String([]string{}, nil).(*vector).payload.(Appliable)
+	payload := StringWithNA([]string{}, nil).(*vector).payload.(Appliable)
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
 			if payload.SupportsApplier(data.applier) != data.isSupported {
@@ -611,7 +611,7 @@ func TestStringPayload_Apply(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			payload := String(data.dataIn, data.naIn).(*vector).payload.(Appliable).Apply(data.applier)
+			payload := StringWithNA(data.dataIn, data.naIn).(*vector).payload.(Appliable).Apply(data.applier)
 
 			if !data.isNAPayload {
 				payloadOut := payload.(*stringPayload)
@@ -651,7 +651,7 @@ func TestStringPayload_SupportsSummarizer(t *testing.T) {
 		},
 	}
 
-	payload := String([]string{}, nil).(*vector).payload.(Summarizable)
+	payload := StringWithNA([]string{}, nil).(*vector).payload.(Summarizable)
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
 			if payload.SupportsSummarizer(data.summarizer) != data.isSupported {
@@ -702,7 +702,7 @@ func TestStringPayload_Summarize(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			payload := String(data.dataIn, data.naIn).(*vector).payload.(Summarizable).Summarize(data.summarizer)
+			payload := StringWithNA(data.dataIn, data.naIn).(*vector).payload.(Summarizable).Summarize(data.summarizer)
 
 			if !data.isNAPayload {
 				payloadOut := payload.(*stringPayload)
@@ -739,13 +739,13 @@ func TestStringPayload_Append(t *testing.T) {
 	}{
 		{
 			name:    "boolean",
-			vec:     Boolean([]bool{true, true}, []bool{true, false}),
+			vec:     BooleanWithNA([]bool{true, true}, []bool{true, false}),
 			outData: []string{"1", "2", "3", "", "true"},
 			outNA:   []bool{false, false, false, true, false},
 		},
 		{
 			name:    "integer",
-			vec:     Integer([]int{4, 5}, []bool{true, false}),
+			vec:     IntegerWithNA([]int{4, 5}, []bool{true, false}),
 			outData: []string{"1", "2", "3", "", "5"},
 			outNA:   []bool{false, false, false, true, false},
 		},

@@ -469,7 +469,7 @@ func (v *vector) AsInteger() Vector {
 	if payload, ok := v.payload.(Intable); ok {
 		values, na := payload.Integers()
 
-		return Integer(values, na)
+		return IntegerWithNA(values, na)
 	}
 
 	return NA(v.length)
@@ -479,7 +479,7 @@ func (v *vector) AsFloat(options ...Option) Vector {
 	if payload, ok := v.payload.(Floatable); ok {
 		values, na := payload.Floats()
 
-		return Float(values, na, options...)
+		return FloatWithNA(values, na, options...)
 	}
 
 	return NA(v.length)
@@ -489,7 +489,7 @@ func (v *vector) AsComplex(options ...Option) Vector {
 	if payload, ok := v.payload.(Complexable); ok {
 		values, na := payload.Complexes()
 
-		return Complex(values, na, options...)
+		return ComplexWithNA(values, na, options...)
 	}
 
 	return NA(v.length)
@@ -499,7 +499,7 @@ func (v *vector) AsBoolean() Vector {
 	if payload, ok := v.payload.(Boolable); ok {
 		values, na := payload.Booleans()
 
-		return Boolean(values, na)
+		return BooleanWithNA(values, na)
 	}
 
 	return NA(v.length)
@@ -509,7 +509,7 @@ func (v *vector) AsString() Vector {
 	if payload, ok := v.payload.(Stringable); ok {
 		values, na := payload.Strings()
 
-		return String(values, na)
+		return StringWithNA(values, na)
 	}
 
 	return NA(v.length)
@@ -519,7 +519,7 @@ func (v *vector) AsTime() Vector {
 	if payload, ok := v.payload.(Timeable); ok {
 		values, na := payload.Times()
 
-		return Time(values, na)
+		return TimeWithNA(values, na)
 	}
 
 	return NA(v.length)
@@ -529,7 +529,7 @@ func (v *vector) AsInterface() Vector {
 	if payload, ok := v.payload.(Interfaceable); ok {
 		values, na := payload.Interfaces()
 
-		return Interface(values, na)
+		return InterfaceWithNA(values, na)
 	}
 
 	return NA(v.length)
