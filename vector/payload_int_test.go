@@ -1058,3 +1058,34 @@ func TestIntegerPayload_Lte(t *testing.T) {
 		})
 	}
 }
+
+func TestIntegerPayload_Groups(t *testing.T) {
+	testData := []struct {
+		name    string
+		payload Payload
+		groups  [][]int
+	}{
+		{
+			name:    "normal",
+			payload: IntegerPayload([]int{-20, 10, 4, -20, 7, -20, 10, -20, 4, 10}, nil),
+			groups:  [][]int{{1, 4, 6, 8}, {2, 7, 10}, {3, 9}, {5}},
+		},
+		{
+			name: "with NA",
+			payload: IntegerPayload([]int{-20, 10, 4, -20, 10, -20, 10, -20, 4, 7},
+				[]bool{false, false, false, false, false, false, true, true, false, false}),
+			groups: [][]int{{1, 4, 6}, {2, 5}, {3, 9}, {10}, {7, 8}},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			groups := data.payload.(*integerPayload).Groups()
+
+			if !reflect.DeepEqual(groups, data.groups) {
+				t.Error(fmt.Sprintf("Groups (%v) do not match expected (%v)",
+					groups, data.groups))
+			}
+		})
+	}
+}

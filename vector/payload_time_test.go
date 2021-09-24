@@ -165,7 +165,6 @@ func TestTimePayload_Strings(t *testing.T) {
 
 	for i, data := range testData {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			//			fmt.Println(toTimeData(data.in))
 			vec := TimeWithNA(toTimeData(data.in), data.inNA)
 			payload := vec.(*vector).payload.(*timePayload)
 
@@ -928,6 +927,38 @@ func TestTimePayload_Lte(t *testing.T) {
 			if !reflect.DeepEqual(cmp, data.cmp) {
 				t.Error(fmt.Sprintf("Comparator results (%v) do not match expected (%v)",
 					cmp, data.cmp))
+			}
+		})
+	}
+}
+
+func TestTimePayload_Groups(t *testing.T) {
+	testData := []struct {
+		name    string
+		payload Payload
+		groups  [][]int
+	}{
+		{
+			name: "normal",
+			payload: TimePayload(toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00",
+				"2020-01-01T12:30:00+03:00", "2020-01-01T12:30:00+03:00"}), nil),
+			groups: [][]int{{1}, {2}, {3, 4}},
+		},
+		{
+			name: "with NA",
+			payload: TimePayload(toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00",
+				"2020-01-01T12:30:00+03:00", "2020-01-01T12:30:00+03:00"}), []bool{false, true, false, false}),
+			groups: [][]int{{1}, {3, 4}, {2}},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			groups := data.payload.(*timePayload).Groups()
+
+			if !reflect.DeepEqual(groups, data.groups) {
+				t.Error(fmt.Sprintf("Groups (%v) do not match expected (%v)",
+					groups, data.groups))
 			}
 		})
 	}

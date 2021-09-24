@@ -54,6 +54,8 @@ type Vector interface {
 	Arrangeable
 
 	Options() []Option
+
+	SummerV
 }
 
 type Payload interface {
@@ -109,7 +111,7 @@ type Interfaceable interface {
 	Interfaces() ([]interface{}, []bool)
 }
 
-type TransformFunc func([]interface{}, []bool) Payload
+type TransformFunc = func([]interface{}, []bool) Payload
 
 type Configurable interface {
 	Options() []Option
@@ -345,7 +347,7 @@ func (v *vector) Groups() [][]int {
 		return groupper.Groups()
 	}
 
-	return nil
+	return [][]int{}
 }
 
 func (v *vector) IsGrouped() bool {
@@ -358,7 +360,6 @@ func (v *vector) GroupByIndices(groups [][]int) Vector {
 	}
 
 	newVec := New(v.payload, v.Options()...).(*vector)
-
 	newVec.groups = make([]Vector, len(groups))
 	for i, indices := range groups {
 		newVec.groups[i] = newVec.ByIndices(indices)

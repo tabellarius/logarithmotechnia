@@ -574,6 +574,11 @@ func TestDataframe_GroupBy(t *testing.T) {
 			"heal", "armor", "heal", "unique", "armor"}, nil)},
 	})
 
-	newDf := df.GroupBy("category", "power")
-	fmt.Println(newDf.columns[0].IsGrouped())
+	//	sumDf := df.Sum()
+	//	fmt.Println(sumDf.columns)
+	//	fmt.Println()
+
+	groupedDf := df.GroupBy("category", "power")
+	sumGroupedDf := groupedDf.Sum()
+	fmt.Println(sumGroupedDf.columns)
 }

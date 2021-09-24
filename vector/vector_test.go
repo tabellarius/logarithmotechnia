@@ -1593,3 +1593,87 @@ func TestVector_SortedIndices(t *testing.T) {
 		})
 	}
 }
+
+func TestVector_Groups(t *testing.T) {
+	testData := []struct {
+		name   string
+		vec    Vector
+		groups [][]int
+	}{
+		{
+			name:   "normal",
+			vec:    Integer([]int{-20, 10, 4, -20, 7, -20, 10, -20, 4, 10}, nil),
+			groups: [][]int{{1, 4, 6, 8}, {2, 7, 10}, {3, 9}, {5}},
+		},
+		{
+			name: "with NA",
+			vec: Integer([]int{-20, 10, 4, -20, 7, -20, 10, -20, 4, 10},
+				[]bool{false, false, false, false, false, false, true, true, false, false}),
+			groups: [][]int{{1, 4, 6}, {2, 10}, {3, 9}, {5}, {7, 8}},
+		},
+		{
+			name:   "empty",
+			vec:    Integer([]int{}, nil),
+			groups: [][]int{},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			groups := data.vec.Groups()
+
+			if !reflect.DeepEqual(groups, data.groups) {
+				t.Error(fmt.Sprintf("Groups (%v) do not match expected (%v)",
+					groups, data.groups))
+			}
+		})
+	}
+}
+
+func TestVector_GroupByIndices(t *testing.T) {
+	testData := []struct {
+		name      string
+		vec       Vector
+		indices   [][]int
+		groups    []Vector
+		isGrouped bool
+	}{
+		{
+			name:    "normal",
+			vec:     Integer([]int{-20, 10, 4, -20, 7, -20, 10, -20, 4, 10}, nil),
+			indices: [][]int{{1, 4, 7, 10}, {2, 3, 5, 9}, {6, 8}},
+			groups: []Vector{
+				Integer([]int{-20, -20, 10, 10}, nil),
+				Integer([]int{10, 4, 7, 4}, nil),
+				Integer([]int{-20, -20}, nil),
+			},
+			isGrouped: true,
+		},
+		{
+			name:    "with non-existent indices",
+			vec:     Integer([]int{-20, 10, 4, -20, 7, -20, 10, -20, 4, 10}, nil),
+			indices: [][]int{{1, 4, 7, 10}, {2, 3, 5, 9, 12}, {6, 8, 11}},
+			groups: []Vector{
+				Integer([]int{-20, -20, 10, 10}, nil),
+				Integer([]int{10, 4, 7, 4}, nil),
+				Integer([]int{-20, -20}, nil),
+			},
+			isGrouped: true,
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			groupedVec := data.vec.GroupByIndices(data.indices).(*vector)
+
+			if data.isGrouped {
+				if !CompareVectorArrs(groupedVec.groups, data.groups) {
+					t.Error(fmt.Sprintf("Groups (%v) do not match expected (%v)",
+						groupedVec.groups, data.groups))
+				}
+			} else {
+
+			}
+		})
+	}
+}

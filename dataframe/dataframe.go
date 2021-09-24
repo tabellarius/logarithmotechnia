@@ -1,7 +1,6 @@
 package dataframe
 
 import (
-	"fmt"
 	"logarithmotechnia/vector"
 	"strconv"
 )
@@ -157,17 +156,17 @@ func (df *Dataframe) GroupBy(selectors ...interface{}) *Dataframe {
 	var groups [][]int
 	for _, groupBy := range groupByColumns {
 		groups = df.groupByColumn(groupBy, groups)
-		fmt.Println(groups)
 	}
 
 	if len(groups) == 0 {
 		return df
 	}
 
-	newDf := New(df.columns, df.OptionsWithNames()...)
-	for i, column := range newDf.columns {
-		newDf.columns[i] = column.GroupByIndices(groups)
+	newColumns := make([]vector.Vector, df.colNum)
+	for i, column := range df.columns {
+		newColumns[i] = column.GroupByIndices(groups)
 	}
+	newDf := New(newColumns, df.OptionsWithNames()...)
 	newDf.groupedBy = groupByColumns
 
 	return newDf
