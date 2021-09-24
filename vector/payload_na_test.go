@@ -582,7 +582,7 @@ func TestNaPayload_Append(t *testing.T) {
 		},
 		{
 			name:   "integer",
-			vec:    Integer([]int{1, 1}, []bool{true, false}),
+			vec:    IntegerWithNA([]int{1, 1}, []bool{true, false}),
 			outLen: 5,
 		},
 	}

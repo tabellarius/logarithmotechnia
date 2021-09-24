@@ -602,6 +602,10 @@ func StringPayload(data []string, na []bool, _ ...Option) Payload {
 	return payload
 }
 
-func String(data []string, na []bool, options ...Option) Vector {
+func StringWithNA(data []string, na []bool, options ...Option) Vector {
 	return New(StringPayload(data, na, options...), options...)
+}
+
+func String(data []string, options ...Option) Vector {
+	return StringWithNA(data, nil, options...)
 }

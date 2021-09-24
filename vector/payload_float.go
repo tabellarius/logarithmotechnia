@@ -655,6 +655,10 @@ func FloatPayload(data []float64, na []bool, options ...Option) Payload {
 	return payload
 }
 
-func Float(data []float64, na []bool, options ...Option) Vector {
+func FloatWithNA(data []float64, na []bool, options ...Option) Vector {
 	return New(FloatPayload(data, na, options...), options...)
+}
+
+func Float(data []float64, options ...Option) Vector {
+	return FloatWithNA(data, nil, options...)
 }

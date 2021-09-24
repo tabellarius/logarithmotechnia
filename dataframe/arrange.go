@@ -24,7 +24,7 @@ func (df *Dataframe) Arrange(args ...interface{}) *Dataframe {
 	if conf.HasOption(vector.KeyOptionArrangeReverseColumns) {
 		reverseColumns = conf.Value(vector.KeyOptionArrangeReverseColumns).([]string)
 	}
-	rcVec := vector.String(reverseColumns, nil)
+	rcVec := vector.StringWithNA(reverseColumns, nil)
 
 	columns := []string{}
 	for _, column := range potentialColumns {

@@ -21,9 +21,9 @@ func TestDataframe_Rename(t *testing.T) {
 			renames:     []Rename{{"name", "nickname"}},
 			columnNames: []string{"nickname", "age", "gender"},
 			columns: []vector.Vector{
-				vector.String([]string{"Jim", "SPARC-001", "Anna", "Lucius", "Maria"}, nil),
-				vector.Integer([]int{31, 3, 24, 41, 33}, nil),
-				vector.String([]string{"m", "", "f", "m", "f"}, []bool{false, true, false, false, false}),
+				vector.StringWithNA([]string{"Jim", "SPARC-001", "Anna", "Lucius", "Maria"}, nil),
+				vector.IntegerWithNA([]int{31, 3, 24, 41, 33}, nil),
+				vector.StringWithNA([]string{"m", "", "f", "m", "f"}, []bool{false, true, false, false, false}),
 			},
 		},
 		{
@@ -31,9 +31,9 @@ func TestDataframe_Rename(t *testing.T) {
 			renames:     []Rename{{"name", "nickname"}, {"age", "nickname"}},
 			columnNames: []string{"nickname", "nickname", "gender"},
 			columns: []vector.Vector{
-				vector.String([]string{"Jim", "SPARC-001", "Anna", "Lucius", "Maria"}, nil),
-				vector.Integer([]int{31, 3, 24, 41, 33}, nil),
-				vector.String([]string{"m", "", "f", "m", "f"}, []bool{false, true, false, false, false}),
+				vector.StringWithNA([]string{"Jim", "SPARC-001", "Anna", "Lucius", "Maria"}, nil),
+				vector.IntegerWithNA([]int{31, 3, 24, 41, 33}, nil),
+				vector.StringWithNA([]string{"m", "", "f", "m", "f"}, []bool{false, true, false, false, false}),
 			},
 		},
 	}

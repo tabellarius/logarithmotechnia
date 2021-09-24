@@ -59,7 +59,7 @@ func TestTime(t *testing.T) {
 			timeData := toTimeData(data.data)
 			outTimeData := toTimeData(data.outData)
 
-			v := Time(timeData, data.na)
+			v := TimeWithNA(timeData, data.na)
 
 			vv := v.(*vector)
 
@@ -102,7 +102,7 @@ func TestTime(t *testing.T) {
 }
 
 func TestTimePayload_Type(t *testing.T) {
-	vec := Time([]time.Time{}, nil)
+	vec := TimeWithNA([]time.Time{}, nil)
 	if vec.Type() != "time" {
 		t.Error("Type is incorrect.")
 	}
@@ -133,7 +133,7 @@ func TestTimePayload_Len(t *testing.T) {
 
 	for i, data := range testData {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			payload := Time(toTimeData(data.in), nil).(*vector).payload
+			payload := TimeWithNA(toTimeData(data.in), nil).(*vector).payload
 			if payload.Len() != data.outLength {
 				t.Error(fmt.Sprintf("Payloads's length (%d) is not equal to out (%d)",
 					payload.Len(), data.outLength))
@@ -166,7 +166,7 @@ func TestTimePayload_Strings(t *testing.T) {
 	for i, data := range testData {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			//			fmt.Println(toTimeData(data.in))
-			vec := Time(toTimeData(data.in), data.inNA)
+			vec := TimeWithNA(toTimeData(data.in), data.inNA)
 			payload := vec.(*vector).payload.(*timePayload)
 
 			strings, na := payload.Strings()
@@ -204,7 +204,7 @@ func TestTimePayload_Times(t *testing.T) {
 	for i, data := range testData {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			timeData := toTimeData(data.in)
-			vec := Time(timeData, data.inNA)
+			vec := TimeWithNA(timeData, data.inNA)
 			payload := vec.(*vector).payload.(*timePayload)
 
 			times, na := payload.Times()
@@ -242,7 +242,7 @@ func TestTimePayload_Interfaces(t *testing.T) {
 	for i, data := range testData {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			timeData := toTimeData(data.in)
-			vec := Time(timeData, data.inNA)
+			vec := TimeWithNA(timeData, data.inNA)
 			payload := vec.(*vector).payload.(*timePayload)
 
 			interfaces, na := payload.Interfaces()
@@ -257,7 +257,7 @@ func TestTimePayload_Interfaces(t *testing.T) {
 }
 
 func TestTimePayload_ByIndices(t *testing.T) {
-	vec := Time(toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z"}),
+	vec := TimeWithNA(toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z"}),
 		[]bool{false, false, true},
 	)
 	testData := []struct {
@@ -322,7 +322,7 @@ func TestTimePayload_SupportsWhicher(t *testing.T) {
 		},
 	}
 
-	payload := Time([]time.Time{}, nil).(*vector).payload.(Whichable)
+	payload := TimeWithNA([]time.Time{}, nil).(*vector).payload.(Whichable)
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
 			if payload.SupportsWhicher(data.filter) != data.isSupported {
@@ -355,7 +355,7 @@ func TestTimePayload_Whicher(t *testing.T) {
 		},
 	}
 
-	payload := Time(toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z"}),
+	payload := TimeWithNA(toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z"}),
 		[]bool{false, false, true}).(*vector).payload.(Whichable)
 
 	for _, data := range testData {
@@ -392,7 +392,7 @@ func TestTimePayload_SupportsApplier(t *testing.T) {
 		},
 	}
 
-	payload := Time([]time.Time{}, nil).(*vector).payload.(Appliable)
+	payload := TimeWithNA([]time.Time{}, nil).(*vector).payload.(Appliable)
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
 			if payload.SupportsApplier(data.applier) != data.isSupported {
@@ -461,7 +461,7 @@ func TestTimePayload_Apply(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			payload := Time(data.dataIn, data.naIn).(*vector).payload.(Appliable).Apply(data.applier)
+			payload := TimeWithNA(data.dataIn, data.naIn).(*vector).payload.(Appliable).Apply(data.applier)
 
 			if !data.isNAPayload {
 				payloadOut := payload.(*timePayload)
@@ -533,7 +533,7 @@ func TestTimePayload_SupportsSummarizer(t *testing.T) {
 		},
 	}
 
-	payload := Time([]time.Time{}, nil).(*vector).payload.(Summarizable)
+	payload := TimeWithNA([]time.Time{}, nil).(*vector).payload.(Summarizable)
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
 			if payload.SupportsSummarizer(data.summarizer) != data.isSupported {
@@ -588,7 +588,7 @@ func TestTimePayload_Summarize(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			payload := Time(data.dataIn, data.naIn).(*vector).payload.(Summarizable).Summarize(data.summarizer)
+			payload := TimeWithNA(data.dataIn, data.naIn).(*vector).payload.(Summarizable).Summarize(data.summarizer)
 
 			if !data.isNAPayload {
 				payloadOut := payload.(*timePayload)
@@ -626,14 +626,14 @@ func TestTimePayload_Append(t *testing.T) {
 	}{
 		{
 			name: "times",
-			vec:  Time(toTimeData([]string{"2026-01-02T15:04:05+07:00", "2023-01-01T12:30:00+03:00"}), []bool{true, false}),
+			vec:  TimeWithNA(toTimeData([]string{"2026-01-02T15:04:05+07:00", "2023-01-01T12:30:00+03:00"}), []bool{true, false}),
 			outData: toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z",
 				"0001-01-01T00:00:00Z", "2023-01-01T12:30:00+03:00"}),
 			outNA: []bool{false, false, false, true, false},
 		},
 		{
 			name: "integer",
-			vec:  Integer([]int{4, 5}, []bool{true, false}),
+			vec:  IntegerWithNA([]int{4, 5}, []bool{true, false}),
 			outData: toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z",
 				"0001-01-01T00:00:00Z", "0001-01-01T00:00:00Z"}),
 			outNA: []bool{false, false, false, true, true},

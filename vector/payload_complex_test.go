@@ -58,7 +58,7 @@ func TestComplex(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			v := Complex(data.data, data.na)
+			v := ComplexWithNA(data.data, data.na)
 
 			vv := v.(*vector)
 
@@ -101,7 +101,7 @@ func TestComplex(t *testing.T) {
 }
 
 func TestComplexPayload_Type(t *testing.T) {
-	vec := Complex([]complex128{}, nil)
+	vec := ComplexWithNA([]complex128{}, nil)
 	if vec.Type() != "complex" {
 		t.Error("Type is incorrect.")
 	}
@@ -120,7 +120,7 @@ func TestComplexPayload_Len(t *testing.T) {
 
 	for i, data := range testData {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			payload := Float(data.in, nil).(*vector).payload
+			payload := FloatWithNA(data.in, nil).(*vector).payload
 			if payload.Len() != data.outLength {
 				t.Error(fmt.Sprintf("Payloads's length (%d) is not equal to out (%d)",
 					payload.Len(), data.outLength))
@@ -130,7 +130,7 @@ func TestComplexPayload_Len(t *testing.T) {
 }
 
 func TestComplexPayload_ByIndices(t *testing.T) {
-	vec := Complex([]complex128{1, 2, 3, 4, 5}, []bool{false, false, false, false, true})
+	vec := ComplexWithNA([]complex128{1, 2, 3, 4, 5}, []bool{false, false, false, false, true})
 	testData := []struct {
 		name    string
 		indices []int
@@ -193,7 +193,7 @@ func TestComplexPayload_SupportsWhicher(t *testing.T) {
 		},
 	}
 
-	payload := Complex([]complex128{1}, nil).(*vector).payload.(Whichable)
+	payload := ComplexWithNA([]complex128{1}, nil).(*vector).payload.(Whichable)
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
 			if payload.SupportsWhicher(data.filter) != data.isSupported {
@@ -236,7 +236,7 @@ func TestComplexPayload_Whicher(t *testing.T) {
 		},
 	}
 
-	payload := Complex([]complex128{1, 2, 39, 4, 56, 2, 45, 90, 4, 3}, nil).(*vector).payload.(Whichable)
+	payload := ComplexWithNA([]complex128{1, 2, 39, 4, 56, 2, 45, 90, 4, 3}, nil).(*vector).payload.(Whichable)
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
@@ -271,7 +271,7 @@ func TestComplexPayload_SupportsApplier(t *testing.T) {
 		},
 	}
 
-	payload := Complex([]complex128{}, nil).(*vector).payload.(Appliable)
+	payload := ComplexWithNA([]complex128{}, nil).(*vector).payload.(Appliable)
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
 			if payload.SupportsApplier(data.applier) != data.isSupported {
@@ -340,7 +340,7 @@ func TestComplexPayload_Apply(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			payload := Complex(data.dataIn, data.naIn).(*vector).payload.(Appliable).Apply(data.applier)
+			payload := ComplexWithNA(data.dataIn, data.naIn).(*vector).payload.(Appliable).Apply(data.applier)
 
 			if !data.isNAPayload {
 				payloadOut := payload.(*complexPayload)
@@ -391,7 +391,7 @@ func TestComplexPayload_Booleans(t *testing.T) {
 
 	for i, data := range testData {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			vec := Complex(data.in, data.inNA)
+			vec := ComplexWithNA(data.in, data.inNA)
 			payload := vec.(*vector).payload.(*complexPayload)
 
 			booleans, na := payload.Booleans()
@@ -434,7 +434,7 @@ func TestComplexPayload_Integers(t *testing.T) {
 
 	for i, data := range testData {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			vec := Complex(data.in, data.inNA)
+			vec := ComplexWithNA(data.in, data.inNA)
 			payload := vec.(*vector).payload.(*complexPayload)
 
 			integers, na := payload.Integers()
@@ -477,7 +477,7 @@ func TestComplexPayload_Interfaces(t *testing.T) {
 
 	for i, data := range testData {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			vec := Complex(data.in, data.inNA)
+			vec := ComplexWithNA(data.in, data.inNA)
 			payload := vec.(*vector).payload.(*complexPayload)
 
 			interfaces, na := payload.Interfaces()
@@ -520,7 +520,7 @@ func TestComplexPayload_Floats(t *testing.T) {
 
 	for i, data := range testData {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			vec := Complex(data.in, data.inNA)
+			vec := ComplexWithNA(data.in, data.inNA)
 			payload := vec.(*vector).payload.(*complexPayload)
 
 			floats, na := payload.Floats()
@@ -563,7 +563,7 @@ func TestComplexPayload_Complexes(t *testing.T) {
 
 	for i, data := range testData {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			vec := Complex(data.in, data.inNA)
+			vec := ComplexWithNA(data.in, data.inNA)
 			payload := vec.(*vector).payload.(*complexPayload)
 
 			complexes, na := payload.Complexes()
@@ -607,7 +607,7 @@ func TestComplexPayload_Strings(t *testing.T) {
 
 	for i, data := range testData {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			vec := Complex(data.in, data.inNA)
+			vec := ComplexWithNA(data.in, data.inNA)
 			payload := vec.(*vector).payload.(*complexPayload)
 
 			strings, na := payload.Strings()
@@ -639,7 +639,7 @@ func TestComplexPayload_SupportsSummarizer(t *testing.T) {
 		},
 	}
 
-	payload := Complex([]complex128{}, nil).(*vector).payload.(Summarizable)
+	payload := ComplexWithNA([]complex128{}, nil).(*vector).payload.(Summarizable)
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
 			if payload.SupportsSummarizer(data.summarizer) != data.isSupported {
@@ -694,7 +694,7 @@ func TestComplexPayload_Summarize(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			payload := Complex(data.dataIn, data.naIn).(*vector).payload.(Summarizable).Summarize(data.summarizer)
+			payload := ComplexWithNA(data.dataIn, data.naIn).(*vector).payload.(Summarizable).Summarize(data.summarizer)
 
 			if !data.isNAPayload {
 				payloadOut := payload.(*complexPayload)
@@ -731,13 +731,13 @@ func TestComplexPayload_Append(t *testing.T) {
 	}{
 		{
 			name:    "complex",
-			vec:     Complex([]complex128{4 + 4i, 5 + 5i}, []bool{true, false}),
+			vec:     ComplexWithNA([]complex128{4 + 4i, 5 + 5i}, []bool{true, false}),
 			outData: []complex128{1 + 1i, 2 + 2i, 3 + 3i, cmplx.NaN(), 5 + 5i},
 			outNA:   []bool{false, false, false, true, false},
 		},
 		{
 			name:    "integer",
-			vec:     Integer([]int{4, 5}, []bool{true, false}),
+			vec:     IntegerWithNA([]int{4, 5}, []bool{true, false}),
 			outData: []complex128{1 + 1i, 2 + 2i, 3 + 3i, cmplx.NaN(), 5 + 0i},
 			outNA:   []bool{false, false, false, true, false},
 		},

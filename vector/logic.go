@@ -85,7 +85,7 @@ func fitCmpToSrc(src, cmp []bool) []bool {
 	cmpLen := len(cmp)
 
 	if srcLen != cmpLen {
-		bvec := Boolean(cmp, nil)
+		bvec := BooleanWithNA(cmp, nil)
 		booleans, _ := bvec.Adjust(srcLen).Booleans()
 		return booleans
 	}

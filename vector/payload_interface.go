@@ -448,6 +448,10 @@ func InterfacePayload(data []interface{}, na []bool, options ...Option) Payload 
 
 }
 
-func Interface(data []interface{}, na []bool, options ...Option) Vector {
+func InterfaceWithNA(data []interface{}, na []bool, options ...Option) Vector {
 	return New(InterfacePayload(data, na, options...), options...)
+}
+
+func Interface(data []interface{}, options ...Option) Vector {
+	return InterfaceWithNA(data, nil, options...)
 }
