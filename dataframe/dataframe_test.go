@@ -102,6 +102,7 @@ func TestNew(t *testing.T) {
 			if !vector.CompareVectorArrs(df.columns, data.dfColumns) {
 				t.Error(fmt.Sprintf("Columns (%v) are not equal to expected (%v)", df.columns, data.dfColumns))
 			}
+
 			if !reflect.DeepEqual(df.columnNames, data.dfColumnNames) {
 				t.Error(fmt.Sprintf("Column names (%v) are not equal to expected (%v)",
 					df.columnNames, data.dfColumnNames))

@@ -1594,6 +1594,80 @@ func TestVector_SortedIndices(t *testing.T) {
 	}
 }
 
+func TestVector_SortedIndicesWithRanks(t *testing.T) {
+	testData := []struct {
+		name          string
+		vec           Vector
+		sortedIndices []int
+		ranks         []int
+	}{
+		{
+			name:          "integer with NA",
+			vec:           IntegerWithNA([]int{12, -4, 0, -4, 5}, []bool{false, false, true, false, false}),
+			sortedIndices: []int{3, 2, 4, 5, 1},
+			ranks:         []int{1, 2, 2, 3, 4},
+		},
+		{
+			name:          "integer without NA",
+			vec:           IntegerWithNA([]int{12, -4, 0, -4, 5}, nil),
+			sortedIndices: []int{2, 4, 3, 5, 1},
+			ranks:         []int{1, 1, 2, 3, 4},
+		},
+		{
+			name:          "boolean with NA",
+			vec:           BooleanWithNA([]bool{true, true, false, false, true}, []bool{false, false, false, true, true}),
+			sortedIndices: []int{4, 5, 3, 1, 2},
+			ranks:         []int{1, 1, 2, 3, 3},
+		},
+		{
+			name:          "boolean without NA",
+			vec:           BooleanWithNA([]bool{true, true, false, false, true}, nil),
+			sortedIndices: []int{3, 4, 1, 2, 5},
+			ranks:         []int{1, 1, 2, 2, 2},
+		},
+		{
+			name:          "float with NA",
+			vec:           FloatWithNA([]float64{12, -4, 0, -4, 5}, []bool{false, false, true, false, false}),
+			sortedIndices: []int{3, 2, 4, 5, 1},
+			ranks:         []int{1, 2, 2, 3, 4},
+		},
+		{
+			name:          "float without NA",
+			vec:           FloatWithNA([]float64{12, -4, 0, -4, 5}, nil),
+			sortedIndices: []int{2, 4, 3, 5, 1},
+			ranks:         []int{1, 1, 2, 3, 4},
+		},
+		{
+			name:          "string with NA",
+			vec:           StringWithNA([]string{"delta", "beta", "alpha", "zero", "zero"}, []bool{false, false, true, true, false}),
+			sortedIndices: []int{3, 4, 2, 1, 5},
+			ranks:         []int{1, 1, 2, 3, 4},
+		},
+		{
+			name:          "string without NA",
+			vec:           StringWithNA([]string{"delta", "beta", "alpha", "zero", "zero"}, nil),
+			sortedIndices: []int{3, 2, 1, 4, 5},
+			ranks:         []int{1, 2, 3, 4, 4},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			sortedIndices, ranks := data.vec.SortedIndicesWithRanks()
+
+			if !reflect.DeepEqual(sortedIndices, data.sortedIndices) {
+				t.Error(fmt.Sprintf("Sorted indices (%v) do not match expected (%v)",
+					sortedIndices, data.sortedIndices))
+			}
+
+			if !reflect.DeepEqual(ranks, data.ranks) {
+				t.Error(fmt.Sprintf("Sorted ranks (%v) do not match expected (%v)",
+					ranks, data.ranks))
+			}
+		})
+	}
+}
+
 func TestVector_Groups(t *testing.T) {
 	testData := []struct {
 		name   string
@@ -1607,7 +1681,7 @@ func TestVector_Groups(t *testing.T) {
 		},
 		{
 			name: "with NA",
-			vec: Integer([]int{-20, 10, 4, -20, 7, -20, 10, -20, 4, 10},
+			vec: IntegerWithNA([]int{-20, 10, 4, -20, 7, -20, 10, -20, 4, 10},
 				[]bool{false, false, false, false, false, false, true, true, false, false}),
 			groups: [][]int{{1, 4, 6}, {2, 10}, {3, 9}, {5}, {7, 8}},
 		},
