@@ -324,6 +324,39 @@ func (p *stringPayload) Append(payload Payload) Payload {
 	return StringPayload(newVals, newNA, p.Options()...)
 }
 
+func (p *stringPayload) Groups() [][]int {
+	groupMap := map[string][]int{}
+	ordered := []string{}
+	na := []int{}
+
+	for i, val := range p.data {
+		idx := i + 1
+
+		if p.na[i] {
+			na = append(na, idx)
+			continue
+		}
+
+		if _, ok := groupMap[val]; !ok {
+			groupMap[val] = []int{}
+			ordered = append(ordered, val)
+		}
+
+		groupMap[val] = append(groupMap[val], idx)
+	}
+
+	groups := make([][]int, len(ordered))
+	for i, val := range ordered {
+		groups[i] = groupMap[val]
+	}
+
+	if len(na) > 0 {
+		groups = append(groups, na)
+	}
+
+	return groups
+}
+
 func (p *stringPayload) StrForElem(idx int) string {
 	if p.na[idx-1] {
 		return "NA"

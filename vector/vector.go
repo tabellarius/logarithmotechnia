@@ -23,6 +23,11 @@ type Vector interface {
 	Append(vec Vector) Vector
 	Adjust(size int) Vector
 
+	Groups() [][]int
+	Ungroup() Vector
+	IsGrouped() bool
+	GroupByIndices([][]int) Vector
+
 	IsEmpty() bool
 
 	NAble
@@ -49,6 +54,8 @@ type Vector interface {
 	Arrangeable
 
 	Options() []Option
+
+	SummerV
 }
 
 type Payload interface {
@@ -104,7 +111,7 @@ type Interfaceable interface {
 	Interfaces() ([]interface{}, []bool)
 }
 
-type TransformFunc func([]interface{}, []bool) Payload
+type TransformFunc = func([]interface{}, []bool) Payload
 
 type Configurable interface {
 	Options() []Option
@@ -129,10 +136,15 @@ type Arrangeable interface {
 	SortedIndicesWithRanks() ([]int, []int)
 }
 
+type Groupper interface {
+	Groups() [][]int
+}
+
 // vector holds data and functions shared by all vectors
 type vector struct {
 	length  int
 	payload Payload
+	groups  []Vector
 }
 
 func (v *vector) Type() string {
@@ -149,10 +161,7 @@ func (v *vector) Payload() Payload {
 }
 
 func (v *vector) Clone() Vector {
-	return &vector{
-		length:  v.length,
-		payload: v.payload,
-	}
+	return New(v.payload, v.Options()...)
 }
 
 func (v *vector) ByIndices(indices []int) Vector {
@@ -328,6 +337,42 @@ func (v *vector) Adjust(size int) Vector {
 	newPayload := v.payload.Adjust(size)
 
 	return New(newPayload, v.Options()...)
+}
+
+func (v *vector) Groups() [][]int {
+	if groupper, ok := v.payload.(Groupper); ok {
+		return groupper.Groups()
+	}
+
+	return [][]int{}
+}
+
+func (v *vector) IsGrouped() bool {
+	return len(v.groups) > 0
+}
+
+func (v *vector) GroupByIndices(groups [][]int) Vector {
+	if len(groups) == 0 {
+		return v
+	}
+
+	newVec := New(v.payload, v.Options()...).(*vector)
+	newVec.groups = make([]Vector, len(groups))
+	for i, indices := range groups {
+		newVec.groups[i] = newVec.ByIndices(indices)
+	}
+
+	return newVec
+}
+
+func (v *vector) Ungroup() Vector {
+	if !v.IsGrouped() {
+		return v
+	}
+
+	newVec := New(v.payload, v.Options()...).(*vector)
+
+	return newVec
 }
 
 func (v *vector) IsNA() []bool {

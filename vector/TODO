@@ -1,3 +1,5 @@
+*() + *NA() для создания векторов (чтобы не нужно было писать все время nil)
+Fix duplicate column names
 Factors
 String functions
 Finder interface for InterfacePayload

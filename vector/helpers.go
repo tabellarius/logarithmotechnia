@@ -66,7 +66,7 @@ func CompareVectorsForTest(one, two Vector) bool {
 		p2 := vec2.payload.(*interfacePayload)
 		ok = reflect.DeepEqual(p1.data, p2.data) && reflect.DeepEqual(p1.na, p2.na)
 	case *naPayload:
-		ok = true
+		ok = vec1.length == vec2.length
 	case *stringPayload:
 		p1 := vec1.payload.(*stringPayload)
 		p2 := vec2.payload.(*stringPayload)

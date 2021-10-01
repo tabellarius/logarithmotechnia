@@ -359,6 +359,39 @@ func (p *complexPayload) Options() []Option {
 	}
 }
 
+func (p *complexPayload) Groups() [][]int {
+	groupMap := map[complex128][]int{}
+	ordered := []complex128{}
+	na := []int{}
+
+	for i, val := range p.data {
+		idx := i + 1
+
+		if p.na[i] {
+			na = append(na, idx)
+			continue
+		}
+
+		if _, ok := groupMap[val]; !ok {
+			groupMap[val] = []int{}
+			ordered = append(ordered, val)
+		}
+
+		groupMap[val] = append(groupMap[val], idx)
+	}
+
+	groups := make([][]int, len(ordered))
+	for i, val := range ordered {
+		groups[i] = groupMap[val]
+	}
+
+	if len(na) > 0 {
+		groups = append(groups, na)
+	}
+
+	return groups
+}
+
 func (p *complexPayload) StrForElem(idx int) string {
 	i := idx - 1
 
