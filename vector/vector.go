@@ -161,10 +161,7 @@ func (v *vector) Payload() Payload {
 }
 
 func (v *vector) Clone() Vector {
-	return &vector{
-		length:  v.length,
-		payload: v.payload,
-	}
+	return New(v.payload, v.Options()...)
 }
 
 func (v *vector) ByIndices(indices []int) Vector {

@@ -204,9 +204,21 @@ func (df *Dataframe) IsGrouped() bool {
 	return len(df.groupedBy) > 0
 }
 
+func (df *Dataframe) GroupedBy() []string {
+	groupedBy := make([]string, len(df.groupedBy))
+	copy(groupedBy, df.groupedBy)
+
+	return groupedBy
+}
+
 func (df *Dataframe) Ungroup() *Dataframe {
 	if !df.IsGrouped() {
 		return df
+	}
+
+	columns := make([]vector.Vector, df.colNum)
+	for i := 0; i < df.colNum; i++ {
+		columns[i] = df.columns[i].Ungroup()
 	}
 
 	return New(df.columns, df.OptionsWithNames()...)

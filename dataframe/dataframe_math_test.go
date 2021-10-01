@@ -34,9 +34,9 @@ func TestDataframe_Sum(t *testing.T) {
 			df:   df.GroupBy("A").Sum(),
 			columns: []vector.Vector{
 				vector.Integer([]int{100, 400, 60}),
-				vector.IntegerWithNA([]int{0}, []bool{true}),
-				vector.Integer([]int{3}),
-				vector.NA(1),
+				vector.IntegerWithNA([]int{100, 0, 0}, []bool{false, true, true}),
+				vector.Integer([]int{1, 1, 1}),
+				vector.NA(3),
 			},
 		},
 	}
