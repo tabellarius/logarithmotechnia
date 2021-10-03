@@ -1,11 +1,10 @@
-*() + *NA() для создания векторов (чтобы не нужно было писать все время nil)
 Fix duplicate column names
 Factors
 String functions
 Finder interface for InterfacePayload
-Default NA Values
 Vector's element indices as uint32
 Add df.Err and logger
 Comparator for Interface payload(?) Make all payload public
 (?) Update() + Clone()
 (?) Remove SupportsWhicher() and SupportsFilter()
+(?) Default NA Values

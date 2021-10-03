@@ -1,6 +1,5 @@
-Rework dataframe creation
-Move df.config.columnNames into df.ColumnNames (vector)
+Joins
+Distinct()
 Select - OptionRemoveColumns()
 (?) Select by func
-Joins
-Group()
+(?) Rework dataframe creation
