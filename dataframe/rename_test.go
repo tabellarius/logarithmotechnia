@@ -29,7 +29,7 @@ func TestDataframe_Rename(t *testing.T) {
 		{
 			name:        "normal",
 			renames:     []Rename{{"name", "nickname"}, {"age", "nickname"}},
-			columnNames: []string{"nickname", "nickname", "gender"},
+			columnNames: []string{"nickname", "nickname_1", "gender"},
 			columns: []vector.Vector{
 				vector.StringWithNA([]string{"Jim", "SPARC-001", "Anna", "Lucius", "Maria"}, nil),
 				vector.IntegerWithNA([]int{31, 3, 24, 41, 33}, nil),
