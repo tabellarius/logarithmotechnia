@@ -74,7 +74,7 @@ func bindTwoDataFramesByRows(src, app *Dataframe) *Dataframe {
 		if app.Names().Has(src.columnNames[i]) {
 			tmpColumn = app.Select(src.columnNames[i]).Ci(1)
 		} else {
-			tmpColumn = vector.NA(src.rowNum)
+			tmpColumn = vector.NA(app.rowNum)
 		}
 		columns[i] = src.columns[i].Append(tmpColumn)
 		columnNames[i] = src.columnNames[i]

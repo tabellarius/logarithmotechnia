@@ -61,35 +61,6 @@ func (df *Dataframe) Ci(index int) vector.Vector {
 	return nil
 }
 
-func (df *Dataframe) SetColumnName(index int, name string) *Dataframe {
-	df.setColumnName(index, name)
-	df.columnNamesVector = vector.StringWithNA(df.columnNames, nil)
-
-	return df
-}
-
-func (df *Dataframe) setColumnName(index int, name string) {
-	if df.IsValidColumnIndex(index) {
-		if !df.HasColumn(name) {
-			df.columnNames[index-1] = name
-		}
-	}
-}
-
-func (df *Dataframe) SetColumnNames(names []string) *Dataframe {
-	index := 1
-	for _, name := range names {
-		df.setColumnName(index, name)
-		index++
-		if index > df.colNum {
-			break
-		}
-	}
-	df.columnNamesVector = vector.StringWithNA(df.columnNames, nil)
-
-	return df
-}
-
 func (df *Dataframe) Names() vector.Vector {
 	return df.columnNamesVector
 }
@@ -307,6 +278,7 @@ func dataframeFromVectors(vectors []vector.Vector, options ...vector.Option) *Da
 	columnNames := generateColumnNames(colNum)
 	if conf.HasOption(vector.KeyOptionColumnNames) {
 		names := conf.Value(vector.KeyOptionColumnNames).([]string)
+		names = renameDuplicateColumns(names)
 		if colNum >= len(names) {
 			copy(columnNames, names)
 		} else {
@@ -321,4 +293,38 @@ func dataframeFromVectors(vectors []vector.Vector, options ...vector.Option) *Da
 		columnNames:       columnNames,
 		columnNamesVector: vector.StringWithNA(columnNames, nil),
 	}
+}
+
+func renameDuplicateColumns(names []string) []string {
+	if len(names) == 0 {
+		return names
+	}
+
+	uniqueNames := make([]string, len(names))
+	uniqueNames[0] = names[0]
+	for i := 1; i < len(names); i++ {
+		id := 1
+		name := names[i]
+
+		for {
+			duplicate := false
+			for j := 0; j < i; j++ {
+				if uniqueNames[j] == name {
+					duplicate = true
+					break
+				}
+			}
+
+			if !duplicate {
+				break
+			}
+
+			name = names[i] + "_" + strconv.Itoa(id)
+			id++
+		}
+
+		uniqueNames[i] = name
+	}
+
+	return uniqueNames
 }
