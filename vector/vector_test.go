@@ -1673,28 +1673,38 @@ func TestVector_Groups(t *testing.T) {
 		name   string
 		vec    Vector
 		groups [][]int
+		values []interface{}
 	}{
 		{
 			name:   "normal",
 			vec:    Integer([]int{-20, 10, 4, -20, 7, -20, 10, -20, 4, 10}, nil),
 			groups: [][]int{{1, 4, 6, 8}, {2, 7, 10}, {3, 9}, {5}},
+			values: []interface{}{-20, 10, 4, 7},
 		},
 		{
 			name: "with NA",
 			vec: IntegerWithNA([]int{-20, 10, 4, -20, 7, -20, 10, -20, 4, 10},
 				[]bool{false, false, false, false, false, false, true, true, false, false}),
 			groups: [][]int{{1, 4, 6}, {2, 10}, {3, 9}, {5}, {7, 8}},
+			values: []interface{}{-20, 10, 4, 7, nil},
 		},
 		{
 			name:   "empty",
 			vec:    Integer([]int{}, nil),
 			groups: [][]int{},
+			values: []interface{}{},
+		},
+		{
+			name:   "non-groupable",
+			vec:    NA(10),
+			groups: [][]int{{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}},
+			values: []interface{}{nil},
 		},
 	}
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			groups := data.vec.Groups()
+			groups, _ := data.vec.Groups()
 
 			if !reflect.DeepEqual(groups, data.groups) {
 				t.Error(fmt.Sprintf("Groups (%v) do not match expected (%v)",

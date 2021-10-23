@@ -1083,27 +1083,35 @@ func TestFloatPayload_Groups(t *testing.T) {
 		name    string
 		payload Payload
 		groups  [][]int
+		values  []interface{}
 	}{
 		{
 			name:    "normal",
 			payload: FloatPayload([]float64{-20, 10, 4, -20, 7, -20, 10, -20, 4, 10}, nil),
 			groups:  [][]int{{1, 4, 6, 8}, {2, 7, 10}, {3, 9}, {5}},
+			values:  []interface{}{-20.0, 10.0, 4.0, 7.0},
 		},
 		{
 			name: "with NA",
 			payload: FloatPayload([]float64{-20, 10, 4, -20, 10, -20, 10, -20, 4, 7},
 				[]bool{false, false, false, false, false, false, true, true, false, false}),
 			groups: [][]int{{1, 4, 6}, {2, 5}, {3, 9}, {10}, {7, 8}},
+			values: []interface{}{-20.0, 10.0, 4.0, 7.0, nil},
 		},
 	}
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			groups := data.payload.(*floatPayload).Groups()
+			groups, values := data.payload.(*floatPayload).Groups()
 
 			if !reflect.DeepEqual(groups, data.groups) {
 				t.Error(fmt.Sprintf("Groups (%v) do not match expected (%v)",
 					groups, data.groups))
+			}
+
+			if !reflect.DeepEqual(values, data.values) {
+				t.Error(fmt.Sprintf("Groups (%v) do not match expected (%v)",
+					values, data.values))
 			}
 		})
 	}

@@ -359,7 +359,7 @@ func (p *complexPayload) Options() []Option {
 	}
 }
 
-func (p *complexPayload) Groups() [][]int {
+func (p *complexPayload) Groups() ([][]int, []interface{}) {
 	groupMap := map[complex128][]int{}
 	ordered := []complex128{}
 	na := []int{}
@@ -389,7 +389,15 @@ func (p *complexPayload) Groups() [][]int {
 		groups = append(groups, na)
 	}
 
-	return groups
+	values := make([]interface{}, len(groups))
+	for i, val := range ordered {
+		values[i] = interface{}(val)
+	}
+	if len(na) > 0 {
+		values[len(values)-1] = nil
+	}
+
+	return groups, values
 }
 
 func (p *complexPayload) StrForElem(idx int) string {

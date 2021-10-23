@@ -23,7 +23,7 @@ type Vector interface {
 	Append(vec Vector) Vector
 	Adjust(size int) Vector
 
-	Groups() [][]int
+	Groups() ([][]int, []interface{})
 	Ungroup() Vector
 	IsGrouped() bool
 	GroupByIndices([][]int) Vector
@@ -137,7 +137,7 @@ type Arrangeable interface {
 }
 
 type Groupper interface {
-	Groups() [][]int
+	Groups() ([][]int, []interface{})
 }
 
 // vector holds data and functions shared by all vectors
@@ -339,12 +339,12 @@ func (v *vector) Adjust(size int) Vector {
 	return New(newPayload, v.Options()...)
 }
 
-func (v *vector) Groups() [][]int {
+func (v *vector) Groups() ([][]int, []interface{}) {
 	if groupper, ok := v.payload.(Groupper); ok {
 		return groupper.Groups()
 	}
 
-	return [][]int{}
+	return [][]int{incIndices(indicesArray(v.length))}, []interface{}{nil}
 }
 
 func (v *vector) IsGrouped() bool {

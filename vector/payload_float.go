@@ -595,7 +595,7 @@ func (p *floatPayload) convertComparator(val interface{}) (float64, bool) {
 	return v, ok
 }
 
-func (p *floatPayload) Groups() [][]int {
+func (p *floatPayload) Groups() ([][]int, []interface{}) {
 	groupMap := map[float64][]int{}
 	ordered := []float64{}
 	na := []int{}
@@ -625,7 +625,15 @@ func (p *floatPayload) Groups() [][]int {
 		groups = append(groups, na)
 	}
 
-	return groups
+	values := make([]interface{}, len(groups))
+	for i, val := range ordered {
+		values[i] = interface{}(val)
+	}
+	if len(na) > 0 {
+		values[len(values)-1] = nil
+	}
+
+	return groups, values
 }
 
 func (p *floatPayload) Options() []Option {

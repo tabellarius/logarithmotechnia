@@ -1048,27 +1048,35 @@ func TestBooleanPayload_Groups(t *testing.T) {
 		name    string
 		payload Payload
 		groups  [][]int
+		values  []interface{}
 	}{
 		{
 			name:    "normal",
 			payload: BooleanPayload([]bool{true, false, true, true, false}, nil),
 			groups:  [][]int{{1, 3, 4}, {2, 5}},
+			values:  []interface{}{true, false},
 		},
 		{
 			name: "with NA",
 			payload: BooleanPayload([]bool{true, false, true, true, false},
 				[]bool{false, false, true, false, false}),
 			groups: [][]int{{1, 4}, {2, 5}, {3}},
+			values: []interface{}{true, false, nil},
 		},
 	}
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			groups := data.payload.(*booleanPayload).Groups()
+			groups, values := data.payload.(*booleanPayload).Groups()
 
 			if !reflect.DeepEqual(groups, data.groups) {
 				t.Error(fmt.Sprintf("Groups (%v) do not match expected (%v)",
 					groups, data.groups))
+			}
+
+			if !reflect.DeepEqual(values, data.values) {
+				t.Error(fmt.Sprintf("Groups (%v) do not match expected (%v)",
+					values, data.values))
 			}
 		})
 	}

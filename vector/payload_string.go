@@ -324,7 +324,7 @@ func (p *stringPayload) Append(payload Payload) Payload {
 	return StringPayload(newVals, newNA, p.Options()...)
 }
 
-func (p *stringPayload) Groups() [][]int {
+func (p *stringPayload) Groups() ([][]int, []interface{}) {
 	groupMap := map[string][]int{}
 	ordered := []string{}
 	na := []int{}
@@ -354,7 +354,15 @@ func (p *stringPayload) Groups() [][]int {
 		groups = append(groups, na)
 	}
 
-	return groups
+	values := make([]interface{}, len(groups))
+	for i, val := range ordered {
+		values[i] = interface{}(val)
+	}
+	if len(na) > 0 {
+		values[len(values)-1] = nil
+	}
+
+	return groups, values
 }
 
 func (p *stringPayload) StrForElem(idx int) string {

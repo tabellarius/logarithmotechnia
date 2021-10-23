@@ -937,24 +937,35 @@ func TestTimePayload_Groups(t *testing.T) {
 		name    string
 		payload Payload
 		groups  [][]int
+		values  []interface{}
 	}{
 		{
 			name: "normal",
 			payload: TimePayload(toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00",
 				"2020-01-01T12:30:00+03:00", "2020-01-01T12:30:00+03:00"}), nil),
 			groups: [][]int{{1}, {2}, {3, 4}},
+			values: []interface{}{
+				toTimeData([]string{"2006-01-02T15:04:05+07:00"})[0],
+				toTimeData([]string{"2021-01-01T12:30:00+03:00"})[0],
+				toTimeData([]string{"2020-01-01T12:30:00+03:00"})[0],
+			},
 		},
 		{
 			name: "with NA",
 			payload: TimePayload(toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00",
 				"2020-01-01T12:30:00+03:00", "2020-01-01T12:30:00+03:00"}), []bool{false, true, false, false}),
 			groups: [][]int{{1}, {3, 4}, {2}},
+			values: []interface{}{
+				toTimeData([]string{"2006-01-02T15:04:05+07:00"})[0],
+				toTimeData([]string{"2020-01-01T12:30:00+03:00"})[0],
+				nil,
+			},
 		},
 	}
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			groups := data.payload.(*timePayload).Groups()
+			groups, _ := data.payload.(*timePayload).Groups()
 
 			if !reflect.DeepEqual(groups, data.groups) {
 				t.Error(fmt.Sprintf("Groups (%v) do not match expected (%v)",

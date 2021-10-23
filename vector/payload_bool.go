@@ -357,7 +357,7 @@ func (p *booleanPayload) adjustToBiggerSize(size int) Payload {
 	return BooleanPayload(data, na)
 }
 
-func (p *booleanPayload) Groups() [][]int {
+func (p *booleanPayload) Groups() ([][]int, []interface{}) {
 	groupMap := map[bool][]int{}
 	ordered := []bool{}
 	na := []int{}
@@ -387,7 +387,15 @@ func (p *booleanPayload) Groups() [][]int {
 		groups = append(groups, na)
 	}
 
-	return groups
+	values := make([]interface{}, len(groups))
+	for i, val := range ordered {
+		values[i] = interface{}(val)
+	}
+	if len(na) > 0 {
+		values[len(values)-1] = nil
+	}
+
+	return groups, values
 }
 
 func (p *booleanPayload) StrForElem(idx int) string {

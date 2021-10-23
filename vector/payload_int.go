@@ -356,7 +356,7 @@ func (p *integerPayload) adjustToBiggerSize(size int) Payload {
 	return IntegerPayload(data, na, p.Options()...)
 }
 
-func (p *integerPayload) Groups() [][]int {
+func (p *integerPayload) Groups() ([][]int, []interface{}) {
 	groupMap := map[int][]int{}
 	ordered := []int{}
 	na := []int{}
@@ -386,7 +386,15 @@ func (p *integerPayload) Groups() [][]int {
 		groups = append(groups, na)
 	}
 
-	return groups
+	values := make([]interface{}, len(groups))
+	for i, val := range ordered {
+		values[i] = interface{}(val)
+	}
+	if len(na) > 0 {
+		values[len(values)-1] = nil
+	}
+
+	return groups, values
 }
 
 func (p *integerPayload) StrForElem(idx int) string {

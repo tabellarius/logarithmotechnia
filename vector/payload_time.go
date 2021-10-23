@@ -458,7 +458,7 @@ func (p *timePayload) Lte(val interface{}) []bool {
 	return cmp
 }
 
-func (p *timePayload) Groups() [][]int {
+func (p *timePayload) Groups() ([][]int, []interface{}) {
 	groupMap := map[time.Time][]int{}
 	ordered := []time.Time{}
 	na := []int{}
@@ -488,7 +488,15 @@ func (p *timePayload) Groups() [][]int {
 		groups = append(groups, na)
 	}
 
-	return groups
+	values := make([]interface{}, len(groups))
+	for i, val := range ordered {
+		values[i] = interface{}(val)
+	}
+	if len(na) > 0 {
+		values[len(values)-1] = nil
+	}
+
+	return groups, values
 }
 
 func (p *timePayload) Options() []Option {

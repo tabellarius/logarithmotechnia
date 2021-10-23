@@ -10,6 +10,7 @@ const KeyOptionAfterColumn = "after_column"
 const KeyOptionColumnNames = "column_names"
 const KeyOptionArrangeReverse = "arrange_reverse"
 const KeyOptionArrangeReverseColumns = "arrange_reverse_columns"
+const KeyOptionJoinBy = "join_by_columns"
 
 //deprecated
 type Config struct {
@@ -102,4 +103,8 @@ func OptionArrangeReverse(reverse bool) Option {
 
 func OptionArrangeReverseColumns(columns ...string) Option {
 	return ConfOption{KeyOptionArrangeReverseColumns, columns}
+}
+
+func OptionJoinBy(by ...string) Option {
+	return ConfOption{KeyOptionJoinBy, by}
 }

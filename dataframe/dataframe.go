@@ -145,7 +145,8 @@ func (df *Dataframe) GroupBy(selectors ...interface{}) *Dataframe {
 
 func (df *Dataframe) groupByColumn(groupBy string, curGroups [][]int) [][]int {
 	if len(curGroups) == 0 {
-		return df.Cn(groupBy).Groups()
+		groups, _ := df.Cn(groupBy).Groups()
+		return groups
 	}
 
 	newIndices := [][]int{}
@@ -155,7 +156,7 @@ func (df *Dataframe) groupByColumn(groupBy string, curGroups [][]int) [][]int {
 			continue
 		}
 
-		subGroups := df.Cn(groupBy).ByIndices(indices).Groups()
+		subGroups, _ := df.Cn(groupBy).ByIndices(indices).Groups()
 		replaceGroups := make([][]int, len(subGroups))
 		for j, subIndices := range subGroups {
 			newGroup := make([]int, len(subIndices))
