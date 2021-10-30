@@ -168,7 +168,7 @@ func (v *vector) ByIndices(indices []int) Vector {
 	var selected []int
 
 	for _, index := range indices {
-		if index >= 1 && index <= v.length {
+		if index >= 0 && index <= v.length {
 			selected = append(selected, index)
 		}
 	}

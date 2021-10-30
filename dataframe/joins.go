@@ -3,6 +3,8 @@ package dataframe
 import (
 	"fmt"
 	"logarithmotechnia/vector"
+	"strconv"
+	"strings"
 )
 
 func (df *Dataframe) InnerJoin(with *Dataframe, options ...vector.Option) *Dataframe {
@@ -14,13 +16,37 @@ func (df *Dataframe) InnerJoin(with *Dataframe, options ...vector.Option) *Dataf
 	}
 
 	rootDfTree := &joinNode{}
-	//	rootWithTree := &joinNode{}
+	rootWithTree := &joinNode{}
 	fillJoinTree(df, rootDfTree, columns)
-	//	fillJoinTree(with, rootWithTree, columns)
+	fillJoinTree(with, rootWithTree, columns)
 
-	fmt.Println(rootDfTree)
+	dfTreeKeys := rootDfTree.getKeys()
 
-	return nil
+	dfIndices := make([]int, 0)
+	withIndices := make([]int, 0)
+	for _, key := range dfTreeKeys {
+		indicesForWith := rootWithTree.getIndicesFor(key)
+		if indicesForWith == nil {
+			continue
+		}
+		indicesForDf := rootDfTree.getIndicesFor(key)
+		for _, idxDf := range indicesForDf {
+			for _, idxWith := range indicesForWith {
+				dfIndices = append(dfIndices, idxDf)
+				withIndices = append(withIndices, idxWith)
+			}
+		}
+	}
+
+	removeColumns := make([]string, len(columns))
+	for i, column := range columns {
+		removeColumns[i] = "-" + column
+	}
+
+	newDf := df.ByIndices(dfIndices)
+	newWIth := with.Select(removeColumns).ByIndices(withIndices)
+
+	return newDf.BindColumns(newWIth)
 }
 
 func (df *Dataframe) determineColumns(conf vector.Configuration, src *Dataframe) []string {
@@ -46,6 +72,7 @@ func (df *Dataframe) determineColumns(conf vector.Configuration, src *Dataframe)
 }
 
 type joinNode struct {
+	groupVal interface{}
 	groupMap map[interface{}]*joinNode
 	indices  []int
 	values   []interface{}
@@ -87,8 +114,27 @@ func (n *joinNode) getKeys() [][]interface{} {
 			keys = append(keys, []interface{}{val})
 		}
 	}
-	fmt.Println("Keys:", keys)
+
 	return keys
+}
+
+func (n *joinNode) String() string {
+	return joinNodeToString(n, 0)
+}
+
+func joinNodeToString(node *joinNode, lvl int) string {
+	str := strings.Repeat("    ", lvl) + "Group: " + fmt.Sprintf("%v", node.groupVal) + "\n"
+	str += strings.Repeat("    ", lvl) + "Values: " + fmt.Sprintf("%v", node.values) + "\n"
+	str += strings.Repeat("    ", lvl) + "Values array length: " + strconv.Itoa(len(node.values)) + "\n"
+	str += strings.Repeat("    ", lvl) + "Indices: " + fmt.Sprintf("%v", node.indices) + "\n"
+
+	if len(node.values) > 0 {
+		for _, value := range node.values {
+			str += joinNodeToString(node.groupMap[value], lvl+1) + "\n"
+		}
+	}
+
+	return str
 }
 
 func fillJoinTree(df *Dataframe, node *joinNode, columns []string) {
@@ -106,6 +152,7 @@ func fillJoinTree(df *Dataframe, node *joinNode, columns []string) {
 	node.values = values
 	for i := 0; i < len(values); i++ {
 		subNode := &joinNode{}
+		subNode.groupVal = values[i]
 		if node.indices == nil {
 			subNode.indices = groups[i]
 		} else {

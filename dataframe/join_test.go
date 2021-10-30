@@ -20,4 +20,5 @@ func TestDataframe_InnerJoin(t *testing.T) {
 	})
 
 	employee.InnerJoin(department, vector.OptionJoinBy("DepartmentType"))
+	//	employee.InnerJoin(department, vector.OptionJoinBy("DepartmentType", "DepartmentId"))
 }
