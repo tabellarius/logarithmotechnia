@@ -426,6 +426,12 @@ func TestStringPayload_ByIndices(t *testing.T) {
 			out:     []string{"", "1", "3"},
 			outNA:   []bool{true, false, false},
 		},
+		{
+			name:    "with zero",
+			indices: []int{5, 1, 0, 3},
+			out:     []string{"", "1", "", "3"},
+			outNA:   []bool{true, false, true, false},
+		},
 	}
 
 	for _, data := range testData {

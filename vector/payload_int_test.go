@@ -414,6 +414,12 @@ func TestIntegerPayload_ByIndices(t *testing.T) {
 			out:     []int{0, 1, 3},
 			outNA:   []bool{true, false, false},
 		},
+		{
+			name:    "with zero",
+			indices: []int{5, 1, 0, 3},
+			out:     []int{0, 1, 0, 3},
+			outNA:   []bool{true, false, true, false},
+		},
 	}
 
 	for _, data := range testData {

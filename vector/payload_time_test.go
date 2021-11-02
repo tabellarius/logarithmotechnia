@@ -283,6 +283,12 @@ func TestTimePayload_ByIndices(t *testing.T) {
 			out:     toTimeData([]string{"0001-01-01T00:00:00Z", "2006-01-02T15:04:05+07:00"}),
 			outNA:   []bool{true, false},
 		},
+		{
+			name:    "with zero",
+			indices: []int{3, 1, 0},
+			out:     toTimeData([]string{"0001-01-01T00:00:00Z", "2006-01-02T15:04:05+07:00", "0001-01-01T00:00:00Z"}),
+			outNA:   []bool{true, false, true},
+		},
 	}
 
 	for _, data := range testData {

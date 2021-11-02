@@ -137,9 +137,9 @@ func TestDataframe_ByIndices(t *testing.T) {
 			name:    "with invalid",
 			indices: []int{-1, 0, 1, 3, 5, 8, 10, 11, 100},
 			dfColumns: []vector.Vector{
-				vector.IntegerWithNA([]int{1, 3, 5, 8, 10}, nil),
-				vector.StringWithNA([]string{"1", "3", "5", "8", "10"}, nil),
-				vector.BooleanWithNA([]bool{true, true, true, false, false}, nil),
+				vector.IntegerWithNA([]int{0, 1, 3, 5, 8, 10}, []bool{true, false, false, false, false, false}),
+				vector.StringWithNA([]string{"", "1", "3", "5", "8", "10"}, []bool{true, false, false, false, false, false}),
+				vector.BooleanWithNA([]bool{false, true, true, true, false, false}, []bool{true, false, false, false, false, false}),
 			},
 		},
 		{

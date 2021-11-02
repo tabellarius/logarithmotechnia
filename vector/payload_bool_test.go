@@ -431,6 +431,12 @@ func TestBooleanPayload_ByIndices(t *testing.T) {
 			out:     []bool{false, true, true},
 			outNA:   []bool{true, false, false},
 		},
+		{
+			name:    "with zero",
+			indices: []int{5, 1, 0, 3},
+			out:     []bool{false, true, false, true},
+			outNA:   []bool{true, false, true, false},
+		},
 	}
 
 	for _, data := range testData {

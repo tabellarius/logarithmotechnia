@@ -1,6 +1,7 @@
 package dataframe
 
 import (
+	"fmt"
 	"logarithmotechnia/vector"
 	"strconv"
 )
@@ -194,6 +195,16 @@ func (df *Dataframe) Ungroup() *Dataframe {
 	}
 
 	return New(df.columns, df.OptionsWithNames()...)
+}
+
+func (df *Dataframe) String() string {
+	var str string
+
+	for i, column := range df.columns {
+		str += fmt.Sprintf("%s: %v\n", df.columnNames[i], column)
+	}
+
+	return str
 }
 
 func (df *Dataframe) columnIndexByName(name string) int {

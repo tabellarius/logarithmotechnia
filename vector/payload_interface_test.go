@@ -146,6 +146,12 @@ func TestInterfacePayload_ByIndices(t *testing.T) {
 			out:     []interface{}{nil, 1, 3},
 			outNA:   []bool{true, false, false},
 		},
+		{
+			name:    "some",
+			indices: []int{5, 1, 3, 0},
+			out:     []interface{}{nil, 1, 3, nil},
+			outNA:   []bool{true, false, false, true},
+		},
 	}
 
 	for _, data := range testData {

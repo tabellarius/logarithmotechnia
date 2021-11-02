@@ -155,6 +155,12 @@ func TestComplexPayload_ByIndices(t *testing.T) {
 			out:     []complex128{cmplx.NaN(), 1, 3},
 			outNA:   []bool{true, false, false},
 		},
+		{
+			name:    "with zero",
+			indices: []int{5, 1, 0, 3},
+			out:     []complex128{cmplx.NaN(), 1, cmplx.NaN(), 3},
+			outNA:   []bool{true, false, true, false},
+		},
 	}
 
 	for _, data := range testData {

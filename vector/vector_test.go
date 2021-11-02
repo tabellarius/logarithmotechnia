@@ -612,9 +612,9 @@ func TestVector_ByIndices(t *testing.T) {
 		{
 			name:    "normal",
 			indices: []int{-1, 0, 4, 3, 2, 6},
-			out:     []int{4, 0, 2},
-			outNA:   []bool{false, true, false},
-			length:  3,
+			out:     []int{0, 4, 0, 2},
+			outNA:   []bool{true, false, true, false},
+			length:  4,
 		},
 		{
 			name:    "empty",
