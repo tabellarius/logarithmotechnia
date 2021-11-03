@@ -3,14 +3,14 @@ package vector
 import "sort"
 
 type DefArrangeable struct {
-	length int
+	Length int
 	DefNAble
-	fnLess  func(i, j int) bool
-	fnEqual func(i, j int) bool
+	FnLess  func(i, j int) bool
+	FnEqual func(i, j int) bool
 }
 
 func (ar *DefArrangeable) sortedIndices() []int {
-	indices := indicesArray(ar.length)
+	indices := indicesArray(ar.Length)
 
 	var fn func(i, j int) bool
 	if ar.HasNA() {
@@ -27,11 +27,11 @@ func (ar *DefArrangeable) sortedIndices() []int {
 				return false
 			}
 
-			return ar.fnLess(indices[i], indices[j])
+			return ar.FnLess(indices[i], indices[j])
 		}
 	} else {
 		fn = func(i, j int) bool {
-			return ar.fnLess(indices[i], indices[j])
+			return ar.FnLess(indices[i], indices[j])
 		}
 	}
 
@@ -56,13 +56,13 @@ func (ar *DefArrangeable) SortedIndicesWithRanks() ([]int, []int) {
 	}
 
 	rank := 1
-	ranks := make([]int, ar.length)
+	ranks := make([]int, ar.Length)
 	if ar.na[0] {
 		rank = 0
 	}
 	ranks[0] = rank
-	for i := 1; i < ar.length; i++ {
-		if ar.na[indices[i]] != ar.na[indices[i-1]] || !ar.fnEqual(indices[i], indices[i-1]) {
+	for i := 1; i < ar.Length; i++ {
+		if ar.na[indices[i]] != ar.na[indices[i-1]] || !ar.FnEqual(indices[i], indices[i-1]) {
 			rank++
 			ranks[i] = rank
 		} else {

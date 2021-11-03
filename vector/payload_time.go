@@ -548,12 +548,12 @@ func TimePayload(data []time.Time, na []bool, options ...Option) Payload {
 	}
 
 	payload.DefArrangeable = DefArrangeable{
-		length:   payload.length,
+		Length:   payload.length,
 		DefNAble: payload.DefNAble,
-		fnLess: func(i, j int) bool {
+		FnLess: func(i, j int) bool {
 			return payload.data[i].Before(payload.data[j])
 		},
-		fnEqual: func(i, j int) bool {
+		FnEqual: func(i, j int) bool {
 			return payload.data[i].Equal(payload.data[j])
 		},
 	}

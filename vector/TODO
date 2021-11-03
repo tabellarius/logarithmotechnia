@@ -8,3 +8,4 @@ Comparator for Interface payload(?) Make all payload public
 (?) Update() + Clone()
 (?) Remove SupportsWhicher() and SupportsFilter()
 (?) Default NA Values
+Add NewDefNAable() for DefNAble

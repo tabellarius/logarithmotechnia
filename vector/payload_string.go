@@ -375,7 +375,7 @@ func (p *stringPayload) StrForElem(idx int) string {
 		return "NA"
 	}
 
-	return p.data[idx-1]
+	return "\"" + p.data[idx-1] + "\""
 }
 
 func (p *stringPayload) Adjust(size int) Payload {
@@ -635,12 +635,12 @@ func StringPayload(data []string, na []bool, _ ...Option) Payload {
 	}
 
 	payload.DefArrangeable = DefArrangeable{
-		length:   payload.length,
+		Length:   payload.length,
 		DefNAble: payload.DefNAble,
-		fnLess: func(i, j int) bool {
+		FnLess: func(i, j int) bool {
 			return payload.data[i] < payload.data[j]
 		},
-		fnEqual: func(i, j int) bool {
+		FnEqual: func(i, j int) bool {
 			return payload.data[i] == payload.data[j]
 		},
 	}
