@@ -3,6 +3,7 @@ package dataframe
 import (
 	"fmt"
 	"logarithmotechnia/vector"
+	"reflect"
 	"testing"
 )
 
@@ -80,7 +81,7 @@ func TestDataframe_InnerJoin(t *testing.T) {
 		{
 			name:        "department ✕ employee",
 			joined:      department.InnerJoin(employee, vector.OptionJoinBy("DepType")).Arrange("Title", "Name"),
-			columnNames: []string{},
+			columnNames: []string{"DepID", "Title", "DepType", "Group", "Name", "Salary", "Group_1"},
 			outColumns: []vector.Vector{
 				vector.Integer([]int{
 					4, 4, 4, 2, 2, 2, 1, 1, 1, 3, 3, 6,
@@ -110,7 +111,7 @@ func TestDataframe_InnerJoin(t *testing.T) {
 		{
 			name:        "employee ✕ department by group",
 			joined:      employee.InnerJoin(department, vector.OptionJoinBy("Group", "DepType")).Arrange("Name", "Title"),
-			columnNames: []string{"Name", "DepType", "Salary", "Group", "DepID", "Title", "Group_1"},
+			columnNames: []string{"Name", "DepType", "Salary", "Group", "DepID", "Title"},
 			outColumns: []vector.Vector{
 				vector.String([]string{
 					"Gera", "Hades", "Jack", "Jane", "John", "Marcia", "Robert", "Zeus",
@@ -135,7 +136,7 @@ func TestDataframe_InnerJoin(t *testing.T) {
 		{
 			name:        "department ✕ employee by group",
 			joined:      department.InnerJoin(employee, vector.OptionJoinBy("Group", "DepType")).Arrange("Title", "Name"),
-			columnNames: []string{},
+			columnNames: []string{"DepID", "Title", "DepType", "Group", "Name", "Salary"},
 			outColumns: []vector.Vector{
 				vector.Integer([]int{
 					4, 2, 2, 1, 1, 3, 3, 6,
@@ -161,11 +162,113 @@ func TestDataframe_InnerJoin(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
+			if !reflect.DeepEqual(data.joined.columnNames, data.columnNames) {
+				t.Error(fmt.Sprintf("Column namess (%v) are not equal to expected (%v)\n",
+					data.joined.columnNames, data.columnNames))
+			}
+
 			if !vector.CompareVectorArrs(data.joined.columns, data.outColumns) {
 				t.Error(fmt.Sprintf("Columns (%v) are not equal to expected (%v)\n",
 					data.joined.columns, data.outColumns))
 			}
 		})
 	}
+}
 
+func TestDataframe_LeftJoin(t *testing.T) {
+	employee, department := getJoinDataFrames()
+
+	testData := []struct {
+		name        string
+		joined      *Dataframe
+		columnNames []string
+		outColumns  []vector.Vector
+	}{
+		{
+			name:        "employee ✕ department",
+			joined:      employee.LeftJoin(department, vector.OptionJoinBy("DepType")).Arrange("Name", "Title"),
+			columnNames: []string{"Name", "DepType", "Salary", "Group", "DepID", "Title", "Group_1"},
+			outColumns: []vector.Vector{
+				vector.String([]string{
+					"Catullus", "Gera", "Hades", "Hephaestus", "Jack", "Jane", "Jane", "John", "John", "Marcia",
+					"Marcius", "Robert", "Robert", "Zeus",
+				}),
+				vector.StringWithNA([]string{
+					"logistics", "sales", "", "factory", "production", "research", "research", "research", "research",
+					"production", "production", "research", "research", "sales",
+				}, []bool{false, false, true, false, false, false, false, false, false, false, false, false, false, false}),
+				vector.Integer([]int{
+					100000, 150000, 175000, 150000, 80000, 110000, 110000, 120000, 120000, 60000, 90000, 140000, 140000,
+					225000,
+				}),
+				vector.String([]string{
+					"A", "A", "A", "B", "B", "A", "A", "A", "A", "B", "A", "B", "B", "A",
+				}),
+				vector.IntegerWithNA([]int{
+					0, 3, 6, 0, 2, 4, 1, 4, 1, 2, 2, 4, 1, 3,
+				}, []bool{true, false, false, true, false, false, false, false, false, false, false, false, false, false}),
+				vector.StringWithNA([]string{
+					"", "Sales", "Unknown", "", "Production", "Laboratory", "R&D", "Laboratory", "R&D", "Production",
+					"Production", "Laboratory", "R&D", "Sales",
+				}, []bool{true, false, false, true, false, false, false, false, false, false, false, false, false, false}),
+				vector.StringWithNA([]string{
+					"", "A", "A", "", "B", "B", "A", "B", "A", "B", "B", "B", "A", "A",
+				}, []bool{true, false, false, true, false, false, false, false, false, false, false, false, false, false}),
+			},
+		},
+		{
+			name:        "department ✕ employee",
+			joined:      department.LeftJoin(employee, vector.OptionJoinBy("DepType")).Arrange("Title", "Name"),
+			columnNames: []string{},
+			outColumns: []vector.Vector{
+				vector.Integer([]int{}),
+				vector.String([]string{}),
+				vector.String([]string{}),
+				vector.Integer([]int{}),
+				vector.String([]string{}),
+				vector.Integer([]int{}),
+				vector.String([]string{}),
+			},
+		},
+		{
+			name:        "employee ✕ department by group",
+			joined:      employee.LeftJoin(department, vector.OptionJoinBy("DepType")).Arrange("Name", "Title"),
+			columnNames: []string{},
+			outColumns: []vector.Vector{
+				vector.String([]string{}),
+				vector.String([]string{}),
+				vector.Integer([]int{}),
+				vector.String([]string{}),
+				vector.Integer([]int{}),
+				vector.String([]string{}),
+			},
+		},
+		{
+			name:        "department ✕ employee by group",
+			joined:      employee.LeftJoin(department, vector.OptionJoinBy("DepType")).Arrange("Title", "Name"),
+			columnNames: []string{},
+			outColumns: []vector.Vector{
+				vector.Integer([]int{}),
+				vector.String([]string{}),
+				vector.String([]string{}),
+				vector.String([]string{}),
+				vector.String([]string{}),
+				vector.Integer([]int{}),
+			},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			if !reflect.DeepEqual(data.joined.columnNames, data.columnNames) {
+				t.Error(fmt.Sprintf("Column namess (%v) are not equal to expected (%v)\n",
+					data.joined.columnNames, data.columnNames))
+			}
+
+			if !vector.CompareVectorArrs(data.joined.columns, data.outColumns) {
+				t.Error(fmt.Sprintf("Columns (%v) are not equal to expected (%v)\n",
+					data.joined.columns, data.outColumns))
+			}
+		})
+	}
 }
