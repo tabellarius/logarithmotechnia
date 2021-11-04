@@ -4,3 +4,4 @@ Select - OptionRemoveColumns()
 (?) Select by func
 (?) Rework dataframe creation
 Move config to dataframe
+Loading from CSV

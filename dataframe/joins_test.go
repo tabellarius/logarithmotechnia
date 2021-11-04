@@ -219,41 +219,83 @@ func TestDataframe_LeftJoin(t *testing.T) {
 		{
 			name:        "department ✕ employee",
 			joined:      department.LeftJoin(employee, vector.OptionJoinBy("DepType")).Arrange("Title", "Name"),
-			columnNames: []string{},
+			columnNames: []string{"DepID", "Title", "DepType", "Group", "Name", "Salary", "Group_1"},
 			outColumns: []vector.Vector{
-				vector.Integer([]int{}),
-				vector.String([]string{}),
-				vector.String([]string{}),
-				vector.Integer([]int{}),
-				vector.String([]string{}),
-				vector.Integer([]int{}),
-				vector.String([]string{}),
+				vector.Integer([]int{
+					4, 4, 4, 2, 2, 2, 1, 1, 1, 3, 3, 6, 5,
+				}),
+				vector.String([]string{
+					"Laboratory", "Laboratory", "Laboratory", "Production", "Production", "Production", "R&D", "R&D", "R&D",
+					"Sales", "Sales", "Unknown", "Warehouse",
+				}),
+				vector.StringWithNA([]string{
+					"research", "research", "research", "production", "production", "production", "research", "research",
+					"research", "sales", "sales", "", "wares",
+				}, []bool{false, false, false, false, false, false, false, false, false, false, false, true, false}),
+				vector.String([]string{
+					"B", "B", "B", "B", "B", "B", "A", "A", "A", "A", "A", "A", "B",
+				}),
+				vector.StringWithNA([]string{
+					"Jane", "John", "Robert", "Jack", "Marcia", "Marcius", "Jane", "John", "Robert", "Gera", "Zeus",
+					"Hades", "",
+				}, []bool{false, false, false, false, false, false, false, false, false, false, false, false, true}),
+				vector.IntegerWithNA([]int{
+					110000, 120000, 140000, 80000, 60000, 90000, 110000, 120000, 140000, 150000, 225000, 175000, 0,
+				}, []bool{false, false, false, false, false, false, false, false, false, false, false, false, true}),
+				vector.StringWithNA([]string{
+					"A", "A", "B", "B", "B", "A", "A", "A", "B", "A", "A", "A", "",
+				}, []bool{false, false, false, false, false, false, false, false, false, false, false, false, true}),
 			},
 		},
 		{
 			name:        "employee ✕ department by group",
-			joined:      employee.LeftJoin(department, vector.OptionJoinBy("DepType")).Arrange("Name", "Title"),
-			columnNames: []string{},
+			joined:      employee.LeftJoin(department, vector.OptionJoinBy("Group", "DepType")).Arrange("Name", "Title"),
+			columnNames: []string{"Name", "DepType", "Salary", "Group", "DepID", "Title"},
 			outColumns: []vector.Vector{
-				vector.String([]string{}),
-				vector.String([]string{}),
-				vector.Integer([]int{}),
-				vector.String([]string{}),
-				vector.Integer([]int{}),
-				vector.String([]string{}),
+				vector.String([]string{
+					"Catullus", "Gera", "Hades", "Hephaestus", "Jack", "Jane", "John", "Marcia", "Marcius", "Robert", "Zeus",
+				}),
+				vector.StringWithNA([]string{
+					"logistics", "sales", "", "factory", "production", "research", "research", "production", "production",
+					"research", "sales",
+				}, []bool{false, false, true, false, false, false, false, false, false, false, false}),
+				vector.Integer([]int{
+					100000, 150000, 175000, 150000, 80000, 110000, 120000, 60000, 90000, 140000, 225000,
+				}),
+				vector.String([]string{
+					"A", "A", "A", "B", "B", "A", "A", "B", "A", "B", "A",
+				}),
+				vector.IntegerWithNA([]int{
+					0, 3, 6, 0, 2, 1, 1, 2, 0, 4, 3,
+				}, []bool{true, false, false, true, false, false, false, false, true, false, false}),
+				vector.StringWithNA([]string{
+					"", "Sales", "Unknown", "", "Production", "R&D", "R&D", "Production", "", "Laboratory", "Sales",
+				}, []bool{true, false, false, true, false, false, false, false, true, false, false}),
 			},
 		},
 		{
 			name:        "department ✕ employee by group",
-			joined:      employee.LeftJoin(department, vector.OptionJoinBy("DepType")).Arrange("Title", "Name"),
-			columnNames: []string{},
+			joined:      department.LeftJoin(employee, vector.OptionJoinBy("Group", "DepType")).Arrange("Title", "Name"),
+			columnNames: []string{"DepID", "Title", "DepType", "Group", "Name", "Salary"},
 			outColumns: []vector.Vector{
-				vector.Integer([]int{}),
-				vector.String([]string{}),
-				vector.String([]string{}),
-				vector.String([]string{}),
-				vector.String([]string{}),
-				vector.Integer([]int{}),
+				vector.Integer([]int{
+					4, 2, 2, 1, 1, 3, 3, 6, 5,
+				}),
+				vector.String([]string{
+					"Laboratory", "Production", "Production", "R&D", "R&D", "Sales", "Sales", "Unknown", "Warehouse",
+				}),
+				vector.StringWithNA([]string{
+					"research", "production", "production", "research", "research", "sales", "sales", "", "wares",
+				}, []bool{false, false, false, false, false, false, false, true, false}),
+				vector.String([]string{
+					"B", "B", "B", "A", "A", "A", "A", "A", "B",
+				}),
+				vector.StringWithNA([]string{
+					"Robert", "Jack", "Marcia", "Jane", "John", "Gera", "Zeus", "Hades", "",
+				}, []bool{false, false, false, false, false, false, false, false, true}),
+				vector.IntegerWithNA([]int{
+					140000, 80000, 60000, 110000, 120000, 150000, 225000, 175000, 0,
+				}, []bool{false, false, false, false, false, false, false, false, true}),
 			},
 		},
 	}
