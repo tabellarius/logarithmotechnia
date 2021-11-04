@@ -314,3 +314,58 @@ func TestDataframe_LeftJoin(t *testing.T) {
 		})
 	}
 }
+
+func TestDataframe_RightJoin(t *testing.T) {
+	employee, department := getJoinDataFrames()
+
+	testData := []struct {
+		name        string
+		joined      *Dataframe
+		columnNames []string
+		outColumns  []vector.Vector
+	}{
+		{
+			name:        "employee ✕ department",
+			joined:      employee.RightJoin(department, vector.OptionJoinBy("DepType")).Arrange("Name", "Title"),
+			columnNames: []string{"Name", "DepType", "Salary", "Group", "DepID", "Title", "Group_1"},
+			outColumns: []vector.Vector{
+				vector.StringWithNA([]string{
+					"Gera", "Hades", "Jack", "Jane", "Jane", "John", "John", "Marcia", "Marcius", "Robert", "Robert",
+					"Zeus", "",
+				}, []bool{}),
+
+				vector.String([]string{}),
+				vector.StringWithNA([]string{}, []bool{}),
+				vector.Integer([]int{}),
+				vector.String([]string{}),
+				vector.IntegerWithNA([]int{}, []bool{}),
+				vector.StringWithNA([]string{}, []bool{}),
+				vector.StringWithNA([]string{}, []bool{}),
+			},
+		},
+		{
+			name:        "department ✕ employee",
+			joined:      department.RightJoin(employee, vector.OptionJoinBy("DepType")).Arrange("Title", "Name"),
+			columnNames: []string{"DepID", "Title", "DepType", "Group", "Name", "Salary", "Group_1"},
+			outColumns:  []vector.Vector{},
+		},
+		{
+			name:        "employee ✕ department by group",
+			joined:      employee.RightJoin(department, vector.OptionJoinBy("Group", "DepType")).Arrange("Name", "Title"),
+			columnNames: []string{"Name", "DepType", "Salary", "Group", "DepID", "Title"},
+			outColumns:  []vector.Vector{},
+		},
+		{
+			name:        "department ✕ employee by group",
+			joined:      department.RightJoin(employee, vector.OptionJoinBy("Group", "DepType")).Arrange("Title", "Name"),
+			columnNames: []string{"DepID", "Title", "DepType", "Group", "Name", "Salary"},
+			outColumns:  []vector.Vector{},
+		},
+	}
+
+	_ = testData
+
+	fmt.Println(employee.RightJoin(department, vector.OptionJoinBy("DepType")).Arrange("Name", "Title"))
+	fmt.Println()
+	fmt.Println(vector.StringWithNA([]string{"alpha", "", "omega"}, []bool{false, true, false}).SortedIndices())
+}

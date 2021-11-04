@@ -1543,7 +1543,7 @@ func TestVector_SortedIndices(t *testing.T) {
 		{
 			name:          "integer with NA",
 			vec:           IntegerWithNA([]int{12, -8, 0, -4, 5}, []bool{false, false, true, false, false}),
-			sortedIndices: []int{3, 2, 4, 5, 1},
+			sortedIndices: []int{2, 4, 5, 1, 3},
 		},
 		{
 			name:          "integer without NA",
@@ -1553,7 +1553,7 @@ func TestVector_SortedIndices(t *testing.T) {
 		{
 			name:          "boolean with NA",
 			vec:           BooleanWithNA([]bool{true, true, false, false, true}, []bool{false, false, false, true, true}),
-			sortedIndices: []int{4, 5, 3, 1, 2},
+			sortedIndices: []int{3, 1, 2, 4, 5},
 		},
 		{
 			name:          "boolean without NA",
@@ -1563,7 +1563,7 @@ func TestVector_SortedIndices(t *testing.T) {
 		{
 			name:          "float with NA",
 			vec:           FloatWithNA([]float64{12, -8, 0, -4, 5}, []bool{false, false, true, false, false}),
-			sortedIndices: []int{3, 2, 4, 5, 1},
+			sortedIndices: []int{2, 4, 5, 1, 3},
 		},
 		{
 			name:          "float without NA",
@@ -1573,7 +1573,7 @@ func TestVector_SortedIndices(t *testing.T) {
 		{
 			name:          "string with NA",
 			vec:           StringWithNA([]string{"delta", "beta", "alpha", "zeroth", "zero"}, []bool{false, false, true, true, false}),
-			sortedIndices: []int{3, 4, 2, 1, 5},
+			sortedIndices: []int{2, 1, 5, 3, 4},
 		},
 		{
 			name:          "string without NA",
@@ -1604,8 +1604,8 @@ func TestVector_SortedIndicesWithRanks(t *testing.T) {
 		{
 			name:          "integer with NA",
 			vec:           IntegerWithNA([]int{12, -4, 0, -4, 5}, []bool{false, false, true, false, false}),
-			sortedIndices: []int{3, 2, 4, 5, 1},
-			ranks:         []int{1, 2, 2, 3, 4},
+			sortedIndices: []int{2, 4, 5, 1, 3},
+			ranks:         []int{1, 1, 2, 3, 4},
 		},
 		{
 			name:          "integer without NA",
@@ -1616,8 +1616,8 @@ func TestVector_SortedIndicesWithRanks(t *testing.T) {
 		{
 			name:          "boolean with NA",
 			vec:           BooleanWithNA([]bool{true, true, false, false, true}, []bool{false, false, false, true, true}),
-			sortedIndices: []int{4, 5, 3, 1, 2},
-			ranks:         []int{1, 1, 2, 3, 3},
+			sortedIndices: []int{3, 1, 2, 4, 5},
+			ranks:         []int{1, 2, 2, 3, 3},
 		},
 		{
 			name:          "boolean without NA",
@@ -1628,8 +1628,8 @@ func TestVector_SortedIndicesWithRanks(t *testing.T) {
 		{
 			name:          "float with NA",
 			vec:           FloatWithNA([]float64{12, -4, 0, -4, 5}, []bool{false, false, true, false, false}),
-			sortedIndices: []int{3, 2, 4, 5, 1},
-			ranks:         []int{1, 2, 2, 3, 4},
+			sortedIndices: []int{2, 4, 5, 1, 3},
+			ranks:         []int{1, 1, 2, 3, 4},
 		},
 		{
 			name:          "float without NA",
@@ -1640,8 +1640,8 @@ func TestVector_SortedIndicesWithRanks(t *testing.T) {
 		{
 			name:          "string with NA",
 			vec:           StringWithNA([]string{"delta", "beta", "alpha", "zero", "zero"}, []bool{false, false, true, true, false}),
-			sortedIndices: []int{3, 4, 2, 1, 5},
-			ranks:         []int{1, 1, 2, 3, 4},
+			sortedIndices: []int{2, 1, 5, 3, 4},
+			ranks:         []int{1, 2, 3, 4, 4},
 		},
 		{
 			name:          "string without NA",

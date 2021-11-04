@@ -95,6 +95,53 @@ func (df *Dataframe) LeftJoin(with *Dataframe, options ...vector.Option) *Datafr
 	return newDf.BindColumns(newWIth)
 }
 
+func (df *Dataframe) RightJoin(with *Dataframe, options ...vector.Option) *Dataframe {
+	conf := vector.MergeOptions(options)
+	columns := df.determineColumns(conf, with)
+
+	if len(columns) == 0 {
+		return df
+	}
+
+	rootDfTree := &joinNode{}
+	rootWithTree := &joinNode{}
+	fillJoinTree(df, rootDfTree, columns)
+	fillJoinTree(with, rootWithTree, columns)
+
+	treeKeys := rootWithTree.getKeys()
+
+	dfIndices := make([]int, 0)
+	withIndices := make([]int, 0)
+	for _, key := range treeKeys {
+		indicesForDf := rootDfTree.getIndicesFor(key)
+		indicesForWith := rootWithTree.getIndicesFor(key)
+		if indicesForDf == nil {
+			for _, idxWith := range indicesForWith {
+				dfIndices = append(dfIndices, 0)
+				withIndices = append(withIndices, idxWith)
+			}
+		} else {
+			for _, idxDf := range indicesForDf {
+				for _, idxWith := range indicesForWith {
+					dfIndices = append(dfIndices, idxDf)
+					withIndices = append(withIndices, idxWith)
+				}
+			}
+		}
+	}
+
+	removeColumns := make([]string, len(columns))
+	for i, column := range columns {
+		removeColumns[i] = "-" + column
+	}
+
+	newDf := df.Select(removeColumns).ByIndices(dfIndices)
+	newWIth := with.ByIndices(withIndices)
+	joinedDf := newDf.BindColumns(newWIth)
+
+	return joinedDf
+}
+
 func (df *Dataframe) determineColumns(conf vector.Configuration, src *Dataframe) []string {
 	var joinColumns []string
 

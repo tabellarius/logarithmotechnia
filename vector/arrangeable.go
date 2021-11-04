@@ -20,11 +20,11 @@ func (ar *DefArrangeable) sortedIndices() []int {
 			}
 
 			if ar.na[indices[i]] {
-				return true
+				return false
 			}
 
 			if ar.na[indices[j]] {
-				return false
+				return true
 			}
 
 			return ar.FnLess(indices[i], indices[j])
