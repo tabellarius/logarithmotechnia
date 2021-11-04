@@ -641,6 +641,50 @@ func (p *floatPayload) Groups() ([][]int, []interface{}) {
 	return groups, values
 }
 
+func (p *floatPayload) IsUnique() []bool {
+	booleans := make([]bool, p.length)
+
+	valuesMap := map[float64]bool{}
+	wasNA := false
+	wasNaN := false
+	wasInfPlus := false
+	wasInfMinus := false
+	for i := 0; i < p.length; i++ {
+		is := false
+
+		if p.na[i] {
+			if !wasNA {
+				is = true
+				wasNA = true
+			}
+		} else if math.IsNaN(p.data[i]) {
+			if !wasNaN {
+				is = true
+				wasNaN = true
+			}
+		} else if math.IsInf(p.data[i], 1) {
+			if !wasInfPlus {
+				is = true
+				wasInfPlus = true
+			}
+		} else if math.IsInf(p.data[i], -1) {
+			if !wasInfMinus {
+				is = true
+				wasInfMinus = true
+			}
+		} else {
+			if _, ok := valuesMap[p.data[i]]; !ok {
+				is = true
+				valuesMap[p.data[i]] = true
+			}
+		}
+
+		booleans[i] = is
+	}
+
+	return booleans
+}
+
 func (p *floatPayload) Options() []Option {
 	return []Option{
 		OptionPrecision(p.printer.Precision),

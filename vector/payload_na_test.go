@@ -607,3 +607,33 @@ func TestNaPayload_Adjust(t *testing.T) {
 		t.Error(fmt.Sprintf("New payload's length is wrong (%v instead of %v)", newPayload.length, 5))
 	}
 }
+
+func TestNaPayload_IsUnique(t *testing.T) {
+	testData := []struct {
+		name     string
+		payload  Payload
+		booleans []bool
+	}{
+		{
+			name:     "zero",
+			payload:  NAPayload(0),
+			booleans: []bool{},
+		},
+		{
+			name:     "normal",
+			payload:  NAPayload(5),
+			booleans: []bool{true, false, false, false, false},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			booleans := data.payload.(*naPayload).IsUnique()
+
+			if !reflect.DeepEqual(booleans, data.booleans) {
+				t.Error(fmt.Sprintf("Result of IsUnique() (%v) do not match expected (%v)",
+					booleans, data.booleans))
+			}
+		})
+	}
+}

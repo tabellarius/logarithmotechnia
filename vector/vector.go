@@ -53,6 +53,9 @@ type Vector interface {
 	Comparable
 	Arrangeable
 
+	IsUniquer
+	Unique() Vector
+
 	Options() []Option
 
 	SummerV
@@ -138,6 +141,10 @@ type Arrangeable interface {
 
 type Groupper interface {
 	Groups() ([][]int, []interface{})
+}
+
+type IsUniquer interface {
+	IsUnique() []bool
 }
 
 // vector holds data and functions shared by all vectors
@@ -690,6 +697,22 @@ func (v *vector) SortedIndicesWithRanks() ([]int, []int) {
 	indices := indicesArray(v.length)
 
 	return indices, indices
+}
+
+func (v *vector) Unique() Vector {
+	if uniquer, ok := v.payload.(IsUniquer); ok {
+		return v.Filter(uniquer.IsUnique())
+	}
+
+	return v
+}
+
+func (v *vector) IsUnique() []bool {
+	if uniquer, ok := v.payload.(IsUniquer); ok {
+		return uniquer.IsUnique()
+	}
+
+	return trueBooleanArr(v.length)
 }
 
 func (v *vector) Options() []Option {

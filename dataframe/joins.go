@@ -139,7 +139,9 @@ func (df *Dataframe) RightJoin(with *Dataframe, options ...vector.Option) *Dataf
 	newWIth := with.ByIndices(withIndices)
 	joinedDf := newDf.BindColumns(newWIth)
 
-	return joinedDf
+	selectNames, _ := df.Names().Append(joinedDf.Names()).Unique().Strings()
+
+	return joinedDf.Select(selectNames)
 }
 
 func (df *Dataframe) determineColumns(conf vector.Configuration, src *Dataframe) []string {

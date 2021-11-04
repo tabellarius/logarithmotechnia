@@ -504,6 +504,34 @@ func (p *timePayload) Groups() ([][]int, []interface{}) {
 	return groups, values
 }
 
+func (p *timePayload) IsUnique() []bool {
+	booleans := make([]bool, p.length)
+
+	valuesMap := map[string]bool{}
+	wasNA := false
+	for i := 0; i < p.length; i++ {
+		is := false
+
+		if p.na[i] {
+			if !wasNA {
+				is = true
+				wasNA = true
+			}
+		} else {
+			strTime := p.data[i].Format(p.printer.Format)
+
+			if _, ok := valuesMap[strTime]; !ok {
+				is = true
+				valuesMap[strTime] = true
+			}
+		}
+
+		booleans[i] = is
+	}
+
+	return booleans
+}
+
 func (p *timePayload) Options() []Option {
 	return []Option{
 		OptionTimeFormat(p.printer.Format),

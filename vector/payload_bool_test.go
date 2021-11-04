@@ -1087,3 +1087,33 @@ func TestBooleanPayload_Groups(t *testing.T) {
 		})
 	}
 }
+
+func TestBooleanPayload_IsUnique(t *testing.T) {
+	testData := []struct {
+		name     string
+		payload  Payload
+		booleans []bool
+	}{
+		{
+			name:     "without NA",
+			payload:  BooleanPayload([]bool{true, false, true, false, true}, nil),
+			booleans: []bool{true, true, false, false, false},
+		},
+		{
+			name:     "with NA",
+			payload:  BooleanPayload([]bool{true, false, true, false, true}, []bool{false, true, true, false, false}),
+			booleans: []bool{true, true, false, true, false},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			booleans := data.payload.(*booleanPayload).IsUnique()
+
+			if !reflect.DeepEqual(booleans, data.booleans) {
+				t.Error(fmt.Sprintf("Result of IsUnique() (%v) do not match expected (%v)",
+					booleans, data.booleans))
+			}
+		})
+	}
+}

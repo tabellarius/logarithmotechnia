@@ -366,6 +366,4 @@ func TestDataframe_RightJoin(t *testing.T) {
 	_ = testData
 
 	fmt.Println(employee.RightJoin(department, vector.OptionJoinBy("DepType")).Arrange("Name", "Title"))
-	fmt.Println()
-	fmt.Println(vector.StringWithNA([]string{"alpha", "", "omega"}, []bool{false, true, false}).SortedIndices())
 }

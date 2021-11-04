@@ -610,6 +610,44 @@ func ComplexPayload(data []complex128, na []bool, options ...Option) Payload {
 	}
 }
 
+func (p *complexPayload) IsUnique() []bool {
+	booleans := make([]bool, p.length)
+
+	valuesMap := map[complex128]bool{}
+	wasNA := false
+	wasNaN := false
+	wasInf := false
+	for i := 0; i < p.length; i++ {
+		is := false
+
+		if p.na[i] {
+			if !wasNA {
+				is = true
+				wasNA = true
+			}
+		} else if cmplx.IsNaN(p.data[i]) {
+			if !wasNaN {
+				is = true
+				wasNaN = true
+			}
+		} else if cmplx.IsInf(p.data[i]) {
+			if !wasInf {
+				is = true
+				wasInf = true
+			}
+		} else {
+			if _, ok := valuesMap[p.data[i]]; !ok {
+				is = true
+				valuesMap[p.data[i]] = true
+			}
+		}
+
+		booleans[i] = is
+	}
+
+	return booleans
+}
+
 func ComplexWithNA(data []complex128, na []bool, options ...Option) Vector {
 	return New(ComplexPayload(data, na, options...), options...)
 }

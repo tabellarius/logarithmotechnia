@@ -172,6 +172,16 @@ func (p *naPayload) naArray() []bool {
 	return na
 }
 
+func (p *naPayload) IsUnique() []bool {
+	booleans := make([]bool, p.length)
+
+	if p.length > 0 {
+		booleans[0] = true
+	}
+
+	return booleans
+}
+
 func (p *naPayload) Options() []Option {
 	return []Option{}
 }

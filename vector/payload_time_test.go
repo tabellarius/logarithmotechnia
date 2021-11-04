@@ -980,3 +980,35 @@ func TestTimePayload_Groups(t *testing.T) {
 		})
 	}
 }
+
+func TestTimePayload_IsUnique(t *testing.T) {
+	testData := []struct {
+		name     string
+		payload  Payload
+		booleans []bool
+	}{
+		{
+			name: "without NA",
+			payload: TimePayload(toTimeData([]string{"2006-01-02T15:04:05+07:00", "2006-01-02T15:04:05+07:00",
+				"2020-01-01T12:30:00+03:00", "2020-01-01T12:30:00+03:00"}), nil),
+			booleans: []bool{true, false, true, false},
+		},
+		{
+			name: "with NA",
+			payload: TimePayload(toTimeData([]string{"2006-01-02T15:04:05+07:00", "2006-01-02T15:04:05+07:00",
+				"2020-01-01T12:30:00+03:00", "2020-01-01T12:30:00+03:00"}), []bool{false, true, false, false}),
+			booleans: []bool{true, true, true, false},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			booleans := data.payload.(*timePayload).IsUnique()
+
+			if !reflect.DeepEqual(booleans, data.booleans) {
+				t.Error(fmt.Sprintf("Result of IsUnique() (%v) do not match expected (%v)",
+					booleans, data.booleans))
+			}
+		})
+	}
+}

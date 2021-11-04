@@ -1122,3 +1122,34 @@ func TestFloatPayload_Groups(t *testing.T) {
 		})
 	}
 }
+
+func TestFloatPayload_IsUnique(t *testing.T) {
+	testData := []struct {
+		name     string
+		payload  Payload
+		booleans []bool
+	}{
+		{
+			name: "without NA",
+			payload: FloatPayload([]float64{1, 2, 1, 3, 2, 3, 2, math.NaN(), math.NaN(),
+				math.Inf(1), math.Inf(-1), math.Inf(1), math.Inf(-1)}, nil),
+			booleans: []bool{true, true, false, true, false, false, false, true, false, true, true, false, false},
+		},
+		{
+			name:     "with NA",
+			payload:  FloatPayload([]float64{1, 2, 1, 3, 2, 3, 2}, []bool{false, true, true, false, false, false, false}),
+			booleans: []bool{true, true, false, true, true, false, false},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			booleans := data.payload.(*floatPayload).IsUnique()
+
+			if !reflect.DeepEqual(booleans, data.booleans) {
+				t.Error(fmt.Sprintf("Result of IsUnique() (%v) do not match expected (%v)",
+					booleans, data.booleans))
+			}
+		})
+	}
+}

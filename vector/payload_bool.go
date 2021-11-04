@@ -515,6 +515,32 @@ func (p *booleanPayload) Lte(interface{}) []bool {
 	return cmp
 }
 
+func (p *booleanPayload) IsUnique() []bool {
+	booleans := make([]bool, p.length)
+
+	valuesMap := map[bool]bool{}
+	wasNA := false
+	for i := 0; i < p.length; i++ {
+		is := false
+
+		if p.na[i] {
+			if !wasNA {
+				is = true
+				wasNA = true
+			}
+		} else {
+			if _, ok := valuesMap[p.data[i]]; !ok {
+				is = true
+				valuesMap[p.data[i]] = true
+			}
+		}
+
+		booleans[i] = is
+	}
+
+	return booleans
+}
+
 func (p *booleanPayload) Options() []Option {
 	return []Option{}
 }

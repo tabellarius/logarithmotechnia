@@ -1761,3 +1761,65 @@ func TestVector_GroupByIndices(t *testing.T) {
 		})
 	}
 }
+
+func TestVector_IsUnique(t *testing.T) {
+	testData := []struct {
+		name     string
+		vector   Vector
+		booleans []bool
+	}{
+		{
+			name:     "without NA",
+			vector:   Integer([]int{1, 0, 1, 3, 2, 3, 2, 0}),
+			booleans: []bool{true, true, false, true, true, false, false, false},
+		},
+		{
+			name: "with NA",
+			vector: IntegerWithNA([]int{1, 0, 1, 3, 2, 3, 2, 0},
+				[]bool{false, true, true, false, false, false, false, false}),
+			booleans: []bool{true, true, false, true, true, false, false, true},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			booleans := data.vector.IsUnique()
+
+			if !reflect.DeepEqual(booleans, data.booleans) {
+				t.Error(fmt.Sprintf("Result of IsUnique() (%v) do not match expected (%v)",
+					booleans, data.booleans))
+			}
+		})
+	}
+}
+
+func TestVector_Unique(t *testing.T) {
+	testData := []struct {
+		name      string
+		vector    Vector
+		outVector Vector
+	}{
+		{
+			name:      "without NA",
+			vector:    Integer([]int{1, 0, 1, 3, 2, 3, 2, 0}),
+			outVector: Integer([]int{1, 0, 3, 2}),
+		},
+		{
+			name: "with NA",
+			vector: IntegerWithNA([]int{1, 0, 1, 3, 2, 3, 2, 0},
+				[]bool{false, true, true, false, false, false, false, false}),
+			outVector: IntegerWithNA([]int{1, 0, 3, 2, 0}, []bool{false, true, false, false, false}),
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			v := data.vector.Unique()
+
+			if !CompareVectorsForTest(v, data.outVector) {
+				t.Error(fmt.Sprintf("Result of Unique() (%v) do not match expected (%v)",
+					v, data.outVector))
+			}
+		})
+	}
+}
