@@ -139,7 +139,7 @@ type Arrangeable interface {
 	SortedIndicesWithRanks() ([]int, []int)
 }
 
-type Groupper interface {
+type Grouper interface {
 	Groups() ([][]int, []interface{})
 }
 
@@ -347,7 +347,7 @@ func (v *vector) Adjust(size int) Vector {
 }
 
 func (v *vector) Groups() ([][]int, []interface{}) {
-	if groupper, ok := v.payload.(Groupper); ok {
+	if groupper, ok := v.payload.(Grouper); ok {
 		return groupper.Groups()
 	}
 
