@@ -430,8 +430,6 @@ func (p *booleanPayload) Find(needle interface{}) int {
 	return 0
 }
 
-/* Finder interface */
-
 func (p *booleanPayload) FindAll(needle interface{}) []int {
 	val, ok := needle.(bool)
 	if !ok {
@@ -448,7 +446,7 @@ func (p *booleanPayload) FindAll(needle interface{}) []int {
 	return found
 }
 
-/* Comparable interface */
+/* Finder interface */
 
 func (p *booleanPayload) Eq(val interface{}) []bool {
 	cmp := make([]bool, p.length)
@@ -468,6 +466,8 @@ func (p *booleanPayload) Eq(val interface{}) []bool {
 
 	return cmp
 }
+
+/* Comparable interface */
 
 func (p *booleanPayload) Neq(val interface{}) []bool {
 	cmp := make([]bool, p.length)
@@ -543,6 +543,39 @@ func (p *booleanPayload) IsUnique() []bool {
 
 func (p *booleanPayload) Options() []Option {
 	return []Option{}
+}
+
+func (p *booleanPayload) Coalesce(payload Payload) Payload {
+	if p.length != payload.Len() {
+		payload = payload.Adjust(p.length)
+	}
+
+	var srcData []bool
+	var srcNA []bool
+
+	if same, ok := payload.(*booleanPayload); ok {
+		srcData = same.data
+		srcNA = same.na
+	} else if boolable, ok := payload.(Boolable); ok {
+		srcData, srcNA = boolable.Booleans()
+	} else {
+		return p
+	}
+
+	dstData := make([]bool, p.length)
+	dstNA := make([]bool, p.length)
+
+	for i := 0; i < p.length; i++ {
+		if p.na[i] && !srcNA[i] {
+			dstData[i] = srcData[i]
+			dstNA[i] = false
+		} else {
+			dstData[i] = p.data[i]
+			dstNA[i] = p.na[i]
+		}
+	}
+
+	return BooleanPayload(dstData, dstNA, p.Options()...)
 }
 
 func BooleanPayload(data []bool, na []bool, _ ...Option) Payload {

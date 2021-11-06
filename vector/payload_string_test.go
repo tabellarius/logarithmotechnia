@@ -1104,3 +1104,58 @@ func TestStringPayload_IsUnique(t *testing.T) {
 		})
 	}
 }
+
+func TestStringPayload_Coalesce(t *testing.T) {
+	testData := []struct {
+		name         string
+		coalescer    Payload
+		coalescendum Payload
+		outData      []string
+		outNA        []bool
+	}{
+		{
+			name:         "empty",
+			coalescer:    StringPayload(nil, nil),
+			coalescendum: StringPayload([]string{}, nil),
+			outData:      []string{},
+			outNA:        []bool{},
+		},
+		{
+			name:         "same type",
+			coalescer:    StringPayload([]string{"1", "", "", "", "5"}, []bool{false, true, true, true, false}),
+			coalescendum: StringPayload([]string{"11", "12", "", "14", "15"}, []bool{false, false, true, false, false}),
+			outData:      []string{"1", "12", "", "14", "5"},
+			outNA:        []bool{false, false, true, false, false},
+		},
+		{
+			name:         "same type + different size",
+			coalescer:    StringPayload([]string{"1", "", "", "", "5"}, []bool{false, true, true, true, false}),
+			coalescendum: StringPayload([]string{"", "11"}, []bool{true, false}),
+			outData:      []string{"1", "11", "", "11", "5"},
+			outNA:        []bool{false, false, true, false, false},
+		},
+		{
+			name:         "different type",
+			coalescer:    StringPayload([]string{"1", "0", "0", "0", "5"}, []bool{false, true, true, true, false}),
+			coalescendum: IntegerPayload([]int{0, 10, 0, 112, 0}, []bool{false, false, true, false, false}),
+			outData:      []string{"1", "10", "", "112", "5"},
+			outNA:        []bool{false, false, true, false, false},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			payload := data.coalescer.(Coalescer).Coalesce(data.coalescendum).(*stringPayload)
+
+			if !reflect.DeepEqual(payload.data, data.outData) {
+				t.Error(fmt.Sprintf("Data (%v) do not match expected (%v)",
+					payload.data, data.outData))
+			}
+
+			if !reflect.DeepEqual(payload.na, data.outNA) {
+				t.Error(fmt.Sprintf("NA (%v) do not match expected (%v)",
+					payload.na, data.outNA))
+			}
+		})
+	}
+}

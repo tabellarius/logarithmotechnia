@@ -455,3 +455,9 @@ func TestDataframe_RightJoin(t *testing.T) {
 		})
 	}
 }
+
+func TestDataframe_FullJoin(t *testing.T) {
+	employee, department := getJoinDataFrames()
+
+	fmt.Println(employee.FullJoin(department, vector.OptionJoinBy("DepType")).Arrange("Name", "Title"))
+}

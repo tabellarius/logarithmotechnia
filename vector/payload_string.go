@@ -626,6 +626,39 @@ func (p *stringPayload) IsUnique() []bool {
 	return booleans
 }
 
+func (p *stringPayload) Coalesce(payload Payload) Payload {
+	if p.length != payload.Len() {
+		payload = payload.Adjust(p.length)
+	}
+
+	var srcData []string
+	var srcNA []bool
+
+	if same, ok := payload.(*stringPayload); ok {
+		srcData = same.data
+		srcNA = same.na
+	} else if stringable, ok := payload.(Stringable); ok {
+		srcData, srcNA = stringable.Strings()
+	} else {
+		return p
+	}
+
+	dstData := make([]string, p.length)
+	dstNA := make([]bool, p.length)
+
+	for i := 0; i < p.length; i++ {
+		if p.na[i] && !srcNA[i] {
+			dstData[i] = srcData[i]
+			dstNA[i] = false
+		} else {
+			dstData[i] = p.data[i]
+			dstNA[i] = p.na[i]
+		}
+	}
+
+	return StringPayload(dstData, dstNA, p.Options()...)
+}
+
 func (p *stringPayload) Options() []Option {
 	return []Option{}
 }

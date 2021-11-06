@@ -56,6 +56,8 @@ type Vector interface {
 	IsUniquer
 	Unique() Vector
 
+	Coalesce(...Vector) Vector
+
 	Options() []Option
 
 	SummerV
@@ -145,6 +147,10 @@ type Grouper interface {
 
 type IsUniquer interface {
 	IsUnique() []bool
+}
+
+type Coalescer interface {
+	Coalesce(Payload) Payload
 }
 
 // vector holds data and functions shared by all vectors
@@ -713,6 +719,28 @@ func (v *vector) IsUnique() []bool {
 	}
 
 	return trueBooleanArr(v.length)
+}
+
+func (v *vector) Coalesce(vectors ...Vector) Vector {
+	if len(vectors) == 0 {
+		return v
+	}
+
+	coalescer, ok := v.payload.(Coalescer)
+	if !ok {
+		return v
+	}
+
+	var payload Payload
+	for _, v := range vectors {
+		payload = coalescer.Coalesce(v.Payload())
+		coalescer, ok = payload.(Coalescer)
+		if !ok {
+			break
+		}
+	}
+
+	return New(payload, v.Options()...)
 }
 
 func (v *vector) Options() []Option {

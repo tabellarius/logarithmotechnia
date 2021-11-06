@@ -646,6 +646,39 @@ func (p *integerPayload) IsUnique() []bool {
 	return booleans
 }
 
+func (p *integerPayload) Coalesce(payload Payload) Payload {
+	if p.length != payload.Len() {
+		payload = payload.Adjust(p.length)
+	}
+
+	var srcData []int
+	var srcNA []bool
+
+	if same, ok := payload.(*integerPayload); ok {
+		srcData = same.data
+		srcNA = same.na
+	} else if intable, ok := payload.(Intable); ok {
+		srcData, srcNA = intable.Integers()
+	} else {
+		return p
+	}
+
+	dstData := make([]int, p.length)
+	dstNA := make([]bool, p.length)
+
+	for i := 0; i < p.length; i++ {
+		if p.na[i] && !srcNA[i] {
+			dstData[i] = srcData[i]
+			dstNA[i] = false
+		} else {
+			dstData[i] = p.data[i]
+			dstNA[i] = p.na[i]
+		}
+	}
+
+	return IntegerPayload(dstData, dstNA, p.Options()...)
+}
+
 func (p *integerPayload) Options() []Option {
 	return []Option{}
 }

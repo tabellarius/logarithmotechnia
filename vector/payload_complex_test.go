@@ -1137,3 +1137,58 @@ func TestComplexPayload_IsUnique(t *testing.T) {
 		})
 	}
 }
+
+func TestComplexPayload_Coalesce(t *testing.T) {
+	testData := []struct {
+		name         string
+		coalescer    Payload
+		coalescendum Payload
+		outData      []complex128
+		outNA        []bool
+	}{
+		{
+			name:         "empty",
+			coalescer:    ComplexPayload(nil, nil),
+			coalescendum: ComplexPayload([]complex128{}, nil),
+			outData:      []complex128{},
+			outNA:        []bool{},
+		},
+		{
+			name:         "same type",
+			coalescer:    ComplexPayload([]complex128{1, 0, 0, 0, 5}, []bool{false, true, true, true, false}),
+			coalescendum: ComplexPayload([]complex128{11, 12, 0, 14, 15}, []bool{false, false, true, false, false}),
+			outData:      []complex128{1, 12, cmplx.NaN(), 14, 5},
+			outNA:        []bool{false, false, true, false, false},
+		},
+		{
+			name:         "same type + different size",
+			coalescer:    ComplexPayload([]complex128{1, 0, 0, 0, 5}, []bool{false, true, true, true, false}),
+			coalescendum: ComplexPayload([]complex128{0, 11}, []bool{true, false}),
+			outData:      []complex128{1, 11, cmplx.NaN(), 11, 5},
+			outNA:        []bool{false, false, true, false, false},
+		},
+		{
+			name:         "different type",
+			coalescer:    ComplexPayload([]complex128{1, 0, 0, 0, 5}, []bool{false, true, true, true, false}),
+			coalescendum: IntegerPayload([]int{0, 10, 0, 112, 0}, []bool{false, false, true, false, false}),
+			outData:      []complex128{1, 10, cmplx.NaN(), 112, 5},
+			outNA:        []bool{false, false, true, false, false},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			payload := data.coalescer.(Coalescer).Coalesce(data.coalescendum).(*complexPayload)
+
+			if !util.EqualComplexArrays(payload.data, data.outData) {
+				t.Error(fmt.Sprintf("Data (%v) do not match expected (%v)",
+					payload.data, data.outData))
+			}
+
+			if !reflect.DeepEqual(payload.na, data.outNA) {
+				t.Error(fmt.Sprintf("NA (%v) do not match expected (%v)",
+					payload.na, data.outNA))
+			}
+		})
+	}
+}

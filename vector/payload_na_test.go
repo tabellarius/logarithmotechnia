@@ -637,3 +637,44 @@ func TestNaPayload_IsUnique(t *testing.T) {
 		})
 	}
 }
+
+func TestNaPayload_Coalesce(t *testing.T) {
+	testData := []struct {
+		name         string
+		coalescer    Payload
+		coalescendum Payload
+		outData      []int
+		outNA        []bool
+	}{
+		{
+			name:         "empty",
+			coalescer:    NAPayload(0),
+			coalescendum: IntegerPayload([]int{}, nil),
+			outData:      []int{},
+			outNA:        []bool{},
+		},
+		{
+			name:         "non-empty",
+			coalescer:    NAPayload(5),
+			coalescendum: IntegerPayload([]int{11, 12, 0, 14, 15}, []bool{false, false, true, false, false}),
+			outData:      []int{11, 12, 0, 14, 15},
+			outNA:        []bool{false, false, true, false, false},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			payload := data.coalescer.(Coalescer).Coalesce(data.coalescendum).(*integerPayload)
+
+			if !reflect.DeepEqual(payload.data, data.outData) {
+				t.Error(fmt.Sprintf("Data (%v) do not match expected (%v)",
+					payload.data, data.outData))
+			}
+
+			if !reflect.DeepEqual(payload.na, data.outNA) {
+				t.Error(fmt.Sprintf("NA (%v) do not match expected (%v)",
+					payload.na, data.outNA))
+			}
+		})
+	}
+}

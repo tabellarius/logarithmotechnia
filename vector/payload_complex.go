@@ -569,6 +569,39 @@ func (p *complexPayload) convertComparator(val interface{}) (complex128, bool) {
 	return v, ok
 }
 
+func (p *complexPayload) Coalesce(payload Payload) Payload {
+	if p.length != payload.Len() {
+		payload = payload.Adjust(p.length)
+	}
+
+	var srcData []complex128
+	var srcNA []bool
+
+	if same, ok := payload.(*complexPayload); ok {
+		srcData = same.data
+		srcNA = same.na
+	} else if complexable, ok := payload.(Complexable); ok {
+		srcData, srcNA = complexable.Complexes()
+	} else {
+		return p
+	}
+
+	dstData := make([]complex128, p.length)
+	dstNA := make([]bool, p.length)
+
+	for i := 0; i < p.length; i++ {
+		if p.na[i] && !srcNA[i] {
+			dstData[i] = srcData[i]
+			dstNA[i] = false
+		} else {
+			dstData[i] = p.data[i]
+			dstNA[i] = p.na[i]
+		}
+	}
+
+	return ComplexPayload(dstData, dstNA, p.Options()...)
+}
+
 func ComplexPayload(data []complex128, na []bool, options ...Option) Payload {
 	length := len(data)
 	conf := MergeOptions(options)

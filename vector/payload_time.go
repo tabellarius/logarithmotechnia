@@ -589,6 +589,39 @@ func TimePayload(data []time.Time, na []bool, options ...Option) Payload {
 	return payload
 }
 
+func (p *timePayload) Coalesce(payload Payload) Payload {
+	if p.length != payload.Len() {
+		payload = payload.Adjust(p.length)
+	}
+
+	var srcData []time.Time
+	var srcNA []bool
+
+	if same, ok := payload.(*timePayload); ok {
+		srcData = same.data
+		srcNA = same.na
+	} else if timeable, ok := payload.(Timeable); ok {
+		srcData, srcNA = timeable.Times()
+	} else {
+		return p
+	}
+
+	dstData := make([]time.Time, p.length)
+	dstNA := make([]bool, p.length)
+
+	for i := 0; i < p.length; i++ {
+		if p.na[i] && !srcNA[i] {
+			dstData[i] = srcData[i]
+			dstNA[i] = false
+		} else {
+			dstData[i] = p.data[i]
+			dstNA[i] = p.na[i]
+		}
+	}
+
+	return TimePayload(dstData, dstNA, p.Options()...)
+}
+
 func TimeWithNA(data []time.Time, na []bool, options ...Option) Vector {
 	return New(TimePayload(data, na, options...), options...)
 }

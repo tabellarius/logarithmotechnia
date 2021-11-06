@@ -1823,3 +1823,41 @@ func TestVector_Unique(t *testing.T) {
 		})
 	}
 }
+
+func TestVector_Coalesce(t *testing.T) {
+	testData := []struct {
+		name         string
+		coalescer    Vector
+		coalescendum []Vector
+		coalescens   Vector
+	}{
+		{
+			name:         "empty",
+			coalescer:    Integer(nil, nil),
+			coalescendum: []Vector{Integer([]int{}, nil)},
+			coalescens:   Integer([]int{}),
+		},
+		{
+			name:      "normal",
+			coalescer: IntegerWithNA([]int{1, 0, 0, 0, 0, 0, 7}, []bool{false, true, true, true, true, true, false}),
+			coalescendum: []Vector{
+				IntegerWithNA([]int{10, 20, 0, 0, 0, 60, 70}, []bool{false, false, true, true, true, false, false}),
+				FloatWithNA([]float64{100, 200, 300, 0, 500, 600, 700},
+					[]bool{false, false, false, true, false, false, false}),
+			},
+			coalescens: IntegerWithNA([]int{1, 20, 300, 0, 500, 60, 7},
+				[]bool{false, false, false, true, false, false, false}),
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			vec := data.coalescer.Coalesce(data.coalescendum...)
+
+			if !CompareVectorsForTest(vec, data.coalescens) {
+				t.Error(fmt.Sprintf("Data (%v) do not match expected (%v)",
+					vec, data.coalescens))
+			}
+		})
+	}
+}

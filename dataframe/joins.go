@@ -144,6 +144,69 @@ func (df *Dataframe) RightJoin(with *Dataframe, options ...vector.Option) *Dataf
 	return joinedDf.Select(selectNames)
 }
 
+func (df *Dataframe) FullJoin(with *Dataframe, options ...vector.Option) *Dataframe {
+	conf := vector.MergeOptions(options)
+	columns := df.determineColumns(conf, with)
+
+	if len(columns) == 0 {
+		return df
+	}
+
+	rootDfTree := &joinNode{}
+	rootWithTree := &joinNode{}
+	fillJoinTree(df, rootDfTree, columns)
+	fillJoinTree(with, rootWithTree, columns)
+
+	dfTreeKeys := rootDfTree.getKeys()
+	withTreeKeys := rootWithTree.getKeys()
+
+	dfIndices := make([]int, 0)
+	withIndices := make([]int, 0)
+	for _, key := range dfTreeKeys {
+		indicesForDf := rootDfTree.getIndicesFor(key)
+		indicesForWith := rootWithTree.getIndicesFor(key)
+		if indicesForWith == nil {
+			for _, idxDf := range indicesForDf {
+				dfIndices = append(dfIndices, idxDf)
+				withIndices = append(withIndices, 0)
+			}
+		} else {
+			for _, idxDf := range indicesForDf {
+				for _, idxWith := range indicesForWith {
+					dfIndices = append(dfIndices, idxDf)
+					withIndices = append(withIndices, idxWith)
+				}
+			}
+		}
+	}
+
+	for _, key := range withTreeKeys {
+		indicesForDf := rootDfTree.getIndicesFor(key)
+		if indicesForDf == nil {
+			indicesForWith := rootWithTree.getIndicesFor(key)
+			for _, idxWith := range indicesForWith {
+				dfIndices = append(dfIndices, 0)
+				withIndices = append(withIndices, idxWith)
+			}
+		}
+	}
+
+	removeColumns := make([]string, len(columns))
+	for i, column := range columns {
+		removeColumns[i] = "-" + column
+	}
+
+	newDf := df.ByIndices(dfIndices)
+	newWIth := with.ByIndices(withIndices)
+
+	coalesceColumns := make([]Column, len(columns))
+	for i, column := range columns {
+		coalesceColumns[i] = Column{column, newDf.Cn(column).Coalesce(newWIth.Cn(column))}
+	}
+
+	return newDf.Mutate(coalesceColumns).BindColumns(newWIth.Select(removeColumns))
+}
+
 func (df *Dataframe) determineColumns(conf vector.Configuration, src *Dataframe) []string {
 	var joinColumns []string
 

@@ -182,6 +182,14 @@ func (p *naPayload) IsUnique() []bool {
 	return booleans
 }
 
+func (p *naPayload) Coalesce(payload Payload) Payload {
+	if p.length != payload.Len() {
+		payload = payload.Adjust(p.length)
+	}
+
+	return payload
+}
+
 func (p *naPayload) Options() []Option {
 	return []Option{}
 }

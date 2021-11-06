@@ -1153,3 +1153,58 @@ func TestFloatPayload_IsUnique(t *testing.T) {
 		})
 	}
 }
+
+func TestFloatPayload_Coalesce(t *testing.T) {
+	testData := []struct {
+		name         string
+		coalescer    Payload
+		coalescendum Payload
+		outData      []float64
+		outNA        []bool
+	}{
+		{
+			name:         "empty",
+			coalescer:    FloatPayload(nil, nil),
+			coalescendum: FloatPayload([]float64{}, nil),
+			outData:      []float64{},
+			outNA:        []bool{},
+		},
+		{
+			name:         "same type",
+			coalescer:    FloatPayload([]float64{1, 0, 0, 0, 5}, []bool{false, true, true, true, false}),
+			coalescendum: FloatPayload([]float64{11, 12, 0, 14, 15}, []bool{false, false, true, false, false}),
+			outData:      []float64{1, 12, math.NaN(), 14, 5},
+			outNA:        []bool{false, false, true, false, false},
+		},
+		{
+			name:         "same type + different size",
+			coalescer:    FloatPayload([]float64{1, 0, 0, 0, 5}, []bool{false, true, true, true, false}),
+			coalescendum: FloatPayload([]float64{0, 11}, []bool{true, false}),
+			outData:      []float64{1, 11, math.NaN(), 11, 5},
+			outNA:        []bool{false, false, true, false, false},
+		},
+		{
+			name:         "different type",
+			coalescer:    FloatPayload([]float64{1, 0, 0, 0, 5}, []bool{false, true, true, true, false}),
+			coalescendum: IntegerPayload([]int{0, 10, 0, 112, 0}, []bool{false, false, true, false, false}),
+			outData:      []float64{1, 10, math.NaN(), 112, 5},
+			outNA:        []bool{false, false, true, false, false},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			payload := data.coalescer.(Coalescer).Coalesce(data.coalescendum).(*floatPayload)
+
+			if !util.EqualFloatArrays(payload.data, data.outData) {
+				t.Error(fmt.Sprintf("Data (%v) do not match expected (%v)",
+					payload.data, data.outData))
+			}
+
+			if !reflect.DeepEqual(payload.na, data.outNA) {
+				t.Error(fmt.Sprintf("NA (%v) do not match expected (%v)",
+					payload.na, data.outNA))
+			}
+		})
+	}
+}

@@ -2,10 +2,10 @@ Fix duplicate column names
 Factors + Factorable
 String functions
 Finder interface for InterfacePayload
-Vector's element indices as uint32
 Add df.Err and logger
-Comparator for Interface payload(?) Make all payload public
+Comparator for Interface payload(?)
 (?) Update() + Clone()
 (?) Remove SupportsWhicher() and SupportsFilter()
 (?) Default NA Values
 Add NewDefNAable() for DefNAble
+Review type conversions

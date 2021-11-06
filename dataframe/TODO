@@ -6,3 +6,4 @@ Select - OptionRemoveColumns()
 Move config to dataframe
 Loading from CSV
 Rename - support for []string{"from", "to"}
+Mutate must accept single Column{} as well
