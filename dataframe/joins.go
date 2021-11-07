@@ -237,6 +237,35 @@ func (df *Dataframe) SemiJoin(with *Dataframe, options ...vector.Option) *Datafr
 	return df.ByIndices(dfIndices)
 }
 
+func (df *Dataframe) AntiJoin(with *Dataframe, options ...vector.Option) *Dataframe {
+	conf := vector.MergeOptions(options)
+	columns := df.determineColumns(conf, with)
+
+	if len(columns) == 0 {
+		return df
+	}
+
+	rootDfTree := &joinNode{}
+	rootWithTree := &joinNode{}
+	fillJoinTree(df, rootDfTree, columns)
+	fillJoinTree(with, rootWithTree, columns)
+
+	dfTreeKeys := rootDfTree.getKeys()
+
+	dfIndices := make([]int, 0)
+	for _, key := range dfTreeKeys {
+		indicesForWith := rootWithTree.getIndicesFor(key)
+		if indicesForWith == nil {
+			indicesForDf := rootDfTree.getIndicesFor(key)
+			for _, idxDf := range indicesForDf {
+				dfIndices = append(dfIndices, idxDf)
+			}
+		}
+	}
+
+	return df.ByIndices(dfIndices)
+}
+
 func (df *Dataframe) determineColumns(conf vector.Configuration, src *Dataframe) []string {
 	var joinColumns []string
 

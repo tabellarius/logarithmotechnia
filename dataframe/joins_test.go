@@ -717,3 +717,105 @@ func TestDataframe_SemiJoin(t *testing.T) {
 		})
 	}
 }
+
+func TestDataframe_AntiJoin(t *testing.T) {
+	employee, department := getJoinDataFrames()
+
+	testData := []struct {
+		name        string
+		joined      *Dataframe
+		columnNames []string
+		outColumns  []vector.Vector
+	}{
+		{
+			name:        "employee ✕ department",
+			joined:      employee.AntiJoin(department, vector.OptionJoinBy("DepType")).Arrange("Name", "Title"),
+			columnNames: []string{"Name", "DepType", "Salary", "Group"},
+			outColumns: []vector.Vector{
+				vector.String([]string{
+					"Catullus", "Hephaestus",
+				}),
+				vector.String([]string{
+					"logistics", "factory",
+				}),
+				vector.Integer([]int{
+					100000, 150000,
+				}),
+				vector.String([]string{
+					"A", "B",
+				}),
+			},
+		},
+		{
+			name:        "department ✕ employee",
+			joined:      department.AntiJoin(employee, vector.OptionJoinBy("DepType")).Arrange("Title", "Name"),
+			columnNames: []string{"DepID", "Title", "DepType", "Group"},
+			outColumns: []vector.Vector{
+				vector.Integer([]int{
+					5,
+				}),
+				vector.String([]string{
+					"Warehouse",
+				}),
+				vector.String([]string{
+					"wares",
+				}),
+				vector.String([]string{
+					"B",
+				}),
+			},
+		},
+		{
+			name:        "employee ✕ department by group",
+			joined:      employee.AntiJoin(department, vector.OptionJoinBy("Group", "DepType")).Arrange("Name", "Title"),
+			columnNames: []string{"Name", "DepType", "Salary", "Group"},
+			outColumns: []vector.Vector{
+				vector.String([]string{
+					"Catullus", "Hephaestus", "Marcius",
+				}),
+				vector.String([]string{
+					"logistics", "factory", "production",
+				}),
+				vector.Integer([]int{
+					100000, 150000, 90000,
+				}),
+				vector.String([]string{
+					"A", "B", "A",
+				}),
+			},
+		},
+		{
+			name:        "department ✕ employee by group",
+			joined:      department.AntiJoin(employee, vector.OptionJoinBy("Group", "DepType")).Arrange("Title", "Name"),
+			columnNames: []string{"DepID", "Title", "DepType", "Group"},
+			outColumns: []vector.Vector{
+				vector.Integer([]int{
+					5,
+				}),
+				vector.String([]string{
+					"Warehouse",
+				}),
+				vector.StringWithNA([]string{
+					"wares",
+				}, []bool{}),
+				vector.String([]string{
+					"B",
+				}),
+			},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			if !reflect.DeepEqual(data.joined.columnNames, data.columnNames) {
+				t.Error(fmt.Sprintf("Column namess (%v) are not equal to expected (%v)\n",
+					data.joined.columnNames, data.columnNames))
+			}
+
+			if !vector.CompareVectorArrs(data.joined.columns, data.outColumns) {
+				t.Error(fmt.Sprintf("Columns (%v) are not equal to expected (%v)\n",
+					data.joined.columns, data.outColumns))
+			}
+		})
+	}
+}
