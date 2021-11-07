@@ -615,3 +615,105 @@ func TestDataframe_FullJoin(t *testing.T) {
 		})
 	}
 }
+
+func TestDataframe_SemiJoin(t *testing.T) {
+	employee, department := getJoinDataFrames()
+
+	testData := []struct {
+		name        string
+		joined      *Dataframe
+		columnNames []string
+		outColumns  []vector.Vector
+	}{
+		{
+			name:        "employee ✕ department",
+			joined:      employee.SemiJoin(department, vector.OptionJoinBy("DepType")).Arrange("Name", "Title"),
+			columnNames: []string{"Name", "DepType", "Salary", "Group"},
+			outColumns: []vector.Vector{
+				vector.String([]string{
+					"Gera", "Hades", "Jack", "Jane", "John", "Marcia", "Marcius", "Robert", "Zeus",
+				}),
+				vector.StringWithNA([]string{
+					"sales", "", "production", "research", "research", "production", "production", "research", "sales",
+				}, []bool{false, true, false, false, false, false, false, false, false}),
+				vector.Integer([]int{
+					150000, 175000, 80000, 110000, 120000, 60000, 90000, 140000, 225000,
+				}),
+				vector.String([]string{
+					"A", "A", "B", "A", "A", "B", "A", "B", "A",
+				}),
+			},
+		},
+		{
+			name:        "department ✕ employee",
+			joined:      department.SemiJoin(employee, vector.OptionJoinBy("DepType")).Arrange("Title", "Name"),
+			columnNames: []string{"DepID", "Title", "DepType", "Group"},
+			outColumns: []vector.Vector{
+				vector.Integer([]int{
+					4, 2, 1, 3, 6,
+				}),
+				vector.String([]string{
+					"Laboratory", "Production", "R&D", "Sales", "Unknown",
+				}),
+				vector.StringWithNA([]string{
+					"research", "production", "research", "sales", "",
+				}, []bool{false, false, false, false, true}),
+				vector.String([]string{
+					"B", "B", "A", "A", "A",
+				}),
+			},
+		},
+		{
+			name:        "employee ✕ department by group",
+			joined:      employee.SemiJoin(department, vector.OptionJoinBy("Group", "DepType")).Arrange("Name", "Title"),
+			columnNames: []string{"Name", "DepType", "Salary", "Group"},
+			outColumns: []vector.Vector{
+				vector.String([]string{
+					"Gera", "Hades", "Jack", "Jane", "John", "Marcia", "Robert", "Zeus",
+				}),
+				vector.StringWithNA([]string{
+					"sales", "", "production", "research", "research", "production", "research", "sales",
+				}, []bool{false, true, false, false, false, false, false, false}),
+				vector.Integer([]int{
+					150000, 175000, 80000, 110000, 120000, 60000, 140000, 225000,
+				}),
+				vector.String([]string{
+					"A", "A", "B", "A", "A", "B", "B", "A",
+				}),
+			},
+		},
+		{
+			name:        "department ✕ employee by group",
+			joined:      department.SemiJoin(employee, vector.OptionJoinBy("Group", "DepType")).Arrange("Title", "Name"),
+			columnNames: []string{"DepID", "Title", "DepType", "Group"},
+			outColumns: []vector.Vector{
+				vector.Integer([]int{
+					4, 2, 1, 3, 6,
+				}),
+				vector.String([]string{
+					"Laboratory", "Production", "R&D", "Sales", "Unknown",
+				}),
+				vector.StringWithNA([]string{
+					"research", "production", "research", "sales", "",
+				}, []bool{false, false, false, false, true}),
+				vector.String([]string{
+					"B", "B", "A", "A", "A",
+				}),
+			},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			if !reflect.DeepEqual(data.joined.columnNames, data.columnNames) {
+				t.Error(fmt.Sprintf("Column namess (%v) are not equal to expected (%v)\n",
+					data.joined.columnNames, data.columnNames))
+			}
+
+			if !vector.CompareVectorArrs(data.joined.columns, data.outColumns) {
+				t.Error(fmt.Sprintf("Columns (%v) are not equal to expected (%v)\n",
+					data.joined.columns, data.outColumns))
+			}
+		})
+	}
+}
