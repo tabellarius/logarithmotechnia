@@ -439,6 +439,12 @@ func TestFloatPayload_ByIndices(t *testing.T) {
 			out:     []float64{math.NaN(), 1, 3},
 			outNA:   []bool{true, false, false},
 		},
+		{
+			name:    "with zero",
+			indices: []int{5, 1, 0, 3},
+			out:     []float64{math.NaN(), 1, math.NaN(), 3},
+			outNA:   []bool{true, false, true, false},
+		},
 	}
 
 	for _, data := range testData {
@@ -1083,27 +1089,121 @@ func TestFloatPayload_Groups(t *testing.T) {
 		name    string
 		payload Payload
 		groups  [][]int
+		values  []interface{}
 	}{
 		{
 			name:    "normal",
 			payload: FloatPayload([]float64{-20, 10, 4, -20, 7, -20, 10, -20, 4, 10}, nil),
 			groups:  [][]int{{1, 4, 6, 8}, {2, 7, 10}, {3, 9}, {5}},
+			values:  []interface{}{-20.0, 10.0, 4.0, 7.0},
 		},
 		{
 			name: "with NA",
 			payload: FloatPayload([]float64{-20, 10, 4, -20, 10, -20, 10, -20, 4, 7},
 				[]bool{false, false, false, false, false, false, true, true, false, false}),
 			groups: [][]int{{1, 4, 6}, {2, 5}, {3, 9}, {10}, {7, 8}},
+			values: []interface{}{-20.0, 10.0, 4.0, 7.0, nil},
 		},
 	}
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			groups := data.payload.(*floatPayload).Groups()
+			groups, values := data.payload.(*floatPayload).Groups()
 
 			if !reflect.DeepEqual(groups, data.groups) {
 				t.Error(fmt.Sprintf("Groups (%v) do not match expected (%v)",
 					groups, data.groups))
+			}
+
+			if !reflect.DeepEqual(values, data.values) {
+				t.Error(fmt.Sprintf("Groups (%v) do not match expected (%v)",
+					values, data.values))
+			}
+		})
+	}
+}
+
+func TestFloatPayload_IsUnique(t *testing.T) {
+	testData := []struct {
+		name     string
+		payload  Payload
+		booleans []bool
+	}{
+		{
+			name: "without NA",
+			payload: FloatPayload([]float64{1, 2, 1, 3, 2, 3, 2, math.NaN(), math.NaN(),
+				math.Inf(1), math.Inf(-1), math.Inf(1), math.Inf(-1)}, nil),
+			booleans: []bool{true, true, false, true, false, false, false, true, false, true, true, false, false},
+		},
+		{
+			name:     "with NA",
+			payload:  FloatPayload([]float64{1, 2, 1, 3, 2, 3, 2}, []bool{false, true, true, false, false, false, false}),
+			booleans: []bool{true, true, false, true, true, false, false},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			booleans := data.payload.(*floatPayload).IsUnique()
+
+			if !reflect.DeepEqual(booleans, data.booleans) {
+				t.Error(fmt.Sprintf("Result of IsUnique() (%v) do not match expected (%v)",
+					booleans, data.booleans))
+			}
+		})
+	}
+}
+
+func TestFloatPayload_Coalesce(t *testing.T) {
+	testData := []struct {
+		name         string
+		coalescer    Payload
+		coalescendum Payload
+		outData      []float64
+		outNA        []bool
+	}{
+		{
+			name:         "empty",
+			coalescer:    FloatPayload(nil, nil),
+			coalescendum: FloatPayload([]float64{}, nil),
+			outData:      []float64{},
+			outNA:        []bool{},
+		},
+		{
+			name:         "same type",
+			coalescer:    FloatPayload([]float64{1, 0, 0, 0, 5}, []bool{false, true, true, true, false}),
+			coalescendum: FloatPayload([]float64{11, 12, 0, 14, 15}, []bool{false, false, true, false, false}),
+			outData:      []float64{1, 12, math.NaN(), 14, 5},
+			outNA:        []bool{false, false, true, false, false},
+		},
+		{
+			name:         "same type + different size",
+			coalescer:    FloatPayload([]float64{1, 0, 0, 0, 5}, []bool{false, true, true, true, false}),
+			coalescendum: FloatPayload([]float64{0, 11}, []bool{true, false}),
+			outData:      []float64{1, 11, math.NaN(), 11, 5},
+			outNA:        []bool{false, false, true, false, false},
+		},
+		{
+			name:         "different type",
+			coalescer:    FloatPayload([]float64{1, 0, 0, 0, 5}, []bool{false, true, true, true, false}),
+			coalescendum: IntegerPayload([]int{0, 10, 0, 112, 0}, []bool{false, false, true, false, false}),
+			outData:      []float64{1, 10, math.NaN(), 112, 5},
+			outNA:        []bool{false, false, true, false, false},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			payload := data.coalescer.(Coalescer).Coalesce(data.coalescendum).(*floatPayload)
+
+			if !util.EqualFloatArrays(payload.data, data.outData) {
+				t.Error(fmt.Sprintf("Data (%v) do not match expected (%v)",
+					payload.data, data.outData))
+			}
+
+			if !reflect.DeepEqual(payload.na, data.outNA) {
+				t.Error(fmt.Sprintf("NA (%v) do not match expected (%v)",
+					payload.na, data.outNA))
 			}
 		})
 	}

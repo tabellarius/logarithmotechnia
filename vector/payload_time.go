@@ -35,8 +35,13 @@ func (p *timePayload) ByIndices(indices []int) Payload {
 	na := make([]bool, 0, len(indices))
 
 	for _, idx := range indices {
-		data = append(data, p.data[idx-1])
-		na = append(na, p.na[idx-1])
+		if idx == 0 {
+			data = append(data, time.Time{})
+			na = append(na, true)
+		} else {
+			data = append(data, p.data[idx-1])
+			na = append(na, p.na[idx-1])
+		}
 	}
 
 	return TimePayload(data, na, p.Options()...)
@@ -458,7 +463,7 @@ func (p *timePayload) Lte(val interface{}) []bool {
 	return cmp
 }
 
-func (p *timePayload) Groups() [][]int {
+func (p *timePayload) Groups() ([][]int, []interface{}) {
 	groupMap := map[time.Time][]int{}
 	ordered := []time.Time{}
 	na := []int{}
@@ -488,7 +493,43 @@ func (p *timePayload) Groups() [][]int {
 		groups = append(groups, na)
 	}
 
-	return groups
+	values := make([]interface{}, len(groups))
+	for i, val := range ordered {
+		values[i] = interface{}(val)
+	}
+	if len(na) > 0 {
+		values[len(values)-1] = nil
+	}
+
+	return groups, values
+}
+
+func (p *timePayload) IsUnique() []bool {
+	booleans := make([]bool, p.length)
+
+	valuesMap := map[string]bool{}
+	wasNA := false
+	for i := 0; i < p.length; i++ {
+		is := false
+
+		if p.na[i] {
+			if !wasNA {
+				is = true
+				wasNA = true
+			}
+		} else {
+			strTime := p.data[i].Format(p.printer.Format)
+
+			if _, ok := valuesMap[strTime]; !ok {
+				is = true
+				valuesMap[strTime] = true
+			}
+		}
+
+		booleans[i] = is
+	}
+
+	return booleans
 }
 
 func (p *timePayload) Options() []Option {
@@ -535,17 +576,50 @@ func TimePayload(data []time.Time, na []bool, options ...Option) Payload {
 	}
 
 	payload.DefArrangeable = DefArrangeable{
-		length:   payload.length,
+		Length:   payload.length,
 		DefNAble: payload.DefNAble,
-		fnLess: func(i, j int) bool {
+		FnLess: func(i, j int) bool {
 			return payload.data[i].Before(payload.data[j])
 		},
-		fnEqual: func(i, j int) bool {
+		FnEqual: func(i, j int) bool {
 			return payload.data[i].Equal(payload.data[j])
 		},
 	}
 
 	return payload
+}
+
+func (p *timePayload) Coalesce(payload Payload) Payload {
+	if p.length != payload.Len() {
+		payload = payload.Adjust(p.length)
+	}
+
+	var srcData []time.Time
+	var srcNA []bool
+
+	if same, ok := payload.(*timePayload); ok {
+		srcData = same.data
+		srcNA = same.na
+	} else if timeable, ok := payload.(Timeable); ok {
+		srcData, srcNA = timeable.Times()
+	} else {
+		return p
+	}
+
+	dstData := make([]time.Time, p.length)
+	dstNA := make([]bool, p.length)
+
+	for i := 0; i < p.length; i++ {
+		if p.na[i] && !srcNA[i] {
+			dstData[i] = srcData[i]
+			dstNA[i] = false
+		} else {
+			dstData[i] = p.data[i]
+			dstNA[i] = p.na[i]
+		}
+	}
+
+	return TimePayload(dstData, dstNA, p.Options()...)
 }
 
 func TimeWithNA(data []time.Time, na []bool, options ...Option) Vector {

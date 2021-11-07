@@ -31,8 +31,13 @@ func (p *booleanPayload) ByIndices(indices []int) Payload {
 	na := make([]bool, 0, len(indices))
 
 	for _, idx := range indices {
-		data = append(data, p.data[idx-1])
-		na = append(na, p.na[idx-1])
+		if idx == 0 {
+			data = append(data, false)
+			na = append(na, true)
+		} else {
+			data = append(data, p.data[idx-1])
+			na = append(na, p.na[idx-1])
+		}
 	}
 
 	return BooleanPayload(data, na, p.Options()...)
@@ -357,7 +362,7 @@ func (p *booleanPayload) adjustToBiggerSize(size int) Payload {
 	return BooleanPayload(data, na)
 }
 
-func (p *booleanPayload) Groups() [][]int {
+func (p *booleanPayload) Groups() ([][]int, []interface{}) {
 	groupMap := map[bool][]int{}
 	ordered := []bool{}
 	na := []int{}
@@ -387,7 +392,15 @@ func (p *booleanPayload) Groups() [][]int {
 		groups = append(groups, na)
 	}
 
-	return groups
+	values := make([]interface{}, len(groups))
+	for i, val := range ordered {
+		values[i] = interface{}(val)
+	}
+	if len(na) > 0 {
+		values[len(values)-1] = nil
+	}
+
+	return groups, values
 }
 
 func (p *booleanPayload) StrForElem(idx int) string {
@@ -417,8 +430,6 @@ func (p *booleanPayload) Find(needle interface{}) int {
 	return 0
 }
 
-/* Finder interface */
-
 func (p *booleanPayload) FindAll(needle interface{}) []int {
 	val, ok := needle.(bool)
 	if !ok {
@@ -435,7 +446,7 @@ func (p *booleanPayload) FindAll(needle interface{}) []int {
 	return found
 }
 
-/* Comparable interface */
+/* Finder interface */
 
 func (p *booleanPayload) Eq(val interface{}) []bool {
 	cmp := make([]bool, p.length)
@@ -455,6 +466,8 @@ func (p *booleanPayload) Eq(val interface{}) []bool {
 
 	return cmp
 }
+
+/* Comparable interface */
 
 func (p *booleanPayload) Neq(val interface{}) []bool {
 	cmp := make([]bool, p.length)
@@ -502,8 +515,67 @@ func (p *booleanPayload) Lte(interface{}) []bool {
 	return cmp
 }
 
+func (p *booleanPayload) IsUnique() []bool {
+	booleans := make([]bool, p.length)
+
+	valuesMap := map[bool]bool{}
+	wasNA := false
+	for i := 0; i < p.length; i++ {
+		is := false
+
+		if p.na[i] {
+			if !wasNA {
+				is = true
+				wasNA = true
+			}
+		} else {
+			if _, ok := valuesMap[p.data[i]]; !ok {
+				is = true
+				valuesMap[p.data[i]] = true
+			}
+		}
+
+		booleans[i] = is
+	}
+
+	return booleans
+}
+
 func (p *booleanPayload) Options() []Option {
 	return []Option{}
+}
+
+func (p *booleanPayload) Coalesce(payload Payload) Payload {
+	if p.length != payload.Len() {
+		payload = payload.Adjust(p.length)
+	}
+
+	var srcData []bool
+	var srcNA []bool
+
+	if same, ok := payload.(*booleanPayload); ok {
+		srcData = same.data
+		srcNA = same.na
+	} else if boolable, ok := payload.(Boolable); ok {
+		srcData, srcNA = boolable.Booleans()
+	} else {
+		return p
+	}
+
+	dstData := make([]bool, p.length)
+	dstNA := make([]bool, p.length)
+
+	for i := 0; i < p.length; i++ {
+		if p.na[i] && !srcNA[i] {
+			dstData[i] = srcData[i]
+			dstNA[i] = false
+		} else {
+			dstData[i] = p.data[i]
+			dstNA[i] = p.na[i]
+		}
+	}
+
+	return BooleanPayload(dstData, dstNA, p.Options()...)
 }
 
 func BooleanPayload(data []bool, na []bool, _ ...Option) Payload {
@@ -537,12 +609,12 @@ func BooleanPayload(data []bool, na []bool, _ ...Option) Payload {
 	}
 
 	payload.DefArrangeable = DefArrangeable{
-		length:   payload.length,
+		Length:   payload.length,
 		DefNAble: payload.DefNAble,
-		fnLess: func(i, j int) bool {
+		FnLess: func(i, j int) bool {
 			return !payload.data[i] && payload.data[j]
 		},
-		fnEqual: func(i, j int) bool {
+		FnEqual: func(i, j int) bool {
 			return payload.data[i] == payload.data[j]
 		},
 	}

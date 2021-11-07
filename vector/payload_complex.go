@@ -36,8 +36,13 @@ func (p *complexPayload) ByIndices(indices []int) Payload {
 	na := make([]bool, 0, len(indices))
 
 	for _, idx := range indices {
-		data = append(data, p.data[idx-1])
-		na = append(na, p.na[idx-1])
+		if idx == 0 {
+			data = append(data, cmplx.NaN())
+			na = append(na, true)
+		} else {
+			data = append(data, p.data[idx-1])
+			na = append(na, p.na[idx-1])
+		}
 	}
 
 	return ComplexPayload(data, na, p.Options()...)
@@ -359,7 +364,7 @@ func (p *complexPayload) Options() []Option {
 	}
 }
 
-func (p *complexPayload) Groups() [][]int {
+func (p *complexPayload) Groups() ([][]int, []interface{}) {
 	groupMap := map[complex128][]int{}
 	ordered := []complex128{}
 	na := []int{}
@@ -389,7 +394,15 @@ func (p *complexPayload) Groups() [][]int {
 		groups = append(groups, na)
 	}
 
-	return groups
+	values := make([]interface{}, len(groups))
+	for i, val := range ordered {
+		values[i] = interface{}(val)
+	}
+	if len(na) > 0 {
+		values[len(values)-1] = nil
+	}
+
+	return groups, values
 }
 
 func (p *complexPayload) StrForElem(idx int) string {
@@ -556,6 +569,39 @@ func (p *complexPayload) convertComparator(val interface{}) (complex128, bool) {
 	return v, ok
 }
 
+func (p *complexPayload) Coalesce(payload Payload) Payload {
+	if p.length != payload.Len() {
+		payload = payload.Adjust(p.length)
+	}
+
+	var srcData []complex128
+	var srcNA []bool
+
+	if same, ok := payload.(*complexPayload); ok {
+		srcData = same.data
+		srcNA = same.na
+	} else if complexable, ok := payload.(Complexable); ok {
+		srcData, srcNA = complexable.Complexes()
+	} else {
+		return p
+	}
+
+	dstData := make([]complex128, p.length)
+	dstNA := make([]bool, p.length)
+
+	for i := 0; i < p.length; i++ {
+		if p.na[i] && !srcNA[i] {
+			dstData[i] = srcData[i]
+			dstNA[i] = false
+		} else {
+			dstData[i] = p.data[i]
+			dstNA[i] = p.na[i]
+		}
+	}
+
+	return ComplexPayload(dstData, dstNA, p.Options()...)
+}
+
 func ComplexPayload(data []complex128, na []bool, options ...Option) Payload {
 	length := len(data)
 	conf := MergeOptions(options)
@@ -595,6 +641,44 @@ func ComplexPayload(data []complex128, na []bool, options ...Option) Payload {
 			na: vecNA,
 		},
 	}
+}
+
+func (p *complexPayload) IsUnique() []bool {
+	booleans := make([]bool, p.length)
+
+	valuesMap := map[complex128]bool{}
+	wasNA := false
+	wasNaN := false
+	wasInf := false
+	for i := 0; i < p.length; i++ {
+		is := false
+
+		if p.na[i] {
+			if !wasNA {
+				is = true
+				wasNA = true
+			}
+		} else if cmplx.IsNaN(p.data[i]) {
+			if !wasNaN {
+				is = true
+				wasNaN = true
+			}
+		} else if cmplx.IsInf(p.data[i]) {
+			if !wasInf {
+				is = true
+				wasInf = true
+			}
+		} else {
+			if _, ok := valuesMap[p.data[i]]; !ok {
+				is = true
+				valuesMap[p.data[i]] = true
+			}
+		}
+
+		booleans[i] = is
+	}
+
+	return booleans
 }
 
 func ComplexWithNA(data []complex128, na []bool, options ...Option) Vector {

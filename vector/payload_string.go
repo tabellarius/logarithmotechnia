@@ -32,8 +32,13 @@ func (p *stringPayload) ByIndices(indices []int) Payload {
 	na := make([]bool, 0, len(indices))
 
 	for _, idx := range indices {
-		data = append(data, p.data[idx-1])
-		na = append(na, p.na[idx-1])
+		if idx == 0 {
+			data = append(data, "")
+			na = append(na, true)
+		} else {
+			data = append(data, p.data[idx-1])
+			na = append(na, p.na[idx-1])
+		}
 	}
 
 	return StringPayload(data, na, p.Options()...)
@@ -324,7 +329,7 @@ func (p *stringPayload) Append(payload Payload) Payload {
 	return StringPayload(newVals, newNA, p.Options()...)
 }
 
-func (p *stringPayload) Groups() [][]int {
+func (p *stringPayload) Groups() ([][]int, []interface{}) {
 	groupMap := map[string][]int{}
 	ordered := []string{}
 	na := []int{}
@@ -354,7 +359,15 @@ func (p *stringPayload) Groups() [][]int {
 		groups = append(groups, na)
 	}
 
-	return groups
+	values := make([]interface{}, len(groups))
+	for i, val := range ordered {
+		values[i] = interface{}(val)
+	}
+	if len(na) > 0 {
+		values[len(values)-1] = nil
+	}
+
+	return groups, values
 }
 
 func (p *stringPayload) StrForElem(idx int) string {
@@ -362,7 +375,7 @@ func (p *stringPayload) StrForElem(idx int) string {
 		return "NA"
 	}
 
-	return p.data[idx-1]
+	return "\"" + p.data[idx-1] + "\""
 }
 
 func (p *stringPayload) Adjust(size int) Payload {
@@ -587,6 +600,65 @@ func (p *stringPayload) convertComparator(val interface{}) (string, bool) {
 	return v, ok
 }
 
+func (p *stringPayload) IsUnique() []bool {
+	booleans := make([]bool, p.length)
+
+	valuesMap := map[string]bool{}
+	wasNA := false
+	for i := 0; i < p.length; i++ {
+		is := false
+
+		if p.na[i] {
+			if !wasNA {
+				is = true
+				wasNA = true
+			}
+		} else {
+			if _, ok := valuesMap[p.data[i]]; !ok {
+				is = true
+				valuesMap[p.data[i]] = true
+			}
+		}
+
+		booleans[i] = is
+	}
+
+	return booleans
+}
+
+func (p *stringPayload) Coalesce(payload Payload) Payload {
+	if p.length != payload.Len() {
+		payload = payload.Adjust(p.length)
+	}
+
+	var srcData []string
+	var srcNA []bool
+
+	if same, ok := payload.(*stringPayload); ok {
+		srcData = same.data
+		srcNA = same.na
+	} else if stringable, ok := payload.(Stringable); ok {
+		srcData, srcNA = stringable.Strings()
+	} else {
+		return p
+	}
+
+	dstData := make([]string, p.length)
+	dstNA := make([]bool, p.length)
+
+	for i := 0; i < p.length; i++ {
+		if p.na[i] && !srcNA[i] {
+			dstData[i] = srcData[i]
+			dstNA[i] = false
+		} else {
+			dstData[i] = p.data[i]
+			dstNA[i] = p.na[i]
+		}
+	}
+
+	return StringPayload(dstData, dstNA, p.Options()...)
+}
+
 func (p *stringPayload) Options() []Option {
 	return []Option{}
 }
@@ -622,12 +694,12 @@ func StringPayload(data []string, na []bool, _ ...Option) Payload {
 	}
 
 	payload.DefArrangeable = DefArrangeable{
-		length:   payload.length,
+		Length:   payload.length,
 		DefNAble: payload.DefNAble,
-		fnLess: func(i, j int) bool {
+		FnLess: func(i, j int) bool {
 			return payload.data[i] < payload.data[j]
 		},
-		fnEqual: func(i, j int) bool {
+		FnEqual: func(i, j int) bool {
 			return payload.data[i] == payload.data[j]
 		},
 	}

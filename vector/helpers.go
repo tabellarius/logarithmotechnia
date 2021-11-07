@@ -24,6 +24,16 @@ func incIndices(indices []int) []int {
 	return indices
 }
 
+func trueBooleanArr(size int) []bool {
+	booleans := make([]bool, size)
+
+	for i := 0; i < size; i++ {
+		booleans[i] = true
+	}
+
+	return booleans
+}
+
 func CompareVectorsForTest(one, two Vector) bool {
 	if one == nil && two != nil || two == nil && one != nil {
 		return false

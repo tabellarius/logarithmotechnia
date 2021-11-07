@@ -607,3 +607,74 @@ func TestNaPayload_Adjust(t *testing.T) {
 		t.Error(fmt.Sprintf("New payload's length is wrong (%v instead of %v)", newPayload.length, 5))
 	}
 }
+
+func TestNaPayload_IsUnique(t *testing.T) {
+	testData := []struct {
+		name     string
+		payload  Payload
+		booleans []bool
+	}{
+		{
+			name:     "zero",
+			payload:  NAPayload(0),
+			booleans: []bool{},
+		},
+		{
+			name:     "normal",
+			payload:  NAPayload(5),
+			booleans: []bool{true, false, false, false, false},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			booleans := data.payload.(*naPayload).IsUnique()
+
+			if !reflect.DeepEqual(booleans, data.booleans) {
+				t.Error(fmt.Sprintf("Result of IsUnique() (%v) do not match expected (%v)",
+					booleans, data.booleans))
+			}
+		})
+	}
+}
+
+func TestNaPayload_Coalesce(t *testing.T) {
+	testData := []struct {
+		name         string
+		coalescer    Payload
+		coalescendum Payload
+		outData      []int
+		outNA        []bool
+	}{
+		{
+			name:         "empty",
+			coalescer:    NAPayload(0),
+			coalescendum: IntegerPayload([]int{}, nil),
+			outData:      []int{},
+			outNA:        []bool{},
+		},
+		{
+			name:         "non-empty",
+			coalescer:    NAPayload(5),
+			coalescendum: IntegerPayload([]int{11, 12, 0, 14, 15}, []bool{false, false, true, false, false}),
+			outData:      []int{11, 12, 0, 14, 15},
+			outNA:        []bool{false, false, true, false, false},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			payload := data.coalescer.(Coalescer).Coalesce(data.coalescendum).(*integerPayload)
+
+			if !reflect.DeepEqual(payload.data, data.outData) {
+				t.Error(fmt.Sprintf("Data (%v) do not match expected (%v)",
+					payload.data, data.outData))
+			}
+
+			if !reflect.DeepEqual(payload.na, data.outNA) {
+				t.Error(fmt.Sprintf("NA (%v) do not match expected (%v)",
+					payload.na, data.outNA))
+			}
+		})
+	}
+}

@@ -431,6 +431,12 @@ func TestBooleanPayload_ByIndices(t *testing.T) {
 			out:     []bool{false, true, true},
 			outNA:   []bool{true, false, false},
 		},
+		{
+			name:    "with zero",
+			indices: []int{5, 1, 0, 3},
+			out:     []bool{false, true, false, true},
+			outNA:   []bool{true, false, true, false},
+		},
 	}
 
 	for _, data := range testData {
@@ -1048,27 +1054,120 @@ func TestBooleanPayload_Groups(t *testing.T) {
 		name    string
 		payload Payload
 		groups  [][]int
+		values  []interface{}
 	}{
 		{
 			name:    "normal",
 			payload: BooleanPayload([]bool{true, false, true, true, false}, nil),
 			groups:  [][]int{{1, 3, 4}, {2, 5}},
+			values:  []interface{}{true, false},
 		},
 		{
 			name: "with NA",
 			payload: BooleanPayload([]bool{true, false, true, true, false},
 				[]bool{false, false, true, false, false}),
 			groups: [][]int{{1, 4}, {2, 5}, {3}},
+			values: []interface{}{true, false, nil},
 		},
 	}
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			groups := data.payload.(*booleanPayload).Groups()
+			groups, values := data.payload.(*booleanPayload).Groups()
 
 			if !reflect.DeepEqual(groups, data.groups) {
 				t.Error(fmt.Sprintf("Groups (%v) do not match expected (%v)",
 					groups, data.groups))
+			}
+
+			if !reflect.DeepEqual(values, data.values) {
+				t.Error(fmt.Sprintf("Groups (%v) do not match expected (%v)",
+					values, data.values))
+			}
+		})
+	}
+}
+
+func TestBooleanPayload_IsUnique(t *testing.T) {
+	testData := []struct {
+		name     string
+		payload  Payload
+		booleans []bool
+	}{
+		{
+			name:     "without NA",
+			payload:  BooleanPayload([]bool{true, false, true, false, true}, nil),
+			booleans: []bool{true, true, false, false, false},
+		},
+		{
+			name:     "with NA",
+			payload:  BooleanPayload([]bool{true, false, true, false, true}, []bool{false, true, true, false, false}),
+			booleans: []bool{true, true, false, true, false},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			booleans := data.payload.(*booleanPayload).IsUnique()
+
+			if !reflect.DeepEqual(booleans, data.booleans) {
+				t.Error(fmt.Sprintf("Result of IsUnique() (%v) do not match expected (%v)",
+					booleans, data.booleans))
+			}
+		})
+	}
+}
+
+func TestBooleanPayload_Coalesce(t *testing.T) {
+	testData := []struct {
+		name         string
+		coalescer    Payload
+		coalescendum Payload
+		outData      []bool
+		outNA        []bool
+	}{
+		{
+			name:         "empty",
+			coalescer:    BooleanPayload(nil, nil),
+			coalescendum: BooleanPayload([]bool{}, nil),
+			outData:      []bool{},
+			outNA:        []bool{},
+		},
+		{
+			name:         "same type",
+			coalescer:    BooleanPayload([]bool{true, false, false, false, true}, []bool{false, true, true, true, false}),
+			coalescendum: BooleanPayload([]bool{false, true, false, true, false}, []bool{false, false, true, false, false}),
+			outData:      []bool{true, true, false, true, true},
+			outNA:        []bool{false, false, true, false, false},
+		},
+		{
+			name:         "same type + different size",
+			coalescer:    BooleanPayload([]bool{true, false, false, false, true}, []bool{false, true, true, true, false}),
+			coalescendum: BooleanPayload([]bool{true, false}, []bool{true, false}),
+			outData:      []bool{true, false, false, false, true},
+			outNA:        []bool{false, false, true, false, false},
+		},
+		{
+			name:         "different type",
+			coalescer:    BooleanPayload([]bool{true, false, false, false, true}, []bool{false, true, true, true, false}),
+			coalescendum: IntegerPayload([]int{0, 10, 0, 112, 0}, []bool{false, false, true, false, false}),
+			outData:      []bool{true, true, false, true, true},
+			outNA:        []bool{false, false, true, false, false},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			payload := data.coalescer.(Coalescer).Coalesce(data.coalescendum).(*booleanPayload)
+
+			if !reflect.DeepEqual(payload.data, data.outData) {
+				t.Error(fmt.Sprintf("Data (%v) do not match expected (%v)",
+					payload.data, data.outData))
+			}
+
+			if !reflect.DeepEqual(payload.na, data.outNA) {
+				t.Error(fmt.Sprintf("NA (%v) do not match expected (%v)",
+					payload.na, data.outNA))
 			}
 		})
 	}

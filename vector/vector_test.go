@@ -612,9 +612,9 @@ func TestVector_ByIndices(t *testing.T) {
 		{
 			name:    "normal",
 			indices: []int{-1, 0, 4, 3, 2, 6},
-			out:     []int{4, 0, 2},
-			outNA:   []bool{false, true, false},
-			length:  3,
+			out:     []int{0, 4, 0, 2},
+			outNA:   []bool{true, false, true, false},
+			length:  4,
 		},
 		{
 			name:    "empty",
@@ -1543,7 +1543,7 @@ func TestVector_SortedIndices(t *testing.T) {
 		{
 			name:          "integer with NA",
 			vec:           IntegerWithNA([]int{12, -8, 0, -4, 5}, []bool{false, false, true, false, false}),
-			sortedIndices: []int{3, 2, 4, 5, 1},
+			sortedIndices: []int{2, 4, 5, 1, 3},
 		},
 		{
 			name:          "integer without NA",
@@ -1553,7 +1553,7 @@ func TestVector_SortedIndices(t *testing.T) {
 		{
 			name:          "boolean with NA",
 			vec:           BooleanWithNA([]bool{true, true, false, false, true}, []bool{false, false, false, true, true}),
-			sortedIndices: []int{4, 5, 3, 1, 2},
+			sortedIndices: []int{3, 1, 2, 4, 5},
 		},
 		{
 			name:          "boolean without NA",
@@ -1563,7 +1563,7 @@ func TestVector_SortedIndices(t *testing.T) {
 		{
 			name:          "float with NA",
 			vec:           FloatWithNA([]float64{12, -8, 0, -4, 5}, []bool{false, false, true, false, false}),
-			sortedIndices: []int{3, 2, 4, 5, 1},
+			sortedIndices: []int{2, 4, 5, 1, 3},
 		},
 		{
 			name:          "float without NA",
@@ -1573,7 +1573,7 @@ func TestVector_SortedIndices(t *testing.T) {
 		{
 			name:          "string with NA",
 			vec:           StringWithNA([]string{"delta", "beta", "alpha", "zeroth", "zero"}, []bool{false, false, true, true, false}),
-			sortedIndices: []int{3, 4, 2, 1, 5},
+			sortedIndices: []int{2, 1, 5, 3, 4},
 		},
 		{
 			name:          "string without NA",
@@ -1604,8 +1604,8 @@ func TestVector_SortedIndicesWithRanks(t *testing.T) {
 		{
 			name:          "integer with NA",
 			vec:           IntegerWithNA([]int{12, -4, 0, -4, 5}, []bool{false, false, true, false, false}),
-			sortedIndices: []int{3, 2, 4, 5, 1},
-			ranks:         []int{1, 2, 2, 3, 4},
+			sortedIndices: []int{2, 4, 5, 1, 3},
+			ranks:         []int{1, 1, 2, 3, 4},
 		},
 		{
 			name:          "integer without NA",
@@ -1616,8 +1616,8 @@ func TestVector_SortedIndicesWithRanks(t *testing.T) {
 		{
 			name:          "boolean with NA",
 			vec:           BooleanWithNA([]bool{true, true, false, false, true}, []bool{false, false, false, true, true}),
-			sortedIndices: []int{4, 5, 3, 1, 2},
-			ranks:         []int{1, 1, 2, 3, 3},
+			sortedIndices: []int{3, 1, 2, 4, 5},
+			ranks:         []int{1, 2, 2, 3, 3},
 		},
 		{
 			name:          "boolean without NA",
@@ -1628,8 +1628,8 @@ func TestVector_SortedIndicesWithRanks(t *testing.T) {
 		{
 			name:          "float with NA",
 			vec:           FloatWithNA([]float64{12, -4, 0, -4, 5}, []bool{false, false, true, false, false}),
-			sortedIndices: []int{3, 2, 4, 5, 1},
-			ranks:         []int{1, 2, 2, 3, 4},
+			sortedIndices: []int{2, 4, 5, 1, 3},
+			ranks:         []int{1, 1, 2, 3, 4},
 		},
 		{
 			name:          "float without NA",
@@ -1640,8 +1640,8 @@ func TestVector_SortedIndicesWithRanks(t *testing.T) {
 		{
 			name:          "string with NA",
 			vec:           StringWithNA([]string{"delta", "beta", "alpha", "zero", "zero"}, []bool{false, false, true, true, false}),
-			sortedIndices: []int{3, 4, 2, 1, 5},
-			ranks:         []int{1, 1, 2, 3, 4},
+			sortedIndices: []int{2, 1, 5, 3, 4},
+			ranks:         []int{1, 2, 3, 4, 4},
 		},
 		{
 			name:          "string without NA",
@@ -1673,28 +1673,38 @@ func TestVector_Groups(t *testing.T) {
 		name   string
 		vec    Vector
 		groups [][]int
+		values []interface{}
 	}{
 		{
 			name:   "normal",
 			vec:    Integer([]int{-20, 10, 4, -20, 7, -20, 10, -20, 4, 10}, nil),
 			groups: [][]int{{1, 4, 6, 8}, {2, 7, 10}, {3, 9}, {5}},
+			values: []interface{}{-20, 10, 4, 7},
 		},
 		{
 			name: "with NA",
 			vec: IntegerWithNA([]int{-20, 10, 4, -20, 7, -20, 10, -20, 4, 10},
 				[]bool{false, false, false, false, false, false, true, true, false, false}),
 			groups: [][]int{{1, 4, 6}, {2, 10}, {3, 9}, {5}, {7, 8}},
+			values: []interface{}{-20, 10, 4, 7, nil},
 		},
 		{
 			name:   "empty",
 			vec:    Integer([]int{}, nil),
 			groups: [][]int{},
+			values: []interface{}{},
+		},
+		{
+			name:   "non-groupable",
+			vec:    NA(10),
+			groups: [][]int{{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}},
+			values: []interface{}{nil},
 		},
 	}
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			groups := data.vec.Groups()
+			groups, _ := data.vec.Groups()
 
 			if !reflect.DeepEqual(groups, data.groups) {
 				t.Error(fmt.Sprintf("Groups (%v) do not match expected (%v)",
@@ -1747,6 +1757,106 @@ func TestVector_GroupByIndices(t *testing.T) {
 				}
 			} else {
 
+			}
+		})
+	}
+}
+
+func TestVector_IsUnique(t *testing.T) {
+	testData := []struct {
+		name     string
+		vector   Vector
+		booleans []bool
+	}{
+		{
+			name:     "without NA",
+			vector:   Integer([]int{1, 0, 1, 3, 2, 3, 2, 0}),
+			booleans: []bool{true, true, false, true, true, false, false, false},
+		},
+		{
+			name: "with NA",
+			vector: IntegerWithNA([]int{1, 0, 1, 3, 2, 3, 2, 0},
+				[]bool{false, true, true, false, false, false, false, false}),
+			booleans: []bool{true, true, false, true, true, false, false, true},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			booleans := data.vector.IsUnique()
+
+			if !reflect.DeepEqual(booleans, data.booleans) {
+				t.Error(fmt.Sprintf("Result of IsUnique() (%v) do not match expected (%v)",
+					booleans, data.booleans))
+			}
+		})
+	}
+}
+
+func TestVector_Unique(t *testing.T) {
+	testData := []struct {
+		name      string
+		vector    Vector
+		outVector Vector
+	}{
+		{
+			name:      "without NA",
+			vector:    Integer([]int{1, 0, 1, 3, 2, 3, 2, 0}),
+			outVector: Integer([]int{1, 0, 3, 2}),
+		},
+		{
+			name: "with NA",
+			vector: IntegerWithNA([]int{1, 0, 1, 3, 2, 3, 2, 0},
+				[]bool{false, true, true, false, false, false, false, false}),
+			outVector: IntegerWithNA([]int{1, 0, 3, 2, 0}, []bool{false, true, false, false, false}),
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			v := data.vector.Unique()
+
+			if !CompareVectorsForTest(v, data.outVector) {
+				t.Error(fmt.Sprintf("Result of Unique() (%v) do not match expected (%v)",
+					v, data.outVector))
+			}
+		})
+	}
+}
+
+func TestVector_Coalesce(t *testing.T) {
+	testData := []struct {
+		name         string
+		coalescer    Vector
+		coalescendum []Vector
+		coalescens   Vector
+	}{
+		{
+			name:         "empty",
+			coalescer:    Integer(nil, nil),
+			coalescendum: []Vector{Integer([]int{}, nil)},
+			coalescens:   Integer([]int{}),
+		},
+		{
+			name:      "normal",
+			coalescer: IntegerWithNA([]int{1, 0, 0, 0, 0, 0, 7}, []bool{false, true, true, true, true, true, false}),
+			coalescendum: []Vector{
+				IntegerWithNA([]int{10, 20, 0, 0, 0, 60, 70}, []bool{false, false, true, true, true, false, false}),
+				FloatWithNA([]float64{100, 200, 300, 0, 500, 600, 700},
+					[]bool{false, false, false, true, false, false, false}),
+			},
+			coalescens: IntegerWithNA([]int{1, 20, 300, 0, 500, 60, 7},
+				[]bool{false, false, false, true, false, false, false}),
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			vec := data.coalescer.Coalesce(data.coalescendum...)
+
+			if !CompareVectorsForTest(vec, data.coalescens) {
+				t.Error(fmt.Sprintf("Data (%v) do not match expected (%v)",
+					vec, data.coalescens))
 			}
 		})
 	}

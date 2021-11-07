@@ -283,6 +283,12 @@ func TestTimePayload_ByIndices(t *testing.T) {
 			out:     toTimeData([]string{"0001-01-01T00:00:00Z", "2006-01-02T15:04:05+07:00"}),
 			outNA:   []bool{true, false},
 		},
+		{
+			name:    "with zero",
+			indices: []int{3, 1, 0},
+			out:     toTimeData([]string{"0001-01-01T00:00:00Z", "2006-01-02T15:04:05+07:00", "0001-01-01T00:00:00Z"}),
+			outNA:   []bool{true, false, true},
+		},
 	}
 
 	for _, data := range testData {
@@ -937,28 +943,122 @@ func TestTimePayload_Groups(t *testing.T) {
 		name    string
 		payload Payload
 		groups  [][]int
+		values  []interface{}
 	}{
 		{
 			name: "normal",
 			payload: TimePayload(toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00",
 				"2020-01-01T12:30:00+03:00", "2020-01-01T12:30:00+03:00"}), nil),
 			groups: [][]int{{1}, {2}, {3, 4}},
+			values: []interface{}{
+				toTimeData([]string{"2006-01-02T15:04:05+07:00"})[0],
+				toTimeData([]string{"2021-01-01T12:30:00+03:00"})[0],
+				toTimeData([]string{"2020-01-01T12:30:00+03:00"})[0],
+			},
 		},
 		{
 			name: "with NA",
 			payload: TimePayload(toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00",
 				"2020-01-01T12:30:00+03:00", "2020-01-01T12:30:00+03:00"}), []bool{false, true, false, false}),
 			groups: [][]int{{1}, {3, 4}, {2}},
+			values: []interface{}{
+				toTimeData([]string{"2006-01-02T15:04:05+07:00"})[0],
+				toTimeData([]string{"2020-01-01T12:30:00+03:00"})[0],
+				nil,
+			},
 		},
 	}
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			groups := data.payload.(*timePayload).Groups()
+			groups, _ := data.payload.(*timePayload).Groups()
 
 			if !reflect.DeepEqual(groups, data.groups) {
 				t.Error(fmt.Sprintf("Groups (%v) do not match expected (%v)",
 					groups, data.groups))
+			}
+		})
+	}
+}
+
+func TestTimePayload_IsUnique(t *testing.T) {
+	testData := []struct {
+		name     string
+		payload  Payload
+		booleans []bool
+	}{
+		{
+			name: "without NA",
+			payload: TimePayload(toTimeData([]string{"2006-01-02T15:04:05+07:00", "2006-01-02T15:04:05+07:00",
+				"2020-01-01T12:30:00+03:00", "2020-01-01T12:30:00+03:00"}), nil),
+			booleans: []bool{true, false, true, false},
+		},
+		{
+			name: "with NA",
+			payload: TimePayload(toTimeData([]string{"2006-01-02T15:04:05+07:00", "2006-01-02T15:04:05+07:00",
+				"2020-01-01T12:30:00+03:00", "2020-01-01T12:30:00+03:00"}), []bool{false, true, false, false}),
+			booleans: []bool{true, true, true, false},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			booleans := data.payload.(*timePayload).IsUnique()
+
+			if !reflect.DeepEqual(booleans, data.booleans) {
+				t.Error(fmt.Sprintf("Result of IsUnique() (%v) do not match expected (%v)",
+					booleans, data.booleans))
+			}
+		})
+	}
+}
+
+func TestTimePayload_Coalesce(t *testing.T) {
+	testData := []struct {
+		name         string
+		coalescer    Payload
+		coalescendum Payload
+		outData      []time.Time
+		outNA        []bool
+	}{
+		{
+			name:         "empty",
+			coalescer:    TimePayload(nil, nil),
+			coalescendum: TimePayload([]time.Time{}, nil),
+			outData:      []time.Time{},
+			outNA:        []bool{},
+		},
+		{
+			name: "same type",
+			coalescer: TimePayload(toTimeData([]string{"2021-01-01T12:30:00+03:00", "0001-01-01T00:00:00Z", "2020-01-01T12:30:00+03:00"}),
+				[]bool{false, true, false}).(*timePayload),
+			coalescendum: TimePayload(toTimeData([]string{"2020-03-01T12:30:00+03:00", "2050-01-01T00:00:00+00:00", "2021-01-01T12:30:00+03:00"}),
+				[]bool{false, false, false}).(*timePayload),
+			outData: toTimeData([]string{"2021-01-01T12:30:00+03:00", "2050-01-01T00:00:00+00:00", "2020-01-01T12:30:00+03:00"}),
+			outNA:   []bool{false, false, false},
+		},
+		{
+			name: "same type + different size",
+			coalescer: TimePayload(toTimeData([]string{"2021-01-01T12:30:00+03:00", "0001-01-01T00:00:00Z", "2020-01-01T12:30:00+03:00"}),
+				[]bool{false, true, false}).(*timePayload),
+			coalescendum: TimePayload(toTimeData([]string{"2050-01-01T00:00:00+00:00"}), []bool{false}).(*timePayload),
+			outData:      toTimeData([]string{"2021-01-01T12:30:00+03:00", "2050-01-01T00:00:00+00:00", "2020-01-01T12:30:00+03:00"}),
+			outNA:        []bool{false, false, false},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			payload := data.coalescer.(Coalescer).Coalesce(data.coalescendum).(*timePayload)
+
+			if !reflect.DeepEqual(payload.data, data.outData) {
+				t.Error(fmt.Sprintf("Data (%v) do not match expected (%v)",
+					payload.data, data.outData))
+			}
+
+			if !reflect.DeepEqual(payload.na, data.outNA) {
+				t.Error(fmt.Sprintf("NA (%v) do not match expected (%v)",
+					payload.na, data.outNA))
 			}
 		})
 	}

@@ -23,7 +23,7 @@ type Vector interface {
 	Append(vec Vector) Vector
 	Adjust(size int) Vector
 
-	Groups() [][]int
+	Groups() ([][]int, []interface{})
 	Ungroup() Vector
 	IsGrouped() bool
 	GroupByIndices([][]int) Vector
@@ -52,6 +52,11 @@ type Vector interface {
 	Has(interface{}) bool
 	Comparable
 	Arrangeable
+
+	IsUniquer
+	Unique() Vector
+
+	Coalesce(...Vector) Vector
 
 	Options() []Option
 
@@ -136,8 +141,16 @@ type Arrangeable interface {
 	SortedIndicesWithRanks() ([]int, []int)
 }
 
-type Groupper interface {
-	Groups() [][]int
+type Grouper interface {
+	Groups() ([][]int, []interface{})
+}
+
+type IsUniquer interface {
+	IsUnique() []bool
+}
+
+type Coalescer interface {
+	Coalesce(Payload) Payload
 }
 
 // vector holds data and functions shared by all vectors
@@ -168,7 +181,7 @@ func (v *vector) ByIndices(indices []int) Vector {
 	var selected []int
 
 	for _, index := range indices {
-		if index >= 1 && index <= v.length {
+		if index >= 0 && index <= v.length {
 			selected = append(selected, index)
 		}
 	}
@@ -339,12 +352,12 @@ func (v *vector) Adjust(size int) Vector {
 	return New(newPayload, v.Options()...)
 }
 
-func (v *vector) Groups() [][]int {
-	if groupper, ok := v.payload.(Groupper); ok {
+func (v *vector) Groups() ([][]int, []interface{}) {
+	if groupper, ok := v.payload.(Grouper); ok {
 		return groupper.Groups()
 	}
 
-	return [][]int{}
+	return [][]int{incIndices(indicesArray(v.length))}, []interface{}{nil}
 }
 
 func (v *vector) IsGrouped() bool {
@@ -690,6 +703,44 @@ func (v *vector) SortedIndicesWithRanks() ([]int, []int) {
 	indices := indicesArray(v.length)
 
 	return indices, indices
+}
+
+func (v *vector) Unique() Vector {
+	if uniquer, ok := v.payload.(IsUniquer); ok {
+		return v.Filter(uniquer.IsUnique())
+	}
+
+	return v
+}
+
+func (v *vector) IsUnique() []bool {
+	if uniquer, ok := v.payload.(IsUniquer); ok {
+		return uniquer.IsUnique()
+	}
+
+	return trueBooleanArr(v.length)
+}
+
+func (v *vector) Coalesce(vectors ...Vector) Vector {
+	if len(vectors) == 0 {
+		return v
+	}
+
+	coalescer, ok := v.payload.(Coalescer)
+	if !ok {
+		return v
+	}
+
+	var payload Payload
+	for _, v := range vectors {
+		payload = coalescer.Coalesce(v.Payload())
+		coalescer, ok = payload.(Coalescer)
+		if !ok {
+			break
+		}
+	}
+
+	return New(payload, v.Options()...)
 }
 
 func (v *vector) Options() []Option {

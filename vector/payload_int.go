@@ -35,8 +35,13 @@ func (p *integerPayload) ByIndices(indices []int) Payload {
 	na := make([]bool, 0, len(indices))
 
 	for _, idx := range indices {
-		data = append(data, p.data[idx-1])
-		na = append(na, p.na[idx-1])
+		if idx == 0 {
+			data = append(data, 0)
+			na = append(na, true)
+		} else {
+			data = append(data, p.data[idx-1])
+			na = append(na, p.na[idx-1])
+		}
 	}
 
 	return IntegerPayload(data, na, p.Options()...)
@@ -356,7 +361,7 @@ func (p *integerPayload) adjustToBiggerSize(size int) Payload {
 	return IntegerPayload(data, na, p.Options()...)
 }
 
-func (p *integerPayload) Groups() [][]int {
+func (p *integerPayload) Groups() ([][]int, []interface{}) {
 	groupMap := map[int][]int{}
 	ordered := []int{}
 	na := []int{}
@@ -386,7 +391,15 @@ func (p *integerPayload) Groups() [][]int {
 		groups = append(groups, na)
 	}
 
-	return groups
+	values := make([]interface{}, len(groups))
+	for i, val := range ordered {
+		values[i] = interface{}(val)
+	}
+	if len(na) > 0 {
+		values[len(values)-1] = nil
+	}
+
+	return groups, values
 }
 
 func (p *integerPayload) StrForElem(idx int) string {
@@ -607,6 +620,65 @@ func (p *integerPayload) convertComparator(val interface{}) (int, bool) {
 	return v, ok
 }
 
+func (p *integerPayload) IsUnique() []bool {
+	booleans := make([]bool, p.length)
+
+	valuesMap := map[int]bool{}
+	wasNA := false
+	for i := 0; i < p.length; i++ {
+		is := false
+
+		if p.na[i] {
+			if !wasNA {
+				is = true
+				wasNA = true
+			}
+		} else {
+			if _, ok := valuesMap[p.data[i]]; !ok {
+				is = true
+				valuesMap[p.data[i]] = true
+			}
+		}
+
+		booleans[i] = is
+	}
+
+	return booleans
+}
+
+func (p *integerPayload) Coalesce(payload Payload) Payload {
+	if p.length != payload.Len() {
+		payload = payload.Adjust(p.length)
+	}
+
+	var srcData []int
+	var srcNA []bool
+
+	if same, ok := payload.(*integerPayload); ok {
+		srcData = same.data
+		srcNA = same.na
+	} else if intable, ok := payload.(Intable); ok {
+		srcData, srcNA = intable.Integers()
+	} else {
+		return p
+	}
+
+	dstData := make([]int, p.length)
+	dstNA := make([]bool, p.length)
+
+	for i := 0; i < p.length; i++ {
+		if p.na[i] && !srcNA[i] {
+			dstData[i] = srcData[i]
+			dstNA[i] = false
+		} else {
+			dstData[i] = p.data[i]
+			dstNA[i] = p.na[i]
+		}
+	}
+
+	return IntegerPayload(dstData, dstNA, p.Options()...)
+}
+
 func (p *integerPayload) Options() []Option {
 	return []Option{}
 }
@@ -642,12 +714,12 @@ func IntegerPayload(data []int, na []bool, _ ...Option) Payload {
 	}
 
 	payload.DefArrangeable = DefArrangeable{
-		length:   payload.length,
+		Length:   payload.length,
 		DefNAble: payload.DefNAble,
-		fnLess: func(i, j int) bool {
+		FnLess: func(i, j int) bool {
 			return payload.data[i] < payload.data[j]
 		},
-		fnEqual: func(i, j int) bool {
+		FnEqual: func(i, j int) bool {
 			return payload.data[i] == payload.data[j]
 		},
 	}
