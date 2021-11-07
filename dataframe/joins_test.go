@@ -459,5 +459,159 @@ func TestDataframe_RightJoin(t *testing.T) {
 func TestDataframe_FullJoin(t *testing.T) {
 	employee, department := getJoinDataFrames()
 
-	fmt.Println(employee.FullJoin(department, vector.OptionJoinBy("DepType")).Arrange("Name", "Title"))
+	testData := []struct {
+		name        string
+		joined      *Dataframe
+		columnNames []string
+		outColumns  []vector.Vector
+	}{
+		{
+			name:        "employee ✕ department",
+			joined:      employee.FullJoin(department, vector.OptionJoinBy("DepType")).Arrange("Name", "Title"),
+			columnNames: []string{"Name", "DepType", "Salary", "Group", "DepID", "Title", "Group_1"},
+			outColumns: []vector.Vector{
+				vector.StringWithNA([]string{
+					"Catullus", "Gera", "Hades", "Hephaestus", "Jack", "Jane", "Jane", "John", "John", "Marcia",
+					"Marcius", "Robert", "Robert", "Zeus", "",
+				}, []bool{false, false, false, false, false, false, false, false, false, false, false, false,
+					false, false, true}),
+				vector.StringWithNA([]string{
+					"logistics", "sales", "", "factory", "production", "research", "research", "research", "research",
+					"production", "production", "research", "research", "sales", "wares",
+				}, []bool{false, false, true, false, false, false, false, false, false, false, false, false,
+					false, false, false}),
+				vector.IntegerWithNA([]int{
+					100000, 150000, 175000, 150000, 80000, 110000, 110000, 120000, 120000, 60000, 90000, 140000, 140000,
+					225000, 0,
+				}, []bool{false, false, false, false, false, false, false, false, false, false, false, false,
+					false, false, true}),
+				vector.StringWithNA([]string{
+					"A", "A", "A", "B", "B", "A", "A", "A", "A", "B", "A", "B", "B", "A", "",
+				}, []bool{false, false, false, false, false, false, false, false, false, false, false, false,
+					false, false, true}),
+				vector.IntegerWithNA([]int{
+					0, 3, 6, 0, 2, 4, 1, 4, 1, 2, 2, 4, 1, 3, 5,
+				}, []bool{true, false, false, true, false, false, false, false, false, false, false, false,
+					false, false, false}),
+				vector.StringWithNA([]string{
+					"", "Sales", "Unknown", "", "Production", "Laboratory", "R&D", "Laboratory", "R&D", "Production",
+					"Production", "Laboratory", "R&D", "Sales", "Warehouse",
+				}, []bool{true, false, false, true, false, false, false, false, false, false, false, false,
+					false, false, false}),
+				vector.StringWithNA([]string{
+					"", "A", "A", "", "B", "B", "A", "B", "A", "B", "B", "B", "A", "A", "B",
+				}, []bool{true, false, false, true, false, false, false, false, false, false, false, false,
+					false, false, false}),
+			},
+		},
+		{
+			name:        "department ✕ employee",
+			joined:      department.FullJoin(employee, vector.OptionJoinBy("DepType")).Arrange("Title", "Name"),
+			columnNames: []string{"DepID", "Title", "DepType", "Group", "Name", "Salary", "Group_1"},
+			outColumns: []vector.Vector{
+				vector.IntegerWithNA([]int{
+					4, 4, 4, 2, 2, 2, 1, 1, 1, 3, 3, 6, 5, 0, 0,
+				}, []bool{false, false, false, false, false, false, false, false, false, false, false, false,
+					false, true, true}),
+				vector.StringWithNA([]string{
+					"Laboratory", "Laboratory", "Laboratory", "Production", "Production", "Production", "R&D", "R&D",
+					"R&D", "Sales", "Sales", "Unknown", "Warehouse", "", "",
+				}, []bool{false, false, false, false, false, false, false, false, false, false, false, false,
+					false, true, true}),
+				vector.StringWithNA([]string{
+					"research", "research", "research", "production", "production", "production", "research",
+					"research", "research", "sales", "sales", "", "wares", "logistics", "factory",
+				}, []bool{false, false, false, false, false, false, false, false, false, false, false, true,
+					false, false, false}),
+				vector.StringWithNA([]string{
+					"B", "B", "B", "B", "B", "B", "A", "A", "A", "A", "A", "A", "B", "", "",
+				}, []bool{false, false, false, false, false, false, false, false, false, false, false, false,
+					false, true, true}),
+				vector.StringWithNA([]string{
+					"Jane", "John", "Robert", "Jack", "Marcia", "Marcius", "Jane", "John", "Robert", "Gera", "Zeus",
+					"Hades", "", "Catullus", "Hephaestus",
+				}, []bool{false, false, false, false, false, false, false, false, false, false, false, false,
+					true, false, false}),
+				vector.IntegerWithNA([]int{
+					110000, 120000, 140000, 80000, 60000, 90000, 110000, 120000, 140000, 150000, 225000, 175000, 0,
+					100000, 150000,
+				}, []bool{false, false, false, false, false, false, false, false, false, false, false, false,
+					true, false, false}),
+				vector.StringWithNA([]string{
+					"A", "A", "B", "B", "B", "A", "A", "A", "B", "A", "A", "A", "", "A", "B",
+				}, []bool{false, false, false, false, false, false, false, false, false, false, false, false,
+					true, false, false}),
+			},
+		},
+		{
+			name:        "employee ✕ department by group",
+			joined:      employee.FullJoin(department, vector.OptionJoinBy("Group", "DepType")).Arrange("Name", "Title"),
+			columnNames: []string{"Name", "DepType", "Salary", "Group", "DepID", "Title"},
+			outColumns: []vector.Vector{
+				vector.StringWithNA([]string{
+					"Catullus", "Gera", "Hades", "Hephaestus", "Jack", "Jane", "John", "Marcia", "Marcius", "Robert",
+					"Zeus", "",
+				}, []bool{false, false, false, false, false, false, false, false, false, false, false, true}),
+				vector.StringWithNA([]string{
+					"logistics", "sales", "", "factory", "production", "research", "research", "production",
+					"production", "research", "sales", "wares",
+				}, []bool{false, false, true, false, false, false, false, false, false, false, false, false}),
+				vector.IntegerWithNA([]int{
+					100000, 150000, 175000, 150000, 80000, 110000, 120000, 60000, 90000, 140000, 225000, 0,
+				}, []bool{false, false, false, false, false, false, false, false, false, false, false, true}),
+				vector.String([]string{
+					"A", "A", "A", "B", "B", "A", "A", "B", "A", "B", "A", "B",
+				}),
+				vector.IntegerWithNA([]int{
+					0, 3, 6, 0, 2, 1, 1, 2, 0, 4, 3, 5,
+				}, []bool{true, false, false, true, false, false, false, false, true, false, false, false}),
+				vector.StringWithNA([]string{
+					"", "Sales", "Unknown", "", "Production", "R&D", "R&D", "Production", "", "Laboratory", "Sales",
+					"Warehouse",
+				}, []bool{true, false, false, true, false, false, false, false, true, false, false, false}),
+			},
+		},
+		{
+			name:        "department ✕ employee by group",
+			joined:      department.FullJoin(employee, vector.OptionJoinBy("Group", "DepType")).Arrange("Title", "Name"),
+			columnNames: []string{"DepID", "Title", "DepType", "Group", "Name", "Salary"},
+			outColumns: []vector.Vector{
+				vector.IntegerWithNA([]int{
+					4, 2, 2, 1, 1, 3, 3, 6, 5, 0, 0, 0,
+				}, []bool{false, false, false, false, false, false, false, false, false, true, true, true}),
+				vector.StringWithNA([]string{
+					"Laboratory", "Production", "Production", "R&D", "R&D", "Sales", "Sales", "Unknown", "Warehouse",
+					"", "", "",
+				}, []bool{false, false, false, false, false, false, false, false, false, true, true, true}),
+				vector.StringWithNA([]string{
+					"research", "production", "production", "research", "research", "sales", "sales", "", "wares",
+					"logistics", "factory", "production",
+				}, []bool{false, false, false, false, false, false, false, true, false, false, false, false}),
+				vector.String([]string{
+					"B", "B", "B", "A", "A", "A", "A", "A", "B", "A", "B", "A",
+				}),
+				vector.StringWithNA([]string{
+					"Robert", "Jack", "Marcia", "Jane", "John", "Gera", "Zeus", "Hades", "", "Catullus", "Hephaestus",
+					"Marcius",
+				}, []bool{false, false, false, false, false, false, false, false, true, false, false, false}),
+				vector.IntegerWithNA([]int{
+					140000, 80000, 60000, 110000, 120000, 150000, 225000, 175000, 0, 100000, 150000, 90000,
+				}, []bool{false, false, false, false, false, false, false, false, true, false, false, false}),
+			},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			if !reflect.DeepEqual(data.joined.columnNames, data.columnNames) {
+				t.Error(fmt.Sprintf("Column namess (%v) are not equal to expected (%v)\n",
+					data.joined.columnNames, data.columnNames))
+			}
+
+			if !vector.CompareVectorArrs(data.joined.columns, data.outColumns) {
+				t.Error(fmt.Sprintf("Columns (%v) are not equal to expected (%v)\n",
+					data.joined.columns, data.outColumns))
+			}
+		})
+	}
 }
