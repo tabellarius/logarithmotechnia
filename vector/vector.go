@@ -52,6 +52,7 @@ type Vector interface {
 	Has(interface{}) bool
 	Comparable
 	Arrangeable
+	Factorable
 
 	IsUniquer
 	Unique() Vector
@@ -151,6 +152,11 @@ type IsUniquer interface {
 
 type Coalescer interface {
 	Coalesce(Payload) Payload
+}
+
+type Factorable interface {
+	Levels() []string
+	HasLevel(string) bool
 }
 
 // vector holds data and functions shared by all vectors
@@ -409,8 +415,6 @@ func (v *vector) NotNA() []bool {
 	return notNA
 }
 
-/* Not Applicable-related */
-
 func (v *vector) HasNA() bool {
 	if nable, ok := v.payload.(NAble); ok {
 		return nable.HasNA()
@@ -418,6 +422,8 @@ func (v *vector) HasNA() bool {
 
 	return false
 }
+
+/* Not Applicable-related */
 
 func (v *vector) WithNA() []int {
 	if nable, ok := v.payload.(NAble); ok {
@@ -604,8 +610,6 @@ func (v *vector) Transform(fn TransformFunc) Vector {
 	return NA(v.length)
 }
 
-/* Finder interface */
-
 func (v *vector) Find(needle interface{}) int {
 	if finder, ok := v.payload.(Finder); ok {
 		return finder.Find(needle)
@@ -613,6 +617,8 @@ func (v *vector) Find(needle interface{}) int {
 
 	return 0
 }
+
+/* Finder interface */
 
 func (v *vector) FindAll(needle interface{}) []int {
 	if finder, ok := v.payload.(Finder); ok {
@@ -630,8 +636,6 @@ func (v *vector) Has(needle interface{}) bool {
 	return false
 }
 
-/* Comparable interface */
-
 func (v *vector) Eq(val interface{}) []bool {
 	if comparable, ok := v.payload.(Comparable); ok {
 		return comparable.Eq(val)
@@ -639,6 +643,8 @@ func (v *vector) Eq(val interface{}) []bool {
 
 	return make([]bool, v.length)
 }
+
+/* Comparable interface */
 
 func (v *vector) Neq(val interface{}) []bool {
 	if comparable, ok := v.payload.(Comparable); ok {
@@ -685,8 +691,6 @@ func (v *vector) Lte(val interface{}) []bool {
 	return make([]bool, v.length)
 }
 
-/* Arrangeable interface */
-
 func (v *vector) SortedIndices() []int {
 	if arrangeable, ok := v.payload.(Arrangeable); ok {
 		return arrangeable.SortedIndices()
@@ -694,6 +698,8 @@ func (v *vector) SortedIndices() []int {
 
 	return indicesArray(v.length)
 }
+
+/* Arrangeable interface */
 
 func (v *vector) SortedIndicesWithRanks() ([]int, []int) {
 	if arrangeable, ok := v.payload.(Arrangeable); ok {
@@ -741,6 +747,22 @@ func (v *vector) Coalesce(vectors ...Vector) Vector {
 	}
 
 	return New(payload, v.Options()...)
+}
+
+func (v *vector) Levels() []string {
+	if factorable, ok := v.payload.(Factorable); ok {
+		return factorable.Levels()
+	}
+
+	return nil
+}
+
+func (v *vector) HasLevel(level string) bool {
+	if factorable, ok := v.payload.(Factorable); ok {
+		return factorable.HasLevel(level)
+	}
+
+	return false
 }
 
 func (v *vector) Options() []Option {

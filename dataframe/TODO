@@ -1,8 +1,9 @@
+IsGroupedBy(string)
 Distinct()
 Select - OptionRemoveColumns()
 (?) Select by func
-(?) Rework dataframe creation
 Move config to dataframe
 Loading from CSV
 Rename - support for []string{"from", "to"}
-Mutate must accept single Column{} as well
+Mutate should accept single Column{} as well
+Mutate should accept map[string]Vector

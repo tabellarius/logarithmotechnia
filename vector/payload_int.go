@@ -417,7 +417,7 @@ func (p *integerPayload) Find(needle interface{}) int {
 	}
 
 	for i, datum := range p.data {
-		if val == datum {
+		if !p.na[i] && val == datum {
 			return i + 1
 		}
 	}
@@ -435,7 +435,7 @@ func (p *integerPayload) FindAll(needle interface{}) []int {
 
 	found := []int{}
 	for i, datum := range p.data {
-		if val == datum {
+		if !p.na[i] && val == datum {
 			found = append(found, i+1)
 		}
 	}
@@ -565,7 +565,6 @@ func (p *integerPayload) Lte(val interface{}) []bool {
 
 func (p *integerPayload) convertComparator(val interface{}) (int, bool) {
 	var v int
-	var err error
 	ok := true
 	switch val.(type) {
 	case int:
@@ -578,11 +577,6 @@ func (p *integerPayload) convertComparator(val interface{}) (int, bool) {
 		v = int(val.(uint64))
 	case uint32:
 		v = int(val.(uint32))
-	case string:
-		v, err = strconv.Atoi(val.(string))
-		if err != nil {
-			ok = false
-		}
 	case complex128:
 		ip := imag(val.(complex128))
 		rp, fp := math.Modf(real(val.(complex128)))
