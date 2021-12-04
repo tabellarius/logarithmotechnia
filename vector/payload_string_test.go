@@ -182,19 +182,19 @@ func TestStringPayload_Integers(t *testing.T) {
 			in:    []string{"1", "3", "", "100", ""},
 			inNA:  []bool{false, false, false, false, false},
 			out:   []int{1, 3, 0, 100, 0},
-			outNA: []bool{false, false, false, false, false},
+			outNA: []bool{false, false, true, false, true},
 		},
 		{
 			in:    []string{"10", "", "12", "14", "1110"},
 			inNA:  []bool{false, false, false, true, true},
 			out:   []int{10, 0, 12, 0, 0},
-			outNA: []bool{false, false, false, true, true},
+			outNA: []bool{false, true, false, true, true},
 		},
 		{
 			in:    []string{"1", "3", "", "100", "", "-11", "-10"},
 			inNA:  []bool{false, false, false, false, false, false, true},
 			out:   []int{1, 3, 0, 100, 0, -11, 0},
-			outNA: []bool{false, false, false, false, false, false, true},
+			outNA: []bool{false, false, true, false, true, false, true},
 		},
 	}
 
@@ -224,20 +224,20 @@ func TestStringPayload_Floats(t *testing.T) {
 		{
 			in:    []string{"1", "3", "", "100", ""},
 			inNA:  []bool{false, false, false, false, false},
-			out:   []float64{1, 3, 0, 100, 0},
-			outNA: []bool{false, false, false, false, false},
+			out:   []float64{1, 3, math.NaN(), 100, math.NaN()},
+			outNA: []bool{false, false, true, false, true},
 		},
 		{
 			in:    []string{"10", "", "12", "14", "1110"},
 			inNA:  []bool{false, false, false, true, true},
-			out:   []float64{10, 0, 12, math.NaN(), math.NaN()},
-			outNA: []bool{false, false, false, true, true},
+			out:   []float64{10, math.NaN(), 12, math.NaN(), math.NaN()},
+			outNA: []bool{false, true, false, true, true},
 		},
 		{
 			in:    []string{"1", "3", "", "100", "", "-11", "-10"},
 			inNA:  []bool{false, false, false, false, false, false, true},
-			out:   []float64{1, 3, 0, 100, 0, -11, math.NaN()},
-			outNA: []bool{false, false, false, false, false, false, true},
+			out:   []float64{1, 3, math.NaN(), 100, math.NaN(), -11, math.NaN()},
+			outNA: []bool{false, false, true, false, true, false, true},
 		},
 	}
 
@@ -278,7 +278,7 @@ func TestStringPayload_Complexes(t *testing.T) {
 			in:    []string{"1+1i", "3-3i", "0", "100 + 50i", "0+0i"},
 			inNA:  []bool{false, false, false, false, false},
 			out:   []complex128{1 + 1i, 3 - 3i, 0 + 0i, cmplx.NaN(), 0 + 0i},
-			outNA: []bool{false, false, false, false, false},
+			outNA: []bool{false, false, false, true, false},
 		},
 		{
 			in:    []string{"10+10i", "0", "12+6i", "14+7i", "1110+0i"},
@@ -886,13 +886,9 @@ func TestStringPayload_Eq(t *testing.T) {
 	}{
 		{"2", []bool{true, false, false, true, false}},
 		{"zero", []bool{false, true, false, false, false}},
-		{2, []bool{true, false, false, true, false}},
-
-		{int64(1), []bool{false, false, false, false, true}},
-		{int32(1), []bool{false, false, false, false, true}},
-		{uint64(1), []bool{false, false, false, false, true}},
-		{uint32(1), []bool{false, false, false, false, true}},
-
+		{2, []bool{false, false, false, false, false}},
+		{int64(1), []bool{false, false, false, false, false}},
+		{int32(1), []bool{false, false, false, false, false}},
 		{true, []bool{false, false, false, false, false}},
 	}
 
@@ -917,13 +913,9 @@ func TestStringPayload_Neq(t *testing.T) {
 		cmp []bool
 	}{
 		{"2", []bool{false, true, true, false, true}},
-		{2, []bool{false, true, true, false, true}},
-
-		{int64(1), []bool{true, true, true, true, false}},
-		{int32(1), []bool{true, true, true, true, false}},
-		{uint64(1), []bool{true, true, true, true, false}},
-		{uint32(1), []bool{true, true, true, true, false}},
-
+		{2, []bool{true, true, true, true, true}},
+		{int64(1), []bool{true, true, true, true, true}},
+		{int32(1), []bool{true, true, true, true, true}},
 		{true, []bool{true, true, true, true, true}},
 	}
 

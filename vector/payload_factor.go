@@ -3,6 +3,7 @@ package vector
 import (
 	"math"
 	"math/cmplx"
+	"sort"
 	"strconv"
 )
 
@@ -205,6 +206,33 @@ func (p *factorPayload) applyToStringByCompactFunc(applyFunc StringToStringAppli
 	}
 
 	return StringPayload(data, na, p.Options()...)
+}
+
+func (p *factorPayload) SupportsSummarizer(summarizer interface{}) bool {
+	if _, ok := summarizer.(StringSummarizerFunc); ok {
+		return true
+	}
+
+	return false
+}
+
+func (p *factorPayload) Summarize(summarizer interface{}) Payload {
+	fn, ok := summarizer.(StringSummarizerFunc)
+	if !ok {
+		return NAPayload(1)
+	}
+
+	val := ""
+	na := false
+	for i := 0; i < p.length; i++ {
+		val, na = fn(i+1, val, p.levels[p.data[i]], p.data[i] == 0)
+
+		if na {
+			return NAPayload(1)
+		}
+	}
+
+	return StringPayload([]string{val}, nil, p.Options()...)
 }
 
 func (p *factorPayload) Integers() ([]int, []bool) {
@@ -591,23 +619,100 @@ func (p *factorPayload) convertComparator(val interface{}) (string, bool) {
 }
 
 func (p *factorPayload) Groups() ([][]int, []interface{}) {
-	panic("implement me")
-}
+	groupMap := map[uint32][]int{}
+	ordered := []uint32{}
+	na := []int{}
 
-func (p *factorPayload) SortedIndices() []int {
-	panic("implement me")
-}
+	for i, val := range p.data {
+		idx := i + 1
 
-func (p *factorPayload) SortedIndicesWithRanks() ([]int, []int) {
-	panic("implement me")
+		if val == 0 {
+			na = append(na, idx)
+			continue
+		}
+
+		if _, ok := groupMap[val]; !ok {
+			groupMap[val] = []int{}
+			ordered = append(ordered, val)
+		}
+
+		groupMap[val] = append(groupMap[val], idx)
+	}
+
+	groups := make([][]int, len(ordered))
+	for i, val := range ordered {
+		groups[i] = groupMap[val]
+	}
+
+	if len(na) > 0 {
+		groups = append(groups, na)
+	}
+
+	values := make([]interface{}, len(groups))
+	for i, val := range ordered {
+		values[i] = interface{}(p.levels[val])
+	}
+	if len(na) > 0 {
+		values[len(values)-1] = nil
+	}
+
+	return groups, values
 }
 
 func (p *factorPayload) IsUnique() []bool {
-	panic("implement me")
+	booleans := make([]bool, p.length)
+
+	valuesMap := map[uint32]bool{}
+	wasNA := false
+	for i := 0; i < p.length; i++ {
+		is := false
+
+		if p.data[i] == 0 {
+			if !wasNA {
+				is = true
+				wasNA = true
+			}
+		} else {
+			if _, ok := valuesMap[p.data[i]]; !ok {
+				is = true
+				valuesMap[p.data[i]] = true
+			}
+		}
+
+		booleans[i] = is
+	}
+
+	return booleans
 }
 
 func (p *factorPayload) Coalesce(payload Payload) Payload {
-	panic("implement me")
+	if p.length != payload.Len() {
+		payload = payload.Adjust(p.length)
+	}
+
+	var srcData []string
+	var srcNA []bool
+
+	if stringable, ok := payload.(Stringable); ok {
+		srcData, srcNA = stringable.Strings()
+	} else {
+		return p
+	}
+
+	dstData := make([]string, p.length)
+	dstNA := make([]bool, p.length)
+
+	for i := 0; i < p.length; i++ {
+		if p.data[i] == 0 && !srcNA[i] {
+			dstData[i] = srcData[i]
+			dstNA[i] = false
+		} else {
+			dstData[i] = p.levels[p.data[i]]
+			dstNA[i] = p.data[i] == 0
+		}
+	}
+
+	return StringPayload(dstData, dstNA, p.Options()...)
 }
 
 func (p *factorPayload) Level(val string) int {
@@ -620,6 +725,70 @@ func (p *factorPayload) Level(val string) int {
 	}
 
 	return level
+}
+
+func (p *factorPayload) SortedIndices() []int {
+	return incIndices(p.sortedIndices())
+}
+
+func (p *factorPayload) sortedIndices() []int {
+	indices := indicesArray(p.length)
+
+	var fn func(i, j int) bool
+	if p.HasNA() {
+		fn = func(i, j int) bool {
+			if p.data[indices[i]] == 0 && p.data[indices[j]] == 0 {
+				return i < j
+			}
+
+			if p.data[indices[i]] == 0 {
+				return false
+			}
+
+			if p.data[indices[j]] == 0 {
+				return true
+			}
+
+			return p.levels[p.data[indices[i]]] < p.levels[p.data[indices[j]]]
+		}
+	} else {
+		fn = func(i, j int) bool {
+			return p.levels[p.data[indices[i]]] < p.levels[p.data[indices[j]]]
+		}
+	}
+
+	sort.Slice(indices, fn)
+
+	return indices
+}
+
+func (p *factorPayload) SortedIndicesWithRanks() ([]int, []int) {
+	indices := p.sortedIndices()
+
+	if len(indices) == 0 {
+		return indices, []int{}
+	}
+
+	if len(indices) == 1 {
+		return indices, []int{1}
+	}
+
+	rank := 1
+	ranks := make([]int, p.length)
+	if p.data[0] == 0 {
+		rank = 0
+	}
+	ranks[0] = rank
+	for i := 1; i < p.length; i++ {
+		if p.data[i] != p.data[i-1] {
+			rank++
+			ranks[i] = rank
+		} else {
+			ranks[i] = rank
+		}
+	}
+
+	return incIndices(indices), ranks
 }
 
 func (p *factorPayload) StrForElem(idx int) string {
@@ -672,4 +841,12 @@ func FactorPayload(data []string, na []bool, options ...Option) Payload {
 	}
 
 	return factorPayloadFromFactorData(vecData, vecLevels, options...)
+}
+
+func FactorWithNA(data []string, na []bool, options ...Option) Vector {
+	return New(FactorPayload(data, na, options...), options...)
+}
+
+func Factor(data []string, options ...Option) Vector {
+	return FactorWithNA(data, nil, options...)
 }

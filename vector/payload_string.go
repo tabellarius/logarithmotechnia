@@ -216,7 +216,7 @@ func (p *stringPayload) Floats() ([]float64, []bool) {
 		} else {
 			num, err := strconv.ParseFloat(p.data[i], 64)
 			if err != nil {
-				data[i] = 0
+				data[i] = math.NaN()
 				na[i] = true
 			} else {
 				data[i] = num
