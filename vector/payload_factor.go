@@ -27,7 +27,7 @@ func (p *factorPayload) Len() int {
 }
 
 func (p *factorPayload) ByIndices(indices []int) Payload {
-	data := make([]uint32, 0, len(indices))
+	data := make([]uint32, len(indices))
 
 	for i, idx := range indices {
 		if idx == 0 {

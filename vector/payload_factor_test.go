@@ -238,3 +238,104 @@ func TestFactorPayload_Len(t *testing.T) {
 		})
 	}
 }
+
+func TestFactorPayload_ByIndices(t *testing.T) {
+	srcPayload := FactorPayload([]string{"one", "two", "two", "three", "one"}, []bool{false, false, false, false, true})
+
+	testData := []struct {
+		name    string
+		indices []int
+		levels  []string
+		out     []uint32
+		outNA   []bool
+	}{
+		{
+			name:    "all",
+			indices: []int{1, 2, 3, 4, 5},
+			levels:  []string{"", "one", "two", "three"},
+			out:     []uint32{1, 2, 2, 3, 0},
+		},
+		{
+			name:    "all reverse",
+			indices: []int{5, 4, 3, 2, 1},
+			levels:  []string{"", "one", "two", "three"},
+			out:     []uint32{0, 3, 2, 2, 1},
+		},
+		{
+			name:    "some",
+			indices: []int{5, 1, 3},
+			levels:  []string{"", "one", "two", "three"},
+			out:     []uint32{0, 1, 2},
+		},
+		{
+			name:    "with zero",
+			indices: []int{5, 1, 0, 3},
+			levels:  []string{"", "one", "two", "three"},
+			out:     []uint32{0, 1, 0, 2},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			payload := srcPayload.ByIndices(data.indices).(*factorPayload)
+
+			if !reflect.DeepEqual(payload.data, data.out) {
+				t.Error(fmt.Sprintf("payload.data (%v) is not equal to data.out (%v)", payload.data, data.out))
+			}
+
+			if !reflect.DeepEqual(payload.levels, data.levels) {
+				t.Error(fmt.Sprintf("payload.levels (%v) is not equal to data.levels (%v)", payload.data, data.out))
+			}
+		})
+	}
+}
+
+func TestFactorPayload_Adjust(t *testing.T) {
+	payload5 := FactorPayload([]string{"one", "two", "two", "three", "one"}, nil)
+	payload3 := FactorPayload([]string{"one", "two", "two"}, []bool{false, false, true})
+
+	testData := []struct {
+		name      string
+		inPayload Payload
+		size      int
+		outLevels []string
+		outData   []uint32
+	}{
+		{
+			inPayload: payload5,
+			name:      "same",
+			size:      5,
+			outLevels: []string{"", "one", "two", "three"},
+			outData:   []uint32{1, 2, 2, 3, 1},
+		},
+		{
+			inPayload: payload5,
+			name:      "lesser",
+			size:      3,
+			outLevels: []string{"", "one", "two", "three"},
+			outData:   []uint32{1, 2, 2},
+		},
+		{
+			inPayload: payload3,
+			name:      "bigger",
+			size:      10,
+			outLevels: []string{"", "one", "two"},
+			outData:   []uint32{1, 2, 0, 1, 2, 0, 1, 2, 0, 1},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			outPayload := data.inPayload.Adjust(data.size).(*factorPayload)
+
+			if !reflect.DeepEqual(outPayload.data, data.outData) {
+				t.Error(fmt.Sprintf("Output data (%v) does not match expected (%v)",
+					outPayload.data, data.outData))
+			}
+			if !reflect.DeepEqual(outPayload.levels, data.outLevels) {
+				t.Error(fmt.Sprintf("Output levels (%v) do not match expected (%v)",
+					outPayload.levels, data.outLevels))
+			}
+		})
+	}
+}
