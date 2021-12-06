@@ -86,6 +86,16 @@ func (p *factorPayload) Append(payload Payload) Payload {
 
 	var appVals []string
 	var appNA []bool
+	factor, isFactor := payload.(*factorPayload)
+
+	if isFactor && p.IsSameLevels(factor) {
+		newData := make([]uint32, length)
+
+		copy(newData, p.data)
+		copy(newData[p.length:], factor.data)
+
+		return factorPayloadFromFactorData(newData, p.levels, p.Options()...)
+	}
 
 	if stringable, ok := payload.(Stringable); ok {
 		appVals, appNA = stringable.Strings()
@@ -789,6 +799,40 @@ func (p *factorPayload) SortedIndicesWithRanks() ([]int, []int) {
 	}
 
 	return incIndices(indices), ranks
+}
+
+func (p *factorPayload) Levels() []string {
+	levels := make([]string, len(p.levels))
+
+	copy(levels, p.levels)
+
+	return levels
+}
+
+func (p *factorPayload) HasLevel(level string) bool {
+	for _, lvl := range p.levels {
+		if level == lvl {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (p *factorPayload) IsSameLevels(factor Factorable) bool {
+	levels := factor.Levels()
+
+	if len(p.levels) != len(levels) {
+		return false
+	}
+
+	for i := 0; i < len(p.levels); i++ {
+		if p.levels[i] != levels[i] {
+			return false
+		}
+	}
+
+	return true
 }
 
 func (p *factorPayload) StrForElem(idx int) string {

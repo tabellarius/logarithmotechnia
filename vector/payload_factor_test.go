@@ -339,3 +339,44 @@ func TestFactorPayload_Adjust(t *testing.T) {
 		})
 	}
 }
+
+func TestFactorPayload_Append(t *testing.T) {
+	srcPayload := FactorPayload([]string{"one", "two", "two"}, []bool{false, false, true})
+
+	var testData = []struct {
+		name      string
+		inPayload Payload
+		levels    []string
+		data      []uint32
+	}{
+		{
+			name:      "append similar factor",
+			inPayload: FactorPayload([]string{"one", "two", "one"}, nil),
+			levels:    []string{"", "one", "two"},
+			data:      []uint32{1, 2, 0, 1, 2, 1},
+		},
+		{
+			name:      "append non-similar factor",
+			inPayload: FactorPayload([]string{"one", "three", "one"}, nil),
+			levels:    []string{"", "one", "two", "three"},
+			data:      []uint32{1, 2, 0, 1, 3, 1},
+		},
+	}
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			outPayload := srcPayload.Append(data.inPayload)
+
+			payload := outPayload.(*factorPayload)
+
+			if !reflect.DeepEqual(payload.data, data.data) {
+				t.Error(fmt.Sprintf("Factor data (%v) does not match expected (%v)",
+					payload.data, data.data))
+			}
+
+			if !reflect.DeepEqual(payload.levels, data.levels) {
+				t.Error(fmt.Sprintf("Factor levels (%v) do not match expected (%v)",
+					payload.levels, data.levels))
+			}
+		})
+	}
+}

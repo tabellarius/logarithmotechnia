@@ -157,6 +157,7 @@ type Coalescer interface {
 type Factorable interface {
 	Levels() []string
 	HasLevel(string) bool
+	IsSameLevels(factor Factorable) bool
 }
 
 // vector holds data and functions shared by all vectors
@@ -760,6 +761,14 @@ func (v *vector) Levels() []string {
 func (v *vector) HasLevel(level string) bool {
 	if factorable, ok := v.payload.(Factorable); ok {
 		return factorable.HasLevel(level)
+	}
+
+	return false
+}
+
+func (v *vector) IsSameLevels(factor Factorable) bool {
+	if factorable, ok := v.payload.(Factorable); ok {
+		return factorable.IsSameLevels(factor)
 	}
 
 	return false
