@@ -2,7 +2,10 @@ package vector
 
 import (
 	"fmt"
+	"math"
+	"math/cmplx"
 	"reflect"
+	"strconv"
 	"testing"
 )
 
@@ -376,6 +379,518 @@ func TestFactorPayload_Append(t *testing.T) {
 			if !reflect.DeepEqual(payload.levels, data.levels) {
 				t.Error(fmt.Sprintf("Factor levels (%v) do not match expected (%v)",
 					payload.levels, data.levels))
+			}
+		})
+	}
+}
+
+func TestFactorPayload_SupportsWhicher(t *testing.T) {
+	testData := []struct {
+		name        string
+		filter      interface{}
+		isSupported bool
+	}{
+		{
+			name:        "func(int, string, bool) bool",
+			filter:      func(int, string, bool) bool { return true },
+			isSupported: true,
+		},
+		{
+			name:        "func(string, bool) bool",
+			filter:      func(string, bool) bool { return true },
+			isSupported: true,
+		},
+		{
+			name:        "func(int, float64, bool) bool",
+			filter:      func(int, float64, bool) bool { return true },
+			isSupported: false,
+		},
+	}
+
+	payload := FactorPayload([]string{"one"}, nil).(Whichable)
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			if payload.SupportsWhicher(data.filter) != data.isSupported {
+				t.Error("Selector's support is incorrect.")
+			}
+		})
+	}
+}
+
+func TestFactorPayload_Whicher(t *testing.T) {
+	testData := []struct {
+		name string
+		fn   interface{}
+		out  []bool
+	}{
+		{
+			name: "Odd",
+			fn:   func(idx int, _ string, _ bool) bool { return idx%2 == 1 },
+			out:  []bool{true, false, true, false, true, false, true, false, true, false},
+		},
+		{
+			name: "Even",
+			fn:   func(idx int, _ string, _ bool) bool { return idx%2 == 0 },
+			out:  []bool{false, true, false, true, false, true, false, true, false, true},
+		},
+		{
+			name: "func(_ int, val string, _ bool) bool {return val == 2}",
+			fn:   func(_ int, val string, _ bool) bool { return val == "2" },
+			out:  []bool{false, true, false, false, false, true, false, false, false, false},
+		},
+		{
+			name: "Comparer compact",
+			fn:   func(val string, _ bool) bool { return val == "39" || val == "90" },
+			out:  []bool{false, false, true, false, false, false, false, true, false, false},
+		},
+		{
+			name: "func() bool {return true}",
+			fn:   func() bool { return true },
+			out:  []bool{false, false, false, false, false, false, false, false, false, false},
+		},
+	}
+
+	payload := FactorPayload([]string{"1", "2", "39", "4", "56", "2", "45", "90", "4", "3"}, nil).(Whichable)
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			result := payload.Which(data.fn)
+			if !reflect.DeepEqual(result, data.out) {
+				t.Error(fmt.Sprintf("Result (%v) is not equal to out (%v)", result, data.out))
+			}
+		})
+	}
+}
+
+func TestFactorPayload_SupportsApplier(t *testing.T) {
+	testData := []struct {
+		name        string
+		applier     interface{}
+		isSupported bool
+	}{
+		{
+			name:        "func(int, string, bool) (string, bool)",
+			applier:     func(int, string, bool) (string, bool) { return "", true },
+			isSupported: true,
+		},
+		{
+			name:        "func(string, bool) (string, bool)",
+			applier:     func(string, bool) (string, bool) { return "", true },
+			isSupported: true,
+		},
+		{
+			name:        "func(int, string, bool) bool",
+			applier:     func(int, string, bool) bool { return true },
+			isSupported: false,
+		},
+	}
+
+	payload := FactorPayload([]string{}, nil).(Appliable)
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			if payload.SupportsApplier(data.applier) != data.isSupported {
+				t.Error("Applier's support is incorrect.")
+			}
+		})
+	}
+}
+
+func TestFactorPayload_Apply(t *testing.T) {
+	testData := []struct {
+		name        string
+		applier     interface{}
+		dataIn      []string
+		naIn        []bool
+		dataOut     []string
+		naOut       []bool
+		isNAPayload bool
+	}{
+		{
+			name: "regular",
+			applier: func(_ int, val string, na bool) (string, bool) {
+				return fmt.Sprintf("%s.%s", val, val), na
+			},
+			dataIn:      []string{"1", "9", "3", "5", "7"},
+			naIn:        []bool{false, true, false, true, false},
+			dataOut:     []string{"1.1", "", "3.3", "", "7.7"},
+			naOut:       []bool{false, true, false, true, false},
+			isNAPayload: false,
+		},
+		{
+			name: "regular compact",
+			applier: func(val string, na bool) (string, bool) {
+				return fmt.Sprintf("%s.%s", val, val), na
+			},
+			dataIn:      []string{"1", "9", "3", "5", "7"},
+			naIn:        []bool{false, true, false, true, false},
+			dataOut:     []string{"1.1", "", "3.3", "", "7.7"},
+			naOut:       []bool{false, true, false, true, false},
+			isNAPayload: false,
+		},
+		{
+			name: "manipulate na",
+			applier: func(idx int, val string, na bool) (string, bool) {
+				if idx == 5 {
+					return "1", true
+				}
+				return val, na
+			},
+			dataIn:      []string{"1", "2", "3", "4", "5"},
+			naIn:        []bool{false, false, true, false, false},
+			dataOut:     []string{"1", "2", "", "4", ""},
+			naOut:       []bool{false, false, true, false, true},
+			isNAPayload: false,
+		},
+		{
+			name:        "incorrect applier",
+			applier:     func(int, string, bool) bool { return true },
+			dataIn:      []string{"1", "9", "3", "5", "7"},
+			naIn:        []bool{false, true, false, true, false},
+			dataOut:     []string{"", "", "", "", ""},
+			naOut:       []bool{true, true, true, true, true},
+			isNAPayload: true,
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			payload := FactorPayload(data.dataIn, data.naIn).(Appliable).Apply(data.applier)
+
+			if !data.isNAPayload {
+				payloadOut := payload.(*stringPayload)
+				if !reflect.DeepEqual(data.dataOut, payloadOut.data) {
+					t.Error(fmt.Sprintf("Output data (%v) does not match expected (%v)",
+						payloadOut.data, data.dataOut))
+				}
+				if !reflect.DeepEqual(data.naOut, payloadOut.na) {
+					t.Error(fmt.Sprintf("Output NA (%v) does not match expected (%v)",
+						payloadOut.na, data.naOut))
+				}
+			} else {
+				_, ok := payload.(*naPayload)
+				if !ok {
+					t.Error("Payload is not NA")
+				}
+			}
+		})
+	}
+}
+
+func TestFactorPayload_SupportsSummarizer(t *testing.T) {
+	testData := []struct {
+		name        string
+		summarizer  interface{}
+		isSupported bool
+	}{
+		{
+			name:        "valid",
+			summarizer:  func(int, string, string, bool) (string, bool) { return "", false },
+			isSupported: true,
+		},
+		{
+			name:        "invalid",
+			summarizer:  func(int, int, bool) bool { return true },
+			isSupported: false,
+		},
+	}
+
+	payload := StringWithNA([]string{}, nil).(*vector).payload.(Summarizable)
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			if payload.SupportsSummarizer(data.summarizer) != data.isSupported {
+				t.Error("Summarizer's support is incorrect.")
+			}
+		})
+	}
+}
+
+func TestFactorPayload_Summarize(t *testing.T) {
+	summarizer := func(idx int, prev string, cur string, na bool) (string, bool) {
+		return prev + cur, na
+	}
+
+	testData := []struct {
+		name        string
+		summarizer  interface{}
+		dataIn      []string
+		naIn        []bool
+		dataOut     []string
+		naOut       []bool
+		isNAPayload bool
+	}{
+		{
+			name:        "true",
+			summarizer:  summarizer,
+			dataIn:      []string{"1", "2", "1", "6", "5"},
+			naIn:        []bool{false, false, false, false, false},
+			dataOut:     []string{"12165"},
+			naOut:       []bool{false},
+			isNAPayload: false,
+		},
+		{
+			name:        "NA",
+			summarizer:  summarizer,
+			dataIn:      []string{"1", "2", "1", "6", "5"},
+			naIn:        []bool{false, false, false, false, true},
+			isNAPayload: true,
+		},
+		{
+			name:        "incorrect applier",
+			summarizer:  func(int, int, bool) bool { return true },
+			dataIn:      []string{"1", "2", "1", "6", "5"},
+			naIn:        []bool{false, true, false, true, false},
+			isNAPayload: true,
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			payload := StringWithNA(data.dataIn, data.naIn).(*vector).payload.(Summarizable).Summarize(data.summarizer)
+
+			if !data.isNAPayload {
+				payloadOut := payload.(*stringPayload)
+				if !reflect.DeepEqual(data.dataOut, payloadOut.data) {
+					t.Error(fmt.Sprintf("Output data (%v) does not match expected (%v)",
+						data.dataOut, payloadOut.data))
+				}
+				if !reflect.DeepEqual(data.naOut, payloadOut.na) {
+					t.Error(fmt.Sprintf("Output NA (%v) does not match expected (%v)",
+						data.naOut, payloadOut.na))
+				}
+			} else {
+				naPayload, ok := payload.(*naPayload)
+				if ok {
+					if naPayload.length != 1 {
+						t.Error("Incorrect length of NA payload (not 1)")
+					}
+				} else {
+					t.Error("Payload is not NA")
+				}
+			}
+		})
+	}
+}
+
+func TestFactorPayload_Integers(t *testing.T) {
+	testData := []struct {
+		in    []string
+		inNA  []bool
+		out   []int
+		outNA []bool
+	}{
+		{
+			in:    []string{"1", "3", "", "100", ""},
+			inNA:  []bool{false, false, false, false, false},
+			out:   []int{1, 3, 0, 100, 0},
+			outNA: []bool{false, false, true, false, true},
+		},
+		{
+			in:    []string{"10", "", "12", "14", "1110"},
+			inNA:  []bool{false, false, false, true, true},
+			out:   []int{10, 0, 12, 0, 0},
+			outNA: []bool{false, true, false, true, true},
+		},
+		{
+			in:    []string{"1", "3", "", "100", "", "-11", "-10"},
+			inNA:  []bool{false, false, false, false, false, false, true},
+			out:   []int{1, 3, 0, 100, 0, -11, 0},
+			outNA: []bool{false, false, true, false, true, false, true},
+		},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			payload := FactorPayload(data.in, data.inNA).(*factorPayload)
+
+			integers, na := payload.Integers()
+			if !reflect.DeepEqual(integers, data.out) {
+				t.Error(fmt.Sprintf("Integers (%v) are not equal to data.out (%v)\n", integers, data.out))
+			}
+			if !reflect.DeepEqual(na, data.outNA) {
+				t.Error(fmt.Sprintf("IsNA (%v) are not equal to data.outNA (%v)\n", na, data.outNA))
+			}
+		})
+	}
+}
+
+func TestFactorPayload_Floats(t *testing.T) {
+	testData := []struct {
+		in    []string
+		inNA  []bool
+		out   []float64
+		outNA []bool
+	}{
+		{
+			in:    []string{"1", "3", "", "100", ""},
+			inNA:  []bool{false, false, false, false, false},
+			out:   []float64{1, 3, math.NaN(), 100, math.NaN()},
+			outNA: []bool{false, false, true, false, true},
+		},
+		{
+			in:    []string{"10", "", "12", "14", "1110"},
+			inNA:  []bool{false, false, false, true, true},
+			out:   []float64{10, math.NaN(), 12, math.NaN(), math.NaN()},
+			outNA: []bool{false, true, false, true, true},
+		},
+		{
+			in:    []string{"1", "3", "", "100", "", "-11", "-10"},
+			inNA:  []bool{false, false, false, false, false, false, true},
+			out:   []float64{1, 3, math.NaN(), 100, math.NaN(), -11, math.NaN()},
+			outNA: []bool{false, false, true, false, true, false, true},
+		},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			payload := FactorPayload(data.in, data.inNA).(*factorPayload)
+
+			floats, na := payload.Floats()
+			correct := true
+			for i := 0; i < len(floats); i++ {
+				if math.IsNaN(data.out[i]) {
+					if !math.IsNaN(floats[i]) {
+						correct = false
+					}
+				} else if floats[i] != data.out[i] {
+					correct = false
+				}
+			}
+			if !correct {
+				t.Error(fmt.Sprintf("Floats (%v) are not equal to data.out (%v)\n", floats, data.out))
+			}
+			if !reflect.DeepEqual(na, data.outNA) {
+				t.Error(fmt.Sprintf("IsNA (%v) are not equal to data.outNA (%v)\n", na, data.outNA))
+			}
+		})
+	}
+}
+
+func TestFactorPayload_Complexes(t *testing.T) {
+	testData := []struct {
+		in    []string
+		inNA  []bool
+		out   []complex128
+		outNA []bool
+	}{
+		{
+			in:    []string{"1+1i", "3-3i", "0", "100 + 50i", "0+0i"},
+			inNA:  []bool{false, false, false, false, false},
+			out:   []complex128{1 + 1i, 3 - 3i, 0 + 0i, cmplx.NaN(), 0 + 0i},
+			outNA: []bool{false, false, false, true, false},
+		},
+		{
+			in:    []string{"10+10i", "0", "12+6i", "14+7i", "1110+0i"},
+			inNA:  []bool{false, false, false, true, true},
+			out:   []complex128{10 + 10i, 0 + 0i, 12 + 6i, cmplx.NaN(), cmplx.NaN()},
+			outNA: []bool{false, false, false, true, true},
+		},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			payload := FactorPayload(data.in, data.inNA).(*factorPayload)
+
+			complexes, na := payload.Complexes()
+			correct := true
+			for i := 0; i < len(complexes); i++ {
+				if cmplx.IsNaN(data.out[i]) {
+					if !cmplx.IsNaN(complexes[i]) {
+						correct = false
+					}
+				} else if complexes[i] != data.out[i] {
+					correct = false
+				}
+			}
+			if !correct {
+				t.Error(fmt.Sprintf("Complexes (%v) are not equal to data.out (%v)\n", complexes, data.out))
+			}
+			if !reflect.DeepEqual(na, data.outNA) {
+				t.Error(fmt.Sprintf("IsNA (%v) are not equal to data.outNA (%v)\n", na, data.outNA))
+			}
+		})
+	}
+}
+
+func TestFactorPayload_Strings(t *testing.T) {
+	testData := []struct {
+		in    []string
+		inNA  []bool
+		out   []string
+		outNA []bool
+	}{
+		{
+			in:    []string{"1", "3", "0", "100", ""},
+			inNA:  []bool{false, false, false, false, false},
+			out:   []string{"1", "3", "0", "100", ""},
+			outNA: []bool{false, false, false, false, false},
+		},
+		{
+			in:    []string{"10", "", "12", "14", "1110"},
+			inNA:  []bool{false, false, false, true, true},
+			out:   []string{"10", "", "12", "", ""},
+			outNA: []bool{false, false, false, true, true},
+		},
+		{
+			in:    []string{"1", "3", "0", "100", "", "-11", "-10"},
+			inNA:  []bool{false, false, false, false, false, false, true},
+			out:   []string{"1", "3", "0", "100", "", "-11", ""},
+			outNA: []bool{false, false, false, false, false, false, true},
+		},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			payload := FactorPayload(data.in, data.inNA).(*factorPayload)
+
+			strings, na := payload.Strings()
+			if !reflect.DeepEqual(strings, data.out) {
+				t.Error(fmt.Sprintf("Strings (%v) are not equal to data.out (%v)\n", strings, data.out))
+			}
+			if !reflect.DeepEqual(na, data.outNA) {
+				t.Error(fmt.Sprintf("IsNA (%v) are not equal to data.outNA (%v)\n", na, data.outNA))
+			}
+		})
+	}
+}
+
+func TestFactorPayload_Interfaces(t *testing.T) {
+	testData := []struct {
+		in    []string
+		inNA  []bool
+		out   []interface{}
+		outNA []bool
+	}{
+		{
+			in:    []string{"1", "3", "0", "100", ""},
+			inNA:  []bool{false, false, false, false, false},
+			out:   []interface{}{"1", "3", "0", "100", ""},
+			outNA: []bool{false, false, false, false, false},
+		},
+		{
+			in:    []string{"10", "", "12", "14", "1110"},
+			inNA:  []bool{false, false, false, true, true},
+			out:   []interface{}{"10", "", "12", nil, nil},
+			outNA: []bool{false, false, false, true, true},
+		},
+		{
+			in:    []string{"1", "3", "0", "100", "", "-11", "-10"},
+			inNA:  []bool{false, false, false, false, false, false, true},
+			out:   []interface{}{"1", "3", "0", "100", "", "-11", nil},
+			outNA: []bool{false, false, false, false, false, false, true},
+		},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			payload := FactorPayload(data.in, data.inNA).(*factorPayload)
+
+			interfaces, na := payload.Interfaces()
+			if !reflect.DeepEqual(interfaces, data.out) {
+				t.Error(fmt.Sprintf("Interfaces (%v) are not equal to data.out (%v)\n", interfaces, data.out))
+			}
+			if !reflect.DeepEqual(na, data.outNA) {
+				t.Error(fmt.Sprintf("IsNA (%v) are not equal to data.outNA (%v)\n", na, data.outNA))
 			}
 		})
 	}

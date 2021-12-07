@@ -286,7 +286,7 @@ func (p *factorPayload) Floats() ([]float64, []bool) {
 		} else {
 			num, err := strconv.ParseFloat(p.levels[p.data[i]], 64)
 			if err != nil {
-				data[i] = 0
+				data[i] = math.NaN()
 				na[i] = true
 			} else {
 				data[i] = num
@@ -376,7 +376,7 @@ func (p *factorPayload) Interfaces() ([]interface{}, []bool) {
 			data[i] = nil
 			na[i] = true
 		} else {
-			data[i] = p.data[i]
+			data[i] = p.levels[p.data[i]]
 		}
 	}
 
