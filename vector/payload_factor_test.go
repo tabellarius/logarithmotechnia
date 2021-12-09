@@ -895,3 +895,213 @@ func TestFactorPayload_Interfaces(t *testing.T) {
 		})
 	}
 }
+
+func TestFactorPayload_IsNA(t *testing.T) {
+	testData := []struct {
+		payload Payload
+		outNA   []bool
+	}{
+		{
+			payload: FactorPayload([]string{"1", "1", "1", "1", "1", "1"}, []bool{true, true, false, false, false, true}),
+			outNA:   []bool{true, true, false, false, false, true},
+		},
+		{
+			payload: FactorPayload([]string{"1", "1", "1"}, []bool{true, true, false}),
+			outNA:   []bool{true, true, false},
+		},
+		{
+			payload: FactorPayload([]string{}, []bool{}),
+			outNA:   []bool{},
+		},
+		{
+			payload: FactorPayload([]string{}, nil),
+			outNA:   []bool{},
+		},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			na := data.payload.(NAble).IsNA()
+
+			if !reflect.DeepEqual(na, data.outNA) {
+				t.Error(fmt.Sprintf("Value IsNA(%v) is not equal to out(%v)", na, data.outNA))
+			}
+		})
+	}
+}
+
+func TestFactorPayload_NotNA(t *testing.T) {
+	testData := []struct {
+		payload Payload
+		outNA   []bool
+	}{
+		{
+			payload: FactorPayload([]string{"1", "1", "1", "1", "1", "1"}, []bool{true, true, false, false, false, true}),
+			outNA:   []bool{false, false, true, true, true, false},
+		},
+		{
+			payload: FactorPayload([]string{"1", "1", "1"}, []bool{true, true, false}),
+			outNA:   []bool{false, false, true},
+		},
+		{
+			payload: FactorPayload([]string{}, []bool{}),
+			outNA:   []bool{},
+		},
+		{
+			payload: FactorPayload([]string{}, nil),
+			outNA:   []bool{},
+		},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			na := data.payload.(NAble).NotNA()
+
+			if !reflect.DeepEqual(na, data.outNA) {
+				t.Error(fmt.Sprintf("Value NotNA(%v) is not equal to out(%v)", na, data.outNA))
+			}
+		})
+	}
+}
+
+func TestFactorPayload_HasNA(t *testing.T) {
+	testData := []struct {
+		name    string
+		payload Payload
+		hasNA   bool
+	}{
+		{
+			name:    "no NA (1)",
+			payload: FactorPayload([]string{"1", "1", "1", "1", "1"}, []bool{false, false, false, false, false}),
+			hasNA:   false,
+		},
+		{
+			name:    "no NA (2)",
+			payload: FactorPayload([]string{"1", "1", "1"}, []bool{true, true, false}),
+			hasNA:   true,
+		},
+		{
+			name:    "with NA",
+			payload: FactorPayload([]string{"1", "1", "1", "1", "1"}, []bool{true, false, true, false, true}),
+			hasNA:   true,
+		},
+		{
+			name:    "empty",
+			payload: FactorPayload([]string{}, []bool{}),
+			hasNA:   false,
+		},
+		{
+			name:    "empty (nil)",
+			payload: FactorPayload([]string{}, nil),
+			hasNA:   false,
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			hasNA := data.payload.(NAble).HasNA()
+
+			if !reflect.DeepEqual(hasNA, data.hasNA) {
+				t.Error(fmt.Sprintf("Value NotNA(%v) is not equal to out(%v)", hasNA, data.hasNA))
+			}
+		})
+	}
+}
+
+func TestFactorPayload_WithNA(t *testing.T) {
+	testData := []struct {
+		name    string
+		payload Payload
+		withNA  []int
+	}{
+		{
+			name:    "without na",
+			payload: FactorPayload([]string{"1", "1", "1", "1", "1"}, []bool{false, false, false, false, false}),
+			withNA:  []int{},
+		},
+		{
+			name:    "with na#1",
+			payload: FactorPayload([]string{"1", "1", "1", "1", "1"}, []bool{true, false, true, false, true}),
+			withNA:  []int{1, 3, 5},
+		},
+		{
+			name:    "with na#2",
+			payload: FactorPayload([]string{"1", "1", "1", "1", "1"}, []bool{false, false, false, true, true}),
+			withNA:  []int{4, 5},
+		},
+		{
+			name:    "with na#3",
+			payload: FactorPayload([]string{"1", "1", "1", "1", "1"}, []bool{false, false, false, false, true}),
+			withNA:  []int{5},
+		},
+		{
+			name:    "all na",
+			payload: FactorPayload([]string{"1", "1", "1", "1", "1"}, []bool{true, true, true, true, true}),
+			withNA:  []int{1, 2, 3, 4, 5},
+		},
+		{
+			name:    "empty",
+			payload: FactorPayload([]string{}, []bool{}),
+			withNA:  []int{},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			withNA := data.payload.(NAble).WithNA()
+
+			if !reflect.DeepEqual(withNA, data.withNA) {
+				t.Error(fmt.Sprintf("Value NotNA(%v) is not equal to out(%v)", withNA, data.withNA))
+			}
+		})
+	}
+}
+
+func TestFactorPayload_WithoutNA(t *testing.T) {
+	testData := []struct {
+		name      string
+		payload   Payload
+		withoutNA []int
+	}{
+		{
+			name:      "without na",
+			payload:   FactorPayload([]string{"1", "1", "1", "1", "1"}, []bool{false, false, false, false, false}),
+			withoutNA: []int{1, 2, 3, 4, 5},
+		},
+		{
+			name:      "with na#1",
+			payload:   FactorPayload([]string{"1", "1", "1", "1", "1"}, []bool{true, false, true, false, true}),
+			withoutNA: []int{2, 4},
+		},
+		{
+			name:      "with na#2",
+			payload:   FactorPayload([]string{"1", "1", "1", "1", "1"}, []bool{false, false, false, true, true}),
+			withoutNA: []int{1, 2, 3},
+		},
+		{
+			name:      "with na#3",
+			payload:   FactorPayload([]string{"1", "1", "1", "1", "1"}, []bool{false, false, false, false, true}),
+			withoutNA: []int{1, 2, 3, 4},
+		},
+		{
+			name:      "all na",
+			payload:   FactorPayload([]string{"1", "1", "1", "1", "1"}, []bool{true, true, true, true, true}),
+			withoutNA: []int{},
+		},
+		{
+			name:      "empty",
+			payload:   FactorPayload([]string{}, []bool{}),
+			withoutNA: []int{},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			withoutNA := data.payload.(NAble).WithoutNA()
+
+			if !reflect.DeepEqual(withoutNA, data.withoutNA) {
+				t.Error(fmt.Sprintf("Value NotNA(%v) is not equal to out(%v)", withoutNA, data.withoutNA))
+			}
+		})
+	}
+}

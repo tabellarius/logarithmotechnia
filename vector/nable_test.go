@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func TestDefNAble_NA(t *testing.T) {
+func TestDefNAble_IsNA(t *testing.T) {
 	testData := []struct {
 		name string
 		in   []bool
