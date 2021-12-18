@@ -1,6 +1,8 @@
 package vector
 
-import "sort"
+import (
+	"sort"
+)
 
 type DefArrangeable struct {
 	Length int

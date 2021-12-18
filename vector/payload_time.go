@@ -311,7 +311,7 @@ func (p *timePayload) Find(needle interface{}) int {
 	}
 
 	for i, datum := range p.data {
-		if val.Equal(datum) {
+		if !p.na[i] && val.Equal(datum) {
 			return i + 1
 		}
 	}
@@ -327,7 +327,7 @@ func (p *timePayload) FindAll(needle interface{}) []int {
 
 	found := []int{}
 	for i, datum := range p.data {
-		if val.Equal(datum) {
+		if !p.na[i] && val.Equal(datum) {
 			found = append(found, i+1)
 		}
 	}

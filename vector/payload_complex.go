@@ -440,7 +440,7 @@ func (p *complexPayload) Find(needle interface{}) int {
 	}
 
 	for i, datum := range p.data {
-		if val == datum {
+		if !p.na[i] && val == datum {
 			return i + 1
 		}
 	}
@@ -464,7 +464,7 @@ func (p *complexPayload) FindAll(needle interface{}) []int {
 
 	found := []int{}
 	for i, datum := range p.data {
-		if val == datum {
+		if !p.na[i] && val == datum {
 			found = append(found, i+1)
 		}
 	}

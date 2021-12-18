@@ -904,7 +904,7 @@ func TestIntegerPayload_Eq(t *testing.T) {
 		{2.0, []bool{true, false, false, true, false}},
 		{2 + 0i, []bool{true, false, false, true, false}},
 		{complex64(2 + 0i), []bool{true, false, false, true, false}},
-		{"2", []bool{true, false, false, true, false}},
+		{"2", []bool{false, false, false, false, false}},
 
 		{float32(1), []bool{false, false, false, false, true}},
 		{int64(1), []bool{false, false, false, false, true}},
@@ -944,7 +944,7 @@ func TestIntegerPayload_Neq(t *testing.T) {
 		{2.0, []bool{false, true, true, false, true}},
 		{2 + 0i, []bool{false, true, true, false, true}},
 		{complex64(2 + 0i), []bool{false, true, true, false, true}},
-		{"2", []bool{false, true, true, false, true}},
+		{"2", []bool{true, true, true, true, true}},
 
 		{float32(1), []bool{true, true, true, true, false}},
 		{int64(1), []bool{true, true, true, true, false}},

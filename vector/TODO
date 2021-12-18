@@ -1,11 +1,10 @@
-Fix duplicate column names
 Factors + Factorable
-String functions
+Error in Finder (NA does not count)
+extra/decimal
+Arithmetic functions
 Finder interface for InterfacePayload
-Add df.Err and logger
 Comparator for Interface payload(?)
 (?) Update() + Clone()
-(?) Remove SupportsWhicher() and SupportsFilter()
-(?) Default NA Values
 Add NewDefNAable() for DefNAble
 Review type conversions
+Add df.Err and logger

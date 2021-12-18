@@ -49,7 +49,7 @@ func (p *stringPayload) SupportsWhicher(whicher interface{}) bool {
 		return true
 	}
 
-	if _, ok := whicher.(func(string, bool) bool); ok {
+	if _, ok := whicher.(StringWhicherCompactFunc); ok {
 		return true
 	}
 
@@ -181,21 +181,22 @@ func (p *stringPayload) Integers() ([]int, []bool) {
 	}
 
 	data := make([]int, p.length)
+	na := make([]bool, p.Len())
+	copy(na, p.na)
+
 	for i := 0; i < p.length; i++ {
 		if p.na[i] {
 			data[i] = 0
 		} else {
-			num, err := strconv.ParseFloat(p.data[i], 64)
+			num, err := strconv.Atoi(p.data[i])
 			if err != nil {
 				data[i] = 0
+				na[i] = true
 			} else {
-				data[i] = int(num)
+				data[i] = num
 			}
 		}
 	}
-
-	na := make([]bool, p.Len())
-	copy(na, p.na)
 
 	return data, na
 }
@@ -206,6 +207,8 @@ func (p *stringPayload) Floats() ([]float64, []bool) {
 	}
 
 	data := make([]float64, p.length)
+	na := make([]bool, p.Len())
+	copy(na, p.na)
 
 	for i := 0; i < p.length; i++ {
 		if p.na[i] {
@@ -213,15 +216,13 @@ func (p *stringPayload) Floats() ([]float64, []bool) {
 		} else {
 			num, err := strconv.ParseFloat(p.data[i], 64)
 			if err != nil {
-				data[i] = 0
+				data[i] = math.NaN()
+				na[i] = true
 			} else {
 				data[i] = num
 			}
 		}
 	}
-
-	na := make([]bool, p.Len())
-	copy(na, p.na)
 
 	return data, na
 }
@@ -232,6 +233,9 @@ func (p *stringPayload) Complexes() ([]complex128, []bool) {
 	}
 
 	data := make([]complex128, p.length)
+	na := make([]bool, p.Len())
+	copy(na, p.na)
+
 	for i := 0; i < p.length; i++ {
 		if p.na[i] {
 			data[i] = cmplx.NaN()
@@ -239,14 +243,12 @@ func (p *stringPayload) Complexes() ([]complex128, []bool) {
 			num, err := strconv.ParseComplex(p.data[i], 128)
 			if err != nil {
 				data[i] = cmplx.NaN()
+				na[i] = true
 			} else {
 				data[i] = num
 			}
 		}
 	}
-
-	na := make([]bool, p.Len())
-	copy(na, p.na)
 
 	return data, na
 }
@@ -429,7 +431,7 @@ func (p *stringPayload) Find(needle interface{}) int {
 	}
 
 	for i, datum := range p.data {
-		if val == datum {
+		if !p.na[i] && val == datum {
 			return i + 1
 		}
 	}
@@ -445,7 +447,7 @@ func (p *stringPayload) FindAll(needle interface{}) []int {
 
 	found := []int{}
 	for i, datum := range p.data {
-		if val == datum {
+		if !p.na[i] && val == datum {
 			found = append(found, i+1)
 		}
 	}
@@ -581,16 +583,6 @@ func (p *stringPayload) convertComparator(val interface{}) (string, bool) {
 	var v string
 	ok := true
 	switch val.(type) {
-	case int:
-		v = strconv.Itoa(val.(int))
-	case int64:
-		v = strconv.Itoa(int(val.(int64)))
-	case int32:
-		v = strconv.Itoa(int(val.(int32)))
-	case uint64:
-		v = strconv.Itoa(int(val.(uint64)))
-	case uint32:
-		v = strconv.Itoa(int(val.(uint32)))
 	case string:
 		v = val.(string)
 	default:
