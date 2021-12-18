@@ -672,6 +672,48 @@ func TestFactorPayload_Summarize(t *testing.T) {
 	}
 }
 
+func TestFactorPayload_Booleans(t *testing.T) {
+	testData := []struct {
+		in    []string
+		inNA  []bool
+		out   []bool
+		outNA []bool
+	}{
+		{
+			in:    []string{"1", "3", "", "100", ""},
+			inNA:  []bool{false, false, false, false, false},
+			out:   []bool{true, true, false, true, false},
+			outNA: []bool{false, false, false, false, false},
+		},
+		{
+			in:    []string{"10", "", "12", "14", "1110"},
+			inNA:  []bool{false, false, false, true, true},
+			out:   []bool{true, false, true, false, false},
+			outNA: []bool{false, false, false, true, true},
+		},
+		{
+			in:    []string{"1", "3", "", "100", "", "-11", "-10"},
+			inNA:  []bool{false, false, false, false, false, false, true},
+			out:   []bool{true, true, false, true, false, true, false},
+			outNA: []bool{false, false, false, false, false, false, true},
+		},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			payload := FactorPayload(data.in, data.inNA).(*factorPayload)
+
+			booleans, na := payload.Booleans()
+			if !reflect.DeepEqual(booleans, data.out) {
+				t.Error(fmt.Sprintf("Booleans (%v) are not equal to data.out (%v)\n", booleans, data.out))
+			}
+			if !reflect.DeepEqual(na, data.outNA) {
+				t.Error(fmt.Sprintf("IsNA (%v) are not equal to data.outNA (%v)\n", na, data.outNA))
+			}
+		})
+	}
+}
+
 func TestFactorPayload_Integers(t *testing.T) {
 	testData := []struct {
 		in    []string
@@ -1101,6 +1143,560 @@ func TestFactorPayload_WithoutNA(t *testing.T) {
 
 			if !reflect.DeepEqual(withoutNA, data.withoutNA) {
 				t.Error(fmt.Sprintf("Value NotNA(%v) is not equal to out(%v)", withoutNA, data.withoutNA))
+			}
+		})
+	}
+}
+
+func TestFactorPayload_Find(t *testing.T) {
+	payload := FactorPayload([]string{"1", "2", "1", "4", "0"}, nil).(*factorPayload)
+
+	testData := []struct {
+		name   string
+		needle interface{}
+		pos    int
+	}{
+		{"existent", "4", 4},
+		{"non-existent", "non", 0},
+		{"incorrect type", true, 0},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			pos := payload.Find(data.needle)
+
+			if pos != data.pos {
+				t.Error(fmt.Sprintf("Position (%v) does not match expected (%v)",
+					pos, data.pos))
+			}
+		})
+	}
+}
+
+func TestFactorPayload_FindAll(t *testing.T) {
+	payload := FactorPayload([]string{"1", "2", "1", "4", "0"}, nil).(*factorPayload)
+
+	testData := []struct {
+		name   string
+		needle interface{}
+		pos    []int
+	}{
+		{"existent", "1", []int{1, 3}},
+		{"non-existent", -10, []int{}},
+		{"incorrect type", false, []int{}},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			pos := payload.FindAll(data.needle)
+
+			if !reflect.DeepEqual(pos, data.pos) {
+				t.Error(fmt.Sprintf("Positions (%v) does not match expected (%v)",
+					pos, data.pos))
+			}
+		})
+	}
+}
+
+func TestFactorPayload_Eq(t *testing.T) {
+	payload := StringPayload([]string{"2", "zero", "2", "2", "1"},
+		[]bool{false, false, true, false, false}).(*stringPayload)
+
+	testData := []struct {
+		eq  interface{}
+		cmp []bool
+	}{
+		{"2", []bool{true, false, false, true, false}},
+		{"zero", []bool{false, true, false, false, false}},
+		{2, []bool{false, false, false, false, false}},
+		{int64(1), []bool{false, false, false, false, false}},
+		{int32(1), []bool{false, false, false, false, false}},
+		{true, []bool{false, false, false, false, false}},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			cmp := payload.Eq(data.eq)
+
+			if !reflect.DeepEqual(cmp, data.cmp) {
+				t.Error(fmt.Sprintf("Comparator results (%v) do not match expected (%v)",
+					cmp, data.cmp))
+			}
+		})
+	}
+}
+
+func TestFactorPayload_Neq(t *testing.T) {
+	payload := FactorPayload([]string{"2", "zero", "2", "2", "1"},
+		[]bool{false, false, true, false, false}).(*factorPayload)
+
+	testData := []struct {
+		eq  interface{}
+		cmp []bool
+	}{
+		{"2", []bool{false, true, true, false, true}},
+		{2, []bool{true, true, true, true, true}},
+		{int64(1), []bool{true, true, true, true, true}},
+		{int32(1), []bool{true, true, true, true, true}},
+		{true, []bool{true, true, true, true, true}},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			cmp := payload.Neq(data.eq)
+
+			if !reflect.DeepEqual(cmp, data.cmp) {
+				t.Error(fmt.Sprintf("Comparator results (%v) do not match expected (%v)",
+					cmp, data.cmp))
+			}
+		})
+	}
+}
+
+func TestFactorPayload_Gt(t *testing.T) {
+	payload := FactorPayload([]string{"alpha", "zero", "zeroth", "zero", "gamma"},
+		[]bool{false, false, false, true, false}).(*factorPayload)
+
+	testData := []struct {
+		val interface{}
+		cmp []bool
+	}{
+		{"zero", []bool{false, false, true, false, false}},
+		{true, []bool{false, false, false, false, false}},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			cmp := payload.Gt(data.val)
+
+			if !reflect.DeepEqual(cmp, data.cmp) {
+				t.Error(fmt.Sprintf("Comparator results (%v) do not match expected (%v)",
+					cmp, data.cmp))
+			}
+		})
+	}
+}
+
+func TestFactorPayload_Lt(t *testing.T) {
+	payload := FactorPayload([]string{"alpha", "zero", "zeroth", "zeroth", "gamma"},
+		[]bool{false, false, false, true, false}).(*factorPayload)
+
+	testData := []struct {
+		val interface{}
+		cmp []bool
+	}{
+		{"zero", []bool{true, false, false, false, true}},
+		{true, []bool{false, false, false, false, false}},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			cmp := payload.Lt(data.val)
+
+			if !reflect.DeepEqual(cmp, data.cmp) {
+				t.Error(fmt.Sprintf("Comparator results (%v) do not match expected (%v)",
+					cmp, data.cmp))
+			}
+		})
+	}
+}
+
+func TestFactorPayload_Gte(t *testing.T) {
+	payload := FactorPayload([]string{"alpha", "zero", "zeroth", "zero", "gamma"},
+		[]bool{false, false, false, true, false}).(*factorPayload)
+
+	testData := []struct {
+		val interface{}
+		cmp []bool
+	}{
+		{"zero", []bool{false, true, true, false, false}},
+		{true, []bool{false, false, false, false, false}},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			cmp := payload.Gte(data.val)
+
+			if !reflect.DeepEqual(cmp, data.cmp) {
+				t.Error(fmt.Sprintf("Comparator results (%v) do not match expected (%v)",
+					cmp, data.cmp))
+			}
+		})
+	}
+}
+
+func TestFactorPayload_Lte(t *testing.T) {
+	payload := FactorPayload([]string{"alpha", "zero", "zeroth", "zero", "gamma"},
+		[]bool{false, false, false, true, false}).(*factorPayload)
+
+	testData := []struct {
+		val interface{}
+		cmp []bool
+	}{
+		{"zero", []bool{true, true, false, false, true}},
+		{true, []bool{false, false, false, false, false}},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			cmp := payload.Lte(data.val)
+
+			if !reflect.DeepEqual(cmp, data.cmp) {
+				t.Error(fmt.Sprintf("Comparator results (%v) do not match expected (%v)",
+					cmp, data.cmp))
+			}
+		})
+	}
+}
+
+func TestFactorPayload_Groups(t *testing.T) {
+	testData := []struct {
+		name    string
+		payload Payload
+		groups  [][]int
+		values  []interface{}
+	}{
+		{
+			name:    "normal",
+			payload: FactorPayload([]string{"aa", "bb", "bb", "aa", "cc", "dd", "aa"}, nil),
+			groups:  [][]int{{1, 4, 7}, {2, 3}, {5}, {6}},
+			values:  []interface{}{"aa", "bb", "cc", "dd"},
+		},
+		{
+			name: "with NA",
+			payload: FactorPayload([]string{"aa", "bb", "bb", "aa", "cc", "dd", "aa"},
+				[]bool{false, false, false, false, true, false, false}),
+			groups: [][]int{{1, 4, 7}, {2, 3}, {6}, {5}},
+			values: []interface{}{"aa", "bb", "dd", nil},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			groups, values := data.payload.(*factorPayload).Groups()
+
+			if !reflect.DeepEqual(groups, data.groups) {
+				t.Error(fmt.Sprintf("Groups (%v) do not match expected (%v)",
+					groups, data.groups))
+			}
+
+			if !reflect.DeepEqual(values, data.values) {
+				t.Error(fmt.Sprintf("Groups (%v) do not match expected (%v)",
+					values, data.values))
+			}
+		})
+	}
+}
+
+func TestFactorPayload_IsUnique(t *testing.T) {
+	testData := []struct {
+		name     string
+		payload  Payload
+		booleans []bool
+	}{
+		{
+			name:     "without NA",
+			payload:  FactorPayload([]string{"1", "2", "1", "3", "2", "3", "2"}, nil),
+			booleans: []bool{true, true, false, true, false, false, false},
+		},
+		{
+			name: "with NA",
+			payload: FactorPayload([]string{"1", "2", "1", "3", "2", "3", "2"},
+				[]bool{false, true, true, false, false, false, false}),
+			booleans: []bool{true, true, false, true, true, false, false},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			booleans := data.payload.(*factorPayload).IsUnique()
+
+			if !reflect.DeepEqual(booleans, data.booleans) {
+				t.Error(fmt.Sprintf("Result of IsUnique() (%v) do not match expected (%v)",
+					booleans, data.booleans))
+			}
+		})
+	}
+}
+
+func TestFactorPayload_Coalesce(t *testing.T) {
+	testData := []struct {
+		name         string
+		coalescer    Payload
+		coalescendum Payload
+		outData      []uint32
+		outLevels    []string
+	}{
+		{
+			name:         "empty",
+			coalescer:    FactorPayload(nil, nil),
+			coalescendum: FactorPayload([]string{}, nil),
+			outData:      []uint32{},
+			outLevels:    []string{""},
+		},
+		{
+			name:         "same type",
+			coalescer:    FactorPayload([]string{"1", "", "", "", "5"}, []bool{false, true, true, true, false}),
+			coalescendum: FactorPayload([]string{"11", "12", "", "14", "15"}, []bool{false, false, true, false, false}),
+			outData:      []uint32{1, 2, 0, 3, 4},
+			outLevels:    []string{"", "1", "12", "14", "5"},
+		},
+		{
+			name:         "same type + different size",
+			coalescer:    FactorPayload([]string{"1", "", "", "", "5"}, []bool{false, true, true, true, false}),
+			coalescendum: FactorPayload([]string{"", "11"}, []bool{true, false}),
+			outData:      []uint32{1, 2, 0, 2, 3},
+			outLevels:    []string{"", "1", "11", "5"},
+		},
+		{
+			name:         "different type",
+			coalescer:    FactorPayload([]string{"1", "0", "0", "0", "5"}, []bool{false, true, true, true, false}),
+			coalescendum: IntegerPayload([]int{0, 10, 0, 112, 0}, []bool{false, false, true, false, false}),
+			outData:      []uint32{1, 2, 0, 3, 4},
+			outLevels:    []string{"", "1", "10", "112", "5"},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			payload := data.coalescer.(Coalescer).Coalesce(data.coalescendum).(*factorPayload)
+
+			if !reflect.DeepEqual(payload.data, data.outData) {
+				t.Error(fmt.Sprintf("Data (%v) do not match expected (%v)",
+					payload.data, data.outData))
+			}
+
+			if !reflect.DeepEqual(payload.levels, data.outLevels) {
+				t.Error(fmt.Sprintf("Data (%v) do not match expected (%v)",
+					payload.data, data.outData))
+			}
+		})
+	}
+}
+
+func TestFactorPayload_SortedIndices(t *testing.T) {
+	testData := []struct {
+		name          string
+		payload       Payload
+		sortedIndices []int
+	}{
+		{
+			name:          "with NA",
+			payload:       FactorPayload([]string{"delta", "beta", "alpha", "zeroth", "zero"}, []bool{false, false, true, true, false}),
+			sortedIndices: []int{2, 1, 5, 3, 4},
+		},
+		{
+			name:          "without NA",
+			payload:       FactorPayload([]string{"delta", "beta", "alpha", "zeroth", "zero"}, nil),
+			sortedIndices: []int{3, 2, 1, 5, 4},
+		},
+		{
+			name:          "empty",
+			payload:       FactorPayload([]string{}, nil),
+			sortedIndices: []int{},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			sortedIndices := data.payload.(*factorPayload).SortedIndices()
+
+			if !reflect.DeepEqual(sortedIndices, data.sortedIndices) {
+				t.Error(fmt.Sprintf("Comparator results (%v) do not match expected (%v)",
+					sortedIndices, data.sortedIndices))
+			}
+		})
+	}
+}
+
+func TestFactorPayload_SortedIndicesWithRanks(t *testing.T) {
+	testData := []struct {
+		name          string
+		payload       Payload
+		sortedIndices []int
+		ranks         []int
+	}{
+		{
+			name:          "with NA",
+			payload:       FactorPayload([]string{"delta", "beta", "alpha", "zeroth", "zero"}, []bool{false, false, true, true, false}),
+			sortedIndices: []int{2, 1, 5, 3, 4},
+			ranks:         []int{1, 2, 3, 4, 4},
+		},
+		{
+			name:          "without NA",
+			payload:       FactorPayload([]string{"delta", "beta", "alpha", "zeroth", "zero"}, nil),
+			sortedIndices: []int{3, 2, 1, 5, 4},
+			ranks:         []int{1, 2, 3, 4, 5},
+		},
+		{
+			name:          "empty",
+			payload:       FactorPayload([]string{}, nil),
+			sortedIndices: []int{},
+			ranks:         []int{},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			sortedIndices, ranks := data.payload.(*factorPayload).SortedIndicesWithRanks()
+
+			if !reflect.DeepEqual(sortedIndices, data.sortedIndices) {
+				t.Error(fmt.Sprintf("Sorted indices (%v) do not match expected (%v)",
+					sortedIndices, data.sortedIndices))
+			}
+
+			if !reflect.DeepEqual(ranks, data.ranks) {
+				t.Error(fmt.Sprintf("Sorted ranks (%v) do not match expected (%v)",
+					ranks, data.ranks))
+			}
+		})
+	}
+}
+
+func TestFactorPayload_Levels(t *testing.T) {
+	testData := []struct {
+		name    string
+		payload Payload
+		levels  []string
+	}{
+		{
+			name:    "normal",
+			payload: FactorPayload([]string{"one", "two", "two", "one", "three"}, nil),
+			levels:  []string{"one", "two", "three"},
+		},
+		{
+			name:    "empty",
+			payload: FactorPayload([]string{}, nil),
+			levels:  []string{},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			levels := data.payload.(*factorPayload).Levels()
+
+			if !reflect.DeepEqual(levels, data.levels) {
+				t.Error(fmt.Sprintf("Data (%v) do not match expected (%v)",
+					levels, data.levels))
+			}
+		})
+	}
+}
+
+func TestFactorPayload_Level(t *testing.T) {
+	payload := FactorPayload([]string{"one", "two", "two", "one", "three"}, nil).(*factorPayload)
+
+	testData := []struct {
+		level    string
+		position int
+	}{
+		{
+			level:    "one",
+			position: 1,
+		},
+		{
+			level:    "two",
+			position: 2,
+		},
+		{
+			level:    "three",
+			position: 3,
+		},
+		{
+			level:    "four",
+			position: 0,
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.level, func(t *testing.T) {
+			position := payload.Level(data.level)
+
+			if !reflect.DeepEqual(position, data.position) {
+				t.Error(fmt.Sprintf("Position (%v) do not match expected (%v)",
+					position, data.position))
+			}
+		})
+	}
+}
+
+func TestFactorPayload_HasLevel(t *testing.T) {
+	payload := FactorPayload([]string{"one", "two", "two", "one", "three"}, nil).(*factorPayload)
+
+	testData := []struct {
+		level    string
+		hasLevel bool
+	}{
+		{
+			level:    "one",
+			hasLevel: true,
+		},
+		{
+			level:    "two",
+			hasLevel: true,
+		},
+		{
+			level:    "three",
+			hasLevel: true,
+		},
+		{
+			level:    "four",
+			hasLevel: false,
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.level, func(t *testing.T) {
+			hasLevel := payload.HasLevel(data.level)
+
+			if hasLevel != data.hasLevel {
+				t.Error(fmt.Sprintf("hasLevel (%v) do not match expected (%v)",
+					hasLevel, data.hasLevel))
+			}
+		})
+	}
+}
+
+func TestFactorPayload_IsSameLevels(t *testing.T) {
+	testData := []struct {
+		name         string
+		factor1      Payload
+		factor2      Payload
+		isSameLevels bool
+	}{
+		{
+			name:         "same payloads",
+			factor1:      FactorPayload([]string{"one", "two", "two", "one", "three"}, nil),
+			factor2:      FactorPayload([]string{"one", "two", "two", "one", "three"}, nil),
+			isSameLevels: true,
+		},
+		{
+			name:         "different payloads, same levels",
+			factor1:      FactorPayload([]string{"one", "two", "two", "one", "three"}, nil),
+			factor2:      FactorPayload([]string{"one", "two", "two", "one", "two", "one", "three", "three"}, nil),
+			isSameLevels: true,
+		},
+		{
+			name:         "different number of levels",
+			factor1:      FactorPayload([]string{"one", "two", "two", "one", "three"}, nil),
+			factor2:      FactorPayload([]string{"one", "two", "two", "one", "two", "one"}, nil),
+			isSameLevels: false,
+		},
+		{
+			name:         "different order of levels",
+			factor1:      FactorPayload([]string{"one", "two", "two", "one", "three"}, nil),
+			factor2:      FactorPayload([]string{"one", "three", "two", "one", "two"}, nil),
+			isSameLevels: false,
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			isSameLevels := data.factor1.(*factorPayload).IsSameLevels(data.factor2.(*factorPayload))
+
+			if isSameLevels != data.isSameLevels {
+				t.Error(fmt.Sprintf("isSameLevels (%v) do not match expected (%v)",
+					isSameLevels, data.isSameLevels))
 			}
 		})
 	}

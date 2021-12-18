@@ -530,7 +530,7 @@ func (p *factorPayload) Neq(val interface{}) []bool {
 
 	for i, level := range p.data {
 		if level == 0 {
-			cmp[i] = false
+			cmp[i] = true
 		} else {
 			cmp[i] = level != valLevel
 		}
@@ -722,19 +722,7 @@ func (p *factorPayload) Coalesce(payload Payload) Payload {
 		}
 	}
 
-	return StringPayload(dstData, dstNA, p.Options()...)
-}
-
-func (p *factorPayload) Level(val string) int {
-	level := 0
-
-	for i := 1; i < len(p.levels); i++ {
-		if val == p.levels[i] {
-			level = i
-		}
-	}
-
-	return level
+	return FactorPayload(dstData, dstNA, p.Options()...)
 }
 
 func (p *factorPayload) SortedIndices() []int {
@@ -785,12 +773,9 @@ func (p *factorPayload) SortedIndicesWithRanks() ([]int, []int) {
 
 	rank := 1
 	ranks := make([]int, p.length)
-	if p.data[0] == 0 {
-		rank = 0
-	}
 	ranks[0] = rank
 	for i := 1; i < p.length; i++ {
-		if p.data[i] != p.data[i-1] {
+		if p.data[indices[i]] != p.data[indices[i-1]] {
 			rank++
 			ranks[i] = rank
 		} else {
@@ -802,11 +787,23 @@ func (p *factorPayload) SortedIndicesWithRanks() ([]int, []int) {
 }
 
 func (p *factorPayload) Levels() []string {
-	levels := make([]string, len(p.levels))
+	levels := make([]string, len(p.levels)-1)
 
-	copy(levels, p.levels)
+	copy(levels, p.levels[1:])
 
 	return levels
+}
+
+func (p *factorPayload) Level(val string) int {
+	level := 0
+
+	for i := 1; i < len(p.levels); i++ {
+		if val == p.levels[i] {
+			level = i
+		}
+	}
+
+	return level
 }
 
 func (p *factorPayload) HasLevel(level string) bool {
@@ -822,12 +819,12 @@ func (p *factorPayload) HasLevel(level string) bool {
 func (p *factorPayload) IsSameLevels(factor Factorable) bool {
 	levels := factor.Levels()
 
-	if len(p.levels) != len(levels) {
+	if len(p.levels) != len(levels)+1 {
 		return false
 	}
 
-	for i := 0; i < len(p.levels); i++ {
-		if p.levels[i] != levels[i] {
+	for i := 1; i < len(p.levels); i++ {
+		if p.levels[i] != levels[i-1] {
 			return false
 		}
 	}
