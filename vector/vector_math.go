@@ -10,12 +10,14 @@ type SummerP interface {
 
 func (v *vector) Sum() Vector {
 	if v.IsGrouped() {
-		vec := v.groups[0].Sum()
-		for i := 1; i < len(v.groups); i++ {
-			vec = vec.Append(v.groups[i].Sum())
+
+		vectors := v.GroupVectors()
+		outValues := make([]Vector, len(vectors))
+		for i := 0; i < len(vectors); i++ {
+			outValues[i] = vectors[i].Sum()
 		}
 
-		return vec
+		return Combine(outValues...)
 	}
 
 	if summer, ok := v.payload.(SummerP); ok {

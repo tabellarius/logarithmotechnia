@@ -1,3 +1,4 @@
+Fix option loss
 IsGroupedBy(string)
 Distinct()
 Select - OptionRemoveColumns()

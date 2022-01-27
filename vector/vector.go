@@ -26,7 +26,8 @@ type Vector interface {
 	Groups() ([][]int, []interface{})
 	Ungroup() Vector
 	IsGrouped() bool
-	GroupByIndices([][]int) Vector
+	GroupByIndices(index GroupIndex) Vector
+	GroupVectors() []Vector
 
 	IsEmpty() bool
 
@@ -162,9 +163,9 @@ type Factorable interface {
 
 // vector holds data and functions shared by all vectors
 type vector struct {
-	length  int
-	payload Payload
-	groups  []Vector
+	length     int
+	payload    Payload
+	groupIndex GroupIndex
 }
 
 func (v *vector) Type() string {
@@ -368,21 +369,31 @@ func (v *vector) Groups() ([][]int, []interface{}) {
 }
 
 func (v *vector) IsGrouped() bool {
-	return len(v.groups) > 0
+	return v.groupIndex != nil
 }
 
-func (v *vector) GroupByIndices(groups [][]int) Vector {
+func (v *vector) GroupByIndices(groups GroupIndex) Vector {
 	if len(groups) == 0 {
 		return v
 	}
 
 	newVec := New(v.payload, v.Options()...).(*vector)
-	newVec.groups = make([]Vector, len(groups))
-	for i, indices := range groups {
-		newVec.groups[i] = newVec.ByIndices(indices)
-	}
+	newVec.groupIndex = groups
 
 	return newVec
+}
+
+func (v *vector) GroupVectors() []Vector {
+	if !v.IsGrouped() {
+		return nil
+	}
+
+	vectors := make([]Vector, len(v.groupIndex))
+	for i, indices := range v.groupIndex {
+		vectors[i] = v.ByIndices(indices)
+	}
+
+	return nil
 }
 
 func (v *vector) Ungroup() Vector {
