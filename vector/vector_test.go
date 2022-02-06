@@ -1723,26 +1723,22 @@ func TestVector_GroupByIndices(t *testing.T) {
 		isGrouped bool
 	}{
 		{
-			name:    "normal",
-			vec:     Integer([]int{-20, 10, 4, -20, 7, -20, 10, -20, 4, 10}, nil),
-			indices: [][]int{{1, 4, 7, 10}, {2, 3, 5, 9}, {6, 8}},
-			groups: []Vector{
-				Integer([]int{-20, -20, 10, 10}, nil),
-				Integer([]int{10, 4, 7, 4}, nil),
-				Integer([]int{-20, -20}, nil),
-			},
+			name:      "normal",
+			vec:       Integer([]int{-20, 10, 4, -20, 7, -20, 10, -20, 4, 10}, nil),
+			indices:   [][]int{{1, 4, 7, 10}, {2, 3, 5, 9}, {6, 8}},
 			isGrouped: true,
 		},
 		{
-			name:    "with non-existent indices",
-			vec:     Integer([]int{-20, 10, 4, -20, 7, -20, 10, -20, 4, 10}, nil),
-			indices: [][]int{{1, 4, 7, 10}, {2, 3, 5, 9, 12}, {6, 8, 11}},
-			groups: []Vector{
-				Integer([]int{-20, -20, 10, 10}, nil),
-				Integer([]int{10, 4, 7, 4}, nil),
-				Integer([]int{-20, -20}, nil),
-			},
+			name:      "with non-existent indices",
+			vec:       Integer([]int{-20, 10, 4, -20, 7, -20, 10, -20, 4, 10}, nil),
+			indices:   [][]int{{1, 4, 7, 10}, {2, 3, 5, 9, 12}, {6, 8, 11}},
 			isGrouped: true,
+		},
+		{
+			name:      "empty group index",
+			vec:       Integer([]int{-20, 10, 4, -20, 7, -20, 10, -20, 4, 10}, nil),
+			indices:   [][]int{},
+			isGrouped: false,
 		},
 	}
 
@@ -1751,12 +1747,14 @@ func TestVector_GroupByIndices(t *testing.T) {
 			groupedVec := data.vec.GroupByIndices(data.indices).(*vector)
 
 			if data.isGrouped {
-				if !CompareVectorArrs(groupedVec.groups, data.groups) {
-					t.Error(fmt.Sprintf("Groups (%v) do not match expected (%v)",
-						groupedVec.groups, data.groups))
+				if !reflect.DeepEqual([][]int(groupedVec.groupIndex), data.indices) {
+					t.Error(fmt.Sprintf("Group index (%v) do not match expected (%v)",
+						groupedVec.groupIndex, data.indices))
 				}
 			} else {
-
+				if groupedVec.groupIndex != nil {
+					t.Error("Group index is not nil")
+				}
 			}
 		})
 	}

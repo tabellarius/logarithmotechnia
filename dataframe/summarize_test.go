@@ -10,7 +10,7 @@ func TestDataframe_Summarize(t *testing.T) {
 	df := New([]Column{
 		{"A", vector.Integer([]int{100, 200, 200, 30, 30})},
 		{"B", vector.IntegerWithNA([]int{100, 100, 40, 30, 40}, []bool{false, true, true, true, false})},
-		{"C", vector.Boolean([]bool{true, false, true, false, true})},
+		{"C", vector.Boolean([]bool{true, false, false, false, true})},
 		{"D", vector.String([]string{"A", "B", "C", "A", "B"})},
 	})
 

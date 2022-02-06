@@ -28,6 +28,7 @@ type Vector interface {
 	IsGrouped() bool
 	GroupByIndices(index GroupIndex) Vector
 	GroupVectors() []Vector
+	GroupFirstElements() []int
 
 	IsEmpty() bool
 
@@ -393,7 +394,21 @@ func (v *vector) GroupVectors() []Vector {
 		vectors[i] = v.ByIndices(indices)
 	}
 
-	return nil
+	return vectors
+}
+
+func (v *vector) GroupFirstElements() []int {
+	indices := []int{}
+
+	if v.IsGrouped() {
+		if v.Len() > 0 {
+			indices = append(indices, 1)
+		}
+	} else {
+		indices = v.groupIndex.FirstElements()
+	}
+
+	return indices
 }
 
 func (v *vector) Ungroup() Vector {

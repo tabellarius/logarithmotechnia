@@ -11,15 +11,9 @@ func (df *Dataframe) Summarize(columns []Column) *Dataframe {
 	}
 
 	for _, group := range df.GroupedBy() {
-		nIndices := []int{}
 		vec := df.Cn(group)
-		vIndices, _ := vec.Groups()
 
-		for _, gIndices := range vIndices {
-			nIndices = append(nIndices, gIndices[0])
-		}
-
-		newColumns = append(newColumns, Column{group, vec.ByIndices(nIndices)})
+		newColumns = append(newColumns, Column{group, vec.ByIndices(vec.GroupFirstElements())})
 	}
 
 	return New(newColumns, df.Options()...)
