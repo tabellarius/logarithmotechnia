@@ -1,6 +1,8 @@
 package dataframe
 
-import "logarithmotechnia/vector"
+import (
+	"logarithmotechnia/vector"
+)
 
 func (df *Dataframe) GroupBy(selectors ...interface{}) *Dataframe {
 	columns := []string{}
@@ -36,6 +38,7 @@ func (df *Dataframe) GroupBy(selectors ...interface{}) *Dataframe {
 	options := append(df.OptionsWithNames(), vector.OptionGroupIndex(groups))
 
 	newColumns := make([]vector.Vector, df.colNum)
+	//	fmt.Println(groups)
 	for i, column := range df.columns {
 		newColumns[i] = column.GroupByIndices(groups)
 	}

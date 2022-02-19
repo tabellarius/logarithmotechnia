@@ -8,6 +8,9 @@ import (
 // Vector is an interface for a different vector types. This structure is similar to R-vectors: it starts from 1,
 // allows for an extensive indexing, supports IsNA-values and named variables
 type Vector interface {
+	Name() string
+	SetName(name string) Vector
+
 	Type() string
 	Len() int
 	Payload() Payload
@@ -164,9 +167,20 @@ type Factorable interface {
 
 // vector holds data and functions shared by all vectors
 type vector struct {
+	name       string
 	length     int
 	payload    Payload
 	groupIndex GroupIndex
+}
+
+func (v *vector) Name() string {
+	return v.name
+}
+
+func (v *vector) SetName(name string) Vector {
+	v.name = name
+
+	return v
 }
 
 func (v *vector) Type() string {
@@ -402,10 +416,10 @@ func (v *vector) GroupFirstElements() []int {
 
 	if v.IsGrouped() {
 		if v.Len() > 0 {
-			indices = append(indices, 1)
+			indices = v.groupIndex.FirstElements()
 		}
 	} else {
-		indices = v.groupIndex.FirstElements()
+		indices = append(indices, 1)
 	}
 
 	return indices
@@ -801,15 +815,23 @@ func (v *vector) IsSameLevels(factor Factorable) bool {
 }
 
 func (v *vector) Options() []Option {
-	return []Option{}
+	return []Option{
+		OptionVectorName(v.name),
+	}
 }
 
 // New creates a vector part of the future vector. This function is used by public functions which create
 // typed vectors
-func New(payload Payload, _ ...Option) Vector {
+func New(payload Payload, options ...Option) Vector {
 	vec := vector{
 		length:  payload.Len(),
 		payload: payload,
+	}
+
+	for _, option := range options {
+		if option.Key() == KeyOptionVectorName {
+			vec.name = option.Value().(string)
+		}
 	}
 
 	return &vec

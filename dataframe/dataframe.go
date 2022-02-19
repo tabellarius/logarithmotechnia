@@ -205,6 +205,10 @@ func dataframeFromVectors(vectors []vector.Vector, options ...vector.Option) *Da
 		}
 	}
 
+	for i, columnName := range columnNames {
+		vectors[i].SetName(columnName)
+	}
+
 	return &Dataframe{
 		rowNum:            maxLen,
 		colNum:            colNum,
