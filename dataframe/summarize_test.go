@@ -3,6 +3,7 @@ package dataframe
 import (
 	"fmt"
 	"logarithmotechnia/vector"
+	"reflect"
 	"testing"
 )
 
@@ -38,9 +39,53 @@ func TestDataframe_Summarize(t *testing.T) {
 			},
 			columnNames: []string{"A", "B", "D"},
 		},
+		{
+			name:      "columns",
+			groupedDf: groupedByD,
+			summarizers: []interface{}{
+				Column{"Column A", groupedByD.Cn("A").Sum()},
+				Column{"Column B", groupedByD.Cn("B").Sum()},
+			},
+			vecs: []vector.Vector{
+				vector.Integer([]int{130, 230, 200, 330}),
+				vector.IntegerWithNA([]int{0, 0, 0, 280}, []bool{true, true, true, false}),
+				vector.String([]string{"A", "B", "C", "D"}),
+			},
+			columnNames: []string{"Column A", "Column B", "D"},
+		},
+		{
+			name:      "vector array",
+			groupedDf: groupedByD,
+			summarizers: []interface{}{
+				[]vector.Vector{
+					groupedByD.Cn("A").Sum(),
+					groupedByD.Cn("B").Sum(),
+				},
+			},
+			vecs: []vector.Vector{
+				vector.Integer([]int{130, 230, 200, 330}),
+				vector.IntegerWithNA([]int{0, 0, 0, 280}, []bool{true, true, true, false}),
+				vector.String([]string{"A", "B", "C", "D"}),
+			},
+			columnNames: []string{"A", "B", "D"},
+		},
+		{
+			name:      "column array",
+			groupedDf: groupedByD,
+			summarizers: []interface{}{
+				[]Column{
+					{"Column A", groupedByD.Cn("A").Sum()},
+					{"Column B", groupedByD.Cn("B").Sum()},
+				},
+			},
+			vecs: []vector.Vector{
+				vector.Integer([]int{130, 230, 200, 330}),
+				vector.IntegerWithNA([]int{0, 0, 0, 280}, []bool{true, true, true, false}),
+				vector.String([]string{"A", "B", "C", "D"}),
+			},
+			columnNames: []string{"Column A", "Column B", "D"},
+		},
 	}
-
-	_ = testData
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
@@ -51,17 +96,11 @@ func TestDataframe_Summarize(t *testing.T) {
 					sumDf.columns, data.vecs))
 			}
 
+			if !reflect.DeepEqual(sumDf.columnNames, data.columnNames) {
+				t.Error(fmt.Sprintf("Column names are not (%v) are not equal to expected (%v)",
+					sumDf.columnNames, data.columnNames))
+			}
+
 		})
 	}
-
-	df = df.GroupBy("D")
-
-	summedDf := df.Summarize(
-		df.Cn("A").Sum(),
-		df.Cn("B").Sum(),
-	)
-
-	_ = summedDf
-
-	fmt.Println(summedDf)
 }
