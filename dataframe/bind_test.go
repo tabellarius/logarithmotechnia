@@ -179,6 +179,18 @@ func TestDataframe_BindRows(t *testing.T) {
 					[]bool{false, false, false, false, false, true, false, false}),
 			},
 		},
+		{
+			name: "bindRows 2 args array",
+			df:   df1.BindRows([]*Dataframe{df2, df3}),
+			expectedColumns: []vector.Vector{
+				vector.IntegerWithNA([]int{10, 0, 0, 1, 2, 0, 0, 0},
+					[]bool{false, true, true, false, false, true, true, true}),
+				vector.BooleanWithNA([]bool{true, false, true, false, false, false, false, false},
+					[]bool{false, false, false, true, true, true, true, true}),
+				vector.StringWithNA([]string{"1", "2", "3", "4", "5", "", "alpha", "omega"},
+					[]bool{false, false, false, false, false, true, false, false}),
+			},
+		},
 	}
 
 	for _, data := range testData {

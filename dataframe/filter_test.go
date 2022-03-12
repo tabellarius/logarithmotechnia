@@ -14,14 +14,13 @@ func TestDataframe_Filter(t *testing.T) {
 	})
 
 	testData := []struct {
-		name         string
-		selectorInt  []int
-		selectorBool []bool
-		dfColumns    []vector.Vector
+		name      string
+		selector  interface{}
+		dfColumns []vector.Vector
 	}{
 		{
-			name:        "indices",
-			selectorInt: []int{-1, 0, 1, 3, 5, 8, 10, 11, 100},
+			name:     "indices",
+			selector: []int{-1, 0, 1, 3, 5, 8, 10, 11, 100},
 			dfColumns: []vector.Vector{
 				vector.IntegerWithNA([]int{0, 1, 3, 5, 8, 10}, []bool{true, false, false, false, false, false}),
 				vector.StringWithNA([]string{"", "1", "3", "5", "8", "10"}, []bool{true, false, false, false, false, false}),
@@ -29,8 +28,8 @@ func TestDataframe_Filter(t *testing.T) {
 			},
 		},
 		{
-			name:         "boolean full",
-			selectorBool: []bool{true, false, true, false, true, false, false, true, false, true},
+			name:     "boolean full",
+			selector: []bool{true, false, true, false, true, false, false, true, false, true},
 			dfColumns: []vector.Vector{
 				vector.IntegerWithNA([]int{1, 3, 5, 8, 10}, nil),
 				vector.StringWithNA([]string{"1", "3", "5", "8", "10"}, nil),
@@ -38,24 +37,24 @@ func TestDataframe_Filter(t *testing.T) {
 			},
 		},
 		{
-			name:         "boolean odd",
-			selectorBool: []bool{true, false},
+			name:     "boolean odd",
+			selector: []bool{true, false},
 			dfColumns: []vector.Vector{
 				vector.IntegerWithNA([]int{1, 3, 5, 7, 9}, nil),
 				vector.StringWithNA([]string{"1", "3", "5", "7", "9"}, nil),
 				vector.BooleanWithNA([]bool{true, true, true, true, true}, nil),
 			},
 		},
+		{
+			name:      "invalid selector",
+			selector:  []complex128{0 + 0i, 1 + 1i},
+			dfColumns: []vector.Vector{},
+		},
 	}
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			var newDf *Dataframe
-			if data.selectorInt != nil {
-				newDf = df.Filter(data.selectorInt)
-			} else if data.selectorBool != nil {
-				newDf = df.Filter(data.selectorBool)
-			}
+			newDf := df.Filter(data.selector)
 
 			if !vector.CompareVectorArrs(newDf.columns, data.dfColumns) {
 				t.Error(fmt.Sprintf("Columns (%v) are not equal to expected (%v)", newDf.columns, data.dfColumns))

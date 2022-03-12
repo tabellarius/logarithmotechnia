@@ -150,6 +150,12 @@ func TestDataframe_GroupBy(t *testing.T) {
 			isGrouped: false,
 		},
 		{
+			name:      "no groups",
+			df:        df.GroupBy(),
+			groupedBy: []string{},
+			isGrouped: false,
+		},
+		{
 			name:      "grouped by mixed",
 			df:        df.GroupBy("C", "F", "A"),
 			groupedBy: []string{"C", "A"},

@@ -272,6 +272,7 @@ func TestDataframe_C(t *testing.T) {
 		{0, nil},
 		{4, nil},
 		{"some", nil},
+		{2 + 2i, nil},
 	}
 
 	for i, data := range testData {
