@@ -182,3 +182,34 @@ func TestDataframe_GroupBy(t *testing.T) {
 		})
 	}
 }
+
+func TestDataframe_Ungroup(t *testing.T) {
+	df := New([]Column{
+		{"A", vector.Integer([]int{100, 200, 200, 30, 30})},
+		{"B", vector.IntegerWithNA([]int{100, 100, 40, 30, 40}, []bool{false, true, true, true, false})},
+		{"C", vector.Boolean([]bool{true, false, true, false, true})},
+		{"D", vector.String([]string{"1", "2", "3", "4", "5"})},
+	})
+	testData := []struct {
+		name string
+		df   *Dataframe
+	}{
+		{
+			name: "non-grouped",
+			df:   df,
+		},
+		{
+			name: "grouped",
+			df:   df.GroupBy("A"),
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			isGrouped := data.df.Ungroup().IsGrouped()
+			if isGrouped != false {
+				t.Error(fmt.Sprintf("isGrouped (%v) is not equal to false", isGrouped))
+			}
+		})
+	}
+}
