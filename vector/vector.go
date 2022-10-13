@@ -709,24 +709,24 @@ func (v *vector) Gt(val interface{}) []bool {
 }
 
 func (v *vector) Lt(val interface{}) []bool {
-	if comparable, ok := v.payload.(Comparable); ok {
-		return comparable.Lt(val)
+	if comparee, ok := v.payload.(Comparable); ok {
+		return comparee.Lt(val)
 	}
 
 	return make([]bool, v.length)
 }
 
 func (v *vector) Gte(val interface{}) []bool {
-	if comparable, ok := v.payload.(Comparable); ok {
-		return comparable.Gte(val)
+	if comparee, ok := v.payload.(Comparable); ok {
+		return comparee.Gte(val)
 	}
 
 	return make([]bool, v.length)
 }
 
 func (v *vector) Lte(val interface{}) []bool {
-	if comparable, ok := v.payload.(Comparable); ok {
-		return comparable.Lte(val)
+	if comparee, ok := v.payload.(Comparable); ok {
+		return comparee.Lte(val)
 	}
 
 	return make([]bool, v.length)
