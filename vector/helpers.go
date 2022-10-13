@@ -105,3 +105,16 @@ func CompareVectorArrs(arr1, arr2 []Vector) bool {
 
 	return true
 }
+
+func Combine(vecs ...Vector) Vector {
+	if len(vecs) == 0 {
+		return nil
+	}
+
+	cmbVec := vecs[0]
+	for i := 1; i < len(vecs); i++ {
+		cmbVec = cmbVec.Append(vecs[i])
+	}
+
+	return cmbVec
+}

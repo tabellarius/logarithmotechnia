@@ -11,6 +11,8 @@ const KeyOptionColumnNames = "column_names"
 const KeyOptionArrangeReverse = "arrange_reverse"
 const KeyOptionArrangeReverseColumns = "arrange_reverse_columns"
 const KeyOptionJoinBy = "join_by_columns"
+const KeyOptionGroupIndex = "group_index"
+const KeyOptionVectorName = "vector_name"
 
 //deprecated
 type Config struct {
@@ -107,4 +109,12 @@ func OptionArrangeReverseColumns(columns ...string) Option {
 
 func OptionJoinBy(by ...string) Option {
 	return ConfOption{KeyOptionJoinBy, by}
+}
+
+func OptionGroupIndex(index GroupIndex) Option {
+	return ConfOption{KeyOptionGroupIndex, index}
+}
+
+func OptionVectorName(name string) Option {
+	return ConfOption{KeyOptionVectorName, name}
 }

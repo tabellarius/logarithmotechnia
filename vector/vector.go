@@ -8,6 +8,9 @@ import (
 // Vector is an interface for a different vector types. This structure is similar to R-vectors: it starts from 1,
 // allows for an extensive indexing, supports IsNA-values and named variables
 type Vector interface {
+	Name() string
+	SetName(name string) Vector
+
 	Type() string
 	Len() int
 	Payload() Payload
@@ -26,7 +29,9 @@ type Vector interface {
 	Groups() ([][]int, []interface{})
 	Ungroup() Vector
 	IsGrouped() bool
-	GroupByIndices([][]int) Vector
+	GroupByIndices(index GroupIndex) Vector
+	GroupVectors() []Vector
+	GroupFirstElements() []int
 
 	IsEmpty() bool
 
@@ -162,9 +167,20 @@ type Factorable interface {
 
 // vector holds data and functions shared by all vectors
 type vector struct {
-	length  int
-	payload Payload
-	groups  []Vector
+	name       string
+	length     int
+	payload    Payload
+	groupIndex GroupIndex
+}
+
+func (v *vector) Name() string {
+	return v.name
+}
+
+func (v *vector) SetName(name string) Vector {
+	v.name = name
+
+	return v
 }
 
 func (v *vector) Type() string {
@@ -368,21 +384,45 @@ func (v *vector) Groups() ([][]int, []interface{}) {
 }
 
 func (v *vector) IsGrouped() bool {
-	return len(v.groups) > 0
+	return v.groupIndex != nil
 }
 
-func (v *vector) GroupByIndices(groups [][]int) Vector {
+func (v *vector) GroupByIndices(groups GroupIndex) Vector {
 	if len(groups) == 0 {
 		return v
 	}
 
 	newVec := New(v.payload, v.Options()...).(*vector)
-	newVec.groups = make([]Vector, len(groups))
-	for i, indices := range groups {
-		newVec.groups[i] = newVec.ByIndices(indices)
-	}
+	newVec.groupIndex = groups
 
 	return newVec
+}
+
+func (v *vector) GroupVectors() []Vector {
+	if !v.IsGrouped() {
+		return nil
+	}
+
+	vectors := make([]Vector, len(v.groupIndex))
+	for i, indices := range v.groupIndex {
+		vectors[i] = v.ByIndices(indices)
+	}
+
+	return vectors
+}
+
+func (v *vector) GroupFirstElements() []int {
+	indices := []int{}
+
+	if v.IsGrouped() {
+		if v.Len() > 0 {
+			indices = v.groupIndex.FirstElements()
+		}
+	} else {
+		indices = append(indices, 1)
+	}
+
+	return indices
 }
 
 func (v *vector) Ungroup() Vector {
@@ -638,8 +678,8 @@ func (v *vector) Has(needle interface{}) bool {
 }
 
 func (v *vector) Eq(val interface{}) []bool {
-	if comparable, ok := v.payload.(Comparable); ok {
-		return comparable.Eq(val)
+	if comparee, ok := v.payload.(Comparable); ok {
+		return comparee.Eq(val)
 	}
 
 	return make([]bool, v.length)
@@ -648,8 +688,8 @@ func (v *vector) Eq(val interface{}) []bool {
 /* Comparable interface */
 
 func (v *vector) Neq(val interface{}) []bool {
-	if comparable, ok := v.payload.(Comparable); ok {
-		return comparable.Neq(val)
+	if comparee, ok := v.payload.(Comparable); ok {
+		return comparee.Neq(val)
 	}
 
 	cmp := make([]bool, v.length)
@@ -661,32 +701,32 @@ func (v *vector) Neq(val interface{}) []bool {
 }
 
 func (v *vector) Gt(val interface{}) []bool {
-	if comparable, ok := v.payload.(Comparable); ok {
-		return comparable.Gt(val)
+	if comparee, ok := v.payload.(Comparable); ok {
+		return comparee.Gt(val)
 	}
 
 	return make([]bool, v.length)
 }
 
 func (v *vector) Lt(val interface{}) []bool {
-	if comparable, ok := v.payload.(Comparable); ok {
-		return comparable.Lt(val)
+	if comparee, ok := v.payload.(Comparable); ok {
+		return comparee.Lt(val)
 	}
 
 	return make([]bool, v.length)
 }
 
 func (v *vector) Gte(val interface{}) []bool {
-	if comparable, ok := v.payload.(Comparable); ok {
-		return comparable.Gte(val)
+	if comparee, ok := v.payload.(Comparable); ok {
+		return comparee.Gte(val)
 	}
 
 	return make([]bool, v.length)
 }
 
 func (v *vector) Lte(val interface{}) []bool {
-	if comparable, ok := v.payload.(Comparable); ok {
-		return comparable.Lte(val)
+	if comparee, ok := v.payload.(Comparable); ok {
+		return comparee.Lte(val)
 	}
 
 	return make([]bool, v.length)
@@ -775,15 +815,27 @@ func (v *vector) IsSameLevels(factor Factorable) bool {
 }
 
 func (v *vector) Options() []Option {
-	return []Option{}
+	return []Option{
+		OptionVectorName(v.name),
+	}
 }
 
 // New creates a vector part of the future vector. This function is used by public functions which create
 // typed vectors
-func New(payload Payload, _ ...Option) Vector {
+func New(payload Payload, options ...Option) Vector {
 	vec := vector{
 		length:  payload.Len(),
 		payload: payload,
+	}
+
+	for _, option := range options {
+		if option == nil {
+			continue
+		}
+
+		if option.Key() == KeyOptionVectorName {
+			vec.name = option.Value().(string)
+		}
 	}
 
 	return &vec
