@@ -11,7 +11,7 @@ import (
 func TestNew(t *testing.T) {
 	testData := []struct {
 		name          string
-		columns       []vector.Vector
+		columns       interface{}
 		columnNames   []string
 		dfColumns     []vector.Vector
 		dfColumnNames []string
@@ -27,6 +27,13 @@ func TestNew(t *testing.T) {
 			name:          "empty with column names",
 			columns:       []vector.Vector{},
 			columnNames:   []string{"one", "two", "three"},
+			dfColumns:     []vector.Vector{},
+			dfColumnNames: []string{},
+		},
+		{
+			name:          "incorrect data type",
+			columns:       []int{1, 2, 3},
+			columnNames:   []string{},
 			dfColumns:     []vector.Vector{},
 			dfColumnNames: []string{},
 		},

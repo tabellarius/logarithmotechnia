@@ -678,8 +678,8 @@ func (v *vector) Has(needle interface{}) bool {
 }
 
 func (v *vector) Eq(val interface{}) []bool {
-	if comparable, ok := v.payload.(Comparable); ok {
-		return comparable.Eq(val)
+	if comparee, ok := v.payload.(Comparable); ok {
+		return comparee.Eq(val)
 	}
 
 	return make([]bool, v.length)
@@ -688,8 +688,8 @@ func (v *vector) Eq(val interface{}) []bool {
 /* Comparable interface */
 
 func (v *vector) Neq(val interface{}) []bool {
-	if comparable, ok := v.payload.(Comparable); ok {
-		return comparable.Neq(val)
+	if comparee, ok := v.payload.(Comparable); ok {
+		return comparee.Neq(val)
 	}
 
 	cmp := make([]bool, v.length)
@@ -701,8 +701,8 @@ func (v *vector) Neq(val interface{}) []bool {
 }
 
 func (v *vector) Gt(val interface{}) []bool {
-	if comparable, ok := v.payload.(Comparable); ok {
-		return comparable.Gt(val)
+	if comparee, ok := v.payload.(Comparable); ok {
+		return comparee.Gt(val)
 	}
 
 	return make([]bool, v.length)
@@ -829,6 +829,10 @@ func New(payload Payload, options ...Option) Vector {
 	}
 
 	for _, option := range options {
+		if option == nil {
+			continue
+		}
+
 		if option.Key() == KeyOptionVectorName {
 			vec.name = option.Value().(string)
 		}
