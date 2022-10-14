@@ -1235,3 +1235,33 @@ func TestIntegerPayload_Pick(t *testing.T) {
 		})
 	}
 }
+
+func TestIntegerPayload_Data(t *testing.T) {
+	testData := []struct {
+		name    string
+		payload Payload
+		outData []interface{}
+	}{
+		{
+			name:    "empty",
+			payload: IntegerPayload([]int{}, []bool{}),
+			outData: []interface{}{},
+		},
+		{
+			name:    "non-empty",
+			payload: IntegerPayload([]int{1, 2, 3, 4, 5}, []bool{false, false, true, true, false}),
+			outData: []interface{}{1, 2, nil, nil, 5},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			payloadData := data.payload.Data()
+
+			if !reflect.DeepEqual(payloadData, data.outData) {
+				t.Error(fmt.Sprintf("Result of Data() (%v) do not match expected (%v)",
+					payloadData, data.outData))
+			}
+		})
+	}
+}

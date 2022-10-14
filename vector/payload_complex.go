@@ -32,11 +32,11 @@ func (p *complexPayload) Len() int {
 }
 
 func (p *complexPayload) Pick(idx int) interface{} {
-	return pickWithNA(idx, p.data, p.na, p.length)
+	return pickValueWithNA(idx, p.data, p.na, p.length)
 }
 
 func (p *complexPayload) Data() []interface{} {
-	return nil
+	return dataWithNAToInterfaceArray(p.data, p.na)
 }
 
 func (p *complexPayload) ByIndices(indices []int) Payload {

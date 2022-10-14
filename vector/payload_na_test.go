@@ -725,3 +725,33 @@ func TestNaPayload_Pick(t *testing.T) {
 		})
 	}
 }
+
+func TestNaPayload_Data(t *testing.T) {
+	testData := []struct {
+		name    string
+		payload Payload
+		outData []interface{}
+	}{
+		{
+			name:    "empty",
+			payload: NAPayload(0),
+			outData: []interface{}{},
+		},
+		{
+			name:    "non-empty",
+			payload: NAPayload(5),
+			outData: []interface{}{nil, nil, nil, nil, nil},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			payloadData := data.payload.Data()
+
+			if !reflect.DeepEqual(payloadData, data.outData) {
+				t.Error(fmt.Sprintf("Result of Data() (%v) do not match expected (%v)",
+					payloadData, data.outData))
+			}
+		})
+	}
+}

@@ -1219,3 +1219,33 @@ func TestBooleanPayload_Pick(t *testing.T) {
 		})
 	}
 }
+
+func TestBooleanPayload_Data(t *testing.T) {
+	testData := []struct {
+		name    string
+		payload Payload
+		outData []interface{}
+	}{
+		{
+			name:    "empty",
+			payload: BooleanPayload([]bool{}, []bool{}),
+			outData: []interface{}{},
+		},
+		{
+			name:    "non-empty",
+			payload: BooleanPayload([]bool{true, false, true, false, true}, []bool{false, false, true, true, false}),
+			outData: []interface{}{true, false, nil, nil, true},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			payloadData := data.payload.Data()
+
+			if !reflect.DeepEqual(payloadData, data.outData) {
+				t.Error(fmt.Sprintf("Result of Data() (%v) do not match expected (%v)",
+					payloadData, data.outData))
+			}
+		})
+	}
+}

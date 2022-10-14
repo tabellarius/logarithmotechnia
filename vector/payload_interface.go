@@ -39,11 +39,11 @@ func (p *interfacePayload) Len() int {
 }
 
 func (p *interfacePayload) Pick(idx int) interface{} {
-	return pickWithNA(idx, p.data, p.na, p.length)
+	return pickValueWithNA(idx, p.data, p.na, p.length)
 }
 
 func (p *interfacePayload) Data() []interface{} {
-	return nil
+	return dataWithNAToInterfaceArray(p.data, p.na)
 }
 
 func (p *interfacePayload) ByIndices(indices []int) Payload {

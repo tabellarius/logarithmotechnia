@@ -27,11 +27,11 @@ func (p *booleanPayload) Len() int {
 }
 
 func (p *booleanPayload) Pick(idx int) interface{} {
-	return pickWithNA(idx, p.data, p.na, p.length)
+	return pickValueWithNA(idx, p.data, p.na, p.length)
 }
 
 func (p *booleanPayload) Data() []interface{} {
-	return nil
+	return dataWithNAToInterfaceArray(p.data, p.na)
 }
 
 func (p *booleanPayload) ByIndices(indices []int) Payload {

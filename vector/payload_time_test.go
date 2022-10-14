@@ -1111,3 +1111,35 @@ func TestTimePayload_Pick(t *testing.T) {
 		})
 	}
 }
+
+func TestTimePayload_Data(t *testing.T) {
+	times := toTimeData([]string{"2021-01-01T12:30:00+03:00", "0001-01-01T00:00:00Z", "2020-01-01T12:30:00+03:00"})
+
+	testData := []struct {
+		name    string
+		payload Payload
+		outData []interface{}
+	}{
+		{
+			name:    "empty",
+			payload: TimePayload([]time.Time{}, []bool{}),
+			outData: []interface{}{},
+		},
+		{
+			name:    "non-empty",
+			payload: TimePayload(times, []bool{false, true, false}),
+			outData: []interface{}{times[0], nil, times[2]},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			payloadData := data.payload.Data()
+
+			if !reflect.DeepEqual(payloadData, data.outData) {
+				t.Error(fmt.Sprintf("Result of Data() (%v) do not match expected (%v)",
+					payloadData, data.outData))
+			}
+		})
+	}
+}

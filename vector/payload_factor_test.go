@@ -1748,3 +1748,33 @@ func TestFactorPayload_Pick(t *testing.T) {
 		})
 	}
 }
+
+func TestFactorPayload_Data(t *testing.T) {
+	testData := []struct {
+		name    string
+		payload Payload
+		outData []interface{}
+	}{
+		{
+			name:    "empty",
+			payload: FactorPayload([]string{}, []bool{}),
+			outData: []interface{}{},
+		},
+		{
+			name:    "non-empty",
+			payload: FactorPayload([]string{"a", "b", "a", "b", "c"}, []bool{false, false, true, true, false}),
+			outData: []interface{}{"a", "b", nil, nil, "c"},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			payloadData := data.payload.Data()
+
+			if !reflect.DeepEqual(payloadData, data.outData) {
+				t.Error(fmt.Sprintf("Result of Data() (%v) do not match expected (%v)",
+					payloadData, data.outData))
+			}
+		})
+	}
+}

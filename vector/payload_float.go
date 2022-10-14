@@ -33,11 +33,11 @@ func (p *floatPayload) Len() int {
 }
 
 func (p *floatPayload) Pick(idx int) interface{} {
-	return pickWithNA(idx, p.data, p.na, p.length)
+	return pickValueWithNA(idx, p.data, p.na, p.length)
 }
 
 func (p *floatPayload) Data() []interface{} {
-	return nil
+	return dataWithNAToInterfaceArray(p.data, p.na)
 }
 
 func (p *floatPayload) ByIndices(indices []int) Payload {
