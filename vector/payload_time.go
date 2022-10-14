@@ -30,6 +30,14 @@ func (p *timePayload) Len() int {
 	return p.length
 }
 
+func (p *timePayload) Pick(idx int) interface{} {
+	return pickValueWithNA(idx, p.data, p.na, p.length)
+}
+
+func (p *timePayload) Data() []interface{} {
+	return dataWithNAToInterfaceArray(p.data, p.na)
+}
+
 func (p *timePayload) ByIndices(indices []int) Payload {
 	data := make([]time.Time, 0, len(indices))
 	na := make([]bool, 0, len(indices))

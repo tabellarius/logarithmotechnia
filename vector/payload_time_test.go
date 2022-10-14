@@ -1063,3 +1063,83 @@ func TestTimePayload_Coalesce(t *testing.T) {
 		})
 	}
 }
+
+func TestTimePayload_Pick(t *testing.T) {
+	times := toTimeData([]string{"2021-01-01T12:30:00+03:00", "0001-01-01T00:00:00Z", "2020-01-01T12:30:00+03:00"})
+	payload := TimePayload(times, []bool{false, true, false})
+
+	testData := []struct {
+		name string
+		idx  int
+		val  interface{}
+	}{
+		{
+			name: "normal 1",
+			idx:  1,
+			val:  interface{}(times[0]),
+		},
+		{
+			name: "normal 3",
+			idx:  3,
+			val:  interface{}(times[2]),
+		},
+		{
+			name: "na",
+			idx:  2,
+			val:  nil,
+		},
+		{
+			name: "out of bounds -1",
+			idx:  -1,
+			val:  nil,
+		},
+		{
+			name: "out of bounds 4",
+			idx:  4,
+			val:  nil,
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			val := payload.Pick(data.idx)
+
+			if val != data.val {
+				t.Error(fmt.Sprintf("Result of Pick() (%v) do not match expected (%v)",
+					val, data.val))
+			}
+		})
+	}
+}
+
+func TestTimePayload_Data(t *testing.T) {
+	times := toTimeData([]string{"2021-01-01T12:30:00+03:00", "0001-01-01T00:00:00Z", "2020-01-01T12:30:00+03:00"})
+
+	testData := []struct {
+		name    string
+		payload Payload
+		outData []interface{}
+	}{
+		{
+			name:    "empty",
+			payload: TimePayload([]time.Time{}, []bool{}),
+			outData: []interface{}{},
+		},
+		{
+			name:    "non-empty",
+			payload: TimePayload(times, []bool{false, true, false}),
+			outData: []interface{}{times[0], nil, times[2]},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			payloadData := data.payload.Data()
+
+			if !reflect.DeepEqual(payloadData, data.outData) {
+				t.Error(fmt.Sprintf("Result of Data() (%v) do not match expected (%v)",
+					payloadData, data.outData))
+			}
+		})
+	}
+}

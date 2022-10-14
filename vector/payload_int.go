@@ -30,6 +30,14 @@ func (p *integerPayload) Len() int {
 	return p.length
 }
 
+func (p *integerPayload) Pick(idx int) interface{} {
+	return pickValueWithNA(idx, p.data, p.na, p.length)
+}
+
+func (p *integerPayload) Data() []interface{} {
+	return dataWithNAToInterfaceArray(p.data, p.na)
+}
+
 func (p *integerPayload) ByIndices(indices []int) Payload {
 	data := make([]int, 0, len(indices))
 	na := make([]bool, 0, len(indices))

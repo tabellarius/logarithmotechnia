@@ -32,6 +32,14 @@ func (p *floatPayload) Len() int {
 	return p.length
 }
 
+func (p *floatPayload) Pick(idx int) interface{} {
+	return pickValueWithNA(idx, p.data, p.na, p.length)
+}
+
+func (p *floatPayload) Data() []interface{} {
+	return dataWithNAToInterfaceArray(p.data, p.na)
+}
+
 func (p *floatPayload) ByIndices(indices []int) Payload {
 	data := make([]float64, 0, len(indices))
 	na := make([]bool, 0, len(indices))

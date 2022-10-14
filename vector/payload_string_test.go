@@ -1151,3 +1151,80 @@ func TestStringPayload_Coalesce(t *testing.T) {
 		})
 	}
 }
+
+func TestStringPayload_Pick(t *testing.T) {
+	payload := FactorPayload([]string{"a", "b", "a", "b", "c"}, []bool{false, false, true, true, false})
+
+	testData := []struct {
+		name string
+		idx  int
+		val  interface{}
+	}{
+		{
+			name: "normal 2",
+			idx:  2,
+			val:  interface{}("b"),
+		},
+		{
+			name: "normal 5",
+			idx:  5,
+			val:  interface{}("c"),
+		},
+		{
+			name: "na",
+			idx:  3,
+			val:  nil,
+		},
+		{
+			name: "out of bounds -1",
+			idx:  -1,
+			val:  nil,
+		},
+		{
+			name: "out of bounds 6",
+			idx:  6,
+			val:  nil,
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			val := payload.Pick(data.idx)
+
+			if val != data.val {
+				t.Error(fmt.Sprintf("Result of Pick() (%v) do not match expected (%v)",
+					val, data.val))
+			}
+		})
+	}
+}
+
+func TestStringPayload_Data(t *testing.T) {
+	testData := []struct {
+		name    string
+		payload Payload
+		outData []interface{}
+	}{
+		{
+			name:    "empty",
+			payload: StringPayload([]string{}, []bool{}),
+			outData: []interface{}{},
+		},
+		{
+			name:    "non-empty",
+			payload: StringPayload([]string{"a", "b", "a", "b", "c"}, []bool{false, false, true, true, false}),
+			outData: []interface{}{"a", "b", nil, nil, "c"},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			payloadData := data.payload.Data()
+
+			if !reflect.DeepEqual(payloadData, data.outData) {
+				t.Error(fmt.Sprintf("Result of Data() (%v) do not match expected (%v)",
+					payloadData, data.outData))
+			}
+		})
+	}
+}

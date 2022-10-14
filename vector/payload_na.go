@@ -20,6 +20,20 @@ func (p *naPayload) Len() int {
 	return p.length
 }
 
+func (p *naPayload) Pick(int) interface{} {
+	return nil
+}
+
+func (p *naPayload) Data() []interface{} {
+	outData := make([]interface{}, p.length)
+
+	for i := 0; i < p.length; i++ {
+		outData[i] = nil
+	}
+
+	return outData
+}
+
 func (p *naPayload) ByIndices(indices []int) Payload {
 	length := 0
 
