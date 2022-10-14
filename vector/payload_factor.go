@@ -26,6 +26,24 @@ func (p *factorPayload) Len() int {
 	return p.length
 }
 
+func (p *factorPayload) Pick(idx int) interface{} {
+	val := pick(idx, p.data, p.length)
+
+	if val == nil {
+		return nil
+	}
+
+	if val.(uint32) == 0 {
+		return nil
+	}
+
+	return p.levels[int(val.(uint32))]
+}
+
+func (p *factorPayload) Data() []interface{} {
+	return nil
+}
+
 func (p *factorPayload) ByIndices(indices []int) Payload {
 	data := make([]uint32, len(indices))
 

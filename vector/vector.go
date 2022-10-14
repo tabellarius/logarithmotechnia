@@ -77,6 +77,8 @@ type Payload interface {
 	Append(payload Payload) Payload
 	Adjust(size int) Payload
 	Options() []Option
+	Pick(idx int) interface{}
+	Data() []interface{}
 }
 
 type Whichable interface {
