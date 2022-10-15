@@ -961,7 +961,7 @@ func TestBooleanPayload_Lt(t *testing.T) {
 		cmp []bool
 	}{
 		{true, []bool{false, false, false, false, false}},
-		{false, []bool{false, false, false, false, false}},
+		{false, []bool{true, false, true, false, true}},
 		{1, []bool{false, false, false, false, false}},
 	}
 
@@ -984,7 +984,7 @@ func TestBooleanPayload_Gt(t *testing.T) {
 		val interface{}
 		cmp []bool
 	}{
-		{true, []bool{false, false, false, false, false}},
+		{true, []bool{false, true, false, true, false}},
 		{false, []bool{false, false, false, false, false}},
 		{1, []bool{false, false, false, false, false}},
 	}
@@ -1008,8 +1008,8 @@ func TestBooleanPayload_Lte(t *testing.T) {
 		val interface{}
 		cmp []bool
 	}{
-		{true, []bool{false, false, false, false, false}},
-		{false, []bool{false, false, false, false, false}},
+		{true, []bool{true, false, true, false, true}},
+		{false, []bool{true, true, true, true, true}},
 		{1, []bool{false, false, false, false, false}},
 	}
 
@@ -1032,8 +1032,8 @@ func TestBooleanPayload_Gte(t *testing.T) {
 		val interface{}
 		cmp []bool
 	}{
-		{true, []bool{false, false, false, false, false}},
-		{false, []bool{false, false, false, false, false}},
+		{true, []bool{true, true, true, true, true}},
+		{false, []bool{false, true, false, true, false}},
 		{1, []bool{false, false, false, false, false}},
 	}
 

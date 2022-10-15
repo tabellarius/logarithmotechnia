@@ -480,6 +480,7 @@ func (p *booleanPayload) Eq(val interface{}) []bool {
 func (p *booleanPayload) Neq(val interface{}) []bool {
 	cmp := make([]bool, p.length)
 	v, ok := val.(bool)
+
 	if !ok {
 		for i := range p.data {
 			cmp[i] = true
@@ -499,26 +500,78 @@ func (p *booleanPayload) Neq(val interface{}) []bool {
 	return cmp
 }
 
-func (p *booleanPayload) Gt(interface{}) []bool {
+func (p *booleanPayload) Gt(val interface{}) []bool {
 	cmp := make([]bool, p.length)
+
+	v, ok := val.(bool)
+	if !ok {
+		return cmp
+	}
+
+	for i, datum := range p.data {
+		if p.na[i] {
+			cmp[i] = false
+		} else {
+			cmp[i] = v == true && datum == false
+		}
+	}
 
 	return cmp
 }
 
-func (p *booleanPayload) Lt(interface{}) []bool {
+func (p *booleanPayload) Lt(val interface{}) []bool {
 	cmp := make([]bool, p.length)
+
+	v, ok := val.(bool)
+	if !ok {
+		return cmp
+	}
+
+	for i, datum := range p.data {
+		if p.na[i] {
+			cmp[i] = false
+		} else {
+			cmp[i] = v == false && datum == true
+		}
+	}
 
 	return cmp
 }
 
-func (p *booleanPayload) Gte(interface{}) []bool {
+func (p *booleanPayload) Gte(val interface{}) []bool {
 	cmp := make([]bool, p.length)
+
+	v, ok := val.(bool)
+	if !ok {
+		return cmp
+	}
+
+	for i, datum := range p.data {
+		if p.na[i] {
+			cmp[i] = false
+		} else {
+			cmp[i] = !(v == false && datum == true)
+		}
+	}
 
 	return cmp
 }
 
-func (p *booleanPayload) Lte(interface{}) []bool {
+func (p *booleanPayload) Lte(val interface{}) []bool {
 	cmp := make([]bool, p.length)
+
+	v, ok := val.(bool)
+	if !ok {
+		return cmp
+	}
+
+	for i, datum := range p.data {
+		if p.na[i] {
+			cmp[i] = false
+		} else {
+			cmp[i] = !(v == true && datum == false)
+		}
+	}
 
 	return cmp
 }

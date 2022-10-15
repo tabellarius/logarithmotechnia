@@ -25,6 +25,8 @@ type Vector interface {
 	Apply(applier interface{}) Vector
 	Append(vec Vector) Vector
 	Adjust(size int) Vector
+	Pick(idx int) interface{}
+	Data() []interface{}
 
 	Groups() ([][]int, []interface{})
 	Ungroup() Vector
@@ -375,6 +377,14 @@ func (v *vector) Adjust(size int) Vector {
 	newPayload := v.payload.Adjust(size)
 
 	return New(newPayload, v.Options()...)
+}
+
+func (v *vector) Pick(idx int) interface{} {
+	return v.payload.Pick(idx)
+}
+
+func (v *vector) Data() []interface{} {
+	return v.payload.Data()
 }
 
 func (v *vector) Groups() ([][]int, []interface{}) {
