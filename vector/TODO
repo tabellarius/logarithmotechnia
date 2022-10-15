@@ -1,3 +1,4 @@
+ApplyTo(whicher, applier)
 extra/decimal
 Arithmetic functions
 Finder interface for InterfacePayload
@@ -6,3 +7,5 @@ Comparator for Interface payload(?)
 Add NewDefNAable() for DefNAble
 Review type conversions
 Add df.Err and logger
+ToMap() - конвертация данных в map
+ToStructs() - конвертация данных в массив структур
