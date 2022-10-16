@@ -41,27 +41,9 @@ func (p *floatPayload) Data() []interface{} {
 }
 
 func (p *floatPayload) ByIndices(indices []int) Payload {
-	data := make([]float64, 0, len(indices))
-	na := make([]bool, 0, len(indices))
+	data, na := byIndices(indices, p.data, p.na, math.NaN())
 
-	for _, idx := range indices {
-		if idx == 0 {
-			data = append(data, math.NaN())
-			na = append(na, true)
-		} else {
-			data = append(data, p.data[idx-1])
-			na = append(na, p.na[idx-1])
-		}
-	}
-
-	return &floatPayload{
-		length:  len(data),
-		data:    data,
-		printer: p.printer,
-		DefNAble: DefNAble{
-			na: na,
-		},
-	}
+	return FloatPayload(data, na, p.Options()...)
 }
 
 func (p *floatPayload) SupportsWhicher(whicher interface{}) bool {
@@ -354,13 +336,13 @@ func (p *floatPayload) Adjust(size int) Payload {
 }
 
 func (p *floatPayload) adjustToLesserSize(size int) Payload {
-	data, na := adjustToLesserSize(p.data, p.na, size)
+	data, na := adjustToLesserSizeWithNA(p.data, p.na, size)
 
 	return FloatPayload(data, na, p.Options()...)
 }
 
 func (p *floatPayload) adjustToBiggerSize(size int) Payload {
-	data, na := adjustToBiggerSize(p.data, p.na, p.length, size)
+	data, na := adjustToBiggerSizeWithNA(p.data, p.na, p.length, size)
 
 	return FloatPayload(data, na, p.Options()...)
 }

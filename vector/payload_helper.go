@@ -35,7 +35,24 @@ func dataWithNAToInterfaceArray[T any](data []T, na []bool) []interface{} {
 	return outData
 }
 
-func adjustToLesserSize[T any](srcData []T, srcNA []bool, size int) ([]T, []bool) {
+func byIndices[T any](indices []int, srcData []T, srcNA []bool, naDef T) ([]T, []bool) {
+	data := make([]T, 0, len(indices))
+	na := make([]bool, 0, len(indices))
+
+	for _, idx := range indices {
+		if idx == 0 {
+			data = append(data, naDef)
+			na = append(na, true)
+		} else {
+			data = append(data, srcData[idx-1])
+			na = append(na, srcNA[idx-1])
+		}
+	}
+
+	return data, na
+}
+
+func adjustToLesserSizeWithNA[T any](srcData []T, srcNA []bool, size int) ([]T, []bool) {
 	data := make([]T, size)
 	na := make([]bool, size)
 
@@ -45,7 +62,7 @@ func adjustToLesserSize[T any](srcData []T, srcNA []bool, size int) ([]T, []bool
 	return data, na
 }
 
-func adjustToBiggerSize[T any](srcData []T, srcNA []bool, length int, size int) ([]T, []bool) {
+func adjustToBiggerSizeWithNA[T any](srcData []T, srcNA []bool, length int, size int) ([]T, []bool) {
 	cycles := size / length
 	if size%length > 0 {
 		cycles++
@@ -63,6 +80,31 @@ func adjustToBiggerSize[T any](srcData []T, srcNA []bool, length int, size int) 
 	na = na[:size]
 
 	return data, na
+}
+
+func adjustToLesserSize[T any](srcData []T, size int) []T {
+	data := make([]T, size)
+
+	copy(data, srcData)
+
+	return data
+}
+
+func adjustToBiggerSize[T any](srcData []T, length int, size int) []T {
+	cycles := size / length
+	if size%length > 0 {
+		cycles++
+	}
+
+	data := make([]T, cycles*length)
+
+	for i := 0; i < cycles; i++ {
+		copy(data[i*length:], srcData)
+	}
+
+	data = data[:size]
+
+	return data
 }
 
 func applyByFunc[T any](inData []T, inNA []bool, length int,

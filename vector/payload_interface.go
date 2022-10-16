@@ -47,27 +47,9 @@ func (p *interfacePayload) Data() []interface{} {
 }
 
 func (p *interfacePayload) ByIndices(indices []int) Payload {
-	data := make([]interface{}, 0, len(indices))
-	na := make([]bool, 0, len(indices))
+	data, na := byIndices(indices, p.data, p.na, nil)
 
-	for _, idx := range indices {
-		if idx == 0 {
-			data = append(data, nil)
-			na = append(na, true)
-		} else {
-			data = append(data, p.data[idx-1])
-			na = append(na, p.na[idx-1])
-		}
-	}
-
-	return &interfacePayload{
-		length:  len(data),
-		data:    data,
-		printer: p.printer,
-		DefNAble: DefNAble{
-			na: na,
-		},
-	}
+	return InterfacePayload(data, na, p.Options()...)
 }
 
 func (p *interfacePayload) StrForElem(idx int) string {
@@ -368,13 +350,13 @@ func (p *interfacePayload) Adjust(size int) Payload {
 }
 
 func (p *interfacePayload) adjustToLesserSize(size int) Payload {
-	data, na := adjustToLesserSize(p.data, p.na, size)
+	data, na := adjustToLesserSizeWithNA(p.data, p.na, size)
 
 	return InterfacePayload(data, na, p.Options()...)
 }
 
 func (p *interfacePayload) adjustToBiggerSize(size int) Payload {
-	data, na := adjustToBiggerSize(p.data, p.na, p.length, size)
+	data, na := adjustToBiggerSizeWithNA(p.data, p.na, p.length, size)
 
 	return InterfacePayload(data, na, p.Options()...)
 }

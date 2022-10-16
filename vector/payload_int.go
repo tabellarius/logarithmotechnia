@@ -39,18 +39,7 @@ func (p *integerPayload) Data() []interface{} {
 }
 
 func (p *integerPayload) ByIndices(indices []int) Payload {
-	data := make([]int, 0, len(indices))
-	na := make([]bool, 0, len(indices))
-
-	for _, idx := range indices {
-		if idx == 0 {
-			data = append(data, 0)
-			na = append(na, true)
-		} else {
-			data = append(data, p.data[idx-1])
-			na = append(na, p.na[idx-1])
-		}
-	}
+	data, na := byIndices(indices, p.data, p.na, 0)
 
 	return IntegerPayload(data, na, p.Options()...)
 }
@@ -325,13 +314,13 @@ func (p *integerPayload) Adjust(size int) Payload {
 }
 
 func (p *integerPayload) adjustToLesserSize(size int) Payload {
-	data, na := adjustToLesserSize(p.data, p.na, size)
+	data, na := adjustToLesserSizeWithNA(p.data, p.na, size)
 
 	return IntegerPayload(data, na, p.Options()...)
 }
 
 func (p *integerPayload) adjustToBiggerSize(size int) Payload {
-	data, na := adjustToBiggerSize(p.data, p.na, p.length, size)
+	data, na := adjustToBiggerSizeWithNA(p.data, p.na, p.length, size)
 
 	return IntegerPayload(data, na, p.Options()...)
 }
