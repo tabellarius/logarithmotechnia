@@ -322,31 +322,13 @@ func (p *complexPayload) Adjust(size int) Payload {
 }
 
 func (p *complexPayload) adjustToLesserSize(size int) Payload {
-	data := make([]complex128, size)
-	na := make([]bool, size)
-
-	copy(data, p.data)
-	copy(na, p.na)
+	data, na := adjustToLesserSize(p.data, p.na, size)
 
 	return ComplexPayload(data, na, p.Options()...)
 }
 
 func (p *complexPayload) adjustToBiggerSize(size int) Payload {
-	cycles := size / p.length
-	if size%p.length > 0 {
-		cycles++
-	}
-
-	data := make([]complex128, cycles*p.length)
-	na := make([]bool, cycles*p.length)
-
-	for i := 0; i < cycles; i++ {
-		copy(data[i*p.length:], p.data)
-		copy(na[i*p.length:], p.na)
-	}
-
-	data = data[:size]
-	na = na[:size]
+	data, na := adjustToBiggerSize(p.data, p.na, p.length, size)
 
 	return ComplexPayload(data, na, p.Options()...)
 }

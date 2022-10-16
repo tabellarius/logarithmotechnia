@@ -83,9 +83,7 @@ func (p *factorPayload) Adjust(size int) Payload {
 func (p *factorPayload) adjustToLesserSize(size int) Payload {
 	data := make([]uint32, size)
 
-	for i := 0; i < size; i++ {
-		data[i] = p.data[i]
-	}
+	copy(data, p.data)
 
 	return factorPayloadFromFactorData(data, p.levels, p.Options()...)
 }

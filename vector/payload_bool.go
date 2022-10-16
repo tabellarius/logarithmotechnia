@@ -326,31 +326,13 @@ func (p *booleanPayload) Adjust(size int) Payload {
 }
 
 func (p *booleanPayload) adjustToLesserSize(size int) Payload {
-	data := make([]bool, size)
-	na := make([]bool, size)
-
-	copy(data, p.data)
-	copy(na, p.na)
+	data, na := adjustToLesserSize(p.data, p.na, size)
 
 	return BooleanPayload(data, na)
 }
 
 func (p *booleanPayload) adjustToBiggerSize(size int) Payload {
-	cycles := size / p.length
-	if size%p.length > 0 {
-		cycles++
-	}
-
-	data := make([]bool, cycles*p.length)
-	na := make([]bool, cycles*p.length)
-
-	for i := 0; i < cycles; i++ {
-		copy(data[i*p.length:], p.data)
-		copy(na[i*p.length:], p.na)
-	}
-
-	data = data[:size]
-	na = na[:size]
+	data, na := adjustToBiggerSize(p.data, p.na, p.length, size)
 
 	return BooleanPayload(data, na)
 }
