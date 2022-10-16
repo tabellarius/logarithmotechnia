@@ -46,13 +46,13 @@ type Vector interface {
 	Complexable
 	Timeable
 	Interfaceable
-	AsInteger() Vector
+	AsInteger(options ...Option) Vector
 	AsFloat(options ...Option) Vector
 	AsComplex(options ...Option) Vector
-	AsBoolean() Vector
-	AsString() Vector
-	AsTime() Vector
-	AsInterface() Vector
+	AsBoolean(options ...Option) Vector
+	AsString(options ...Option) Vector
+	AsTime(options ...Option) Vector
+	AsInterface(options ...Option) Vector
 	Transform(fn TransformFunc) Vector
 
 	Finder
@@ -582,11 +582,11 @@ func (v *vector) Interfaces() ([]interface{}, []bool) {
 	return NA(v.length).Interfaces()
 }
 
-func (v *vector) AsInteger() Vector {
+func (v *vector) AsInteger(options ...Option) Vector {
 	if payload, ok := v.payload.(Intable); ok {
 		values, na := payload.Integers()
 
-		return IntegerWithNA(values, na)
+		return IntegerWithNA(values, na, options...)
 	}
 
 	return NA(v.length)
@@ -612,41 +612,41 @@ func (v *vector) AsComplex(options ...Option) Vector {
 	return NA(v.length)
 }
 
-func (v *vector) AsBoolean() Vector {
+func (v *vector) AsBoolean(options ...Option) Vector {
 	if payload, ok := v.payload.(Boolable); ok {
 		values, na := payload.Booleans()
 
-		return BooleanWithNA(values, na)
+		return BooleanWithNA(values, na, options...)
 	}
 
 	return NA(v.length)
 }
 
-func (v *vector) AsString() Vector {
+func (v *vector) AsString(options ...Option) Vector {
 	if payload, ok := v.payload.(Stringable); ok {
 		values, na := payload.Strings()
 
-		return StringWithNA(values, na)
+		return StringWithNA(values, na, options...)
 	}
 
 	return NA(v.length)
 }
 
-func (v *vector) AsTime() Vector {
+func (v *vector) AsTime(options ...Option) Vector {
 	if payload, ok := v.payload.(Timeable); ok {
 		values, na := payload.Times()
 
-		return TimeWithNA(values, na)
+		return TimeWithNA(values, na, options...)
 	}
 
 	return NA(v.length)
 }
 
-func (v *vector) AsInterface() Vector {
+func (v *vector) AsInterface(options ...Option) Vector {
 	if payload, ok := v.payload.(Interfaceable); ok {
 		values, na := payload.Interfaces()
 
-		return InterfaceWithNA(values, na)
+		return InterfaceWithNA(values, na, options...)
 	}
 
 	return NA(v.length)
