@@ -7,5 +7,3 @@ Comparator for Interface payload(?)
 Add NewDefNAable() for DefNAble
 Review type conversions
 Add df.Err and logger
-ToMap() - конвертация данных в map
-ToStructs() - конвертация данных в массив структур

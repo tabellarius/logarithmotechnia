@@ -246,6 +246,11 @@ func (p *factorPayload) applyToStringByCompactFunc(applyFunc StringToStringAppli
 	return StringPayload(data, na, p.Options()...)
 }
 
+func (p *factorPayload) ApplyTo(whicher interface{}, applier interface{}) Payload {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (p *factorPayload) SupportsSummarizer(summarizer interface{}) bool {
 	if _, ok := summarizer.(StringSummarizerFunc); ok {
 		return true

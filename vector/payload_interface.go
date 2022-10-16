@@ -155,35 +155,20 @@ func (p *interfacePayload) Apply(applier interface{}) Payload {
 }
 
 func (p *interfacePayload) applyToInterfaceByFunc(applyFunc InterfaceToInterfaceApplierFunc) Payload {
-	data := make([]interface{}, p.length)
-	na := make([]bool, p.length)
-
-	for i := 0; i < p.length; i++ {
-		dataVal, naVal := applyFunc(i+1, p.data[i], p.na[i])
-		if naVal {
-			dataVal = nil
-		}
-		data[i] = dataVal
-		na[i] = naVal
-	}
+	data, na := applyByFunc(p.data, p.na, p.length, applyFunc, nil)
 
 	return InterfacePayload(data, na, p.Options()...)
 }
 
 func (p *interfacePayload) applyToInterfaceByCompactFunc(applyFunc InterfaceToInterfaceApplierCompactFunc) Payload {
-	data := make([]interface{}, p.length)
-	na := make([]bool, p.length)
-
-	for i := 0; i < p.length; i++ {
-		dataVal, naVal := applyFunc(p.data[i], p.na[i])
-		if naVal {
-			dataVal = nil
-		}
-		data[i] = dataVal
-		na[i] = naVal
-	}
+	data, na := applyByCompactFunc(p.data, p.na, p.length, applyFunc, nil)
 
 	return InterfacePayload(data, na, p.Options()...)
+}
+
+func (p *interfacePayload) ApplyTo(whicher interface{}, applier interface{}) Payload {
+	//TODO implement me
+	panic("implement me")
 }
 
 func (p *interfacePayload) SupportsSummarizer(summarizer interface{}) bool {

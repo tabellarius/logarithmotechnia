@@ -129,35 +129,20 @@ func (p *integerPayload) Apply(applier interface{}) Payload {
 }
 
 func (p *integerPayload) applyToIntegerByFunc(applyFunc IntegerToIntegerApplierFunc) Payload {
-	data := make([]int, p.length)
-	na := make([]bool, p.length)
-
-	for i := 0; i < p.length; i++ {
-		dataVal, naVal := applyFunc(i+1, p.data[i], p.na[i])
-		if naVal {
-			dataVal = 0
-		}
-		data[i] = dataVal
-		na[i] = naVal
-	}
+	data, na := applyByFunc(p.data, p.na, p.length, applyFunc, 0)
 
 	return IntegerPayload(data, na, p.Options()...)
 }
 
 func (p *integerPayload) applyToIntegerByCompactFunc(applyFunc IntegerToIntegerApplierCompactFunc) Payload {
-	data := make([]int, p.length)
-	na := make([]bool, p.length)
-
-	for i := 0; i < p.length; i++ {
-		dataVal, naVal := applyFunc(p.data[i], p.na[i])
-		if naVal {
-			dataVal = 0
-		}
-		data[i] = dataVal
-		na[i] = naVal
-	}
+	data, na := applyByCompactFunc(p.data, p.na, p.length, applyFunc, 0)
 
 	return IntegerPayload(data, na, p.Options()...)
+}
+
+func (p *integerPayload) ApplyTo(whicher interface{}, applier interface{}) Payload {
+	//TODO implement me
+	panic("implement me")
 }
 
 func (p *integerPayload) SupportsSummarizer(summarizer interface{}) bool {

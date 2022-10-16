@@ -137,35 +137,20 @@ func (p *floatPayload) Apply(applier interface{}) Payload {
 }
 
 func (p *floatPayload) applyToFloatByFunc(applyFunc FloatToFloatApplierFunc) Payload {
-	data := make([]float64, p.length)
-	na := make([]bool, p.length)
-
-	for i := 0; i < p.length; i++ {
-		dataVal, naVal := applyFunc(i+1, p.data[i], p.na[i])
-		if naVal {
-			dataVal = math.NaN()
-		}
-		data[i] = dataVal
-		na[i] = naVal
-	}
+	data, na := applyByFunc(p.data, p.na, p.length, applyFunc, math.NaN())
 
 	return FloatPayload(data, na, p.Options()...)
 }
 
 func (p *floatPayload) applyToFloatByCompactFunc(applyFunc FloatToFloatApplierCompactFunc) Payload {
-	data := make([]float64, p.length)
-	na := make([]bool, p.length)
-
-	for i := 0; i < p.length; i++ {
-		dataVal, naVal := applyFunc(p.data[i], p.na[i])
-		if naVal {
-			dataVal = math.NaN()
-		}
-		data[i] = dataVal
-		na[i] = naVal
-	}
+	data, na := applyByCompactFunc(p.data, p.na, p.length, applyFunc, math.NaN())
 
 	return FloatPayload(data, na, p.Options()...)
+}
+
+func (p *floatPayload) ApplyTo(whicher interface{}, applier interface{}) Payload {
+	//TODO implement me
+	panic("implement me")
 }
 
 func (p *floatPayload) SupportsSummarizer(summarizer interface{}) bool {

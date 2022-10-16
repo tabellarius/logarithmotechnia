@@ -118,47 +118,32 @@ func (p *complexPayload) SupportsApplier(applier interface{}) bool {
 
 func (p *complexPayload) Apply(applier interface{}) Payload {
 	if applyFunc, ok := applier.(ComplexToComplexApplierFunc); ok {
-		return p.applyToComplexByFunc(applyFunc)
+		return p.applyComplexByFunc(applyFunc)
 	}
 
 	if applyFunc, ok := applier.(ComplexToComplexApplierCompactFunc); ok {
-		return p.applyToComplexByCompactFunc(applyFunc)
+		return p.applyComplexByCompactFunc(applyFunc)
 	}
 
 	return NAPayload(p.length)
 
 }
 
-func (p *complexPayload) applyToComplexByFunc(applyFunc ComplexToComplexApplierFunc) Payload {
-	data := make([]complex128, p.length)
-	na := make([]bool, p.length)
-
-	for i := 0; i < p.length; i++ {
-		dataVal, naVal := applyFunc(i+1, p.data[i], p.na[i])
-		if naVal {
-			dataVal = cmplx.NaN()
-		}
-		data[i] = dataVal
-		na[i] = naVal
-	}
+func (p *complexPayload) applyComplexByFunc(applyFunc ComplexToComplexApplierFunc) Payload {
+	data, na := applyByFunc(p.data, p.na, p.length, applyFunc, cmplx.NaN())
 
 	return ComplexPayload(data, na, p.Options()...)
 }
 
-func (p *complexPayload) applyToComplexByCompactFunc(applyFunc ComplexToComplexApplierCompactFunc) Payload {
-	data := make([]complex128, p.length)
-	na := make([]bool, p.length)
-
-	for i := 0; i < p.length; i++ {
-		dataVal, naVal := applyFunc(p.data[i], p.na[i])
-		if naVal {
-			dataVal = cmplx.NaN()
-		}
-		data[i] = dataVal
-		na[i] = naVal
-	}
+func (p *complexPayload) applyComplexByCompactFunc(applyFunc ComplexToComplexApplierCompactFunc) Payload {
+	data, na := applyByCompactFunc(p.data, p.na, p.length, applyFunc, cmplx.NaN())
 
 	return ComplexPayload(data, na, p.Options()...)
+}
+
+func (p *complexPayload) ApplyTo(whicher interface{}, applier interface{}) Payload {
+	//TODO implement me
+	panic("implement me")
 }
 
 func (p *complexPayload) SupportsSummarizer(summarizer interface{}) bool {

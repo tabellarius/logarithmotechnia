@@ -113,46 +113,31 @@ func (p *booleanPayload) SupportsApplier(applier interface{}) bool {
 
 func (p *booleanPayload) Apply(applier interface{}) Payload {
 	if applyFunc, ok := applier.(BooleanToBooleanApplierFunc); ok {
-		return p.applyToBooleanByFunc(applyFunc)
+		return p.applyBooleanByFunc(applyFunc)
 	}
 
 	if applyFunc, ok := applier.(BooleanToBooleanApplierCompactFunc); ok {
-		return p.applyToBooleanByCompactFunc(applyFunc)
+		return p.applyBooleanByCompactFunc(applyFunc)
 	}
 
 	return NAPayload(p.length)
 }
 
-func (p *booleanPayload) applyToBooleanByFunc(applyFunc BooleanToBooleanApplierFunc) Payload {
-	data := make([]bool, p.length)
-	na := make([]bool, p.length)
-
-	for i := 0; i < p.length; i++ {
-		dataVal, naVal := applyFunc(i+1, p.data[i], p.na[i])
-		if naVal {
-			dataVal = false
-		}
-		data[i] = dataVal
-		na[i] = naVal
-	}
+func (p *booleanPayload) applyBooleanByFunc(applyFunc BooleanToBooleanApplierFunc) Payload {
+	data, na := applyByFunc(p.data, p.na, p.length, applyFunc, false)
 
 	return BooleanPayload(data, na, p.Options()...)
 }
 
-func (p *booleanPayload) applyToBooleanByCompactFunc(applyFunc BooleanToBooleanApplierCompactFunc) Payload {
-	data := make([]bool, p.length)
-	na := make([]bool, p.length)
-
-	for i := 0; i < p.length; i++ {
-		dataVal, naVal := applyFunc(p.data[i], p.na[i])
-		if naVal {
-			dataVal = false
-		}
-		data[i] = dataVal
-		na[i] = naVal
-	}
+func (p *booleanPayload) applyBooleanByCompactFunc(applyFunc BooleanToBooleanApplierCompactFunc) Payload {
+	data, na := applyByCompactFunc(p.data, p.na, p.length, applyFunc, false)
 
 	return BooleanPayload(data, na, p.Options()...)
+}
+
+func (p *booleanPayload) ApplyTo(whicher interface{}, applier interface{}) Payload {
+	//TODO implement me
+	panic("implement me")
 }
 
 func (p *booleanPayload) SupportsSummarizer(summarizer interface{}) bool {

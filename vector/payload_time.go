@@ -128,35 +128,20 @@ func (p *timePayload) Apply(applier interface{}) Payload {
 }
 
 func (p *timePayload) applyToTimeByFunc(applyFunc TimeToTimeApplierFunc) Payload {
-	data := make([]time.Time, p.length)
-	na := make([]bool, p.length)
-
-	for i := 0; i < p.length; i++ {
-		dataVal, naVal := applyFunc(i+1, p.data[i], p.na[i])
-		if naVal {
-			dataVal = time.Time{}
-		}
-		data[i] = dataVal
-		na[i] = naVal
-	}
+	data, na := applyByFunc(p.data, p.na, p.length, applyFunc, time.Time{})
 
 	return TimePayload(data, na)
 }
 
 func (p *timePayload) applyToTimeByCompactFunc(applyFunc TimeToTimeApplierCompactFunc) Payload {
-	data := make([]time.Time, p.length)
-	na := make([]bool, p.length)
-
-	for i := 0; i < p.length; i++ {
-		dataVal, naVal := applyFunc(p.data[i], p.na[i])
-		if naVal {
-			dataVal = time.Time{}
-		}
-		data[i] = dataVal
-		na[i] = naVal
-	}
+	data, na := applyByCompactFunc(p.data, p.na, p.length, applyFunc, time.Time{})
 
 	return TimePayload(data, na)
+}
+
+func (p *timePayload) ApplyTo(whicher interface{}, applier interface{}) Payload {
+	//TODO implement me
+	panic("implement me")
 }
 
 func (p *timePayload) SupportsSummarizer(summarizer interface{}) bool {
