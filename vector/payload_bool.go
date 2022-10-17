@@ -54,38 +54,14 @@ func (p *booleanPayload) SupportsWhicher(whicher interface{}) bool {
 
 func (p *booleanPayload) Which(whicher interface{}) []bool {
 	if byFunc, ok := whicher.(BooleanWhicherFunc); ok {
-		return p.selectByFunc(byFunc)
+		return selectByFunc(p.data, p.na, byFunc)
 	}
 
 	if byFunc, ok := whicher.(BooleanWhicherCompactFunc); ok {
-		return p.selectByCompactFunc(byFunc)
+		return selectByCompactFunc(p.data, p.na, byFunc)
 	}
 
 	return make([]bool, p.length)
-}
-
-func (p *booleanPayload) selectByFunc(byFunc BooleanWhicherFunc) []bool {
-	booleans := make([]bool, p.length)
-
-	for idx, val := range p.data {
-		if byFunc(idx+1, val, p.na[idx]) {
-			booleans[idx] = true
-		}
-	}
-
-	return booleans
-}
-
-func (p *booleanPayload) selectByCompactFunc(byFunc BooleanWhicherCompactFunc) []bool {
-	booleans := make([]bool, p.length)
-
-	for idx, val := range p.data {
-		if byFunc(val, p.na[idx]) {
-			booleans[idx] = true
-		}
-	}
-
-	return booleans
 }
 
 func (p *booleanPayload) SupportsApplier(applier interface{}) bool {

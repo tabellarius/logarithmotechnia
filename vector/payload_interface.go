@@ -78,38 +78,14 @@ func (p *interfacePayload) SupportsWhicher(whicher interface{}) bool {
 
 func (p *interfacePayload) Which(whicher interface{}) []bool {
 	if byFunc, ok := whicher.(InterfaceWhicherFunc); ok {
-		return p.selectByFunc(byFunc)
+		return selectByFunc(p.data, p.na, byFunc)
 	}
 
 	if byFunc, ok := whicher.(InterfaceWhicherCompactFunc); ok {
-		return p.selectByCompactFunc(byFunc)
+		return selectByCompactFunc(p.data, p.na, byFunc)
 	}
 
 	return make([]bool, p.length)
-}
-
-func (p *interfacePayload) selectByFunc(byFunc InterfaceWhicherFunc) []bool {
-	booleans := make([]bool, p.length)
-
-	for idx, val := range p.data {
-		if byFunc(idx+1, val, p.na[idx]) {
-			booleans[idx] = true
-		}
-	}
-
-	return booleans
-}
-
-func (p *interfacePayload) selectByCompactFunc(byFunc InterfaceWhicherCompactFunc) []bool {
-	booleans := make([]bool, p.length)
-
-	for idx, val := range p.data {
-		if byFunc(val, p.na[idx]) {
-			booleans[idx] = true
-		}
-	}
-
-	return booleans
 }
 
 func (p *interfacePayload) SupportsApplier(applier interface{}) bool {

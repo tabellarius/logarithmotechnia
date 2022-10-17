@@ -228,3 +228,27 @@ func groupsForData[T comparable](srcData []T, srcNA []bool) ([][]int, []interfac
 
 	return groups, values
 }
+
+func selectByFunc[T any](inData []T, inNA []bool, byFunc func(int, T, bool) bool) []bool {
+	booleans := make([]bool, len(inData))
+
+	for idx, val := range inData {
+		if byFunc(idx+1, val, inNA[idx]) {
+			booleans[idx] = true
+		}
+	}
+
+	return booleans
+}
+
+func selectByCompactFunc[T any](inData []T, inNA []bool, byFunc func(T, bool) bool) []bool {
+	booleans := make([]bool, len(inData))
+
+	for idx, val := range inData {
+		if byFunc(val, inNA[idx]) {
+			booleans[idx] = true
+		}
+	}
+
+	return booleans
+}

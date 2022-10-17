@@ -58,38 +58,14 @@ func (p *timePayload) SupportsWhicher(whicher interface{}) bool {
 
 func (p *timePayload) Which(whicher interface{}) []bool {
 	if byFunc, ok := whicher.(TimeWhicherFunc); ok {
-		return p.selectByFunc(byFunc)
+		return selectByFunc(p.data, p.na, byFunc)
 	}
 
 	if byFunc, ok := whicher.(TimeWhicherCompactFunc); ok {
-		return p.selectByCompactFunc(byFunc)
+		return selectByCompactFunc(p.data, p.na, byFunc)
 	}
 
 	return make([]bool, p.length)
-}
-
-func (p *timePayload) selectByFunc(byFunc TimeWhicherFunc) []bool {
-	booleans := make([]bool, p.length)
-
-	for idx, val := range p.data {
-		if byFunc(idx+1, val, p.na[idx]) {
-			booleans[idx] = true
-		}
-	}
-
-	return booleans
-}
-
-func (p *timePayload) selectByCompactFunc(byFunc TimeWhicherCompactFunc) []bool {
-	booleans := make([]bool, p.length)
-
-	for idx, val := range p.data {
-		if byFunc(val, p.na[idx]) {
-			booleans[idx] = true
-		}
-	}
-
-	return booleans
 }
 
 func (p *timePayload) SupportsApplier(applier interface{}) bool {
