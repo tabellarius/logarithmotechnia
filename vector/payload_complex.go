@@ -83,27 +83,19 @@ func (p *complexPayload) SupportsApplier(applier interface{}) bool {
 
 func (p *complexPayload) Apply(applier interface{}) Payload {
 	if applyFunc, ok := applier.(ComplexApplierFunc); ok {
-		return p.applyByFunc(applyFunc)
+		data, na := applyByFunc(p.data, p.na, p.length, applyFunc, cmplx.NaN())
+
+		return ComplexPayload(data, na, p.Options()...)
 	}
 
 	if applyFunc, ok := applier.(ComplexApplierCompactFunc); ok {
-		return p.applyComplexByCompactFunc(applyFunc)
+		data, na := applyByCompactFunc(p.data, p.na, p.length, applyFunc, cmplx.NaN())
+
+		return ComplexPayload(data, na, p.Options()...)
 	}
 
 	return NAPayload(p.length)
 
-}
-
-func (p *complexPayload) applyByFunc(applyFunc ComplexApplierFunc) Payload {
-	data, na := applyByFunc(p.data, p.na, p.length, applyFunc, cmplx.NaN())
-
-	return ComplexPayload(data, na, p.Options()...)
-}
-
-func (p *complexPayload) applyComplexByCompactFunc(applyFunc ComplexApplierCompactFunc) Payload {
-	data, na := applyByCompactFunc(p.data, p.na, p.length, applyFunc, cmplx.NaN())
-
-	return ComplexPayload(data, na, p.Options()...)
 }
 
 func (p *complexPayload) ApplyTo(indices []int, applier interface{}) Payload {

@@ -78,26 +78,18 @@ func (p *booleanPayload) SupportsApplier(applier interface{}) bool {
 
 func (p *booleanPayload) Apply(applier interface{}) Payload {
 	if applyFunc, ok := applier.(BooleanApplierFunc); ok {
-		return p.applyByFunc(applyFunc)
+		data, na := applyByFunc(p.data, p.na, p.length, applyFunc, false)
+
+		return BooleanPayload(data, na, p.Options()...)
 	}
 
 	if applyFunc, ok := applier.(BooleanApplierCompactFunc); ok {
-		return p.applyByCompactFunc(applyFunc)
+		data, na := applyByCompactFunc(p.data, p.na, p.length, applyFunc, false)
+
+		return BooleanPayload(data, na, p.Options()...)
 	}
 
 	return NAPayload(p.length)
-}
-
-func (p *booleanPayload) applyByFunc(applyFunc BooleanApplierFunc) Payload {
-	data, na := applyByFunc(p.data, p.na, p.length, applyFunc, false)
-
-	return BooleanPayload(data, na, p.Options()...)
-}
-
-func (p *booleanPayload) applyByCompactFunc(applyFunc BooleanApplierCompactFunc) Payload {
-	data, na := applyByCompactFunc(p.data, p.na, p.length, applyFunc, false)
-
-	return BooleanPayload(data, na, p.Options()...)
 }
 
 func (p *booleanPayload) ApplyTo(indices []int, applier interface{}) Payload {

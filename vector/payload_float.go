@@ -84,26 +84,18 @@ func (p *floatPayload) SupportsApplier(applier interface{}) bool {
 
 func (p *floatPayload) Apply(applier interface{}) Payload {
 	if applyFunc, ok := applier.(FloatApplierFunc); ok {
-		return p.applyByFunc(applyFunc)
+		data, na := applyByFunc(p.data, p.na, p.length, applyFunc, math.NaN())
+
+		return FloatPayload(data, na, p.Options()...)
 	}
 
 	if applyFunc, ok := applier.(FloatApplierCompactFunc); ok {
-		return p.applyByCompactFunc(applyFunc)
+		data, na := applyByCompactFunc(p.data, p.na, p.length, applyFunc, math.NaN())
+
+		return FloatPayload(data, na, p.Options()...)
 	}
 
 	return NAPayload(p.length)
-}
-
-func (p *floatPayload) applyByFunc(applyFunc FloatApplierFunc) Payload {
-	data, na := applyByFunc(p.data, p.na, p.length, applyFunc, math.NaN())
-
-	return FloatPayload(data, na, p.Options()...)
-}
-
-func (p *floatPayload) applyByCompactFunc(applyFunc FloatApplierCompactFunc) Payload {
-	data, na := applyByCompactFunc(p.data, p.na, p.length, applyFunc, math.NaN())
-
-	return FloatPayload(data, na, p.Options()...)
 }
 
 func (p *floatPayload) ApplyTo(indices []int, applier interface{}) Payload {

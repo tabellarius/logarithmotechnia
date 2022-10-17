@@ -82,26 +82,18 @@ func (p *timePayload) SupportsApplier(applier interface{}) bool {
 
 func (p *timePayload) Apply(applier interface{}) Payload {
 	if applyFunc, ok := applier.(TimeApplierFunc); ok {
-		return p.applyByFunc(applyFunc)
+		data, na := applyByFunc(p.data, p.na, p.length, applyFunc, time.Time{})
+
+		return TimePayload(data, na)
 	}
 
 	if applyFunc, ok := applier.(TimeApplierCompactFunc); ok {
-		return p.applyByCompactFunc(applyFunc)
+		data, na := applyByCompactFunc(p.data, p.na, p.length, applyFunc, time.Time{})
+
+		return TimePayload(data, na)
 	}
 
 	return NAPayload(p.length)
-}
-
-func (p *timePayload) applyByFunc(applyFunc TimeApplierFunc) Payload {
-	data, na := applyByFunc(p.data, p.na, p.length, applyFunc, time.Time{})
-
-	return TimePayload(data, na)
-}
-
-func (p *timePayload) applyByCompactFunc(applyFunc TimeApplierCompactFunc) Payload {
-	data, na := applyByCompactFunc(p.data, p.na, p.length, applyFunc, time.Time{})
-
-	return TimePayload(data, na)
 }
 
 func (p *timePayload) ApplyTo(indices []int, applier interface{}) Payload {

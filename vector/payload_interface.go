@@ -102,26 +102,18 @@ func (p *interfacePayload) SupportsApplier(applier interface{}) bool {
 
 func (p *interfacePayload) Apply(applier interface{}) Payload {
 	if applyFunc, ok := applier.(InterfaceApplierFunc); ok {
-		return p.applyByFunc(applyFunc)
+		data, na := applyByFunc(p.data, p.na, p.length, applyFunc, nil)
+
+		return InterfacePayload(data, na, p.Options()...)
 	}
 
 	if applyFunc, ok := applier.(InterfaceApplierCompactFunc); ok {
-		return p.applyByCompactFunc(applyFunc)
+		data, na := applyByCompactFunc(p.data, p.na, p.length, applyFunc, nil)
+
+		return InterfacePayload(data, na, p.Options()...)
 	}
 
 	return NAPayload(p.length)
-}
-
-func (p *interfacePayload) applyByFunc(applyFunc InterfaceApplierFunc) Payload {
-	data, na := applyByFunc(p.data, p.na, p.length, applyFunc, nil)
-
-	return InterfacePayload(data, na, p.Options()...)
-}
-
-func (p *interfacePayload) applyByCompactFunc(applyFunc InterfaceApplierCompactFunc) Payload {
-	data, na := applyByCompactFunc(p.data, p.na, p.length, applyFunc, nil)
-
-	return InterfacePayload(data, na, p.Options()...)
 }
 
 func (p *interfacePayload) ApplyTo(indices []int, applier interface{}) Payload {
