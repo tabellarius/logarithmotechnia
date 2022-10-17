@@ -277,7 +277,7 @@ func supportsWhicher[T any](whicher any) bool {
 	return false
 }
 
-func supportApplier[T any](applier any) bool {
+func supportsApplier[T any](applier any) bool {
 	if _, ok := applier.(func(int, T, bool) (T, bool)); ok {
 		return true
 	}
@@ -287,4 +287,35 @@ func supportApplier[T any](applier any) bool {
 	}
 
 	return false
+}
+
+func supportsSummarizer[T any](summarizer any) bool {
+	if _, ok := summarizer.(func(int, T, T, bool) (T, bool)); ok {
+		return true
+	}
+
+	return false
+}
+
+func summarize[T any](inData []T, inNA []bool, summarizer any, valInit T, naDef T) (T, bool) {
+	fn, ok := summarizer.(func(int, T, T, bool) (T, bool))
+	if ok {
+		return summarizeByFunc(inData, inNA, fn, valInit, naDef)
+	}
+
+	return naDef, true
+}
+
+func summarizeByFunc[T any](inData []T, inNA []bool, fn func(int, T, T, bool) (T, bool), valInit T, naDef T) (T, bool) {
+	val := valInit
+	na := false
+
+	for i := 0; i < len(inData); i++ {
+		val, na = fn(i+1, val, inData[i], inNA[i])
+		if na {
+			return naDef, true
+		}
+	}
+
+	return val, false
 }

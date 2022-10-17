@@ -1,5 +1,6 @@
 ApplyTo(whicher, applier)
 Add brief applier (only val)
+Add compact and brief summarizer
 extra/decimal
 Arithmetic functions
 Finder interface for InterfacePayload

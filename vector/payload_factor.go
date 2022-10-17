@@ -179,7 +179,7 @@ func (p *factorPayload) selectByCompactFunc(byFunc FactorWhicherCompactFunc) []b
 }
 
 func (p *factorPayload) SupportsApplier(applier any) bool {
-	return supportApplier[string](applier)
+	return supportsApplier[string](applier)
 }
 
 func (p *factorPayload) Apply(applier interface{}) Payload {
@@ -283,30 +283,33 @@ func (p *factorPayload) applyToStringByCompactFunc(indices []int, applyFunc Stri
 }
 
 func (p *factorPayload) SupportsSummarizer(summarizer interface{}) bool {
-	if _, ok := summarizer.(StringSummarizerFunc); ok {
-		return true
-	}
-
-	return false
+	return supportsSummarizer[string](summarizer)
 }
 
 func (p *factorPayload) Summarize(summarizer interface{}) Payload {
+	val := ""
+	na := true
+
 	fn, ok := summarizer.(StringSummarizerFunc)
-	if !ok {
-		return NAPayload(1)
+	if ok {
+		val, na = p.summarizeByFunc(fn)
 	}
 
+	return StringPayload([]string{val}, []bool{na}, p.Options()...)
+}
+
+func (p *factorPayload) summarizeByFunc(fn StringSummarizerFunc) (string, bool) {
 	val := ""
 	na := false
-	for i := 0; i < p.length; i++ {
-		val, na = fn(i+1, val, p.levels[p.data[i]], p.data[i] == 0)
 
+	for i := 0; i < len(p.data); i++ {
+		val, na = fn(i+1, val, p.levels[p.data[i]], p.data[i] == 0)
 		if na {
-			return NAPayload(1)
+			return "", true
 		}
 	}
 
-	return StringPayload([]string{val}, nil, p.Options()...)
+	return val, false
 }
 
 func (p *factorPayload) Integers() ([]int, []bool) {

@@ -50,7 +50,7 @@ func (p *stringPayload) Which(whicher any) []bool {
 }
 
 func (p *stringPayload) SupportsApplier(applier any) bool {
-	return supportApplier[string](applier)
+	return supportsApplier[string](applier)
 }
 
 func (p *stringPayload) Apply(applier any) Payload {
@@ -74,31 +74,14 @@ func (p *stringPayload) ApplyTo(indices []int, applier interface{}) Payload {
 	panic("implement me")
 }
 
-func (p *stringPayload) SupportsSummarizer(summarizer interface{}) bool {
-	if _, ok := summarizer.(StringSummarizerFunc); ok {
-		return true
-	}
-
-	return false
+func (p *stringPayload) SupportsSummarizer(summarizer any) bool {
+	return supportsSummarizer[string](summarizer)
 }
 
 func (p *stringPayload) Summarize(summarizer interface{}) Payload {
-	fn, ok := summarizer.(StringSummarizerFunc)
-	if !ok {
-		return NAPayload(1)
-	}
+	val, na := summarize(p.data, p.na, summarizer, "", "")
 
-	val := ""
-	na := false
-	for i := 0; i < p.length; i++ {
-		val, na = fn(i+1, val, p.data[i], p.na[i])
-
-		if na {
-			return NAPayload(1)
-		}
-	}
-
-	return StringPayload([]string{val}, nil, p.Options()...)
+	return StringPayload([]string{val}, []bool{na}, p.Options()...)
 }
 
 func (p *stringPayload) Integers() ([]int, []bool) {

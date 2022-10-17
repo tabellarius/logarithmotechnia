@@ -55,7 +55,7 @@ func (p *floatPayload) Which(whicher any) []bool {
 }
 
 func (p *floatPayload) SupportsApplier(applier any) bool {
-	return supportApplier[float64](applier)
+	return supportsApplier[float64](applier)
 }
 
 func (p *floatPayload) Apply(applier any) Payload {
@@ -79,31 +79,14 @@ func (p *floatPayload) ApplyTo(indices []int, applier interface{}) Payload {
 	panic("implement me")
 }
 
-func (p *floatPayload) SupportsSummarizer(summarizer interface{}) bool {
-	if _, ok := summarizer.(FloatSummarizerFunc); ok {
-		return true
-	}
-
-	return false
+func (p *floatPayload) SupportsSummarizer(summarizer any) bool {
+	return supportsSummarizer[float64](summarizer)
 }
 
 func (p *floatPayload) Summarize(summarizer interface{}) Payload {
-	fn, ok := summarizer.(FloatSummarizerFunc)
-	if !ok {
-		return NAPayload(1)
-	}
+	val, na := summarize(p.data, p.na, summarizer, 0.0, math.NaN())
 
-	val := 0.0
-	na := false
-	for i := 0; i < p.length; i++ {
-		val, na = fn(i+1, val, p.data[i], p.na[i])
-
-		if na {
-			return NAPayload(1)
-		}
-	}
-
-	return FloatPayload([]float64{val}, nil, p.Options()...)
+	return FloatPayload([]float64{val}, []bool{na}, p.Options()...)
 }
 
 func (p *floatPayload) Integers() ([]int, []bool) {

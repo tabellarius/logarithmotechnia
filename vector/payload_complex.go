@@ -54,7 +54,7 @@ func (p *complexPayload) Which(whicher any) []bool {
 }
 
 func (p *complexPayload) SupportsApplier(applier any) bool {
-	return supportApplier[complex128](applier)
+	return supportsApplier[complex128](applier)
 }
 
 func (p *complexPayload) Apply(applier any) Payload {
@@ -79,31 +79,14 @@ func (p *complexPayload) ApplyTo(indices []int, applier interface{}) Payload {
 	panic("implement me")
 }
 
-func (p *complexPayload) SupportsSummarizer(summarizer interface{}) bool {
-	if _, ok := summarizer.(ComplexSummarizerFunc); ok {
-		return true
-	}
-
-	return false
+func (p *complexPayload) SupportsSummarizer(summarizer any) bool {
+	return supportsSummarizer[complex128](summarizer)
 }
 
 func (p *complexPayload) Summarize(summarizer interface{}) Payload {
-	fn, ok := summarizer.(ComplexSummarizerFunc)
-	if !ok {
-		return NAPayload(1)
-	}
+	val, na := summarize(p.data, p.na, summarizer, 0+0i, cmplx.NaN())
 
-	val := 0 + 0i
-	na := false
-	for i := 0; i < p.length; i++ {
-		val, na = fn(i+1, val, p.data[i], p.na[i])
-
-		if na {
-			return NAPayload(1)
-		}
-	}
-
-	return ComplexPayload([]complex128{val}, nil, p.Options()...)
+	return ComplexPayload([]complex128{val}, []bool{na}, p.Options()...)
 }
 
 func (p *complexPayload) Integers() ([]int, []bool) {

@@ -53,7 +53,7 @@ func (p *timePayload) Which(whicher any) []bool {
 }
 
 func (p *timePayload) SupportsApplier(applier any) bool {
-	return supportApplier[time.Time](applier)
+	return supportsApplier[time.Time](applier)
 }
 
 func (p *timePayload) Apply(applier any) Payload {
@@ -77,31 +77,14 @@ func (p *timePayload) ApplyTo(indices []int, applier interface{}) Payload {
 	panic("implement me")
 }
 
-func (p *timePayload) SupportsSummarizer(summarizer interface{}) bool {
-	if _, ok := summarizer.(TimeSummarizerFunc); ok {
-		return true
-	}
-
-	return false
+func (p *timePayload) SupportsSummarizer(summarizer any) bool {
+	return supportsSummarizer[time.Time](summarizer)
 }
 
 func (p *timePayload) Summarize(summarizer interface{}) Payload {
-	fn, ok := summarizer.(TimeSummarizerFunc)
-	if !ok {
-		return NAPayload(1)
-	}
+	val, na := summarize(p.data, p.na, summarizer, time.Time{}, time.Time{})
 
-	val := time.Time{}
-	na := false
-	for i := 0; i < p.length; i++ {
-		val, na = fn(i+1, val, p.data[i], p.na[i])
-
-		if na {
-			return NAPayload(1)
-		}
-	}
-
-	return TimePayload([]time.Time{val}, nil)
+	return TimePayload([]time.Time{val}, []bool{na})
 }
 
 func (p *timePayload) Strings() ([]string, []bool) {

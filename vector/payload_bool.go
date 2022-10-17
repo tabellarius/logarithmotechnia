@@ -49,7 +49,7 @@ func (p *booleanPayload) Which(whicher any) []bool {
 }
 
 func (p *booleanPayload) SupportsApplier(applier any) bool {
-	return supportApplier[bool](applier)
+	return supportsApplier[bool](applier)
 }
 
 func (p *booleanPayload) Apply(applier any) Payload {
@@ -92,30 +92,14 @@ func (p *booleanPayload) applyToByCompactFunc(indices []int, applyFunc BooleanAp
 	return BooleanPayload(data, na, p.Options()...)
 }
 
-func (p *booleanPayload) SupportsSummarizer(summarizer interface{}) bool {
-	if _, ok := summarizer.(BooleanSummarizerFunc); ok {
-		return true
-	}
-
-	return false
+func (p *booleanPayload) SupportsSummarizer(summarizer any) bool {
+	return supportsSummarizer[bool](summarizer)
 }
 
-func (p *booleanPayload) Summarize(summarizer interface{}) Payload {
-	fn, ok := summarizer.(BooleanSummarizerFunc)
-	if !ok {
-		return NAPayload(1)
-	}
+func (p *booleanPayload) Summarize(summarizer any) Payload {
+	val, na := summarize(p.data, p.na, summarizer, false, false)
 
-	val := false
-	na := false
-	for i := 0; i < p.length; i++ {
-		val, na = fn(i+1, val, p.data[i], p.na[i])
-		if na {
-			return NAPayload(1)
-		}
-	}
-
-	return BooleanPayload([]bool{val}, nil, p.Options()...)
+	return BooleanPayload([]bool{val}, []bool{na}, p.Options()...)
 }
 
 func (p *booleanPayload) Integers() ([]int, []bool) {
