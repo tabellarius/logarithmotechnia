@@ -64,16 +64,8 @@ func (p *interfacePayload) StrForElem(idx int) string {
 	return ""
 }
 
-func (p *interfacePayload) SupportsWhicher(whicher interface{}) bool {
-	if _, ok := whicher.(InterfaceWhicherFunc); ok {
-		return true
-	}
-
-	if _, ok := whicher.(InterfaceWhicherCompactFunc); ok {
-		return true
-	}
-
-	return false
+func (p *interfacePayload) SupportsWhicher(whicher any) bool {
+	return supportsWhicher[any](whicher)
 }
 
 func (p *interfacePayload) Which(whicher interface{}) []bool {
@@ -88,16 +80,8 @@ func (p *interfacePayload) Which(whicher interface{}) []bool {
 	return make([]bool, p.length)
 }
 
-func (p *interfacePayload) SupportsApplier(applier interface{}) bool {
-	if _, ok := applier.(InterfaceApplierFunc); ok {
-		return true
-	}
-
-	if _, ok := applier.(InterfaceApplierCompactFunc); ok {
-		return true
-	}
-
-	return false
+func (p *interfacePayload) SupportsApplier(applier any) bool {
+	return supportApplier[any](applier)
 }
 
 func (p *interfacePayload) Apply(applier interface{}) Payload {

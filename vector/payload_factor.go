@@ -138,16 +138,8 @@ func (p *factorPayload) Append(payload Payload) Payload {
 	return FactorPayload(newVals, newNA, p.Options()...)
 }
 
-func (p *factorPayload) SupportsWhicher(whicher interface{}) bool {
-	if _, ok := whicher.(FactorWhicherFunc); ok {
-		return true
-	}
-
-	if _, ok := whicher.(FactorWhicherCompactFunc); ok {
-		return true
-	}
-
-	return false
+func (p *factorPayload) SupportsWhicher(whicher any) bool {
+	return supportsWhicher[string](whicher)
 }
 
 func (p *factorPayload) Which(whicher interface{}) []bool {
@@ -186,16 +178,8 @@ func (p *factorPayload) selectByCompactFunc(byFunc FactorWhicherCompactFunc) []b
 	return booleans
 }
 
-func (p *factorPayload) SupportsApplier(applier interface{}) bool {
-	if _, ok := applier.(StringApplierFunc); ok {
-		return true
-	}
-
-	if _, ok := applier.(StringApplierCompactFunc); ok {
-		return true
-	}
-
-	return false
+func (p *factorPayload) SupportsApplier(applier any) bool {
+	return supportApplier[string](applier)
 }
 
 func (p *factorPayload) Apply(applier interface{}) Payload {

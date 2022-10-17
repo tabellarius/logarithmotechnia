@@ -40,16 +40,8 @@ func (p *booleanPayload) ByIndices(indices []int) Payload {
 	return BooleanPayload(data, na, p.Options()...)
 }
 
-func (p *booleanPayload) SupportsWhicher(whicher interface{}) bool {
-	if _, ok := whicher.(BooleanWhicherFunc); ok {
-		return true
-	}
-
-	if _, ok := whicher.(BooleanWhicherCompactFunc); ok {
-		return true
-	}
-
-	return false
+func (p *booleanPayload) SupportsWhicher(whicher any) bool {
+	return supportsWhicher[bool](whicher)
 }
 
 func (p *booleanPayload) Which(whicher interface{}) []bool {
@@ -64,16 +56,8 @@ func (p *booleanPayload) Which(whicher interface{}) []bool {
 	return make([]bool, p.length)
 }
 
-func (p *booleanPayload) SupportsApplier(applier interface{}) bool {
-	if _, ok := applier.(BooleanApplierFunc); ok {
-		return true
-	}
-
-	if _, ok := applier.(BooleanApplierCompactFunc); ok {
-		return true
-	}
-
-	return false
+func (p *booleanPayload) SupportsApplier(applier any) bool {
+	return supportApplier[bool](applier)
 }
 
 func (p *booleanPayload) Apply(applier interface{}) Payload {

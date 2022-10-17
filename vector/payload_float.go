@@ -46,16 +46,8 @@ func (p *floatPayload) ByIndices(indices []int) Payload {
 	return FloatPayload(data, na, p.Options()...)
 }
 
-func (p *floatPayload) SupportsWhicher(whicher interface{}) bool {
-	if _, ok := whicher.(FloatWhicherFunc); ok {
-		return true
-	}
-
-	if _, ok := whicher.(FloatWhicherCompactFunc); ok {
-		return true
-	}
-
-	return false
+func (p *floatPayload) SupportsWhicher(whicher any) bool {
+	return supportsWhicher[float64](whicher)
 }
 
 func (p *floatPayload) Which(whicher interface{}) []bool {
@@ -70,16 +62,8 @@ func (p *floatPayload) Which(whicher interface{}) []bool {
 	return make([]bool, p.length)
 }
 
-func (p *floatPayload) SupportsApplier(applier interface{}) bool {
-	if _, ok := applier.(FloatApplierFunc); ok {
-		return true
-	}
-
-	if _, ok := applier.(FloatApplierCompactFunc); ok {
-		return true
-	}
-
-	return false
+func (p *floatPayload) SupportsApplier(applier any) bool {
+	return supportApplier[float64](applier)
 }
 
 func (p *floatPayload) Apply(applier interface{}) Payload {

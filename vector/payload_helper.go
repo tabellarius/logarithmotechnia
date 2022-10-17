@@ -252,3 +252,27 @@ func selectByCompactFunc[T any](inData []T, inNA []bool, byFunc func(T, bool) bo
 
 	return booleans
 }
+
+func supportsWhicher[T any](whicher any) bool {
+	if _, ok := whicher.(func(int, T, bool) bool); ok {
+		return true
+	}
+
+	if _, ok := whicher.(func(T, bool) bool); ok {
+		return true
+	}
+
+	return false
+}
+
+func supportApplier[T any](applier any) bool {
+	if _, ok := applier.(func(int, T, bool) (T, bool)); ok {
+		return true
+	}
+
+	if _, ok := applier.(func(T, bool) (T, bool)); ok {
+		return true
+	}
+
+	return false
+}

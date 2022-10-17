@@ -45,16 +45,8 @@ func (p *complexPayload) ByIndices(indices []int) Payload {
 	return ComplexPayload(data, na, p.Options()...)
 }
 
-func (p *complexPayload) SupportsWhicher(whicher interface{}) bool {
-	if _, ok := whicher.(ComplexWhicherFunc); ok {
-		return true
-	}
-
-	if _, ok := whicher.(ComplexWhicherCompactFunc); ok {
-		return true
-	}
-
-	return false
+func (p *complexPayload) SupportsWhicher(whicher any) bool {
+	return supportsWhicher[complex128](whicher)
 }
 
 func (p *complexPayload) Which(whicher interface{}) []bool {
@@ -69,16 +61,8 @@ func (p *complexPayload) Which(whicher interface{}) []bool {
 	return make([]bool, p.length)
 }
 
-func (p *complexPayload) SupportsApplier(applier interface{}) bool {
-	if _, ok := applier.(ComplexApplierFunc); ok {
-		return true
-	}
-
-	if _, ok := applier.(ComplexApplierCompactFunc); ok {
-		return true
-	}
-
-	return false
+func (p *complexPayload) SupportsApplier(applier any) bool {
+	return supportApplier[complex128](applier)
 }
 
 func (p *complexPayload) Apply(applier interface{}) Payload {

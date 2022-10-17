@@ -44,16 +44,8 @@ func (p *timePayload) ByIndices(indices []int) Payload {
 	return TimePayload(data, na, p.Options()...)
 }
 
-func (p *timePayload) SupportsWhicher(whicher interface{}) bool {
-	if _, ok := whicher.(TimeWhicherFunc); ok {
-		return true
-	}
-
-	if _, ok := whicher.(TimeWhicherCompactFunc); ok {
-		return true
-	}
-
-	return false
+func (p *timePayload) SupportsWhicher(whicher any) bool {
+	return supportsWhicher[time.Time](whicher)
 }
 
 func (p *timePayload) Which(whicher interface{}) []bool {
@@ -68,16 +60,8 @@ func (p *timePayload) Which(whicher interface{}) []bool {
 	return make([]bool, p.length)
 }
 
-func (p *timePayload) SupportsApplier(applier interface{}) bool {
-	if _, ok := applier.(TimeApplierFunc); ok {
-		return true
-	}
-
-	if _, ok := applier.(TimeApplierCompactFunc); ok {
-		return true
-	}
-
-	return false
+func (p *timePayload) SupportsApplier(applier any) bool {
+	return supportApplier[time.Time](applier)
 }
 
 func (p *timePayload) Apply(applier interface{}) Payload {

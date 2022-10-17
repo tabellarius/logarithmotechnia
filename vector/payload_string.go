@@ -42,15 +42,7 @@ func (p *stringPayload) ByIndices(indices []int) Payload {
 }
 
 func (p *stringPayload) SupportsWhicher(whicher interface{}) bool {
-	if _, ok := whicher.(StringWhicherFunc); ok {
-		return true
-	}
-
-	if _, ok := whicher.(StringWhicherCompactFunc); ok {
-		return true
-	}
-
-	return false
+	return supportsWhicher[string](whicher)
 }
 
 func (p *stringPayload) Which(whicher interface{}) []bool {
@@ -65,16 +57,8 @@ func (p *stringPayload) Which(whicher interface{}) []bool {
 	return make([]bool, p.length)
 }
 
-func (p *stringPayload) SupportsApplier(applier interface{}) bool {
-	if _, ok := applier.(StringApplierFunc); ok {
-		return true
-	}
-
-	if _, ok := applier.(StringApplierCompactFunc); ok {
-		return true
-	}
-
-	return false
+func (p *stringPayload) SupportsApplier(applier any) bool {
+	return supportApplier[string](applier)
 }
 
 func (p *stringPayload) Apply(applier interface{}) Payload {
