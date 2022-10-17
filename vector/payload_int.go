@@ -48,23 +48,15 @@ func (p *integerPayload) SupportsWhicher(whicher any) bool {
 	return supportsWhicher[int](whicher)
 }
 
-func (p *integerPayload) Which(whicher interface{}) []bool {
-	if byFunc, ok := whicher.(IntegerWhicherFunc); ok {
-		return selectByFunc(p.data, p.na, byFunc)
-	}
-
-	if byFunc, ok := whicher.(IntegerWhicherCompactFunc); ok {
-		return selectByCompactFunc(p.data, p.na, byFunc)
-	}
-
-	return make([]bool, p.length)
+func (p *integerPayload) Which(whicher any) []bool {
+	return which(p.data, p.na, whicher)
 }
 
 func (p *integerPayload) SupportsApplier(applier any) bool {
 	return supportApplier[int](applier)
 }
 
-func (p *integerPayload) Apply(applier interface{}) Payload {
+func (p *integerPayload) Apply(applier any) Payload {
 	if applyFunc, ok := applier.(IntegerApplierFunc); ok {
 		data, na := applyByFunc(p.data, p.na, p.length, applyFunc, 0)
 

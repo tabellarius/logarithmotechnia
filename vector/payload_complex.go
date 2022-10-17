@@ -49,23 +49,15 @@ func (p *complexPayload) SupportsWhicher(whicher any) bool {
 	return supportsWhicher[complex128](whicher)
 }
 
-func (p *complexPayload) Which(whicher interface{}) []bool {
-	if byFunc, ok := whicher.(ComplexWhicherFunc); ok {
-		return selectByFunc(p.data, p.na, byFunc)
-	}
-
-	if byFunc, ok := whicher.(ComplexWhicherCompactFunc); ok {
-		return selectByCompactFunc(p.data, p.na, byFunc)
-	}
-
-	return make([]bool, p.length)
+func (p *complexPayload) Which(whicher any) []bool {
+	return which(p.data, p.na, whicher)
 }
 
 func (p *complexPayload) SupportsApplier(applier any) bool {
 	return supportApplier[complex128](applier)
 }
 
-func (p *complexPayload) Apply(applier interface{}) Payload {
+func (p *complexPayload) Apply(applier any) Payload {
 	if applyFunc, ok := applier.(ComplexApplierFunc); ok {
 		data, na := applyByFunc(p.data, p.na, p.length, applyFunc, cmplx.NaN())
 

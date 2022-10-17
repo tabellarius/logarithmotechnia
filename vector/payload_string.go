@@ -41,27 +41,19 @@ func (p *stringPayload) ByIndices(indices []int) Payload {
 	return StringPayload(data, na, p.Options()...)
 }
 
-func (p *stringPayload) SupportsWhicher(whicher interface{}) bool {
+func (p *stringPayload) SupportsWhicher(whicher any) bool {
 	return supportsWhicher[string](whicher)
 }
 
-func (p *stringPayload) Which(whicher interface{}) []bool {
-	if byFunc, ok := whicher.(StringWhicherFunc); ok {
-		return selectByFunc(p.data, p.na, byFunc)
-	}
-
-	if byFunc, ok := whicher.(StringWhicherCompactFunc); ok {
-		return selectByCompactFunc(p.data, p.na, byFunc)
-	}
-
-	return make([]bool, p.length)
+func (p *stringPayload) Which(whicher any) []bool {
+	return which(p.data, p.na, whicher)
 }
 
 func (p *stringPayload) SupportsApplier(applier any) bool {
 	return supportApplier[string](applier)
 }
 
-func (p *stringPayload) Apply(applier interface{}) Payload {
+func (p *stringPayload) Apply(applier any) Payload {
 	if applyFunc, ok := applier.(StringApplierFunc); ok {
 		data, na := applyByFunc(p.data, p.na, p.length, applyFunc, "")
 

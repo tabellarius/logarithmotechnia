@@ -48,23 +48,15 @@ func (p *timePayload) SupportsWhicher(whicher any) bool {
 	return supportsWhicher[time.Time](whicher)
 }
 
-func (p *timePayload) Which(whicher interface{}) []bool {
-	if byFunc, ok := whicher.(TimeWhicherFunc); ok {
-		return selectByFunc(p.data, p.na, byFunc)
-	}
-
-	if byFunc, ok := whicher.(TimeWhicherCompactFunc); ok {
-		return selectByCompactFunc(p.data, p.na, byFunc)
-	}
-
-	return make([]bool, p.length)
+func (p *timePayload) Which(whicher any) []bool {
+	return which(p.data, p.na, whicher)
 }
 
 func (p *timePayload) SupportsApplier(applier any) bool {
 	return supportApplier[time.Time](applier)
 }
 
-func (p *timePayload) Apply(applier interface{}) Payload {
+func (p *timePayload) Apply(applier any) Payload {
 	if applyFunc, ok := applier.(TimeApplierFunc); ok {
 		data, na := applyByFunc(p.data, p.na, p.length, applyFunc, time.Time{})
 
