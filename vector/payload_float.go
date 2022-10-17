@@ -8,8 +8,8 @@ import (
 
 type FloatWhicherFunc = func(int, float64, bool) bool
 type FloatWhicherCompactFunc = func(float64, bool) bool
-type FloatToFloatApplierFunc = func(int, float64, bool) (float64, bool)
-type FloatToFloatApplierCompactFunc = func(float64, bool) (float64, bool)
+type FloatApplierFunc = func(int, float64, bool) (float64, bool)
+type FloatApplierCompactFunc = func(float64, bool) (float64, bool)
 type FloatSummarizerFunc = func(int, float64, float64, bool) (float64, bool)
 
 type FloatPrinter struct {
@@ -95,11 +95,11 @@ func (p *floatPayload) selectByCompactFunc(byFunc FloatWhicherCompactFunc) []boo
 }
 
 func (p *floatPayload) SupportsApplier(applier interface{}) bool {
-	if _, ok := applier.(FloatToFloatApplierFunc); ok {
+	if _, ok := applier.(FloatApplierFunc); ok {
 		return true
 	}
 
-	if _, ok := applier.(FloatToFloatApplierCompactFunc); ok {
+	if _, ok := applier.(FloatApplierCompactFunc); ok {
 		return true
 	}
 
@@ -107,30 +107,30 @@ func (p *floatPayload) SupportsApplier(applier interface{}) bool {
 }
 
 func (p *floatPayload) Apply(applier interface{}) Payload {
-	if applyFunc, ok := applier.(FloatToFloatApplierFunc); ok {
-		return p.applyToFloatByFunc(applyFunc)
+	if applyFunc, ok := applier.(FloatApplierFunc); ok {
+		return p.applyByFunc(applyFunc)
 	}
 
-	if applyFunc, ok := applier.(FloatToFloatApplierCompactFunc); ok {
-		return p.applyToFloatByCompactFunc(applyFunc)
+	if applyFunc, ok := applier.(FloatApplierCompactFunc); ok {
+		return p.applyByCompactFunc(applyFunc)
 	}
 
 	return NAPayload(p.length)
 }
 
-func (p *floatPayload) applyToFloatByFunc(applyFunc FloatToFloatApplierFunc) Payload {
+func (p *floatPayload) applyByFunc(applyFunc FloatApplierFunc) Payload {
 	data, na := applyByFunc(p.data, p.na, p.length, applyFunc, math.NaN())
 
 	return FloatPayload(data, na, p.Options()...)
 }
 
-func (p *floatPayload) applyToFloatByCompactFunc(applyFunc FloatToFloatApplierCompactFunc) Payload {
+func (p *floatPayload) applyByCompactFunc(applyFunc FloatApplierCompactFunc) Payload {
 	data, na := applyByCompactFunc(p.data, p.na, p.length, applyFunc, math.NaN())
 
 	return FloatPayload(data, na, p.Options()...)
 }
 
-func (p *floatPayload) ApplyTo(whicher interface{}, applier interface{}) Payload {
+func (p *floatPayload) ApplyTo(indices []int, applier interface{}) Payload {
 	//TODO implement me
 	panic("implement me")
 }

@@ -8,8 +8,8 @@ import (
 
 type ComplexWhicherFunc = func(int, complex128, bool) bool
 type ComplexWhicherCompactFunc = func(complex128, bool) bool
-type ComplexToComplexApplierFunc = func(int, complex128, bool) (complex128, bool)
-type ComplexToComplexApplierCompactFunc = func(complex128, bool) (complex128, bool)
+type ComplexApplierFunc = func(int, complex128, bool) (complex128, bool)
+type ComplexApplierCompactFunc = func(complex128, bool) (complex128, bool)
 type ComplexSummarizerFunc = func(int, complex128, complex128, bool) (complex128, bool)
 
 type ComplexPrinter struct {
@@ -94,11 +94,11 @@ func (p *complexPayload) selectByCompactFunc(byFunc ComplexWhicherCompactFunc) [
 }
 
 func (p *complexPayload) SupportsApplier(applier interface{}) bool {
-	if _, ok := applier.(ComplexToComplexApplierFunc); ok {
+	if _, ok := applier.(ComplexApplierFunc); ok {
 		return true
 	}
 
-	if _, ok := applier.(ComplexToComplexApplierCompactFunc); ok {
+	if _, ok := applier.(ComplexApplierCompactFunc); ok {
 		return true
 	}
 
@@ -106,11 +106,11 @@ func (p *complexPayload) SupportsApplier(applier interface{}) bool {
 }
 
 func (p *complexPayload) Apply(applier interface{}) Payload {
-	if applyFunc, ok := applier.(ComplexToComplexApplierFunc); ok {
-		return p.applyComplexByFunc(applyFunc)
+	if applyFunc, ok := applier.(ComplexApplierFunc); ok {
+		return p.applyByFunc(applyFunc)
 	}
 
-	if applyFunc, ok := applier.(ComplexToComplexApplierCompactFunc); ok {
+	if applyFunc, ok := applier.(ComplexApplierCompactFunc); ok {
 		return p.applyComplexByCompactFunc(applyFunc)
 	}
 
@@ -118,19 +118,19 @@ func (p *complexPayload) Apply(applier interface{}) Payload {
 
 }
 
-func (p *complexPayload) applyComplexByFunc(applyFunc ComplexToComplexApplierFunc) Payload {
+func (p *complexPayload) applyByFunc(applyFunc ComplexApplierFunc) Payload {
 	data, na := applyByFunc(p.data, p.na, p.length, applyFunc, cmplx.NaN())
 
 	return ComplexPayload(data, na, p.Options()...)
 }
 
-func (p *complexPayload) applyComplexByCompactFunc(applyFunc ComplexToComplexApplierCompactFunc) Payload {
+func (p *complexPayload) applyComplexByCompactFunc(applyFunc ComplexApplierCompactFunc) Payload {
 	data, na := applyByCompactFunc(p.data, p.na, p.length, applyFunc, cmplx.NaN())
 
 	return ComplexPayload(data, na, p.Options()...)
 }
 
-func (p *complexPayload) ApplyTo(whicher interface{}, applier interface{}) Payload {
+func (p *complexPayload) ApplyTo(indices []int, applier interface{}) Payload {
 	//TODO implement me
 	panic("implement me")
 }

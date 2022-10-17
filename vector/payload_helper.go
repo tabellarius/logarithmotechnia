@@ -90,7 +90,8 @@ func adjustToLesserSize[T any](srcData []T, size int) []T {
 	return data
 }
 
-func adjustToBiggerSize[T any](srcData []T, length int, size int) []T {
+func adjustToBiggerSize[T any](srcData []T, size int) []T {
+	length := len(srcData)
 	cycles := size / length
 	if size%length > 0 {
 		cycles++
@@ -141,43 +142,47 @@ func applyByCompactFunc[T any](inData []T, inNA []bool, length int,
 	return data, na
 }
 
-func applyToByFunc[T any](whicher []bool, inData []T, inNA []bool, length int,
+func applyToByFunc[T any](indices []int, inData []T, inNA []bool,
 	applyFunc func(int, T, bool) (T, bool), naDef T) ([]T, []bool) {
+	length := len(inData)
+
 	data := make([]T, length)
 	na := make([]bool, length)
 
-	for i := 0; i < length; i++ {
-		if !whicher[i] {
-			continue
-		}
+	copy(data, inData)
+	copy(na, inNA)
 
-		dataVal, naVal := applyFunc(i+1, inData[i], inNA[i])
+	for _, idx := range indices {
+		idx = idx - 1
+		dataVal, naVal := applyFunc(idx+1, inData[idx], inNA[idx])
 		if naVal {
 			dataVal = naDef
 		}
-		data[i] = dataVal
-		na[i] = naVal
+		data[idx] = dataVal
+		na[idx] = naVal
 	}
 
 	return data, na
 }
 
-func applyToByCompactFunc[T any](whicher []bool, inData []T, inNA []bool, length int,
+func applyToByCompactFunc[T any](indices []int, inData []T, inNA []bool,
 	applyFunc func(T, bool) (T, bool), naDef T) ([]T, []bool) {
+	length := len(inData)
+
 	data := make([]T, length)
 	na := make([]bool, length)
 
-	for i := 0; i < length; i++ {
-		if !whicher[i] {
-			continue
-		}
+	copy(data, inData)
+	copy(na, inNA)
 
-		dataVal, naVal := applyFunc(inData[i], inNA[i])
+	for _, idx := range indices {
+		idx = idx - 1
+		dataVal, naVal := applyFunc(inData[idx], inNA[idx])
 		if naVal {
 			dataVal = naDef
 		}
-		data[i] = dataVal
-		na[i] = naVal
+		data[idx] = dataVal
+		na[idx] = naVal
 	}
 
 	return data, na

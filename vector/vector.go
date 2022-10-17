@@ -92,12 +92,7 @@ type Whichable interface {
 type Appliable interface {
 	SupportsApplier(applier interface{}) bool
 	Apply(applier interface{}) Payload
-}
-
-type AppliableTo interface {
-	Whichable
-	Appliable
-	ApplyTo(whicher interface{}, applier interface{}) Payload
+	ApplyTo(indices []int, applier interface{}) Payload
 }
 
 type Summarizable interface {
@@ -299,14 +294,42 @@ func (v *vector) Apply(applier interface{}) Vector {
 }
 
 func (v *vector) ApplyTo(whicher interface{}, applier interface{}) Vector {
-	payload, ok := v.payload.(AppliableTo)
+	payload, ok := v.payload.(Appliable)
 	if !ok {
-		return NA(v.Len())
+		return NA(v.length)
 	}
 
-	newPayload := payload.ApplyTo(whicher, applier)
+	indices := []int{}
+
+	whBool, ok := whicher.([]bool)
+	if ok {
+		indices = util.ToIndices(v.length, whBool)
+	}
+
+	whIdx, ok := whicher.([]int)
+	if ok {
+		indices = v.applyToAdjustIndicesWhicher(whIdx)
+	}
+
+	if !ok {
+		indices = util.ToIndices(v.length, v.Which(whicher))
+	}
+
+	newPayload := payload.ApplyTo(indices, applier)
 
 	return New(newPayload, v.Options()...)
+}
+
+func (v *vector) applyToAdjustIndicesWhicher(whicher []int) []int {
+	indices := make([]int, 0)
+
+	for _, index := range whicher {
+		if index > 0 && index <= v.length {
+			indices = append(indices, index)
+		}
+	}
+
+	return indices
 }
 
 func (v *vector) filterByBooleans(booleans []bool) []int {

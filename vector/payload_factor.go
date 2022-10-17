@@ -9,8 +9,6 @@ import (
 
 type FactorWhicherFunc = func(int, string, bool) bool
 type FactorWhicherCompactFunc = func(string, bool) bool
-type FactorToStringApplierFunc = func(int, string, bool) (string, bool)
-type FactorToStringApplierCompactFunc = func(string, bool) (string, bool)
 
 type factorPayload struct {
 	length int
@@ -189,11 +187,11 @@ func (p *factorPayload) selectByCompactFunc(byFunc FactorWhicherCompactFunc) []b
 }
 
 func (p *factorPayload) SupportsApplier(applier interface{}) bool {
-	if _, ok := applier.(FactorToStringApplierFunc); ok {
+	if _, ok := applier.(StringApplierFunc); ok {
 		return true
 	}
 
-	if _, ok := applier.(FactorToStringApplierCompactFunc); ok {
+	if _, ok := applier.(StringApplierCompactFunc); ok {
 		return true
 	}
 
@@ -201,18 +199,18 @@ func (p *factorPayload) SupportsApplier(applier interface{}) bool {
 }
 
 func (p *factorPayload) Apply(applier interface{}) Payload {
-	if applyFunc, ok := applier.(FactorToStringApplierFunc); ok {
-		return p.applyToStringByFunc(applyFunc)
+	if applyFunc, ok := applier.(StringApplierFunc); ok {
+		return p.applyStringByFunc(applyFunc)
 	}
 
-	if applyFunc, ok := applier.(FactorToStringApplierCompactFunc); ok {
-		return p.applyToStringByCompactFunc(applyFunc)
+	if applyFunc, ok := applier.(StringApplierCompactFunc); ok {
+		return p.applyStringByCompactFunc(applyFunc)
 	}
 
 	return NAPayload(p.length)
 }
 
-func (p *factorPayload) applyToStringByFunc(applyFunc StringToStringApplierFunc) Payload {
+func (p *factorPayload) applyStringByFunc(applyFunc StringApplierFunc) Payload {
 	data := make([]string, p.length)
 	na := make([]bool, p.length)
 
@@ -228,7 +226,7 @@ func (p *factorPayload) applyToStringByFunc(applyFunc StringToStringApplierFunc)
 	return StringPayload(data, na, p.Options()...)
 }
 
-func (p *factorPayload) applyToStringByCompactFunc(applyFunc StringToStringApplierCompactFunc) Payload {
+func (p *factorPayload) applyStringByCompactFunc(applyFunc StringApplierCompactFunc) Payload {
 	data := make([]string, p.length)
 	na := make([]bool, p.length)
 
@@ -244,9 +242,60 @@ func (p *factorPayload) applyToStringByCompactFunc(applyFunc StringToStringAppli
 	return StringPayload(data, na, p.Options()...)
 }
 
-func (p *factorPayload) ApplyTo(whicher interface{}, applier interface{}) Payload {
-	//TODO implement me
-	panic("implement me")
+func (p *factorPayload) ApplyTo(indices []int, applier interface{}) Payload {
+	if applyFunc, ok := applier.(StringApplierFunc); ok {
+		return p.applyToStringByFunc(indices, applyFunc)
+	}
+
+	if applyFunc, ok := applier.(StringApplierCompactFunc); ok {
+		return p.applyToStringByCompactFunc(indices, applyFunc)
+	}
+
+	return NAPayload(p.length)
+}
+
+func (p *factorPayload) applyToStringByFunc(indices []int, applyFunc StringApplierFunc) Payload {
+	data := make([]string, p.length)
+	na := make([]bool, p.length)
+
+	for i := 0; i < p.length; i++ {
+		data[i] = p.levels[p.data[i]]
+		na[i] = p.data[i] == 0
+	}
+
+	for _, idx := range indices {
+		idx = idx - 1
+		dataVal, naVal := applyFunc(idx+1, p.levels[p.data[idx]], p.data[idx] == 0)
+		if naVal {
+			dataVal = ""
+		}
+		data[idx] = dataVal
+		na[idx] = naVal
+	}
+
+	return StringPayload(data, na, p.Options()...)
+}
+
+func (p *factorPayload) applyToStringByCompactFunc(indices []int, applyFunc StringApplierCompactFunc) Payload {
+	data := make([]string, p.length)
+	na := make([]bool, p.length)
+
+	for i := 0; i < p.length; i++ {
+		data[i] = p.levels[p.data[i]]
+		na[i] = p.data[i] == 0
+	}
+
+	for _, idx := range indices {
+		idx = idx - 1
+		dataVal, naVal := applyFunc(p.levels[p.data[idx]], p.data[idx] == 0)
+		if naVal {
+			dataVal = ""
+		}
+		data[idx] = dataVal
+		na[idx] = naVal
+	}
+
+	return StringPayload(data, na, p.Options()...)
 }
 
 func (p *factorPayload) SupportsSummarizer(summarizer interface{}) bool {

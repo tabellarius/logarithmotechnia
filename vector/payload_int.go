@@ -10,8 +10,8 @@ const maxIntPrint = 15
 
 type IntegerWhicherFunc = func(int, int, bool) bool
 type IntegerWhicherCompactFunc = func(int, bool) bool
-type IntegerToIntegerApplierFunc = func(int, int, bool) (int, bool)
-type IntegerToIntegerApplierCompactFunc = func(int, bool) (int, bool)
+type IntegerApplierFunc = func(int, int, bool) (int, bool)
+type IntegerApplierCompactFunc = func(int, bool) (int, bool)
 type IntegerSummarizerFunc = func(int, int, int, bool) (int, bool)
 
 // integerPayload is a structure, subsisting Integer vectors
@@ -93,11 +93,11 @@ func (p *integerPayload) selectByCompactFunc(byFunc IntegerWhicherCompactFunc) [
 }
 
 func (p *integerPayload) SupportsApplier(applier interface{}) bool {
-	if _, ok := applier.(IntegerToIntegerApplierFunc); ok {
+	if _, ok := applier.(IntegerApplierFunc); ok {
 		return true
 	}
 
-	if _, ok := applier.(IntegerToIntegerApplierCompactFunc); ok {
+	if _, ok := applier.(IntegerApplierCompactFunc); ok {
 		return true
 	}
 
@@ -105,31 +105,31 @@ func (p *integerPayload) SupportsApplier(applier interface{}) bool {
 }
 
 func (p *integerPayload) Apply(applier interface{}) Payload {
-	if applyFunc, ok := applier.(IntegerToIntegerApplierFunc); ok {
-		return p.applyToIntegerByFunc(applyFunc)
+	if applyFunc, ok := applier.(IntegerApplierFunc); ok {
+		return p.applyByFunc(applyFunc)
 	}
 
-	if applyFunc, ok := applier.(IntegerToIntegerApplierCompactFunc); ok {
-		return p.applyToIntegerByCompactFunc(applyFunc)
+	if applyFunc, ok := applier.(IntegerApplierCompactFunc); ok {
+		return p.applyByCompactFunc(applyFunc)
 	}
 
 	return NAPayload(p.length)
 
 }
 
-func (p *integerPayload) applyToIntegerByFunc(applyFunc IntegerToIntegerApplierFunc) Payload {
+func (p *integerPayload) applyByFunc(applyFunc IntegerApplierFunc) Payload {
 	data, na := applyByFunc(p.data, p.na, p.length, applyFunc, 0)
 
 	return IntegerPayload(data, na, p.Options()...)
 }
 
-func (p *integerPayload) applyToIntegerByCompactFunc(applyFunc IntegerToIntegerApplierCompactFunc) Payload {
+func (p *integerPayload) applyByCompactFunc(applyFunc IntegerApplierCompactFunc) Payload {
 	data, na := applyByCompactFunc(p.data, p.na, p.length, applyFunc, 0)
 
 	return IntegerPayload(data, na, p.Options()...)
 }
 
-func (p *integerPayload) ApplyTo(whicher interface{}, applier interface{}) Payload {
+func (p *integerPayload) ApplyTo(indices []int, applier interface{}) Payload {
 	//TODO implement me
 	panic("implement me")
 }

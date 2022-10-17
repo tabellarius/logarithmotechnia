@@ -1249,3 +1249,74 @@ func TestBooleanPayload_Data(t *testing.T) {
 		})
 	}
 }
+
+func TestBooleanPayload_ApplyTo(t *testing.T) {
+	srcPayload := BooleanPayload([]bool{true, true, true, false, false}, []bool{false, true, false, true, false})
+	applierFull := func(idx int, val bool, na bool) (bool, bool) {
+		if idx == 5 {
+			val = true
+		}
+
+		return val, false
+	}
+	applierComp := func(val bool, na bool) (bool, bool) {
+		return !val, false
+	}
+
+	testData := []struct {
+		name        string
+		indices     []int
+		applier     interface{}
+		dataOut     []bool
+		naOut       []bool
+		isNAPayload bool
+	}{
+		{
+			name:        "regular",
+			indices:     []int{1, 2, 5},
+			applier:     applierFull,
+			dataOut:     []bool{true, false, true, false, true},
+			naOut:       []bool{false, false, false, true, false},
+			isNAPayload: false,
+		},
+		{
+			name:        "regular compact",
+			indices:     []int{1, 2, 5},
+			applier:     applierComp,
+			dataOut:     []bool{false, true, true, false, true},
+			naOut:       []bool{false, false, false, true, false},
+			isNAPayload: false,
+		},
+		{
+			name:        "incorrect applier",
+			indices:     []int{1, 2, 5},
+			applier:     func(int, int, bool) bool { return true },
+			dataOut:     []bool{false, false, false, false, false},
+			naOut:       []bool{true, true, true, true, true},
+			isNAPayload: true,
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			payload := srcPayload.(Appliable).ApplyTo(data.indices, data.applier)
+
+			if !data.isNAPayload {
+				payloadOut := payload.(*booleanPayload)
+				if !reflect.DeepEqual(data.dataOut, payloadOut.data) {
+					t.Error(fmt.Sprintf("Output data (%v) does not match expected (%v)",
+						data.dataOut, payloadOut.data))
+				}
+				if !reflect.DeepEqual(data.naOut, payloadOut.na) {
+					t.Error(fmt.Sprintf("Output NA (%v) does not match expected (%v)",
+						data.naOut, payloadOut.na))
+				}
+			} else {
+				_, ok := payload.(*naPayload)
+				if !ok {
+					t.Error("Payload is not NA")
+				}
+			}
+		})
+	}
+}

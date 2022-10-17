@@ -8,8 +8,8 @@ import (
 
 type InterfaceWhicherFunc = func(int, interface{}, bool) bool
 type InterfaceWhicherCompactFunc = func(interface{}, bool) bool
-type InterfaceToInterfaceApplierFunc = func(int, interface{}, bool) (interface{}, bool)
-type InterfaceToInterfaceApplierCompactFunc = func(interface{}, bool) (interface{}, bool)
+type InterfaceApplierFunc = func(int, interface{}, bool) (interface{}, bool)
+type InterfaceApplierCompactFunc = func(interface{}, bool) (interface{}, bool)
 type InterfaceSummarizerFunc = func(int, interface{}, interface{}, bool) (interface{}, bool)
 type InterfacePrinterFunc = func(interface{}) string
 
@@ -113,11 +113,11 @@ func (p *interfacePayload) selectByCompactFunc(byFunc InterfaceWhicherCompactFun
 }
 
 func (p *interfacePayload) SupportsApplier(applier interface{}) bool {
-	if _, ok := applier.(InterfaceToInterfaceApplierFunc); ok {
+	if _, ok := applier.(InterfaceApplierFunc); ok {
 		return true
 	}
 
-	if _, ok := applier.(InterfaceToInterfaceApplierCompactFunc); ok {
+	if _, ok := applier.(InterfaceApplierCompactFunc); ok {
 		return true
 	}
 
@@ -125,30 +125,30 @@ func (p *interfacePayload) SupportsApplier(applier interface{}) bool {
 }
 
 func (p *interfacePayload) Apply(applier interface{}) Payload {
-	if applyFunc, ok := applier.(InterfaceToInterfaceApplierFunc); ok {
-		return p.applyToInterfaceByFunc(applyFunc)
+	if applyFunc, ok := applier.(InterfaceApplierFunc); ok {
+		return p.applyByFunc(applyFunc)
 	}
 
-	if applyFunc, ok := applier.(InterfaceToInterfaceApplierCompactFunc); ok {
-		return p.applyToInterfaceByCompactFunc(applyFunc)
+	if applyFunc, ok := applier.(InterfaceApplierCompactFunc); ok {
+		return p.applyByCompactFunc(applyFunc)
 	}
 
 	return NAPayload(p.length)
 }
 
-func (p *interfacePayload) applyToInterfaceByFunc(applyFunc InterfaceToInterfaceApplierFunc) Payload {
+func (p *interfacePayload) applyByFunc(applyFunc InterfaceApplierFunc) Payload {
 	data, na := applyByFunc(p.data, p.na, p.length, applyFunc, nil)
 
 	return InterfacePayload(data, na, p.Options()...)
 }
 
-func (p *interfacePayload) applyToInterfaceByCompactFunc(applyFunc InterfaceToInterfaceApplierCompactFunc) Payload {
+func (p *interfacePayload) applyByCompactFunc(applyFunc InterfaceApplierCompactFunc) Payload {
 	data, na := applyByCompactFunc(p.data, p.na, p.length, applyFunc, nil)
 
 	return InterfacePayload(data, na, p.Options()...)
 }
 
-func (p *interfacePayload) ApplyTo(whicher interface{}, applier interface{}) Payload {
+func (p *interfacePayload) ApplyTo(indices []int, applier interface{}) Payload {
 	//TODO implement me
 	panic("implement me")
 }

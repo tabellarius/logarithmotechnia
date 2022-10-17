@@ -6,8 +6,8 @@ import (
 
 type TimeWhicherFunc = func(int, time.Time, bool) bool
 type TimeWhicherCompactFunc = func(time.Time, bool) bool
-type TimeToTimeApplierFunc = func(int, time.Time, bool) (time.Time, bool)
-type TimeToTimeApplierCompactFunc = func(time.Time, bool) (time.Time, bool)
+type TimeApplierFunc = func(int, time.Time, bool) (time.Time, bool)
+type TimeApplierCompactFunc = func(time.Time, bool) (time.Time, bool)
 type TimeSummarizerFunc = func(int, time.Time, time.Time, bool) (time.Time, bool)
 
 type TimePrinter struct {
@@ -93,11 +93,11 @@ func (p *timePayload) selectByCompactFunc(byFunc TimeWhicherCompactFunc) []bool 
 }
 
 func (p *timePayload) SupportsApplier(applier interface{}) bool {
-	if _, ok := applier.(TimeToTimeApplierFunc); ok {
+	if _, ok := applier.(TimeApplierFunc); ok {
 		return true
 	}
 
-	if _, ok := applier.(TimeToTimeApplierCompactFunc); ok {
+	if _, ok := applier.(TimeApplierCompactFunc); ok {
 		return true
 	}
 
@@ -105,30 +105,30 @@ func (p *timePayload) SupportsApplier(applier interface{}) bool {
 }
 
 func (p *timePayload) Apply(applier interface{}) Payload {
-	if applyFunc, ok := applier.(TimeToTimeApplierFunc); ok {
-		return p.applyToTimeByFunc(applyFunc)
+	if applyFunc, ok := applier.(TimeApplierFunc); ok {
+		return p.applyByFunc(applyFunc)
 	}
 
-	if applyFunc, ok := applier.(TimeToTimeApplierCompactFunc); ok {
-		return p.applyToTimeByCompactFunc(applyFunc)
+	if applyFunc, ok := applier.(TimeApplierCompactFunc); ok {
+		return p.applyByCompactFunc(applyFunc)
 	}
 
 	return NAPayload(p.length)
 }
 
-func (p *timePayload) applyToTimeByFunc(applyFunc TimeToTimeApplierFunc) Payload {
+func (p *timePayload) applyByFunc(applyFunc TimeApplierFunc) Payload {
 	data, na := applyByFunc(p.data, p.na, p.length, applyFunc, time.Time{})
 
 	return TimePayload(data, na)
 }
 
-func (p *timePayload) applyToTimeByCompactFunc(applyFunc TimeToTimeApplierCompactFunc) Payload {
+func (p *timePayload) applyByCompactFunc(applyFunc TimeApplierCompactFunc) Payload {
 	data, na := applyByCompactFunc(p.data, p.na, p.length, applyFunc, time.Time{})
 
 	return TimePayload(data, na)
 }
 
-func (p *timePayload) ApplyTo(whicher interface{}, applier interface{}) Payload {
+func (p *timePayload) ApplyTo(indices []int, applier interface{}) Payload {
 	//TODO implement me
 	panic("implement me")
 }

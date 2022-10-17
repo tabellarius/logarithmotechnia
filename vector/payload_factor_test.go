@@ -1778,3 +1778,90 @@ func TestFactorPayload_Data(t *testing.T) {
 		})
 	}
 }
+
+func TestFactorPayload_ApplyTo(t *testing.T) {
+	testData := []struct {
+		name        string
+		indices     []int
+		applier     interface{}
+		dataIn      []string
+		naIn        []bool
+		dataOut     []string
+		naOut       []bool
+		isNAPayload bool
+	}{
+		{
+			name:    "regular",
+			indices: []int{1, 2, 5},
+			applier: func(_ int, val string, na bool) (string, bool) {
+				return fmt.Sprintf("%s.%s", val, val), na
+			},
+			dataIn:      []string{"1", "9", "3", "5", "7"},
+			naIn:        []bool{false, true, false, true, false},
+			dataOut:     []string{"1.1", "", "3", "", "7.7"},
+			naOut:       []bool{false, true, false, true, false},
+			isNAPayload: false,
+		},
+		{
+			name:    "regular compact",
+			indices: []int{1, 2, 5},
+			applier: func(val string, na bool) (string, bool) {
+				return fmt.Sprintf("%s.%s", val, val), na
+			},
+			dataIn:      []string{"1", "9", "3", "5", "7"},
+			naIn:        []bool{false, true, false, true, false},
+			dataOut:     []string{"1.1", "", "3", "", "7.7"},
+			naOut:       []bool{false, true, false, true, false},
+			isNAPayload: false,
+		},
+		{
+			name:    "manipulate na",
+			indices: []int{1, 2, 5},
+			applier: func(idx int, val string, na bool) (string, bool) {
+				if idx == 5 {
+					val = "1"
+					na = true
+				}
+				return val, na
+			},
+			dataIn:      []string{"1", "2", "3", "4", "5"},
+			naIn:        []bool{false, false, true, false, false},
+			dataOut:     []string{"1", "2", "", "4", ""},
+			naOut:       []bool{false, false, true, false, true},
+			isNAPayload: false,
+		},
+		{
+			name:        "incorrect applier",
+			indices:     []int{1, 2, 5},
+			applier:     func(int, string, bool) bool { return true },
+			dataIn:      []string{"1", "9", "3", "5", "7"},
+			naIn:        []bool{false, true, false, true, false},
+			dataOut:     []string{"", "", "", "", ""},
+			naOut:       []bool{true, true, true, true, true},
+			isNAPayload: true,
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			payload := FactorPayload(data.dataIn, data.naIn).(Appliable).ApplyTo(data.indices, data.applier)
+
+			if !data.isNAPayload {
+				payloadOut := payload.(*stringPayload)
+				if !reflect.DeepEqual(data.dataOut, payloadOut.data) {
+					t.Error(fmt.Sprintf("Output data (%v) does not match expected (%v)",
+						payloadOut.data, data.dataOut))
+				}
+				if !reflect.DeepEqual(data.naOut, payloadOut.na) {
+					t.Error(fmt.Sprintf("Output NA (%v) does not match expected (%v)",
+						payloadOut.na, data.naOut))
+				}
+			} else {
+				_, ok := payload.(*naPayload)
+				if !ok {
+					t.Error("Payload is not NA")
+				}
+			}
+		})
+	}
+}

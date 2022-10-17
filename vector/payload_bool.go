@@ -7,8 +7,8 @@ import (
 
 type BooleanWhicherFunc = func(int, bool, bool) bool
 type BooleanWhicherCompactFunc = func(bool, bool) bool
-type BooleanToBooleanApplierFunc = func(int, bool, bool) (bool, bool)
-type BooleanToBooleanApplierCompactFunc = func(bool, bool) (bool, bool)
+type BooleanApplierFunc = func(int, bool, bool) (bool, bool)
+type BooleanApplierCompactFunc = func(bool, bool) (bool, bool)
 type BooleanSummarizerFunc = func(int, bool, bool, bool) (bool, bool)
 
 type booleanPayload struct {
@@ -89,11 +89,11 @@ func (p *booleanPayload) selectByCompactFunc(byFunc BooleanWhicherCompactFunc) [
 }
 
 func (p *booleanPayload) SupportsApplier(applier interface{}) bool {
-	if _, ok := applier.(BooleanToBooleanApplierFunc); ok {
+	if _, ok := applier.(BooleanApplierFunc); ok {
 		return true
 	}
 
-	if _, ok := applier.(BooleanToBooleanApplierCompactFunc); ok {
+	if _, ok := applier.(BooleanApplierCompactFunc); ok {
 		return true
 	}
 
@@ -101,32 +101,51 @@ func (p *booleanPayload) SupportsApplier(applier interface{}) bool {
 }
 
 func (p *booleanPayload) Apply(applier interface{}) Payload {
-	if applyFunc, ok := applier.(BooleanToBooleanApplierFunc); ok {
-		return p.applyBooleanByFunc(applyFunc)
+	if applyFunc, ok := applier.(BooleanApplierFunc); ok {
+		return p.applyByFunc(applyFunc)
 	}
 
-	if applyFunc, ok := applier.(BooleanToBooleanApplierCompactFunc); ok {
-		return p.applyBooleanByCompactFunc(applyFunc)
+	if applyFunc, ok := applier.(BooleanApplierCompactFunc); ok {
+		return p.applyByCompactFunc(applyFunc)
 	}
 
 	return NAPayload(p.length)
 }
 
-func (p *booleanPayload) applyBooleanByFunc(applyFunc BooleanToBooleanApplierFunc) Payload {
+func (p *booleanPayload) applyByFunc(applyFunc BooleanApplierFunc) Payload {
 	data, na := applyByFunc(p.data, p.na, p.length, applyFunc, false)
 
 	return BooleanPayload(data, na, p.Options()...)
 }
 
-func (p *booleanPayload) applyBooleanByCompactFunc(applyFunc BooleanToBooleanApplierCompactFunc) Payload {
+func (p *booleanPayload) applyByCompactFunc(applyFunc BooleanApplierCompactFunc) Payload {
 	data, na := applyByCompactFunc(p.data, p.na, p.length, applyFunc, false)
 
 	return BooleanPayload(data, na, p.Options()...)
 }
 
-func (p *booleanPayload) ApplyTo(whicher interface{}, applier interface{}) Payload {
-	//TODO implement me
-	panic("implement me")
+func (p *booleanPayload) ApplyTo(indices []int, applier interface{}) Payload {
+	if applyFunc, ok := applier.(BooleanApplierFunc); ok {
+		return p.applyToByFunc(indices, applyFunc)
+	}
+
+	if applyFunc, ok := applier.(BooleanApplierCompactFunc); ok {
+		return p.applyToByCompactFunc(indices, applyFunc)
+	}
+
+	return NAPayload(p.length)
+}
+
+func (p *booleanPayload) applyToByFunc(indices []int, applyFunc BooleanApplierFunc) Payload {
+	data, na := applyToByFunc(indices, p.data, p.na, applyFunc, false)
+
+	return BooleanPayload(data, na, p.Options()...)
+}
+
+func (p *booleanPayload) applyToByCompactFunc(indices []int, applyFunc BooleanApplierCompactFunc) Payload {
+	data, na := applyToByCompactFunc(indices, p.data, p.na, applyFunc, false)
+
+	return BooleanPayload(data, na, p.Options()...)
 }
 
 func (p *booleanPayload) SupportsSummarizer(summarizer interface{}) bool {
