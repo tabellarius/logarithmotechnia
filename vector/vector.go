@@ -302,16 +302,19 @@ func (v *vector) ApplyTo(whicher interface{}, applier interface{}) Vector {
 	indices := []int{}
 
 	whBool, ok := whicher.([]bool)
+	processed := false
 	if ok {
 		indices = util.ToIndices(v.length, whBool)
+		processed = true
 	}
 
 	whIdx, ok := whicher.([]int)
 	if ok {
 		indices = v.applyToAdjustIndicesWhicher(whIdx)
+		processed = true
 	}
 
-	if !ok {
+	if !processed {
 		indices = util.ToIndices(v.length, v.Which(whicher))
 	}
 

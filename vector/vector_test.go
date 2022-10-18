@@ -1172,6 +1172,110 @@ func TestVector_Apply(t *testing.T) {
 	}
 }
 
+func TestVector_ApplyTo(t *testing.T) {
+	testData := []struct {
+		name    string
+		vec     Vector
+		whicher any
+		applier interface{}
+		dataOut []int
+		NAOut   []bool
+	}{
+		{
+			name:    "[]int whicher",
+			whicher: []int{1, 2, 5},
+			vec:     IntegerWithNA([]int{1, 2, 3, 4, 5}, nil),
+			applier: func(idx int, val int, na bool) (int, bool) {
+				if idx == 5 {
+					return val, true
+				}
+				return 10 * val, na
+			},
+			dataOut: []int{10, 20, 3, 4, 0},
+			NAOut:   []bool{false, false, false, false, true},
+		},
+		{
+			name:    "[]bool whicher 5",
+			whicher: []bool{true, false, false, false, true},
+			vec:     IntegerWithNA([]int{1, 2, 3, 4, 5}, nil),
+			applier: func(idx int, val int, na bool) (int, bool) {
+				if idx == 5 {
+					return val, true
+				}
+				return 10 * val, na
+			},
+			dataOut: []int{10, 2, 3, 4, 0},
+			NAOut:   []bool{false, false, false, false, true},
+		},
+		{
+			name:    "[]bool whicher 7",
+			whicher: []bool{true, false, false, false, true, true, true},
+			vec:     IntegerWithNA([]int{1, 2, 3, 4, 5}, nil),
+			applier: func(idx int, val int, na bool) (int, bool) {
+				if idx == 5 {
+					return val, true
+				}
+				return 10 * val, na
+			},
+			dataOut: []int{10, 2, 3, 4, 0},
+			NAOut:   []bool{false, false, false, false, true},
+		},
+		{
+			name:    "[]bool whicher 2",
+			whicher: []bool{true, false},
+			vec:     IntegerWithNA([]int{1, 2, 3, 4, 5}, nil),
+			applier: func(idx int, val int, na bool) (int, bool) {
+				if idx == 5 {
+					return val, true
+				}
+				return 10 * val, na
+			},
+			dataOut: []int{10, 2, 30, 4, 0},
+			NAOut:   []bool{false, false, false, false, true},
+		},
+		{
+			name: "[]bool whicher func",
+			whicher: func(val int, na bool) bool {
+				if val%2 == 0 {
+					return false
+				}
+				return true
+			},
+			vec: IntegerWithNA([]int{1, 2, 3, 4, 5}, nil),
+			applier: func(idx int, val int, na bool) (int, bool) {
+				if idx == 5 {
+					return val, true
+				}
+				return 10 * val, na
+			},
+			dataOut: []int{10, 2, 30, 4, 0},
+			NAOut:   []bool{false, false, false, false, true},
+		},
+		{
+			name:    "invalid applier",
+			vec:     IntegerWithNA([]int{1, 2, 3, 4, 5}, nil),
+			applier: true,
+			dataOut: []int{0, 0, 0, 0, 0},
+			NAOut:   []bool{true, true, true, true, true},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			newVec := data.vec.ApplyTo(data.whicher, data.applier)
+			integers, na := newVec.Integers()
+			if !reflect.DeepEqual(integers, data.dataOut) {
+				t.Error(fmt.Sprintf("Integers (%v) is not equal to expected (%v)",
+					integers, data.dataOut))
+			}
+			if !reflect.DeepEqual(na, data.NAOut) {
+				t.Error(fmt.Sprintf("NA (%v) is not equal to expected (%v)",
+					na, data.NAOut))
+			}
+		})
+	}
+}
+
 func TestVector_Append(t *testing.T) {
 	vec := IntegerWithNA([]int{1, 2, 3}, nil)
 
