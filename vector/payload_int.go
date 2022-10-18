@@ -10,8 +10,8 @@ const maxIntPrint = 15
 
 type IntegerWhicherFunc = func(int, int, bool) bool
 type IntegerWhicherCompactFunc = func(int, bool) bool
-type IntegerToIntegerApplierFunc = func(int, int, bool) (int, bool)
-type IntegerToIntegerApplierCompactFunc = func(int, bool) (int, bool)
+type IntegerApplierFunc = func(int, int, bool) (int, bool)
+type IntegerApplierCompactFunc = func(int, bool) (int, bool)
 type IntegerSummarizerFunc = func(int, int, int, bool) (int, bool)
 
 // integerPayload is a structure, subsisting Integer vectors
@@ -39,152 +39,64 @@ func (p *integerPayload) Data() []interface{} {
 }
 
 func (p *integerPayload) ByIndices(indices []int) Payload {
-	data := make([]int, 0, len(indices))
-	na := make([]bool, 0, len(indices))
-
-	for _, idx := range indices {
-		if idx == 0 {
-			data = append(data, 0)
-			na = append(na, true)
-		} else {
-			data = append(data, p.data[idx-1])
-			na = append(na, p.na[idx-1])
-		}
-	}
+	data, na := byIndices(indices, p.data, p.na, 0)
 
 	return IntegerPayload(data, na, p.Options()...)
 }
 
-func (p *integerPayload) SupportsWhicher(whicher interface{}) bool {
-	if _, ok := whicher.(IntegerWhicherFunc); ok {
-		return true
-	}
-
-	if _, ok := whicher.(IntegerWhicherCompactFunc); ok {
-		return true
-	}
-
-	return false
+func (p *integerPayload) SupportsWhicher(whicher any) bool {
+	return supportsWhicher[int](whicher)
 }
 
-func (p *integerPayload) Which(whicher interface{}) []bool {
-	if byFunc, ok := whicher.(IntegerWhicherFunc); ok {
-		return p.selectByFunc(byFunc)
-	}
-
-	if byFunc, ok := whicher.(IntegerWhicherCompactFunc); ok {
-		return p.selectByCompactFunc(byFunc)
-	}
-
-	return make([]bool, p.length)
+func (p *integerPayload) Which(whicher any) []bool {
+	return which(p.data, p.na, whicher)
 }
 
-func (p *integerPayload) selectByFunc(byFunc IntegerWhicherFunc) []bool {
-	booleans := make([]bool, p.length)
-
-	for idx, val := range p.data {
-		if byFunc(idx+1, val, p.na[idx]) {
-			booleans[idx] = true
-		}
-	}
-
-	return booleans
+func (p *integerPayload) SupportsApplier(applier any) bool {
+	return supportsApplier[int](applier)
 }
 
-func (p *integerPayload) selectByCompactFunc(byFunc IntegerWhicherCompactFunc) []bool {
-	booleans := make([]bool, p.length)
+func (p *integerPayload) Apply(applier any) Payload {
+	if applyFunc, ok := applier.(IntegerApplierFunc); ok {
+		data, na := applyByFunc(p.data, p.na, p.length, applyFunc, 0)
 
-	for idx, val := range p.data {
-		if byFunc(val, p.na[idx]) {
-			booleans[idx] = true
-		}
+		return IntegerPayload(data, na, p.Options()...)
 	}
 
-	return booleans
-}
+	if applyFunc, ok := applier.(IntegerApplierCompactFunc); ok {
+		data, na := applyByCompactFunc(p.data, p.na, p.length, applyFunc, 0)
 
-func (p *integerPayload) SupportsApplier(applier interface{}) bool {
-	if _, ok := applier.(IntegerToIntegerApplierFunc); ok {
-		return true
-	}
-
-	if _, ok := applier.(IntegerToIntegerApplierCompactFunc); ok {
-		return true
-	}
-
-	return false
-}
-
-func (p *integerPayload) Apply(applier interface{}) Payload {
-	if applyFunc, ok := applier.(IntegerToIntegerApplierFunc); ok {
-		return p.applyToIntegerByFunc(applyFunc)
-	}
-
-	if applyFunc, ok := applier.(IntegerToIntegerApplierCompactFunc); ok {
-		return p.applyToIntegerByCompactFunc(applyFunc)
+		return IntegerPayload(data, na, p.Options()...)
 	}
 
 	return NAPayload(p.length)
 
 }
 
-func (p *integerPayload) applyToIntegerByFunc(applyFunc IntegerToIntegerApplierFunc) Payload {
-	data := make([]int, p.length)
-	na := make([]bool, p.length)
+func (p *integerPayload) ApplyTo(indices []int, applier any) Payload {
+	if applyFunc, ok := applier.(IntegerApplierFunc); ok {
+		data, na := applyToByFunc(indices, p.data, p.na, applyFunc, 0)
 
-	for i := 0; i < p.length; i++ {
-		dataVal, naVal := applyFunc(i+1, p.data[i], p.na[i])
-		if naVal {
-			dataVal = 0
-		}
-		data[i] = dataVal
-		na[i] = naVal
+		return IntegerPayload(data, na, p.Options()...)
 	}
 
-	return IntegerPayload(data, na, p.Options()...)
+	if applyFunc, ok := applier.(IntegerApplierCompactFunc); ok {
+		data, na := applyToByCompactFunc(indices, p.data, p.na, applyFunc, 0)
+
+		return IntegerPayload(data, na, p.Options()...)
+	}
+
+	return NAPayload(p.length)
 }
 
-func (p *integerPayload) applyToIntegerByCompactFunc(applyFunc IntegerToIntegerApplierCompactFunc) Payload {
-	data := make([]int, p.length)
-	na := make([]bool, p.length)
-
-	for i := 0; i < p.length; i++ {
-		dataVal, naVal := applyFunc(p.data[i], p.na[i])
-		if naVal {
-			dataVal = 0
-		}
-		data[i] = dataVal
-		na[i] = naVal
-	}
-
-	return IntegerPayload(data, na, p.Options()...)
-}
-
-func (p *integerPayload) SupportsSummarizer(summarizer interface{}) bool {
-	if _, ok := summarizer.(IntegerSummarizerFunc); ok {
-		return true
-	}
-
-	return false
+func (p *integerPayload) SupportsSummarizer(summarizer any) bool {
+	return supportsSummarizer[int](summarizer)
 }
 
 func (p *integerPayload) Summarize(summarizer interface{}) Payload {
-	fn, ok := summarizer.(IntegerSummarizerFunc)
-	if !ok {
-		return NAPayload(1)
-	}
+	val, na := summarize(p.data, p.na, summarizer, 0, 0)
 
-	val := 0
-	na := false
-	for i := 0; i < p.length; i++ {
-		val, na = fn(i+1, val, p.data[i], p.na[i])
-
-		if na {
-			return NAPayload(1)
-		}
-	}
-
-	return IntegerPayload([]int{val}, nil, p.Options()...)
+	return IntegerPayload([]int{val}, []bool{na}, p.Options()...)
 }
 
 func (p *integerPayload) Integers() ([]int, []bool) {
@@ -340,72 +252,19 @@ func (p *integerPayload) Adjust(size int) Payload {
 }
 
 func (p *integerPayload) adjustToLesserSize(size int) Payload {
-	data := make([]int, size)
-	na := make([]bool, size)
-
-	copy(data, p.data)
-	copy(na, p.na)
+	data, na := adjustToLesserSizeWithNA(p.data, p.na, size)
 
 	return IntegerPayload(data, na, p.Options()...)
 }
 
 func (p *integerPayload) adjustToBiggerSize(size int) Payload {
-	cycles := size / p.length
-	if size%p.length > 0 {
-		cycles++
-	}
-
-	data := make([]int, cycles*p.length)
-	na := make([]bool, cycles*p.length)
-
-	for i := 0; i < cycles; i++ {
-		copy(data[i*p.length:], p.data)
-		copy(na[i*p.length:], p.na)
-	}
-
-	data = data[:size]
-	na = na[:size]
+	data, na := adjustToBiggerSizeWithNA(p.data, p.na, p.length, size)
 
 	return IntegerPayload(data, na, p.Options()...)
 }
 
 func (p *integerPayload) Groups() ([][]int, []interface{}) {
-	groupMap := map[int][]int{}
-	ordered := []int{}
-	na := []int{}
-
-	for i, val := range p.data {
-		idx := i + 1
-
-		if p.na[i] {
-			na = append(na, idx)
-			continue
-		}
-
-		if _, ok := groupMap[val]; !ok {
-			groupMap[val] = []int{}
-			ordered = append(ordered, val)
-		}
-
-		groupMap[val] = append(groupMap[val], idx)
-	}
-
-	groups := make([][]int, len(ordered))
-	for i, val := range ordered {
-		groups[i] = groupMap[val]
-	}
-
-	if len(na) > 0 {
-		groups = append(groups, na)
-	}
-
-	values := make([]interface{}, len(groups))
-	for i, val := range ordered {
-		values[i] = interface{}(val)
-	}
-	if len(na) > 0 {
-		values[len(values)-1] = nil
-	}
+	groups, values := groupsForData(p.data, p.na)
 
 	return groups, values
 }

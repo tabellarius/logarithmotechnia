@@ -8,8 +8,8 @@ import (
 
 type ComplexWhicherFunc = func(int, complex128, bool) bool
 type ComplexWhicherCompactFunc = func(complex128, bool) bool
-type ComplexToComplexApplierFunc = func(int, complex128, bool) (complex128, bool)
-type ComplexToComplexApplierCompactFunc = func(complex128, bool) (complex128, bool)
+type ComplexApplierFunc = func(int, complex128, bool) (complex128, bool)
+type ComplexApplierCompactFunc = func(complex128, bool) (complex128, bool)
 type ComplexSummarizerFunc = func(int, complex128, complex128, bool) (complex128, bool)
 
 type ComplexPrinter struct {
@@ -40,152 +40,64 @@ func (p *complexPayload) Data() []interface{} {
 }
 
 func (p *complexPayload) ByIndices(indices []int) Payload {
-	data := make([]complex128, 0, len(indices))
-	na := make([]bool, 0, len(indices))
-
-	for _, idx := range indices {
-		if idx == 0 {
-			data = append(data, cmplx.NaN())
-			na = append(na, true)
-		} else {
-			data = append(data, p.data[idx-1])
-			na = append(na, p.na[idx-1])
-		}
-	}
+	data, na := byIndices(indices, p.data, p.na, cmplx.NaN())
 
 	return ComplexPayload(data, na, p.Options()...)
 }
 
-func (p *complexPayload) SupportsWhicher(whicher interface{}) bool {
-	if _, ok := whicher.(ComplexWhicherFunc); ok {
-		return true
-	}
-
-	if _, ok := whicher.(ComplexWhicherCompactFunc); ok {
-		return true
-	}
-
-	return false
+func (p *complexPayload) SupportsWhicher(whicher any) bool {
+	return supportsWhicher[complex128](whicher)
 }
 
-func (p *complexPayload) Which(whicher interface{}) []bool {
-	if byFunc, ok := whicher.(ComplexWhicherFunc); ok {
-		return p.selectByFunc(byFunc)
-	}
-
-	if byFunc, ok := whicher.(ComplexWhicherCompactFunc); ok {
-		return p.selectByCompactFunc(byFunc)
-	}
-
-	return make([]bool, p.length)
+func (p *complexPayload) Which(whicher any) []bool {
+	return which(p.data, p.na, whicher)
 }
 
-func (p *complexPayload) selectByFunc(byFunc ComplexWhicherFunc) []bool {
-	booleans := make([]bool, p.length)
-
-	for idx, val := range p.data {
-		if byFunc(idx+1, val, p.na[idx]) {
-			booleans[idx] = true
-		}
-	}
-
-	return booleans
+func (p *complexPayload) SupportsApplier(applier any) bool {
+	return supportsApplier[complex128](applier)
 }
 
-func (p *complexPayload) selectByCompactFunc(byFunc ComplexWhicherCompactFunc) []bool {
-	booleans := make([]bool, p.length)
+func (p *complexPayload) Apply(applier any) Payload {
+	if applyFunc, ok := applier.(ComplexApplierFunc); ok {
+		data, na := applyByFunc(p.data, p.na, p.length, applyFunc, cmplx.NaN())
 
-	for idx, val := range p.data {
-		if byFunc(val, p.na[idx]) {
-			booleans[idx] = true
-		}
+		return ComplexPayload(data, na, p.Options()...)
 	}
 
-	return booleans
-}
+	if applyFunc, ok := applier.(ComplexApplierCompactFunc); ok {
+		data, na := applyByCompactFunc(p.data, p.na, p.length, applyFunc, cmplx.NaN())
 
-func (p *complexPayload) SupportsApplier(applier interface{}) bool {
-	if _, ok := applier.(ComplexToComplexApplierFunc); ok {
-		return true
-	}
-
-	if _, ok := applier.(ComplexToComplexApplierCompactFunc); ok {
-		return true
-	}
-
-	return false
-}
-
-func (p *complexPayload) Apply(applier interface{}) Payload {
-	if applyFunc, ok := applier.(ComplexToComplexApplierFunc); ok {
-		return p.applyToComplexByFunc(applyFunc)
-	}
-
-	if applyFunc, ok := applier.(ComplexToComplexApplierCompactFunc); ok {
-		return p.applyToComplexByCompactFunc(applyFunc)
+		return ComplexPayload(data, na, p.Options()...)
 	}
 
 	return NAPayload(p.length)
 
 }
 
-func (p *complexPayload) applyToComplexByFunc(applyFunc ComplexToComplexApplierFunc) Payload {
-	data := make([]complex128, p.length)
-	na := make([]bool, p.length)
+func (p *complexPayload) ApplyTo(indices []int, applier any) Payload {
+	if applyFunc, ok := applier.(ComplexApplierFunc); ok {
+		data, na := applyToByFunc(indices, p.data, p.na, applyFunc, cmplx.NaN())
 
-	for i := 0; i < p.length; i++ {
-		dataVal, naVal := applyFunc(i+1, p.data[i], p.na[i])
-		if naVal {
-			dataVal = cmplx.NaN()
-		}
-		data[i] = dataVal
-		na[i] = naVal
+		return ComplexPayload(data, na, p.Options()...)
 	}
 
-	return ComplexPayload(data, na, p.Options()...)
+	if applyFunc, ok := applier.(ComplexApplierCompactFunc); ok {
+		data, na := applyToByCompactFunc(indices, p.data, p.na, applyFunc, cmplx.NaN())
+
+		return ComplexPayload(data, na, p.Options()...)
+	}
+
+	return NAPayload(p.length)
 }
 
-func (p *complexPayload) applyToComplexByCompactFunc(applyFunc ComplexToComplexApplierCompactFunc) Payload {
-	data := make([]complex128, p.length)
-	na := make([]bool, p.length)
-
-	for i := 0; i < p.length; i++ {
-		dataVal, naVal := applyFunc(p.data[i], p.na[i])
-		if naVal {
-			dataVal = cmplx.NaN()
-		}
-		data[i] = dataVal
-		na[i] = naVal
-	}
-
-	return ComplexPayload(data, na, p.Options()...)
-}
-
-func (p *complexPayload) SupportsSummarizer(summarizer interface{}) bool {
-	if _, ok := summarizer.(ComplexSummarizerFunc); ok {
-		return true
-	}
-
-	return false
+func (p *complexPayload) SupportsSummarizer(summarizer any) bool {
+	return supportsSummarizer[complex128](summarizer)
 }
 
 func (p *complexPayload) Summarize(summarizer interface{}) Payload {
-	fn, ok := summarizer.(ComplexSummarizerFunc)
-	if !ok {
-		return NAPayload(1)
-	}
+	val, na := summarize(p.data, p.na, summarizer, 0+0i, cmplx.NaN())
 
-	val := 0 + 0i
-	na := false
-	for i := 0; i < p.length; i++ {
-		val, na = fn(i+1, val, p.data[i], p.na[i])
-
-		if na {
-			return NAPayload(1)
-		}
-	}
-
-	return ComplexPayload([]complex128{val}, nil, p.Options()...)
+	return ComplexPayload([]complex128{val}, []bool{na}, p.Options()...)
 }
 
 func (p *complexPayload) Integers() ([]int, []bool) {
@@ -337,31 +249,13 @@ func (p *complexPayload) Adjust(size int) Payload {
 }
 
 func (p *complexPayload) adjustToLesserSize(size int) Payload {
-	data := make([]complex128, size)
-	na := make([]bool, size)
-
-	copy(data, p.data)
-	copy(na, p.na)
+	data, na := adjustToLesserSizeWithNA(p.data, p.na, size)
 
 	return ComplexPayload(data, na, p.Options()...)
 }
 
 func (p *complexPayload) adjustToBiggerSize(size int) Payload {
-	cycles := size / p.length
-	if size%p.length > 0 {
-		cycles++
-	}
-
-	data := make([]complex128, cycles*p.length)
-	na := make([]bool, cycles*p.length)
-
-	for i := 0; i < cycles; i++ {
-		copy(data[i*p.length:], p.data)
-		copy(na[i*p.length:], p.na)
-	}
-
-	data = data[:size]
-	na = na[:size]
+	data, na := adjustToBiggerSizeWithNA(p.data, p.na, p.length, size)
 
 	return ComplexPayload(data, na, p.Options()...)
 }
@@ -373,42 +267,7 @@ func (p *complexPayload) Options() []Option {
 }
 
 func (p *complexPayload) Groups() ([][]int, []interface{}) {
-	groupMap := map[complex128][]int{}
-	ordered := []complex128{}
-	na := []int{}
-
-	for i, val := range p.data {
-		idx := i + 1
-
-		if p.na[i] {
-			na = append(na, idx)
-			continue
-		}
-
-		if _, ok := groupMap[val]; !ok {
-			groupMap[val] = []int{}
-			ordered = append(ordered, val)
-		}
-
-		groupMap[val] = append(groupMap[val], idx)
-	}
-
-	groups := make([][]int, len(ordered))
-	for i, val := range ordered {
-		groups[i] = groupMap[val]
-	}
-
-	if len(na) > 0 {
-		groups = append(groups, na)
-	}
-
-	values := make([]interface{}, len(groups))
-	for i, val := range ordered {
-		values[i] = interface{}(val)
-	}
-	if len(na) > 0 {
-		values[len(values)-1] = nil
-	}
+	groups, values := groupsForData(p.data, p.na)
 
 	return groups, values
 }

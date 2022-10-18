@@ -8,8 +8,8 @@ import (
 
 type StringWhicherFunc = func(int, string, bool) bool
 type StringWhicherCompactFunc = func(string, bool) bool
-type StringToStringApplierFunc = func(int, string, bool) (string, bool)
-type StringToStringApplierCompactFunc = func(string, bool) (string, bool)
+type StringApplierFunc = func(int, string, bool) (string, bool)
+type StringApplierCompactFunc = func(string, bool) (string, bool)
 type StringSummarizerFunc = func(int, string, string, bool) (string, bool)
 
 type stringPayload struct {
@@ -36,151 +36,63 @@ func (p *stringPayload) Data() []interface{} {
 }
 
 func (p *stringPayload) ByIndices(indices []int) Payload {
-	data := make([]string, 0, len(indices))
-	na := make([]bool, 0, len(indices))
-
-	for _, idx := range indices {
-		if idx == 0 {
-			data = append(data, "")
-			na = append(na, true)
-		} else {
-			data = append(data, p.data[idx-1])
-			na = append(na, p.na[idx-1])
-		}
-	}
+	data, na := byIndices(indices, p.data, p.na, "")
 
 	return StringPayload(data, na, p.Options()...)
 }
 
-func (p *stringPayload) SupportsWhicher(whicher interface{}) bool {
-	if _, ok := whicher.(StringWhicherFunc); ok {
-		return true
-	}
-
-	if _, ok := whicher.(StringWhicherCompactFunc); ok {
-		return true
-	}
-
-	return false
+func (p *stringPayload) SupportsWhicher(whicher any) bool {
+	return supportsWhicher[string](whicher)
 }
 
-func (p *stringPayload) Which(whicher interface{}) []bool {
-	if byFunc, ok := whicher.(StringWhicherFunc); ok {
-		return p.selectByFunc(byFunc)
-	}
-
-	if byFunc, ok := whicher.(StringWhicherCompactFunc); ok {
-		return p.selectByCompactFunc(byFunc)
-	}
-
-	return make([]bool, p.length)
+func (p *stringPayload) Which(whicher any) []bool {
+	return which(p.data, p.na, whicher)
 }
 
-func (p *stringPayload) selectByFunc(byFunc StringWhicherFunc) []bool {
-	booleans := make([]bool, p.length)
-
-	for idx, val := range p.data {
-		if byFunc(idx+1, val, p.na[idx]) {
-			booleans[idx] = true
-		}
-	}
-
-	return booleans
+func (p *stringPayload) SupportsApplier(applier any) bool {
+	return supportsApplier[string](applier)
 }
 
-func (p *stringPayload) selectByCompactFunc(byFunc StringWhicherCompactFunc) []bool {
-	booleans := make([]bool, p.length)
+func (p *stringPayload) Apply(applier any) Payload {
+	if applyFunc, ok := applier.(StringApplierFunc); ok {
+		data, na := applyByFunc(p.data, p.na, p.length, applyFunc, "")
 
-	for idx, val := range p.data {
-		if byFunc(val, p.na[idx]) {
-			booleans[idx] = true
-		}
+		return StringPayload(data, na, p.Options()...)
 	}
 
-	return booleans
-}
+	if applyFunc, ok := applier.(StringApplierCompactFunc); ok {
+		data, na := applyByCompactFunc(p.data, p.na, p.length, applyFunc, "")
 
-func (p *stringPayload) SupportsApplier(applier interface{}) bool {
-	if _, ok := applier.(StringToStringApplierFunc); ok {
-		return true
-	}
-
-	if _, ok := applier.(StringToStringApplierCompactFunc); ok {
-		return true
-	}
-
-	return false
-}
-
-func (p *stringPayload) Apply(applier interface{}) Payload {
-	if applyFunc, ok := applier.(StringToStringApplierFunc); ok {
-		return p.applyToStringByFunc(applyFunc)
-	}
-
-	if applyFunc, ok := applier.(StringToStringApplierCompactFunc); ok {
-		return p.applyToStringByCompactFunc(applyFunc)
+		return StringPayload(data, na, p.Options()...)
 	}
 
 	return NAPayload(p.length)
 }
 
-func (p *stringPayload) applyToStringByFunc(applyFunc StringToStringApplierFunc) Payload {
-	data := make([]string, p.length)
-	na := make([]bool, p.length)
+func (p *stringPayload) ApplyTo(indices []int, applier any) Payload {
+	if applyFunc, ok := applier.(StringApplierFunc); ok {
+		data, na := applyToByFunc(indices, p.data, p.na, applyFunc, "")
 
-	for i := 0; i < p.length; i++ {
-		dataVal, naVal := applyFunc(i+1, p.data[i], p.na[i])
-		if naVal {
-			dataVal = ""
-		}
-		data[i] = dataVal
-		na[i] = naVal
+		return StringPayload(data, na, p.Options()...)
 	}
 
-	return StringPayload(data, na, p.Options()...)
+	if applyFunc, ok := applier.(StringApplierCompactFunc); ok {
+		data, na := applyToByCompactFunc(indices, p.data, p.na, applyFunc, "")
+
+		return StringPayload(data, na, p.Options()...)
+	}
+
+	return NAPayload(p.length)
 }
 
-func (p *stringPayload) applyToStringByCompactFunc(applyFunc StringToStringApplierCompactFunc) Payload {
-	data := make([]string, p.length)
-	na := make([]bool, p.length)
-
-	for i := 0; i < p.length; i++ {
-		dataVal, naVal := applyFunc(p.data[i], p.na[i])
-		if naVal {
-			dataVal = ""
-		}
-		data[i] = dataVal
-		na[i] = naVal
-	}
-
-	return StringPayload(data, na, p.Options()...)
-}
-
-func (p *stringPayload) SupportsSummarizer(summarizer interface{}) bool {
-	if _, ok := summarizer.(StringSummarizerFunc); ok {
-		return true
-	}
-
-	return false
+func (p *stringPayload) SupportsSummarizer(summarizer any) bool {
+	return supportsSummarizer[string](summarizer)
 }
 
 func (p *stringPayload) Summarize(summarizer interface{}) Payload {
-	fn, ok := summarizer.(StringSummarizerFunc)
-	if !ok {
-		return NAPayload(1)
-	}
+	val, na := summarize(p.data, p.na, summarizer, "", "")
 
-	val := ""
-	na := false
-	for i := 0; i < p.length; i++ {
-		val, na = fn(i+1, val, p.data[i], p.na[i])
-
-		if na {
-			return NAPayload(1)
-		}
-	}
-
-	return StringPayload([]string{val}, nil, p.Options()...)
+	return StringPayload([]string{val}, []bool{na}, p.Options()...)
 }
 
 func (p *stringPayload) Integers() ([]int, []bool) {

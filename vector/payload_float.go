@@ -8,8 +8,8 @@ import (
 
 type FloatWhicherFunc = func(int, float64, bool) bool
 type FloatWhicherCompactFunc = func(float64, bool) bool
-type FloatToFloatApplierFunc = func(int, float64, bool) (float64, bool)
-type FloatToFloatApplierCompactFunc = func(float64, bool) (float64, bool)
+type FloatApplierFunc = func(int, float64, bool) (float64, bool)
+type FloatApplierCompactFunc = func(float64, bool) (float64, bool)
 type FloatSummarizerFunc = func(int, float64, float64, bool) (float64, bool)
 
 type FloatPrinter struct {
@@ -41,158 +41,63 @@ func (p *floatPayload) Data() []interface{} {
 }
 
 func (p *floatPayload) ByIndices(indices []int) Payload {
-	data := make([]float64, 0, len(indices))
-	na := make([]bool, 0, len(indices))
+	data, na := byIndices(indices, p.data, p.na, math.NaN())
 
-	for _, idx := range indices {
-		if idx == 0 {
-			data = append(data, math.NaN())
-			na = append(na, true)
-		} else {
-			data = append(data, p.data[idx-1])
-			na = append(na, p.na[idx-1])
-		}
-	}
-
-	return &floatPayload{
-		length:  len(data),
-		data:    data,
-		printer: p.printer,
-		DefNAble: DefNAble{
-			na: na,
-		},
-	}
+	return FloatPayload(data, na, p.Options()...)
 }
 
-func (p *floatPayload) SupportsWhicher(whicher interface{}) bool {
-	if _, ok := whicher.(FloatWhicherFunc); ok {
-		return true
-	}
-
-	if _, ok := whicher.(FloatWhicherCompactFunc); ok {
-		return true
-	}
-
-	return false
+func (p *floatPayload) SupportsWhicher(whicher any) bool {
+	return supportsWhicher[float64](whicher)
 }
 
-func (p *floatPayload) Which(whicher interface{}) []bool {
-	if byFunc, ok := whicher.(FloatWhicherFunc); ok {
-		return p.selectByFunc(byFunc)
-	}
-
-	if byFunc, ok := whicher.(FloatWhicherCompactFunc); ok {
-		return p.selectByCompactFunc(byFunc)
-	}
-
-	return make([]bool, p.length)
+func (p *floatPayload) Which(whicher any) []bool {
+	return which(p.data, p.na, whicher)
 }
 
-func (p *floatPayload) selectByFunc(byFunc FloatWhicherFunc) []bool {
-	booleans := make([]bool, p.length)
-
-	for idx, val := range p.data {
-		if byFunc(idx+1, val, p.na[idx]) {
-			booleans[idx] = true
-		}
-	}
-
-	return booleans
+func (p *floatPayload) SupportsApplier(applier any) bool {
+	return supportsApplier[float64](applier)
 }
 
-func (p *floatPayload) selectByCompactFunc(byFunc FloatWhicherCompactFunc) []bool {
-	booleans := make([]bool, p.length)
+func (p *floatPayload) Apply(applier any) Payload {
+	if applyFunc, ok := applier.(FloatApplierFunc); ok {
+		data, na := applyByFunc(p.data, p.na, p.length, applyFunc, math.NaN())
 
-	for idx, val := range p.data {
-		if byFunc(val, p.na[idx]) {
-			booleans[idx] = true
-		}
+		return FloatPayload(data, na, p.Options()...)
 	}
 
-	return booleans
-}
+	if applyFunc, ok := applier.(FloatApplierCompactFunc); ok {
+		data, na := applyByCompactFunc(p.data, p.na, p.length, applyFunc, math.NaN())
 
-func (p *floatPayload) SupportsApplier(applier interface{}) bool {
-	if _, ok := applier.(FloatToFloatApplierFunc); ok {
-		return true
-	}
-
-	if _, ok := applier.(FloatToFloatApplierCompactFunc); ok {
-		return true
-	}
-
-	return false
-}
-
-func (p *floatPayload) Apply(applier interface{}) Payload {
-	if applyFunc, ok := applier.(FloatToFloatApplierFunc); ok {
-		return p.applyToFloatByFunc(applyFunc)
-	}
-
-	if applyFunc, ok := applier.(FloatToFloatApplierCompactFunc); ok {
-		return p.applyToFloatByCompactFunc(applyFunc)
+		return FloatPayload(data, na, p.Options()...)
 	}
 
 	return NAPayload(p.length)
 }
 
-func (p *floatPayload) applyToFloatByFunc(applyFunc FloatToFloatApplierFunc) Payload {
-	data := make([]float64, p.length)
-	na := make([]bool, p.length)
+func (p *floatPayload) ApplyTo(indices []int, applier any) Payload {
+	if applyFunc, ok := applier.(FloatApplierFunc); ok {
+		data, na := applyToByFunc(indices, p.data, p.na, applyFunc, math.NaN())
 
-	for i := 0; i < p.length; i++ {
-		dataVal, naVal := applyFunc(i+1, p.data[i], p.na[i])
-		if naVal {
-			dataVal = math.NaN()
-		}
-		data[i] = dataVal
-		na[i] = naVal
+		return FloatPayload(data, na, p.Options()...)
 	}
 
-	return FloatPayload(data, na, p.Options()...)
+	if applyFunc, ok := applier.(FloatApplierCompactFunc); ok {
+		data, na := applyToByCompactFunc(indices, p.data, p.na, applyFunc, math.NaN())
+
+		return FloatPayload(data, na, p.Options()...)
+	}
+
+	return NAPayload(p.length)
 }
 
-func (p *floatPayload) applyToFloatByCompactFunc(applyFunc FloatToFloatApplierCompactFunc) Payload {
-	data := make([]float64, p.length)
-	na := make([]bool, p.length)
-
-	for i := 0; i < p.length; i++ {
-		dataVal, naVal := applyFunc(p.data[i], p.na[i])
-		if naVal {
-			dataVal = math.NaN()
-		}
-		data[i] = dataVal
-		na[i] = naVal
-	}
-
-	return FloatPayload(data, na, p.Options()...)
-}
-
-func (p *floatPayload) SupportsSummarizer(summarizer interface{}) bool {
-	if _, ok := summarizer.(FloatSummarizerFunc); ok {
-		return true
-	}
-
-	return false
+func (p *floatPayload) SupportsSummarizer(summarizer any) bool {
+	return supportsSummarizer[float64](summarizer)
 }
 
 func (p *floatPayload) Summarize(summarizer interface{}) Payload {
-	fn, ok := summarizer.(FloatSummarizerFunc)
-	if !ok {
-		return NAPayload(1)
-	}
+	val, na := summarize(p.data, p.na, summarizer, 0.0, math.NaN())
 
-	val := 0.0
-	na := false
-	for i := 0; i < p.length; i++ {
-		val, na = fn(i+1, val, p.data[i], p.na[i])
-
-		if na {
-			return NAPayload(1)
-		}
-	}
-
-	return FloatPayload([]float64{val}, nil, p.Options()...)
+	return FloatPayload([]float64{val}, []bool{na}, p.Options()...)
 }
 
 func (p *floatPayload) Integers() ([]int, []bool) {
@@ -369,31 +274,13 @@ func (p *floatPayload) Adjust(size int) Payload {
 }
 
 func (p *floatPayload) adjustToLesserSize(size int) Payload {
-	data := make([]float64, size)
-	na := make([]bool, size)
-
-	copy(data, p.data)
-	copy(na, p.na)
+	data, na := adjustToLesserSizeWithNA(p.data, p.na, size)
 
 	return FloatPayload(data, na, p.Options()...)
 }
 
 func (p *floatPayload) adjustToBiggerSize(size int) Payload {
-	cycles := size / p.length
-	if size%p.length > 0 {
-		cycles++
-	}
-
-	data := make([]float64, cycles*p.length)
-	na := make([]bool, cycles*p.length)
-
-	for i := 0; i < cycles; i++ {
-		copy(data[i*p.length:], p.data)
-		copy(na[i*p.length:], p.na)
-	}
-
-	data = data[:size]
-	na = na[:size]
+	data, na := adjustToBiggerSizeWithNA(p.data, p.na, p.length, size)
 
 	return FloatPayload(data, na, p.Options()...)
 }
@@ -603,42 +490,7 @@ func (p *floatPayload) convertComparator(val interface{}) (float64, bool) {
 }
 
 func (p *floatPayload) Groups() ([][]int, []interface{}) {
-	groupMap := map[float64][]int{}
-	ordered := []float64{}
-	na := []int{}
-
-	for i, val := range p.data {
-		idx := i + 1
-
-		if p.na[i] {
-			na = append(na, idx)
-			continue
-		}
-
-		if _, ok := groupMap[val]; !ok {
-			groupMap[val] = []int{}
-			ordered = append(ordered, val)
-		}
-
-		groupMap[val] = append(groupMap[val], idx)
-	}
-
-	groups := make([][]int, len(ordered))
-	for i, val := range ordered {
-		groups[i] = groupMap[val]
-	}
-
-	if len(na) > 0 {
-		groups = append(groups, na)
-	}
-
-	values := make([]interface{}, len(groups))
-	for i, val := range ordered {
-		values[i] = interface{}(val)
-	}
-	if len(na) > 0 {
-		values[len(values)-1] = nil
-	}
+	groups, values := groupsForData(p.data, p.na)
 
 	return groups, values
 }

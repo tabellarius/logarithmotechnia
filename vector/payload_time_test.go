@@ -558,36 +558,36 @@ func TestTimePayload_Summarize(t *testing.T) {
 	}
 
 	testData := []struct {
-		name        string
-		summarizer  interface{}
-		dataIn      []time.Time
-		naIn        []bool
-		dataOut     []time.Time
-		naOut       []bool
-		isNAPayload bool
+		name       string
+		summarizer interface{}
+		dataIn     []time.Time
+		naIn       []bool
+		dataOut    []time.Time
+		naOut      []bool
 	}{
 		{
-			name:        "true",
-			summarizer:  summarizer,
-			dataIn:      toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z"}),
-			naIn:        []bool{false, false, false},
-			dataOut:     toTimeData([]string{"2021-01-01T12:30:00+03:00"}),
-			naOut:       []bool{false},
-			isNAPayload: false,
+			name:       "true",
+			summarizer: summarizer,
+			dataIn:     toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z"}),
+			naIn:       []bool{false, false, false},
+			dataOut:    toTimeData([]string{"2021-01-01T12:30:00+03:00"}),
+			naOut:      []bool{false},
 		},
 		{
-			name:        "NA",
-			summarizer:  summarizer,
-			dataIn:      toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z"}),
-			naIn:        []bool{false, false, true},
-			isNAPayload: true,
+			name:       "NA",
+			summarizer: summarizer,
+			dataIn:     toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z"}),
+			naIn:       []bool{false, false, true},
+			dataOut:    []time.Time{time.Time{}},
+			naOut:      []bool{true},
 		},
 		{
-			name:        "incorrect summarizer",
-			summarizer:  func(int, int, bool) bool { return true },
-			dataIn:      toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z"}),
-			naIn:        []bool{false, false, false},
-			isNAPayload: true,
+			name:       "incorrect summarizer",
+			summarizer: func(int, int, bool) bool { return true },
+			dataIn:     toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z"}),
+			naIn:       []bool{false, false, false},
+			dataOut:    []time.Time{time.Time{}},
+			naOut:      []bool{true},
 		},
 	}
 
@@ -595,25 +595,14 @@ func TestTimePayload_Summarize(t *testing.T) {
 		t.Run(data.name, func(t *testing.T) {
 			payload := TimeWithNA(data.dataIn, data.naIn).(*vector).payload.(Summarizable).Summarize(data.summarizer)
 
-			if !data.isNAPayload {
-				payloadOut := payload.(*timePayload)
-				if !reflect.DeepEqual(data.dataOut, payloadOut.data) {
-					t.Error(fmt.Sprintf("Output data (%v) does not match expected (%v)",
-						data.dataOut, payloadOut.data))
-				}
-				if !reflect.DeepEqual(data.naOut, payloadOut.na) {
-					t.Error(fmt.Sprintf("Output NA (%v) does not match expected (%v)",
-						data.naOut, payloadOut.na))
-				}
-			} else {
-				naPayload, ok := payload.(*naPayload)
-				if ok {
-					if naPayload.length != 1 {
-						t.Error("Incorrect length of NA payload (not 1)")
-					}
-				} else {
-					t.Error("Payload is not NA")
-				}
+			payloadOut := payload.(*timePayload)
+			if !reflect.DeepEqual(data.dataOut, payloadOut.data) {
+				t.Error(fmt.Sprintf("Output data (%v) does not match expected (%v)",
+					data.dataOut, payloadOut.data))
+			}
+			if !reflect.DeepEqual(data.naOut, payloadOut.na) {
+				t.Error(fmt.Sprintf("Output NA (%v) does not match expected (%v)",
+					data.naOut, payloadOut.na))
 			}
 		})
 	}
@@ -1139,6 +1128,70 @@ func TestTimePayload_Data(t *testing.T) {
 			if !reflect.DeepEqual(payloadData, data.outData) {
 				t.Error(fmt.Sprintf("Result of Data() (%v) do not match expected (%v)",
 					payloadData, data.outData))
+			}
+		})
+	}
+}
+
+func TestTimePayload_ApplyTo(t *testing.T) {
+	srcPayload := TimePayload(toTimeData([]string{"2021-01-01T12:30:00+03:00", "0001-01-01T00:00:00Z",
+		"2020-01-01T12:30:00+03:00"}), []bool{false, true, false})
+
+	testData := []struct {
+		name        string
+		indices     []int
+		applier     interface{}
+		dataOut     []time.Time
+		naOut       []bool
+		isNAPayload bool
+	}{
+		{
+			name:    "regular",
+			indices: []int{1, 2},
+			applier: func(idx int, val time.Time, na bool) (time.Time, bool) {
+				return val, true
+			},
+			dataOut:     toTimeData([]string{"0001-01-01T00:00:00Z", "0001-01-01T00:00:00Z", "2020-01-01T12:30:00+03:00"}),
+			naOut:       []bool{true, true, false},
+			isNAPayload: false,
+		},
+		{
+			name:    "regular compact",
+			indices: []int{1, 2},
+			applier: func(val time.Time, na bool) (time.Time, bool) {
+				return val, true
+			},
+			dataOut:     toTimeData([]string{"0001-01-01T00:00:00Z", "0001-01-01T00:00:00Z", "2020-01-01T12:30:00+03:00"}),
+			naOut:       []bool{true, true, false},
+			isNAPayload: false,
+		},
+		{
+			name:        "incorrect applier",
+			indices:     []int{1, 2, 5},
+			applier:     func(int, int, bool) bool { return true },
+			isNAPayload: true,
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			payload := srcPayload.(Appliable).ApplyTo(data.indices, data.applier)
+
+			if !data.isNAPayload {
+				payloadOut := payload.(*timePayload)
+				if !reflect.DeepEqual(data.dataOut, payloadOut.data) {
+					t.Error(fmt.Sprintf("Output data (%v) does not match expected (%v)",
+						data.dataOut, payloadOut.data))
+				}
+				if !reflect.DeepEqual(data.naOut, payloadOut.na) {
+					t.Error(fmt.Sprintf("Output NA (%v) does not match expected (%v)",
+						data.naOut, payloadOut.na))
+				}
+			} else {
+				_, ok := payload.(*naPayload)
+				if !ok {
+					t.Error("Payload is not NA")
+				}
 			}
 		})
 	}

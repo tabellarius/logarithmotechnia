@@ -686,36 +686,36 @@ func TestIntegerPayload_Summarize(t *testing.T) {
 	}
 
 	testData := []struct {
-		name        string
-		summarizer  interface{}
-		dataIn      []int
-		naIn        []bool
-		dataOut     []int
-		naOut       []bool
-		isNAPayload bool
+		name       string
+		summarizer interface{}
+		dataIn     []int
+		naIn       []bool
+		dataOut    []int
+		naOut      []bool
 	}{
 		{
-			name:        "true",
-			summarizer:  summarizer,
-			dataIn:      []int{1, 2, 1, 6, 5},
-			naIn:        []bool{false, false, false, false, false},
-			dataOut:     []int{15},
-			naOut:       []bool{false},
-			isNAPayload: false,
+			name:       "true",
+			summarizer: summarizer,
+			dataIn:     []int{1, 2, 1, 6, 5},
+			naIn:       []bool{false, false, false, false, false},
+			dataOut:    []int{15},
+			naOut:      []bool{false},
 		},
 		{
-			name:        "NA",
-			summarizer:  summarizer,
-			dataIn:      []int{1, 2, 1, 6, 5},
-			naIn:        []bool{false, false, false, false, true},
-			isNAPayload: true,
+			name:       "NA",
+			summarizer: summarizer,
+			dataIn:     []int{1, 2, 1, 6, 5},
+			naIn:       []bool{false, false, false, false, true},
+			dataOut:    []int{0},
+			naOut:      []bool{true},
 		},
 		{
-			name:        "incorrect applier",
-			summarizer:  func(int, int, bool) bool { return true },
-			dataIn:      []int{1, 2, 1, 6, 5},
-			naIn:        []bool{false, true, false, true, false},
-			isNAPayload: true,
+			name:       "incorrect applier",
+			summarizer: func(int, int, bool) bool { return true },
+			dataIn:     []int{1, 2, 1, 6, 5},
+			naIn:       []bool{false, true, false, true, false},
+			dataOut:    []int{0},
+			naOut:      []bool{true},
 		},
 	}
 
@@ -723,25 +723,14 @@ func TestIntegerPayload_Summarize(t *testing.T) {
 		t.Run(data.name, func(t *testing.T) {
 			payload := IntegerWithNA(data.dataIn, data.naIn).(*vector).payload.(Summarizable).Summarize(data.summarizer)
 
-			if !data.isNAPayload {
-				payloadOut := payload.(*integerPayload)
-				if !reflect.DeepEqual(data.dataOut, payloadOut.data) {
-					t.Error(fmt.Sprintf("Output data (%v) does not match expected (%v)",
-						data.dataOut, payloadOut.data))
-				}
-				if !reflect.DeepEqual(data.naOut, payloadOut.na) {
-					t.Error(fmt.Sprintf("Output NA (%v) does not match expected (%v)",
-						data.naOut, payloadOut.na))
-				}
-			} else {
-				naPayload, ok := payload.(*naPayload)
-				if ok {
-					if naPayload.length != 1 {
-						t.Error("Incorrect length of NA payload (not 1)")
-					}
-				} else {
-					t.Error("Payload is not NA")
-				}
+			payloadOut := payload.(*integerPayload)
+			if !reflect.DeepEqual(data.dataOut, payloadOut.data) {
+				t.Error(fmt.Sprintf("Output data (%v) does not match expected (%v)",
+					data.dataOut, payloadOut.data))
+			}
+			if !reflect.DeepEqual(data.naOut, payloadOut.na) {
+				t.Error(fmt.Sprintf("Output NA (%v) does not match expected (%v)",
+					data.naOut, payloadOut.na))
 			}
 		})
 	}
@@ -1261,6 +1250,72 @@ func TestIntegerPayload_Data(t *testing.T) {
 			if !reflect.DeepEqual(payloadData, data.outData) {
 				t.Error(fmt.Sprintf("Result of Data() (%v) do not match expected (%v)",
 					payloadData, data.outData))
+			}
+		})
+	}
+}
+
+func TestIntegerPayload_ApplyTo(t *testing.T) {
+	srcPayload := IntegerPayload([]int{1, 2, 3, 4, 5}, []bool{false, true, false, true, false})
+
+	testData := []struct {
+		name        string
+		indices     []int
+		applier     interface{}
+		dataOut     []int
+		naOut       []bool
+		isNAPayload bool
+	}{
+		{
+			name:    "regular",
+			indices: []int{1, 2, 5},
+			applier: func(idx int, val int, na bool) (int, bool) {
+				if idx == 5 {
+					val = val * 2
+				}
+				return val, false
+			},
+			dataOut:     []int{1, 0, 3, 0, 10},
+			naOut:       []bool{false, false, false, true, false},
+			isNAPayload: false,
+		},
+		{
+			name:    "regular compact",
+			indices: []int{1, 2, 5},
+			applier: func(val int, na bool) (int, bool) {
+				return val * 3, false
+			},
+			dataOut:     []int{3, 0, 3, 0, 15},
+			naOut:       []bool{false, false, false, true, false},
+			isNAPayload: false,
+		},
+		{
+			name:        "incorrect applier",
+			indices:     []int{1, 2, 5},
+			applier:     func(int, int, bool) bool { return true },
+			isNAPayload: true,
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			payload := srcPayload.(Appliable).ApplyTo(data.indices, data.applier)
+
+			if !data.isNAPayload {
+				payloadOut := payload.(*integerPayload)
+				if !reflect.DeepEqual(data.dataOut, payloadOut.data) {
+					t.Error(fmt.Sprintf("Output data (%v) does not match expected (%v)",
+						data.dataOut, payloadOut.data))
+				}
+				if !reflect.DeepEqual(data.naOut, payloadOut.na) {
+					t.Error(fmt.Sprintf("Output NA (%v) does not match expected (%v)",
+						data.naOut, payloadOut.na))
+				}
+			} else {
+				_, ok := payload.(*naPayload)
+				if !ok {
+					t.Error("Payload is not NA")
+				}
 			}
 		})
 	}

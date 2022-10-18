@@ -20,6 +20,11 @@ func TestToIndexes(t *testing.T) {
 			indices: []int{3, 4, 5, 8, 10},
 		},
 		{
+			name:    "overflow",
+			which:   []bool{false, false, true, true, true, false, false, true, false, true, true, false},
+			indices: []int{3, 4, 5, 8, 10},
+		},
+		{
 			name:    "multiple",
 			which:   []bool{true, false, true, false, false},
 			indices: []int{1, 3, 6, 8},

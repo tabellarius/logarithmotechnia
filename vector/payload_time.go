@@ -6,8 +6,8 @@ import (
 
 type TimeWhicherFunc = func(int, time.Time, bool) bool
 type TimeWhicherCompactFunc = func(time.Time, bool) bool
-type TimeToTimeApplierFunc = func(int, time.Time, bool) (time.Time, bool)
-type TimeToTimeApplierCompactFunc = func(time.Time, bool) (time.Time, bool)
+type TimeApplierFunc = func(int, time.Time, bool) (time.Time, bool)
+type TimeApplierCompactFunc = func(time.Time, bool) (time.Time, bool)
 type TimeSummarizerFunc = func(int, time.Time, time.Time, bool) (time.Time, bool)
 
 type TimePrinter struct {
@@ -39,151 +39,63 @@ func (p *timePayload) Data() []interface{} {
 }
 
 func (p *timePayload) ByIndices(indices []int) Payload {
-	data := make([]time.Time, 0, len(indices))
-	na := make([]bool, 0, len(indices))
-
-	for _, idx := range indices {
-		if idx == 0 {
-			data = append(data, time.Time{})
-			na = append(na, true)
-		} else {
-			data = append(data, p.data[idx-1])
-			na = append(na, p.na[idx-1])
-		}
-	}
+	data, na := byIndices(indices, p.data, p.na, time.Time{})
 
 	return TimePayload(data, na, p.Options()...)
 }
 
-func (p *timePayload) SupportsWhicher(whicher interface{}) bool {
-	if _, ok := whicher.(TimeWhicherFunc); ok {
-		return true
-	}
-
-	if _, ok := whicher.(TimeWhicherCompactFunc); ok {
-		return true
-	}
-
-	return false
+func (p *timePayload) SupportsWhicher(whicher any) bool {
+	return supportsWhicher[time.Time](whicher)
 }
 
-func (p *timePayload) Which(whicher interface{}) []bool {
-	if byFunc, ok := whicher.(TimeWhicherFunc); ok {
-		return p.selectByFunc(byFunc)
-	}
-
-	if byFunc, ok := whicher.(TimeWhicherCompactFunc); ok {
-		return p.selectByCompactFunc(byFunc)
-	}
-
-	return make([]bool, p.length)
+func (p *timePayload) Which(whicher any) []bool {
+	return which(p.data, p.na, whicher)
 }
 
-func (p *timePayload) selectByFunc(byFunc TimeWhicherFunc) []bool {
-	booleans := make([]bool, p.length)
-
-	for idx, val := range p.data {
-		if byFunc(idx+1, val, p.na[idx]) {
-			booleans[idx] = true
-		}
-	}
-
-	return booleans
+func (p *timePayload) SupportsApplier(applier any) bool {
+	return supportsApplier[time.Time](applier)
 }
 
-func (p *timePayload) selectByCompactFunc(byFunc TimeWhicherCompactFunc) []bool {
-	booleans := make([]bool, p.length)
+func (p *timePayload) Apply(applier any) Payload {
+	if applyFunc, ok := applier.(TimeApplierFunc); ok {
+		data, na := applyByFunc(p.data, p.na, p.length, applyFunc, time.Time{})
 
-	for idx, val := range p.data {
-		if byFunc(val, p.na[idx]) {
-			booleans[idx] = true
-		}
+		return TimePayload(data, na)
 	}
 
-	return booleans
-}
+	if applyFunc, ok := applier.(TimeApplierCompactFunc); ok {
+		data, na := applyByCompactFunc(p.data, p.na, p.length, applyFunc, time.Time{})
 
-func (p *timePayload) SupportsApplier(applier interface{}) bool {
-	if _, ok := applier.(TimeToTimeApplierFunc); ok {
-		return true
-	}
-
-	if _, ok := applier.(TimeToTimeApplierCompactFunc); ok {
-		return true
-	}
-
-	return false
-}
-
-func (p *timePayload) Apply(applier interface{}) Payload {
-	if applyFunc, ok := applier.(TimeToTimeApplierFunc); ok {
-		return p.applyToTimeByFunc(applyFunc)
-	}
-
-	if applyFunc, ok := applier.(TimeToTimeApplierCompactFunc); ok {
-		return p.applyToTimeByCompactFunc(applyFunc)
+		return TimePayload(data, na)
 	}
 
 	return NAPayload(p.length)
 }
 
-func (p *timePayload) applyToTimeByFunc(applyFunc TimeToTimeApplierFunc) Payload {
-	data := make([]time.Time, p.length)
-	na := make([]bool, p.length)
+func (p *timePayload) ApplyTo(indices []int, applier any) Payload {
+	if applyFunc, ok := applier.(TimeApplierFunc); ok {
+		data, na := applyToByFunc(indices, p.data, p.na, applyFunc, time.Time{})
 
-	for i := 0; i < p.length; i++ {
-		dataVal, naVal := applyFunc(i+1, p.data[i], p.na[i])
-		if naVal {
-			dataVal = time.Time{}
-		}
-		data[i] = dataVal
-		na[i] = naVal
+		return TimePayload(data, na, p.Options()...)
 	}
 
-	return TimePayload(data, na)
+	if applyFunc, ok := applier.(TimeApplierCompactFunc); ok {
+		data, na := applyToByCompactFunc(indices, p.data, p.na, applyFunc, time.Time{})
+
+		return TimePayload(data, na, p.Options()...)
+	}
+
+	return NAPayload(p.length)
 }
 
-func (p *timePayload) applyToTimeByCompactFunc(applyFunc TimeToTimeApplierCompactFunc) Payload {
-	data := make([]time.Time, p.length)
-	na := make([]bool, p.length)
-
-	for i := 0; i < p.length; i++ {
-		dataVal, naVal := applyFunc(p.data[i], p.na[i])
-		if naVal {
-			dataVal = time.Time{}
-		}
-		data[i] = dataVal
-		na[i] = naVal
-	}
-
-	return TimePayload(data, na)
-}
-
-func (p *timePayload) SupportsSummarizer(summarizer interface{}) bool {
-	if _, ok := summarizer.(TimeSummarizerFunc); ok {
-		return true
-	}
-
-	return false
+func (p *timePayload) SupportsSummarizer(summarizer any) bool {
+	return supportsSummarizer[time.Time](summarizer)
 }
 
 func (p *timePayload) Summarize(summarizer interface{}) Payload {
-	fn, ok := summarizer.(TimeSummarizerFunc)
-	if !ok {
-		return NAPayload(1)
-	}
+	val, na := summarize(p.data, p.na, summarizer, time.Time{}, time.Time{})
 
-	val := time.Time{}
-	na := false
-	for i := 0; i < p.length; i++ {
-		val, na = fn(i+1, val, p.data[i], p.na[i])
-
-		if na {
-			return NAPayload(1)
-		}
-	}
-
-	return TimePayload([]time.Time{val}, nil)
+	return TimePayload([]time.Time{val}, []bool{na})
 }
 
 func (p *timePayload) Strings() ([]string, []bool) {
@@ -277,31 +189,13 @@ func (p *timePayload) Adjust(size int) Payload {
 }
 
 func (p *timePayload) adjustToLesserSize(size int) Payload {
-	data := make([]time.Time, size)
-	na := make([]bool, size)
-
-	copy(data, p.data)
-	copy(na, p.na)
+	data, na := adjustToLesserSizeWithNA(p.data, p.na, size)
 
 	return TimePayload(data, na)
 }
 
 func (p *timePayload) adjustToBiggerSize(size int) Payload {
-	cycles := size / p.length
-	if size%p.length > 0 {
-		cycles++
-	}
-
-	data := make([]time.Time, cycles*p.length)
-	na := make([]bool, cycles*p.length)
-
-	for i := 0; i < cycles; i++ {
-		copy(data[i*p.length:], p.data)
-		copy(na[i*p.length:], p.na)
-	}
-
-	data = data[:size]
-	na = na[:size]
+	data, na := adjustToBiggerSizeWithNA(p.data, p.na, p.length, size)
 
 	return TimePayload(data, na)
 }
@@ -472,42 +366,7 @@ func (p *timePayload) Lte(val interface{}) []bool {
 }
 
 func (p *timePayload) Groups() ([][]int, []interface{}) {
-	groupMap := map[time.Time][]int{}
-	ordered := []time.Time{}
-	na := []int{}
-
-	for i, val := range p.data {
-		idx := i + 1
-
-		if p.na[i] {
-			na = append(na, idx)
-			continue
-		}
-
-		if _, ok := groupMap[val]; !ok {
-			groupMap[val] = []int{}
-			ordered = append(ordered, val)
-		}
-
-		groupMap[val] = append(groupMap[val], idx)
-	}
-
-	groups := make([][]int, len(ordered))
-	for i, val := range ordered {
-		groups[i] = groupMap[val]
-	}
-
-	if len(na) > 0 {
-		groups = append(groups, na)
-	}
-
-	values := make([]interface{}, len(groups))
-	for i, val := range ordered {
-		values[i] = interface{}(val)
-	}
-	if len(na) > 0 {
-		values[len(values)-1] = nil
-	}
+	groups, values := groupsForData(p.data, p.na)
 
 	return groups, values
 }

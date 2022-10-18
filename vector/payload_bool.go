@@ -7,8 +7,8 @@ import (
 
 type BooleanWhicherFunc = func(int, bool, bool) bool
 type BooleanWhicherCompactFunc = func(bool, bool) bool
-type BooleanToBooleanApplierFunc = func(int, bool, bool) (bool, bool)
-type BooleanToBooleanApplierCompactFunc = func(bool, bool) (bool, bool)
+type BooleanApplierFunc = func(int, bool, bool) (bool, bool)
+type BooleanApplierCompactFunc = func(bool, bool) (bool, bool)
 type BooleanSummarizerFunc = func(int, bool, bool, bool) (bool, bool)
 
 type booleanPayload struct {
@@ -35,150 +35,63 @@ func (p *booleanPayload) Data() []interface{} {
 }
 
 func (p *booleanPayload) ByIndices(indices []int) Payload {
-	data := make([]bool, 0, len(indices))
-	na := make([]bool, 0, len(indices))
-
-	for _, idx := range indices {
-		if idx == 0 {
-			data = append(data, false)
-			na = append(na, true)
-		} else {
-			data = append(data, p.data[idx-1])
-			na = append(na, p.na[idx-1])
-		}
-	}
+	data, na := byIndices(indices, p.data, p.na, false)
 
 	return BooleanPayload(data, na, p.Options()...)
 }
 
-func (p *booleanPayload) SupportsWhicher(whicher interface{}) bool {
-	if _, ok := whicher.(BooleanWhicherFunc); ok {
-		return true
-	}
-
-	if _, ok := whicher.(BooleanWhicherCompactFunc); ok {
-		return true
-	}
-
-	return false
+func (p *booleanPayload) SupportsWhicher(whicher any) bool {
+	return supportsWhicher[bool](whicher)
 }
 
-func (p *booleanPayload) Which(whicher interface{}) []bool {
-	if byFunc, ok := whicher.(BooleanWhicherFunc); ok {
-		return p.selectByFunc(byFunc)
-	}
-
-	if byFunc, ok := whicher.(BooleanWhicherCompactFunc); ok {
-		return p.selectByCompactFunc(byFunc)
-	}
-
-	return make([]bool, p.length)
+func (p *booleanPayload) Which(whicher any) []bool {
+	return which(p.data, p.na, whicher)
 }
 
-func (p *booleanPayload) selectByFunc(byFunc BooleanWhicherFunc) []bool {
-	booleans := make([]bool, p.length)
-
-	for idx, val := range p.data {
-		if byFunc(idx+1, val, p.na[idx]) {
-			booleans[idx] = true
-		}
-	}
-
-	return booleans
+func (p *booleanPayload) SupportsApplier(applier any) bool {
+	return supportsApplier[bool](applier)
 }
 
-func (p *booleanPayload) selectByCompactFunc(byFunc BooleanWhicherCompactFunc) []bool {
-	booleans := make([]bool, p.length)
+func (p *booleanPayload) Apply(applier any) Payload {
+	if applyFunc, ok := applier.(BooleanApplierFunc); ok {
+		data, na := applyByFunc(p.data, p.na, p.length, applyFunc, false)
 
-	for idx, val := range p.data {
-		if byFunc(val, p.na[idx]) {
-			booleans[idx] = true
-		}
+		return BooleanPayload(data, na, p.Options()...)
 	}
 
-	return booleans
-}
+	if applyFunc, ok := applier.(BooleanApplierCompactFunc); ok {
+		data, na := applyByCompactFunc(p.data, p.na, p.length, applyFunc, false)
 
-func (p *booleanPayload) SupportsApplier(applier interface{}) bool {
-	if _, ok := applier.(BooleanToBooleanApplierFunc); ok {
-		return true
-	}
-
-	if _, ok := applier.(BooleanToBooleanApplierCompactFunc); ok {
-		return true
-	}
-
-	return false
-}
-
-func (p *booleanPayload) Apply(applier interface{}) Payload {
-	if applyFunc, ok := applier.(BooleanToBooleanApplierFunc); ok {
-		return p.applyToBooleanByFunc(applyFunc)
-	}
-
-	if applyFunc, ok := applier.(BooleanToBooleanApplierCompactFunc); ok {
-		return p.applyToBooleanByCompactFunc(applyFunc)
+		return BooleanPayload(data, na, p.Options()...)
 	}
 
 	return NAPayload(p.length)
 }
 
-func (p *booleanPayload) applyToBooleanByFunc(applyFunc BooleanToBooleanApplierFunc) Payload {
-	data := make([]bool, p.length)
-	na := make([]bool, p.length)
+func (p *booleanPayload) ApplyTo(indices []int, applier any) Payload {
+	if applyFunc, ok := applier.(BooleanApplierFunc); ok {
+		data, na := applyToByFunc(indices, p.data, p.na, applyFunc, false)
 
-	for i := 0; i < p.length; i++ {
-		dataVal, naVal := applyFunc(i+1, p.data[i], p.na[i])
-		if naVal {
-			dataVal = false
-		}
-		data[i] = dataVal
-		na[i] = naVal
+		return BooleanPayload(data, na, p.Options()...)
 	}
 
-	return BooleanPayload(data, na, p.Options()...)
+	if applyFunc, ok := applier.(BooleanApplierCompactFunc); ok {
+		data, na := applyToByCompactFunc(indices, p.data, p.na, applyFunc, false)
+
+		return BooleanPayload(data, na, p.Options()...)
+	}
+
+	return NAPayload(p.length)
 }
 
-func (p *booleanPayload) applyToBooleanByCompactFunc(applyFunc BooleanToBooleanApplierCompactFunc) Payload {
-	data := make([]bool, p.length)
-	na := make([]bool, p.length)
-
-	for i := 0; i < p.length; i++ {
-		dataVal, naVal := applyFunc(p.data[i], p.na[i])
-		if naVal {
-			dataVal = false
-		}
-		data[i] = dataVal
-		na[i] = naVal
-	}
-
-	return BooleanPayload(data, na, p.Options()...)
+func (p *booleanPayload) SupportsSummarizer(summarizer any) bool {
+	return supportsSummarizer[bool](summarizer)
 }
 
-func (p *booleanPayload) SupportsSummarizer(summarizer interface{}) bool {
-	if _, ok := summarizer.(BooleanSummarizerFunc); ok {
-		return true
-	}
+func (p *booleanPayload) Summarize(summarizer any) Payload {
+	val, na := summarize(p.data, p.na, summarizer, false, false)
 
-	return false
-}
-
-func (p *booleanPayload) Summarize(summarizer interface{}) Payload {
-	fn, ok := summarizer.(BooleanSummarizerFunc)
-	if !ok {
-		return NAPayload(1)
-	}
-
-	val := false
-	na := false
-	for i := 0; i < p.length; i++ {
-		val, na = fn(i+1, val, p.data[i], p.na[i])
-		if na {
-			return NAPayload(1)
-		}
-	}
-
-	return BooleanPayload([]bool{val}, nil, p.Options()...)
+	return BooleanPayload([]bool{val}, []bool{na}, p.Options()...)
 }
 
 func (p *booleanPayload) Integers() ([]int, []bool) {
@@ -341,72 +254,19 @@ func (p *booleanPayload) Adjust(size int) Payload {
 }
 
 func (p *booleanPayload) adjustToLesserSize(size int) Payload {
-	data := make([]bool, size)
-	na := make([]bool, size)
-
-	copy(data, p.data)
-	copy(na, p.na)
+	data, na := adjustToLesserSizeWithNA(p.data, p.na, size)
 
 	return BooleanPayload(data, na)
 }
 
 func (p *booleanPayload) adjustToBiggerSize(size int) Payload {
-	cycles := size / p.length
-	if size%p.length > 0 {
-		cycles++
-	}
-
-	data := make([]bool, cycles*p.length)
-	na := make([]bool, cycles*p.length)
-
-	for i := 0; i < cycles; i++ {
-		copy(data[i*p.length:], p.data)
-		copy(na[i*p.length:], p.na)
-	}
-
-	data = data[:size]
-	na = na[:size]
+	data, na := adjustToBiggerSizeWithNA(p.data, p.na, p.length, size)
 
 	return BooleanPayload(data, na)
 }
 
 func (p *booleanPayload) Groups() ([][]int, []interface{}) {
-	groupMap := map[bool][]int{}
-	ordered := []bool{}
-	na := []int{}
-
-	for i, val := range p.data {
-		idx := i + 1
-
-		if p.na[i] {
-			na = append(na, idx)
-			continue
-		}
-
-		if _, ok := groupMap[val]; !ok {
-			groupMap[val] = []int{}
-			ordered = append(ordered, val)
-		}
-
-		groupMap[val] = append(groupMap[val], idx)
-	}
-
-	groups := make([][]int, len(ordered))
-	for i, val := range ordered {
-		groups[i] = groupMap[val]
-	}
-
-	if len(na) > 0 {
-		groups = append(groups, na)
-	}
-
-	values := make([]interface{}, len(groups))
-	for i, val := range ordered {
-		values[i] = interface{}(val)
-	}
-	if len(na) > 0 {
-		values[len(values)-1] = nil
-	}
+	groups, values := groupsForData(p.data, p.na)
 
 	return groups, values
 }

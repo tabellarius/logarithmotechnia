@@ -8,8 +8,8 @@ import (
 
 type InterfaceWhicherFunc = func(int, interface{}, bool) bool
 type InterfaceWhicherCompactFunc = func(interface{}, bool) bool
-type InterfaceToInterfaceApplierFunc = func(int, interface{}, bool) (interface{}, bool)
-type InterfaceToInterfaceApplierCompactFunc = func(interface{}, bool) (interface{}, bool)
+type InterfaceApplierFunc = func(int, interface{}, bool) (interface{}, bool)
+type InterfaceApplierCompactFunc = func(interface{}, bool) (interface{}, bool)
 type InterfaceSummarizerFunc = func(int, interface{}, interface{}, bool) (interface{}, bool)
 type InterfacePrinterFunc = func(interface{}) string
 
@@ -47,27 +47,9 @@ func (p *interfacePayload) Data() []interface{} {
 }
 
 func (p *interfacePayload) ByIndices(indices []int) Payload {
-	data := make([]interface{}, 0, len(indices))
-	na := make([]bool, 0, len(indices))
+	data, na := byIndices(indices, p.data, p.na, nil)
 
-	for _, idx := range indices {
-		if idx == 0 {
-			data = append(data, nil)
-			na = append(na, true)
-		} else {
-			data = append(data, p.data[idx-1])
-			na = append(na, p.na[idx-1])
-		}
-	}
-
-	return &interfacePayload{
-		length:  len(data),
-		data:    data,
-		printer: p.printer,
-		DefNAble: DefNAble{
-			na: na,
-		},
-	}
+	return InterfacePayload(data, na, p.Options()...)
 }
 
 func (p *interfacePayload) StrForElem(idx int) string {
@@ -82,135 +64,58 @@ func (p *interfacePayload) StrForElem(idx int) string {
 	return ""
 }
 
-func (p *interfacePayload) SupportsWhicher(whicher interface{}) bool {
-	if _, ok := whicher.(InterfaceWhicherFunc); ok {
-		return true
-	}
-
-	if _, ok := whicher.(InterfaceWhicherCompactFunc); ok {
-		return true
-	}
-
-	return false
+func (p *interfacePayload) SupportsWhicher(whicher any) bool {
+	return supportsWhicher[any](whicher)
 }
 
-func (p *interfacePayload) Which(whicher interface{}) []bool {
-	if byFunc, ok := whicher.(InterfaceWhicherFunc); ok {
-		return p.selectByFunc(byFunc)
-	}
-
-	if byFunc, ok := whicher.(InterfaceWhicherCompactFunc); ok {
-		return p.selectByCompactFunc(byFunc)
-	}
-
-	return make([]bool, p.length)
+func (p *interfacePayload) Which(whicher any) []bool {
+	return which(p.data, p.na, whicher)
 }
 
-func (p *interfacePayload) selectByFunc(byFunc InterfaceWhicherFunc) []bool {
-	booleans := make([]bool, p.length)
-
-	for idx, val := range p.data {
-		if byFunc(idx+1, val, p.na[idx]) {
-			booleans[idx] = true
-		}
-	}
-
-	return booleans
+func (p *interfacePayload) SupportsApplier(applier any) bool {
+	return supportsApplier[any](applier)
 }
 
-func (p *interfacePayload) selectByCompactFunc(byFunc InterfaceWhicherCompactFunc) []bool {
-	booleans := make([]bool, p.length)
+func (p *interfacePayload) Apply(applier any) Payload {
+	if applyFunc, ok := applier.(InterfaceApplierFunc); ok {
+		data, na := applyByFunc(p.data, p.na, p.length, applyFunc, nil)
 
-	for idx, val := range p.data {
-		if byFunc(val, p.na[idx]) {
-			booleans[idx] = true
-		}
+		return InterfacePayload(data, na, p.Options()...)
 	}
 
-	return booleans
-}
+	if applyFunc, ok := applier.(InterfaceApplierCompactFunc); ok {
+		data, na := applyByCompactFunc(p.data, p.na, p.length, applyFunc, nil)
 
-func (p *interfacePayload) SupportsApplier(applier interface{}) bool {
-	if _, ok := applier.(InterfaceToInterfaceApplierFunc); ok {
-		return true
-	}
-
-	if _, ok := applier.(InterfaceToInterfaceApplierCompactFunc); ok {
-		return true
-	}
-
-	return false
-}
-
-func (p *interfacePayload) Apply(applier interface{}) Payload {
-	if applyFunc, ok := applier.(InterfaceToInterfaceApplierFunc); ok {
-		return p.applyToInterfaceByFunc(applyFunc)
-	}
-
-	if applyFunc, ok := applier.(InterfaceToInterfaceApplierCompactFunc); ok {
-		return p.applyToInterfaceByCompactFunc(applyFunc)
+		return InterfacePayload(data, na, p.Options()...)
 	}
 
 	return NAPayload(p.length)
 }
 
-func (p *interfacePayload) applyToInterfaceByFunc(applyFunc InterfaceToInterfaceApplierFunc) Payload {
-	data := make([]interface{}, p.length)
-	na := make([]bool, p.length)
+func (p *interfacePayload) ApplyTo(indices []int, applier any) Payload {
+	if applyFunc, ok := applier.(InterfaceApplierFunc); ok {
+		data, na := applyToByFunc(indices, p.data, p.na, applyFunc, 0)
 
-	for i := 0; i < p.length; i++ {
-		dataVal, naVal := applyFunc(i+1, p.data[i], p.na[i])
-		if naVal {
-			dataVal = nil
-		}
-		data[i] = dataVal
-		na[i] = naVal
+		return InterfacePayload(data, na, p.Options()...)
 	}
 
-	return InterfacePayload(data, na, p.Options()...)
+	if applyFunc, ok := applier.(InterfaceApplierCompactFunc); ok {
+		data, na := applyToByCompactFunc(indices, p.data, p.na, applyFunc, 0)
+
+		return InterfacePayload(data, na, p.Options()...)
+	}
+
+	return NAPayload(p.length)
 }
 
-func (p *interfacePayload) applyToInterfaceByCompactFunc(applyFunc InterfaceToInterfaceApplierCompactFunc) Payload {
-	data := make([]interface{}, p.length)
-	na := make([]bool, p.length)
-
-	for i := 0; i < p.length; i++ {
-		dataVal, naVal := applyFunc(p.data[i], p.na[i])
-		if naVal {
-			dataVal = nil
-		}
-		data[i] = dataVal
-		na[i] = naVal
-	}
-
-	return InterfacePayload(data, na, p.Options()...)
-}
-
-func (p *interfacePayload) SupportsSummarizer(summarizer interface{}) bool {
-	if _, ok := summarizer.(InterfaceSummarizerFunc); ok {
-		return true
-	}
-
-	return false
+func (p *interfacePayload) SupportsSummarizer(summarizer any) bool {
+	return supportsSummarizer[any](summarizer)
 }
 
 func (p *interfacePayload) Summarize(summarizer interface{}) Payload {
-	fn, ok := summarizer.(InterfaceSummarizerFunc)
-	if !ok {
-		return NAPayload(1)
-	}
+	val, na := summarize(p.data, p.na, summarizer, nil, nil)
 
-	val := interface{}(nil)
-	na := false
-	for i := 0; i < p.length; i++ {
-		val, na = fn(i+1, val, p.data[i], p.na[i])
-
-		if na {
-			return NAPayload(1)
-		}
-	}
-
-	return InterfacePayload([]interface{}{val}, nil, p.Options()...)
+	return InterfacePayload([]interface{}{val}, []bool{na}, p.Options()...)
 }
 
 func (p *interfacePayload) Integers() ([]int, []bool) {
@@ -383,31 +288,13 @@ func (p *interfacePayload) Adjust(size int) Payload {
 }
 
 func (p *interfacePayload) adjustToLesserSize(size int) Payload {
-	data := make([]interface{}, size)
-	na := make([]bool, size)
-
-	copy(data, p.data)
-	copy(na, p.na)
+	data, na := adjustToLesserSizeWithNA(p.data, p.na, size)
 
 	return InterfacePayload(data, na, p.Options()...)
 }
 
 func (p *interfacePayload) adjustToBiggerSize(size int) Payload {
-	cycles := size / p.length
-	if size%p.length > 0 {
-		cycles++
-	}
-
-	data := make([]interface{}, cycles*p.length)
-	na := make([]bool, cycles*p.length)
-
-	for i := 0; i < cycles; i++ {
-		copy(data[i*p.length:], p.data)
-		copy(na[i*p.length:], p.na)
-	}
-
-	data = data[:size]
-	na = na[:size]
+	data, na := adjustToBiggerSizeWithNA(p.data, p.na, p.length, size)
 
 	return InterfacePayload(data, na, p.Options()...)
 }

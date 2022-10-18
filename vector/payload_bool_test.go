@@ -684,45 +684,44 @@ func TestBooleanPayload_Summarize(t *testing.T) {
 	}
 
 	testData := []struct {
-		name        string
-		summarizer  interface{}
-		dataIn      []bool
-		naIn        []bool
-		dataOut     []bool
-		naOut       []bool
-		isNAPayload bool
+		name       string
+		summarizer interface{}
+		dataIn     []bool
+		naIn       []bool
+		dataOut    []bool
+		naOut      []bool
 	}{
 		{
-			name:        "true",
-			summarizer:  summarizer,
-			dataIn:      []bool{true, true, true, true, true},
-			naIn:        []bool{false, false, false, false, false},
-			dataOut:     []bool{true},
-			naOut:       []bool{false},
-			isNAPayload: false,
+			name:       "true",
+			summarizer: summarizer,
+			dataIn:     []bool{true, true, true, true, true},
+			naIn:       []bool{false, false, false, false, false},
+			dataOut:    []bool{true},
+			naOut:      []bool{false},
 		},
 		{
-			name:        "false",
-			summarizer:  summarizer,
-			dataIn:      []bool{true, true, false, true, true},
-			naIn:        []bool{false, false, false, false, false},
-			dataOut:     []bool{false},
-			naOut:       []bool{false},
-			isNAPayload: false,
+			name:       "false",
+			summarizer: summarizer,
+			dataIn:     []bool{true, true, false, true, true},
+			naIn:       []bool{false, false, false, false, false},
+			dataOut:    []bool{false},
+			naOut:      []bool{false},
 		},
 		{
-			name:        "NA",
-			summarizer:  summarizer,
-			dataIn:      []bool{true, true, true, true, true},
-			naIn:        []bool{false, false, false, false, true},
-			isNAPayload: true,
+			name:       "NA",
+			summarizer: summarizer,
+			dataIn:     []bool{true, true, true, true, true},
+			naIn:       []bool{false, false, false, false, true},
+			dataOut:    []bool{false},
+			naOut:      []bool{true},
 		},
 		{
-			name:        "incorrect applier",
-			summarizer:  func(int, int, bool) bool { return true },
-			dataIn:      []bool{true, true, false, false, true},
-			naIn:        []bool{false, true, false, true, false},
-			isNAPayload: true,
+			name:       "incorrect applier",
+			summarizer: func(int, int, bool) bool { return true },
+			dataIn:     []bool{true, true, false, false, true},
+			naIn:       []bool{false, true, false, true, false},
+			dataOut:    []bool{false},
+			naOut:      []bool{true},
 		},
 	}
 
@@ -730,25 +729,14 @@ func TestBooleanPayload_Summarize(t *testing.T) {
 		t.Run(data.name, func(t *testing.T) {
 			payload := BooleanWithNA(data.dataIn, data.naIn).(*vector).payload.(Summarizable).Summarize(data.summarizer)
 
-			if !data.isNAPayload {
-				payloadOut := payload.(*booleanPayload)
-				if !reflect.DeepEqual(data.dataOut, payloadOut.data) {
-					t.Error(fmt.Sprintf("Output data (%v) does not match expected (%v)",
-						data.dataOut, payloadOut.data))
-				}
-				if !reflect.DeepEqual(data.naOut, payloadOut.na) {
-					t.Error(fmt.Sprintf("Output NA (%v) does not match expected (%v)",
-						data.naOut, payloadOut.na))
-				}
-			} else {
-				naPayload, ok := payload.(*naPayload)
-				if ok {
-					if naPayload.length != 1 {
-						t.Error("Incorrect length of NA payload (not 1)")
-					}
-				} else {
-					t.Error("Payload is not NA")
-				}
+			payloadOut := payload.(*booleanPayload)
+			if !reflect.DeepEqual(data.dataOut, payloadOut.data) {
+				t.Error(fmt.Sprintf("Output data (%v) does not match expected (%v)",
+					data.dataOut, payloadOut.data))
+			}
+			if !reflect.DeepEqual(data.naOut, payloadOut.na) {
+				t.Error(fmt.Sprintf("Output NA (%v) does not match expected (%v)",
+					data.naOut, payloadOut.na))
 			}
 		})
 	}
@@ -1245,6 +1233,72 @@ func TestBooleanPayload_Data(t *testing.T) {
 			if !reflect.DeepEqual(payloadData, data.outData) {
 				t.Error(fmt.Sprintf("Result of Data() (%v) do not match expected (%v)",
 					payloadData, data.outData))
+			}
+		})
+	}
+}
+
+func TestBooleanPayload_ApplyTo(t *testing.T) {
+	srcPayload := BooleanPayload([]bool{true, true, true, false, false}, []bool{false, true, false, true, false})
+
+	testData := []struct {
+		name        string
+		indices     []int
+		applier     interface{}
+		dataOut     []bool
+		naOut       []bool
+		isNAPayload bool
+	}{
+		{
+			name:    "regular",
+			indices: []int{1, 2, 5},
+			applier: func(idx int, val bool, na bool) (bool, bool) {
+				if idx == 5 {
+					val = true
+				}
+				return val, false
+			},
+			dataOut:     []bool{true, false, true, false, true},
+			naOut:       []bool{false, false, false, true, false},
+			isNAPayload: false,
+		},
+		{
+			name:    "regular compact",
+			indices: []int{1, 2, 5},
+			applier: func(val bool, na bool) (bool, bool) {
+				return !val, false
+			},
+			dataOut:     []bool{false, true, true, false, true},
+			naOut:       []bool{false, false, false, true, false},
+			isNAPayload: false,
+		},
+		{
+			name:        "incorrect applier",
+			indices:     []int{1, 2, 5},
+			applier:     func(int, int, bool) bool { return true },
+			isNAPayload: true,
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			payload := srcPayload.(Appliable).ApplyTo(data.indices, data.applier)
+
+			if !data.isNAPayload {
+				payloadOut := payload.(*booleanPayload)
+				if !reflect.DeepEqual(data.dataOut, payloadOut.data) {
+					t.Error(fmt.Sprintf("Output data (%v) does not match expected (%v)",
+						data.dataOut, payloadOut.data))
+				}
+				if !reflect.DeepEqual(data.naOut, payloadOut.na) {
+					t.Error(fmt.Sprintf("Output NA (%v) does not match expected (%v)",
+						data.naOut, payloadOut.na))
+				}
+			} else {
+				_, ok := payload.(*naPayload)
+				if !ok {
+					t.Error("Payload is not NA")
+				}
 			}
 		})
 	}

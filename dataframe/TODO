@@ -2,7 +2,7 @@ Fix option loss
 IsGroupedBy(string)
 Distinct()
 Select - OptionRemoveColumns()
-(?) Select by func
+(?) Select by func (row-level)
 Move config to dataframe
 Loading from CSV
 Rename - support for []string{"from", "to"}
@@ -10,3 +10,4 @@ Mutate should accept single Column{} as well
 Mutate should accept map[string]Vector
 ToMap() - convert dataframe to map
 Unmarshall() - load dataframe to struct array
+interface{} -> any

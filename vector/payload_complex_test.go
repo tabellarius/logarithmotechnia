@@ -665,36 +665,36 @@ func TestComplexPayload_Summarize(t *testing.T) {
 	}
 
 	testData := []struct {
-		name        string
-		summarizer  interface{}
-		dataIn      []complex128
-		naIn        []bool
-		dataOut     []complex128
-		naOut       []bool
-		isNAPayload bool
+		name       string
+		summarizer interface{}
+		dataIn     []complex128
+		naIn       []bool
+		dataOut    []complex128
+		naOut      []bool
 	}{
 		{
-			name:        "true",
-			summarizer:  summarizer,
-			dataIn:      []complex128{1 + 1i, 2 + 3.5i, 1.5 + 1.5i, 5.5 + 5i, 5 + 11i},
-			naIn:        []bool{false, false, false, false, false},
-			dataOut:     []complex128{15 + 22i},
-			naOut:       []bool{false},
-			isNAPayload: false,
+			name:       "true",
+			summarizer: summarizer,
+			dataIn:     []complex128{1 + 1i, 2 + 3.5i, 1.5 + 1.5i, 5.5 + 5i, 5 + 11i},
+			naIn:       []bool{false, false, false, false, false},
+			dataOut:    []complex128{15 + 22i},
+			naOut:      []bool{false},
 		},
 		{
-			name:        "NA",
-			summarizer:  summarizer,
-			dataIn:      []complex128{1 + 1i, 2 + 3.5i, 1.5 + 1.5i, 5.5 + 5i, 5 + 11i},
-			naIn:        []bool{false, false, false, false, true},
-			isNAPayload: true,
+			name:       "NA",
+			summarizer: summarizer,
+			dataIn:     []complex128{1 + 1i, 2 + 3.5i, 1.5 + 1.5i, 5.5 + 5i, 5 + 11i},
+			naIn:       []bool{false, false, false, false, true},
+			dataOut:    []complex128{cmplx.NaN()},
+			naOut:      []bool{true},
 		},
 		{
-			name:        "incorrect applier",
-			summarizer:  func(int, int, bool) bool { return true },
-			dataIn:      []complex128{1 + 1i, 2 + 3.5i, 1.5 + 1.5i, 5.5 + 5i, 5 + 11i},
-			naIn:        []bool{false, true, false, true, false},
-			isNAPayload: true,
+			name:       "incorrect applier",
+			summarizer: func(int, int, bool) bool { return true },
+			dataIn:     []complex128{1 + 1i, 2 + 3.5i, 1.5 + 1.5i, 5.5 + 5i, 5 + 11i},
+			naIn:       []bool{false, true, false, true, false},
+			dataOut:    []complex128{cmplx.NaN()},
+			naOut:      []bool{true},
 		},
 	}
 
@@ -702,25 +702,14 @@ func TestComplexPayload_Summarize(t *testing.T) {
 		t.Run(data.name, func(t *testing.T) {
 			payload := ComplexWithNA(data.dataIn, data.naIn).(*vector).payload.(Summarizable).Summarize(data.summarizer)
 
-			if !data.isNAPayload {
-				payloadOut := payload.(*complexPayload)
-				if !reflect.DeepEqual(data.dataOut, payloadOut.data) {
-					t.Error(fmt.Sprintf("Output data (%v) does not match expected (%v)",
-						data.dataOut, payloadOut.data))
-				}
-				if !reflect.DeepEqual(data.naOut, payloadOut.na) {
-					t.Error(fmt.Sprintf("Output NA (%v) does not match expected (%v)",
-						data.naOut, payloadOut.na))
-				}
-			} else {
-				naPayload, ok := payload.(*naPayload)
-				if ok {
-					if naPayload.length != 1 {
-						t.Error("Incorrect length of NA payload (not 1)")
-					}
-				} else {
-					t.Error("Payload is not NA")
-				}
+			payloadOut := payload.(*complexPayload)
+			if !util.EqualComplexArrays(data.dataOut, payloadOut.data) {
+				t.Error(fmt.Sprintf("Output data (%v) does not match expected (%v)",
+					data.dataOut, payloadOut.data))
+			}
+			if !reflect.DeepEqual(data.naOut, payloadOut.na) {
+				t.Error(fmt.Sprintf("Output NA (%v) does not match expected (%v)",
+					data.naOut, payloadOut.na))
 			}
 		})
 	}
@@ -1265,6 +1254,75 @@ func TestComplexPayload_Data(t *testing.T) {
 			if !reflect.DeepEqual(payloadData, data.outData) {
 				t.Error(fmt.Sprintf("Result of Data() (%v) do not match expected (%v)",
 					payloadData, data.outData))
+			}
+		})
+	}
+}
+
+func TestComplexPayload_ApplyTo(t *testing.T) {
+	srcPayload := ComplexPayload([]complex128{1 + 1i, 2 + 2i, 3 + 3i, 4 + 4i, 5 + 5i}, []bool{false, true, false, true, false})
+
+	testData := []struct {
+		name        string
+		indices     []int
+		applier     interface{}
+		dataOut     []complex128
+		naOut       []bool
+		isNAPayload bool
+	}{
+		{
+			name:    "regular",
+			indices: []int{1, 2, 5},
+			applier: func(idx int, val complex128, na bool) (complex128, bool) {
+				if idx == 5 {
+					val = val * 2
+				}
+				if na {
+					val = 0 + 0i
+				}
+				return val, false
+			},
+			dataOut:     []complex128{1 + 1i, 0 + 0i, 3 + 3i, cmplx.NaN(), 10 + 10i},
+			naOut:       []bool{false, false, false, true, false},
+			isNAPayload: false,
+		},
+		{
+			name:    "regular compact",
+			indices: []int{1, 2, 5},
+			applier: func(val complex128, na bool) (complex128, bool) {
+				return val * 3, false
+			},
+			dataOut:     []complex128{3 + 3i, cmplx.NaN(), 3 + 3i, cmplx.NaN(), 15 + 15i},
+			naOut:       []bool{false, false, false, true, false},
+			isNAPayload: false,
+		},
+		{
+			name:        "incorrect applier",
+			indices:     []int{1, 2, 5},
+			applier:     func(int, int, bool) bool { return true },
+			isNAPayload: true,
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			payload := srcPayload.(Appliable).ApplyTo(data.indices, data.applier)
+
+			if !data.isNAPayload {
+				payloadOut := payload.(*complexPayload)
+				if !util.EqualComplexArrays(data.dataOut, payloadOut.data) {
+					t.Error(fmt.Sprintf("Output data (%v) does not match expected (%v)",
+						data.dataOut, payloadOut.data))
+				}
+				if !reflect.DeepEqual(data.naOut, payloadOut.na) {
+					t.Error(fmt.Sprintf("Output NA (%v) does not match expected (%v)",
+						data.naOut, payloadOut.na))
+				}
+			} else {
+				_, ok := payload.(*naPayload)
+				if !ok {
+					t.Error("Payload is not NA")
+				}
 			}
 		})
 	}
