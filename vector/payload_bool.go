@@ -68,28 +68,20 @@ func (p *booleanPayload) Apply(applier any) Payload {
 	return NAPayload(p.length)
 }
 
-func (p *booleanPayload) ApplyTo(indices []int, applier interface{}) Payload {
+func (p *booleanPayload) ApplyTo(indices []int, applier any) Payload {
 	if applyFunc, ok := applier.(BooleanApplierFunc); ok {
-		return p.applyToByFunc(indices, applyFunc)
+		data, na := applyToByFunc(indices, p.data, p.na, applyFunc, false)
+
+		return BooleanPayload(data, na, p.Options()...)
 	}
 
 	if applyFunc, ok := applier.(BooleanApplierCompactFunc); ok {
-		return p.applyToByCompactFunc(indices, applyFunc)
+		data, na := applyToByCompactFunc(indices, p.data, p.na, applyFunc, false)
+
+		return BooleanPayload(data, na, p.Options()...)
 	}
 
 	return NAPayload(p.length)
-}
-
-func (p *booleanPayload) applyToByFunc(indices []int, applyFunc BooleanApplierFunc) Payload {
-	data, na := applyToByFunc(indices, p.data, p.na, applyFunc, false)
-
-	return BooleanPayload(data, na, p.Options()...)
-}
-
-func (p *booleanPayload) applyToByCompactFunc(indices []int, applyFunc BooleanApplierCompactFunc) Payload {
-	data, na := applyToByCompactFunc(indices, p.data, p.na, applyFunc, false)
-
-	return BooleanPayload(data, na, p.Options()...)
 }
 
 func (p *booleanPayload) SupportsSummarizer(summarizer any) bool {

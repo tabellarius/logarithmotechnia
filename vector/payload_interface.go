@@ -92,9 +92,20 @@ func (p *interfacePayload) Apply(applier any) Payload {
 	return NAPayload(p.length)
 }
 
-func (p *interfacePayload) ApplyTo(indices []int, applier interface{}) Payload {
-	//TODO implement me
-	panic("implement me")
+func (p *interfacePayload) ApplyTo(indices []int, applier any) Payload {
+	if applyFunc, ok := applier.(InterfaceApplierFunc); ok {
+		data, na := applyToByFunc(indices, p.data, p.na, applyFunc, 0)
+
+		return InterfacePayload(data, na, p.Options()...)
+	}
+
+	if applyFunc, ok := applier.(InterfaceApplierCompactFunc); ok {
+		data, na := applyToByCompactFunc(indices, p.data, p.na, applyFunc, 0)
+
+		return InterfacePayload(data, na, p.Options()...)
+	}
+
+	return NAPayload(p.length)
 }
 
 func (p *interfacePayload) SupportsSummarizer(summarizer any) bool {

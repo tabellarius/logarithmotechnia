@@ -1132,3 +1132,67 @@ func TestTimePayload_Data(t *testing.T) {
 		})
 	}
 }
+
+func TestTimePayload_ApplyTo(t *testing.T) {
+	srcPayload := TimePayload(toTimeData([]string{"2021-01-01T12:30:00+03:00", "0001-01-01T00:00:00Z",
+		"2020-01-01T12:30:00+03:00"}), []bool{false, true, false})
+
+	testData := []struct {
+		name        string
+		indices     []int
+		applier     interface{}
+		dataOut     []time.Time
+		naOut       []bool
+		isNAPayload bool
+	}{
+		{
+			name:    "regular",
+			indices: []int{1, 2},
+			applier: func(idx int, val time.Time, na bool) (time.Time, bool) {
+				return val, true
+			},
+			dataOut:     toTimeData([]string{"0001-01-01T00:00:00Z", "0001-01-01T00:00:00Z", "2020-01-01T12:30:00+03:00"}),
+			naOut:       []bool{true, true, false},
+			isNAPayload: false,
+		},
+		{
+			name:    "regular compact",
+			indices: []int{1, 2},
+			applier: func(val time.Time, na bool) (time.Time, bool) {
+				return val, true
+			},
+			dataOut:     toTimeData([]string{"0001-01-01T00:00:00Z", "0001-01-01T00:00:00Z", "2020-01-01T12:30:00+03:00"}),
+			naOut:       []bool{true, true, false},
+			isNAPayload: false,
+		},
+		{
+			name:        "incorrect applier",
+			indices:     []int{1, 2, 5},
+			applier:     func(int, int, bool) bool { return true },
+			isNAPayload: true,
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			payload := srcPayload.(Appliable).ApplyTo(data.indices, data.applier)
+
+			if !data.isNAPayload {
+				payloadOut := payload.(*timePayload)
+				if !reflect.DeepEqual(data.dataOut, payloadOut.data) {
+					t.Error(fmt.Sprintf("Output data (%v) does not match expected (%v)",
+						data.dataOut, payloadOut.data))
+				}
+				if !reflect.DeepEqual(data.naOut, payloadOut.na) {
+					t.Error(fmt.Sprintf("Output NA (%v) does not match expected (%v)",
+						data.naOut, payloadOut.na))
+				}
+			} else {
+				_, ok := payload.(*naPayload)
+				if !ok {
+					t.Error("Payload is not NA")
+				}
+			}
+		})
+	}
+}

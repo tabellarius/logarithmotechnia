@@ -1240,16 +1240,6 @@ func TestBooleanPayload_Data(t *testing.T) {
 
 func TestBooleanPayload_ApplyTo(t *testing.T) {
 	srcPayload := BooleanPayload([]bool{true, true, true, false, false}, []bool{false, true, false, true, false})
-	applierFull := func(idx int, val bool, na bool) (bool, bool) {
-		if idx == 5 {
-			val = true
-		}
-
-		return val, false
-	}
-	applierComp := func(val bool, na bool) (bool, bool) {
-		return !val, false
-	}
 
 	testData := []struct {
 		name        string
@@ -1260,17 +1250,24 @@ func TestBooleanPayload_ApplyTo(t *testing.T) {
 		isNAPayload bool
 	}{
 		{
-			name:        "regular",
-			indices:     []int{1, 2, 5},
-			applier:     applierFull,
+			name:    "regular",
+			indices: []int{1, 2, 5},
+			applier: func(idx int, val bool, na bool) (bool, bool) {
+				if idx == 5 {
+					val = true
+				}
+				return val, false
+			},
 			dataOut:     []bool{true, false, true, false, true},
 			naOut:       []bool{false, false, false, true, false},
 			isNAPayload: false,
 		},
 		{
-			name:        "regular compact",
-			indices:     []int{1, 2, 5},
-			applier:     applierComp,
+			name:    "regular compact",
+			indices: []int{1, 2, 5},
+			applier: func(val bool, na bool) (bool, bool) {
+				return !val, false
+			},
 			dataOut:     []bool{false, true, true, false, true},
 			naOut:       []bool{false, false, false, true, false},
 			isNAPayload: false,
@@ -1279,8 +1276,6 @@ func TestBooleanPayload_ApplyTo(t *testing.T) {
 			name:        "incorrect applier",
 			indices:     []int{1, 2, 5},
 			applier:     func(int, int, bool) bool { return true },
-			dataOut:     []bool{false, false, false, false, false},
-			naOut:       []bool{true, true, true, true, true},
 			isNAPayload: true,
 		},
 	}

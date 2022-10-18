@@ -10,3 +10,4 @@ Mutate should accept single Column{} as well
 Mutate should accept map[string]Vector
 ToMap() - convert dataframe to map
 Unmarshall() - load dataframe to struct array
+interface{} -> any

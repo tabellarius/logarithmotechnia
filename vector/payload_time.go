@@ -72,9 +72,20 @@ func (p *timePayload) Apply(applier any) Payload {
 	return NAPayload(p.length)
 }
 
-func (p *timePayload) ApplyTo(indices []int, applier interface{}) Payload {
-	//TODO implement me
-	panic("implement me")
+func (p *timePayload) ApplyTo(indices []int, applier any) Payload {
+	if applyFunc, ok := applier.(TimeApplierFunc); ok {
+		data, na := applyToByFunc(indices, p.data, p.na, applyFunc, time.Time{})
+
+		return TimePayload(data, na, p.Options()...)
+	}
+
+	if applyFunc, ok := applier.(TimeApplierCompactFunc); ok {
+		data, na := applyToByCompactFunc(indices, p.data, p.na, applyFunc, time.Time{})
+
+		return TimePayload(data, na, p.Options()...)
+	}
+
+	return NAPayload(p.length)
 }
 
 func (p *timePayload) SupportsSummarizer(summarizer any) bool {

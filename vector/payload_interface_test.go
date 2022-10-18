@@ -1084,3 +1084,79 @@ func TestInterfacePayload_Data(t *testing.T) {
 		})
 	}
 }
+
+func TestInterfacePayload_ApplyTo(t *testing.T) {
+	srcPayload := InterfacePayload([]any{1, 2, 3, 4, 5}, []bool{false, true, false, true, false})
+
+	testData := []struct {
+		name        string
+		indices     []int
+		applier     interface{}
+		dataOut     []any
+		naOut       []bool
+		isNAPayload bool
+	}{
+		{
+			name:    "regular",
+			indices: []int{1, 2, 5},
+			applier: func(idx int, val any, na bool) (any, bool) {
+				iVal := 0
+				if val != nil {
+					iVal = val.(int)
+				}
+				if idx == 5 {
+					iVal = iVal * 2
+				}
+				if na {
+					iVal = 0
+				}
+				return iVal, false
+			},
+			dataOut:     []any{1, 0, 3, nil, 10},
+			naOut:       []bool{false, false, false, true, false},
+			isNAPayload: false,
+		},
+		{
+			name:    "regular compact",
+			indices: []int{1, 2, 5},
+			applier: func(val any, na bool) (any, bool) {
+				if val == nil {
+					return 0, false
+				}
+				return val.(int) * 3, false
+			},
+			dataOut:     []any{3, 0, 3, nil, 15},
+			naOut:       []bool{false, false, false, true, false},
+			isNAPayload: false,
+		},
+		{
+			name:        "incorrect applier",
+			indices:     []int{1, 2, 5},
+			applier:     func(int, int, bool) bool { return true },
+			isNAPayload: true,
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			payload := srcPayload.(Appliable).ApplyTo(data.indices, data.applier)
+
+			if !data.isNAPayload {
+				payloadOut := payload.(*interfacePayload)
+				if !reflect.DeepEqual(data.dataOut, payloadOut.data) {
+					t.Error(fmt.Sprintf("Output data (%v) does not match expected (%v)",
+						data.dataOut, payloadOut.data))
+				}
+				if !reflect.DeepEqual(data.naOut, payloadOut.na) {
+					t.Error(fmt.Sprintf("Output NA (%v) does not match expected (%v)",
+						data.naOut, payloadOut.na))
+				}
+			} else {
+				_, ok := payload.(*naPayload)
+				if !ok {
+					t.Error("Payload is not NA")
+				}
+			}
+		})
+	}
+}

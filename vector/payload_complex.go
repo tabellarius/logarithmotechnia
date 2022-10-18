@@ -74,9 +74,20 @@ func (p *complexPayload) Apply(applier any) Payload {
 
 }
 
-func (p *complexPayload) ApplyTo(indices []int, applier interface{}) Payload {
-	//TODO implement me
-	panic("implement me")
+func (p *complexPayload) ApplyTo(indices []int, applier any) Payload {
+	if applyFunc, ok := applier.(ComplexApplierFunc); ok {
+		data, na := applyToByFunc(indices, p.data, p.na, applyFunc, cmplx.NaN())
+
+		return ComplexPayload(data, na, p.Options()...)
+	}
+
+	if applyFunc, ok := applier.(ComplexApplierCompactFunc); ok {
+		data, na := applyToByCompactFunc(indices, p.data, p.na, applyFunc, cmplx.NaN())
+
+		return ComplexPayload(data, na, p.Options()...)
+	}
+
+	return NAPayload(p.length)
 }
 
 func (p *complexPayload) SupportsSummarizer(summarizer any) bool {

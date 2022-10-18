@@ -69,9 +69,20 @@ func (p *stringPayload) Apply(applier any) Payload {
 	return NAPayload(p.length)
 }
 
-func (p *stringPayload) ApplyTo(indices []int, applier interface{}) Payload {
-	//TODO implement me
-	panic("implement me")
+func (p *stringPayload) ApplyTo(indices []int, applier any) Payload {
+	if applyFunc, ok := applier.(StringApplierFunc); ok {
+		data, na := applyToByFunc(indices, p.data, p.na, applyFunc, "")
+
+		return StringPayload(data, na, p.Options()...)
+	}
+
+	if applyFunc, ok := applier.(StringApplierCompactFunc); ok {
+		data, na := applyToByCompactFunc(indices, p.data, p.na, applyFunc, "")
+
+		return StringPayload(data, na, p.Options()...)
+	}
+
+	return NAPayload(p.length)
 }
 
 func (p *stringPayload) SupportsSummarizer(summarizer any) bool {

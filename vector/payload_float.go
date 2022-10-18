@@ -74,9 +74,20 @@ func (p *floatPayload) Apply(applier any) Payload {
 	return NAPayload(p.length)
 }
 
-func (p *floatPayload) ApplyTo(indices []int, applier interface{}) Payload {
-	//TODO implement me
-	panic("implement me")
+func (p *floatPayload) ApplyTo(indices []int, applier any) Payload {
+	if applyFunc, ok := applier.(FloatApplierFunc); ok {
+		data, na := applyToByFunc(indices, p.data, p.na, applyFunc, math.NaN())
+
+		return FloatPayload(data, na, p.Options()...)
+	}
+
+	if applyFunc, ok := applier.(FloatApplierCompactFunc); ok {
+		data, na := applyToByCompactFunc(indices, p.data, p.na, applyFunc, math.NaN())
+
+		return FloatPayload(data, na, p.Options()...)
+	}
+
+	return NAPayload(p.length)
 }
 
 func (p *floatPayload) SupportsSummarizer(summarizer any) bool {

@@ -1258,3 +1258,72 @@ func TestComplexPayload_Data(t *testing.T) {
 		})
 	}
 }
+
+func TestComplexPayload_ApplyTo(t *testing.T) {
+	srcPayload := ComplexPayload([]complex128{1 + 1i, 2 + 2i, 3 + 3i, 4 + 4i, 5 + 5i}, []bool{false, true, false, true, false})
+
+	testData := []struct {
+		name        string
+		indices     []int
+		applier     interface{}
+		dataOut     []complex128
+		naOut       []bool
+		isNAPayload bool
+	}{
+		{
+			name:    "regular",
+			indices: []int{1, 2, 5},
+			applier: func(idx int, val complex128, na bool) (complex128, bool) {
+				if idx == 5 {
+					val = val * 2
+				}
+				if na {
+					val = 0 + 0i
+				}
+				return val, false
+			},
+			dataOut:     []complex128{1 + 1i, 0 + 0i, 3 + 3i, cmplx.NaN(), 10 + 10i},
+			naOut:       []bool{false, false, false, true, false},
+			isNAPayload: false,
+		},
+		{
+			name:    "regular compact",
+			indices: []int{1, 2, 5},
+			applier: func(val complex128, na bool) (complex128, bool) {
+				return val * 3, false
+			},
+			dataOut:     []complex128{3 + 3i, cmplx.NaN(), 3 + 3i, cmplx.NaN(), 15 + 15i},
+			naOut:       []bool{false, false, false, true, false},
+			isNAPayload: false,
+		},
+		{
+			name:        "incorrect applier",
+			indices:     []int{1, 2, 5},
+			applier:     func(int, int, bool) bool { return true },
+			isNAPayload: true,
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			payload := srcPayload.(Appliable).ApplyTo(data.indices, data.applier)
+
+			if !data.isNAPayload {
+				payloadOut := payload.(*complexPayload)
+				if !util.EqualComplexArrays(data.dataOut, payloadOut.data) {
+					t.Error(fmt.Sprintf("Output data (%v) does not match expected (%v)",
+						data.dataOut, payloadOut.data))
+				}
+				if !reflect.DeepEqual(data.naOut, payloadOut.na) {
+					t.Error(fmt.Sprintf("Output NA (%v) does not match expected (%v)",
+						data.naOut, payloadOut.na))
+				}
+			} else {
+				_, ok := payload.(*naPayload)
+				if !ok {
+					t.Error("Payload is not NA")
+				}
+			}
+		})
+	}
+}

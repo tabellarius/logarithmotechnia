@@ -1,4 +1,3 @@
-ApplyTo(whicher, applier)
 Add brief applier (only val)
 Add compact and brief summarizer
 extra/decimal
@@ -9,3 +8,7 @@ Comparator for Interface payload(?)
 Add NewDefNAable() for DefNAble
 Review type conversions
 Add df.Err and logger
+Remove Factor payload
+Rework factorizable payloads
+interface{} -> any
+InterfacePayload -> AnyPayload
