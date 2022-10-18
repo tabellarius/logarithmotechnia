@@ -60,7 +60,6 @@ type Vector interface {
 	Has(interface{}) bool
 	Comparable
 	Arrangeable
-	Factorable
 
 	IsUniquer
 	Unique() Vector
@@ -163,12 +162,6 @@ type IsUniquer interface {
 
 type Coalescer interface {
 	Coalesce(Payload) Payload
-}
-
-type Factorable interface {
-	Levels() []string
-	HasLevel(string) bool
-	IsSameLevels(factor Factorable) bool
 }
 
 // vector holds data and functions shared by all vectors
@@ -840,30 +833,6 @@ func (v *vector) Coalesce(vectors ...Vector) Vector {
 	}
 
 	return New(payload, v.Options()...)
-}
-
-func (v *vector) Levels() []string {
-	if factorable, ok := v.payload.(Factorable); ok {
-		return factorable.Levels()
-	}
-
-	return nil
-}
-
-func (v *vector) HasLevel(level string) bool {
-	if factorable, ok := v.payload.(Factorable); ok {
-		return factorable.HasLevel(level)
-	}
-
-	return false
-}
-
-func (v *vector) IsSameLevels(factor Factorable) bool {
-	if factorable, ok := v.payload.(Factorable); ok {
-		return factorable.IsSameLevels(factor)
-	}
-
-	return false
 }
 
 func (v *vector) Options() []Option {

@@ -1142,7 +1142,7 @@ func TestStringPayload_Coalesce(t *testing.T) {
 }
 
 func TestStringPayload_Pick(t *testing.T) {
-	payload := FactorPayload([]string{"a", "b", "a", "b", "c"}, []bool{false, false, true, true, false})
+	payload := StringPayload([]string{"a", "b", "a", "b", "c"}, []bool{false, false, true, true, false})
 
 	testData := []struct {
 		name string
@@ -1218,7 +1218,7 @@ func TestStringPayload_Data(t *testing.T) {
 	}
 }
 
-func estStringPayload_ApplyTo(t *testing.T) {
+func TestStringPayload_ApplyTo(t *testing.T) {
 	srcPayload := StringPayload([]string{"1", "2", "3", "4", "5"}, []bool{false, true, false, true, false})
 
 	testData := []struct {
