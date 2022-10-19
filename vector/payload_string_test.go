@@ -591,6 +591,17 @@ func TestStringPayload_Apply(t *testing.T) {
 			isNAPayload: false,
 		},
 		{
+			name: "regular brief",
+			applier: func(val string) string {
+				return fmt.Sprintf("%s.%s", val, val)
+			},
+			dataIn:      []string{"1", "9", "3", "5", "7"},
+			naIn:        []bool{false, true, false, true, false},
+			dataOut:     []string{"1.1", "", "3.3", "", "7.7"},
+			naOut:       []bool{false, true, false, true, false},
+			isNAPayload: false,
+		},
+		{
 			name: "manipulate na",
 			applier: func(idx int, val string, na bool) (string, bool) {
 				if idx == 5 {
@@ -1250,6 +1261,16 @@ func TestStringPayload_ApplyTo(t *testing.T) {
 			},
 			dataOut:     []string{"11", "", "3", "", "55"},
 			naOut:       []bool{false, false, false, true, false},
+			isNAPayload: false,
+		},
+		{
+			name:    "regular brief",
+			indices: []int{1, 2, 5},
+			applier: func(val string) string {
+				return val + val
+			},
+			dataOut:     []string{"11", "", "3", "", "55"},
+			naOut:       []bool{false, true, false, true, false},
 			isNAPayload: false,
 		},
 		{

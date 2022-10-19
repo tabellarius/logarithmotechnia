@@ -77,35 +77,23 @@ func (p *interfacePayload) SupportsApplier(applier any) bool {
 }
 
 func (p *interfacePayload) Apply(applier any) Payload {
-	if applyFunc, ok := applier.(InterfaceApplierFunc); ok {
-		data, na := applyByFunc(p.data, p.na, p.length, applyFunc, nil)
+	data, na := apply(p.data, p.na, applier, 0)
 
-		return InterfacePayload(data, na, p.Options()...)
+	if data == nil {
+		return NAPayload(p.length)
 	}
 
-	if applyFunc, ok := applier.(InterfaceApplierCompactFunc); ok {
-		data, na := applyByCompactFunc(p.data, p.na, p.length, applyFunc, nil)
-
-		return InterfacePayload(data, na, p.Options()...)
-	}
-
-	return NAPayload(p.length)
+	return InterfacePayload(data, na, p.Options()...)
 }
 
 func (p *interfacePayload) ApplyTo(indices []int, applier any) Payload {
-	if applyFunc, ok := applier.(InterfaceApplierFunc); ok {
-		data, na := applyToByFunc(indices, p.data, p.na, applyFunc, 0)
+	data, na := applyTo(indices, p.data, p.na, applier, nil)
 
-		return InterfacePayload(data, na, p.Options()...)
+	if data == nil {
+		return NAPayload(p.length)
 	}
 
-	if applyFunc, ok := applier.(InterfaceApplierCompactFunc); ok {
-		data, na := applyToByCompactFunc(indices, p.data, p.na, applyFunc, 0)
-
-		return InterfacePayload(data, na, p.Options()...)
-	}
-
-	return NAPayload(p.length)
+	return InterfacePayload(data, na, p.Options()...)
 }
 
 func (p *interfacePayload) SupportsSummarizer(summarizer any) bool {

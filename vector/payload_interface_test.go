@@ -318,6 +318,21 @@ func TestInterfacePayload_Apply(t *testing.T) {
 			isNAPayload: false,
 		},
 		{
+			name: "regular brief",
+			applier: func(val interface{}) interface{} {
+				if val == false {
+					return 0
+				}
+
+				return val
+			},
+			dataIn:      []interface{}{true, true, true, false, false},
+			naIn:        []bool{false, true, false, true, false},
+			dataOut:     []interface{}{true, nil, true, nil, 0},
+			naOut:       []bool{false, true, false, true, false},
+			isNAPayload: false,
+		},
+		{
 			name: "manipulate na",
 			applier: func(idx int, val interface{}, na bool) (interface{}, bool) {
 				newNA := na
@@ -1114,6 +1129,19 @@ func TestInterfacePayload_ApplyTo(t *testing.T) {
 			},
 			dataOut:     []any{1, 0, 3, nil, 10},
 			naOut:       []bool{false, false, false, true, false},
+			isNAPayload: false,
+		},
+		{
+			name:    "regular compact",
+			indices: []int{1, 2, 5},
+			applier: func(val any) any {
+				if val == nil {
+					return 0
+				}
+				return val.(int) * 3
+			},
+			dataOut:     []any{3, nil, 3, nil, 15},
+			naOut:       []bool{false, true, false, true, false},
 			isNAPayload: false,
 		},
 		{

@@ -599,6 +599,17 @@ func TestIntegerPayload_Apply(t *testing.T) {
 			isNAPayload: false,
 		},
 		{
+			name: "regular brief",
+			applier: func(val int) int {
+				return val * 2
+			},
+			dataIn:      []int{1, 9, 3, 5, 7},
+			naIn:        []bool{false, true, false, true, false},
+			dataOut:     []int{2, 0, 6, 0, 14},
+			naOut:       []bool{false, true, false, true, false},
+			isNAPayload: false,
+		},
+		{
 			name: "manipulate na",
 			applier: func(idx int, val int, na bool) (int, bool) {
 				newNA := na
@@ -1287,6 +1298,16 @@ func TestIntegerPayload_ApplyTo(t *testing.T) {
 			},
 			dataOut:     []int{3, 0, 3, 0, 15},
 			naOut:       []bool{false, false, false, true, false},
+			isNAPayload: false,
+		},
+		{
+			name:    "regular brief",
+			indices: []int{1, 2, 5},
+			applier: func(val int) int {
+				return val * 3
+			},
+			dataOut:     []int{3, 0, 3, 0, 15},
+			naOut:       []bool{false, true, false, true, false},
 			isNAPayload: false,
 		},
 		{

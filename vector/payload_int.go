@@ -57,36 +57,23 @@ func (p *integerPayload) SupportsApplier(applier any) bool {
 }
 
 func (p *integerPayload) Apply(applier any) Payload {
-	if applyFunc, ok := applier.(IntegerApplierFunc); ok {
-		data, na := applyByFunc(p.data, p.na, p.length, applyFunc, 0)
+	data, na := apply(p.data, p.na, applier, 0)
 
-		return IntegerPayload(data, na, p.Options()...)
+	if data == nil {
+		return NAPayload(p.length)
 	}
 
-	if applyFunc, ok := applier.(IntegerApplierCompactFunc); ok {
-		data, na := applyByCompactFunc(p.data, p.na, p.length, applyFunc, 0)
-
-		return IntegerPayload(data, na, p.Options()...)
-	}
-
-	return NAPayload(p.length)
-
+	return IntegerPayload(data, na, p.Options()...)
 }
 
 func (p *integerPayload) ApplyTo(indices []int, applier any) Payload {
-	if applyFunc, ok := applier.(IntegerApplierFunc); ok {
-		data, na := applyToByFunc(indices, p.data, p.na, applyFunc, 0)
+	data, na := applyTo(indices, p.data, p.na, applier, 0)
 
-		return IntegerPayload(data, na, p.Options()...)
+	if data == nil {
+		return NAPayload(p.length)
 	}
 
-	if applyFunc, ok := applier.(IntegerApplierCompactFunc); ok {
-		data, na := applyToByCompactFunc(indices, p.data, p.na, applyFunc, 0)
-
-		return IntegerPayload(data, na, p.Options()...)
-	}
-
-	return NAPayload(p.length)
+	return IntegerPayload(data, na, p.Options()...)
 }
 
 func (p *integerPayload) SupportsSummarizer(summarizer any) bool {

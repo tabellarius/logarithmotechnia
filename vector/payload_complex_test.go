@@ -320,6 +320,17 @@ func TestComplexPayload_Apply(t *testing.T) {
 			isNAPayload: false,
 		},
 		{
+			name: "regular brief",
+			applier: func(val complex128) complex128 {
+				return val * 2
+			},
+			dataIn:      []complex128{1, 9, 3, 5, 7},
+			naIn:        []bool{false, true, false, true, false},
+			dataOut:     []complex128{2, cmplx.NaN(), 6, cmplx.NaN(), 14},
+			naOut:       []bool{false, true, false, true, false},
+			isNAPayload: false,
+		},
+		{
 			name: "manipulate na",
 			applier: func(idx int, val complex128, na bool) (complex128, bool) {
 				if idx == 5 {
@@ -1294,6 +1305,16 @@ func TestComplexPayload_ApplyTo(t *testing.T) {
 			},
 			dataOut:     []complex128{3 + 3i, cmplx.NaN(), 3 + 3i, cmplx.NaN(), 15 + 15i},
 			naOut:       []bool{false, false, false, true, false},
+			isNAPayload: false,
+		},
+		{
+			name:    "regular brief",
+			indices: []int{1, 2, 5},
+			applier: func(val complex128) complex128 {
+				return val * 3
+			},
+			dataOut:     []complex128{3 + 3i, cmplx.NaN(), 3 + 3i, cmplx.NaN(), 15 + 15i},
+			naOut:       []bool{false, true, false, true, false},
 			isNAPayload: false,
 		},
 		{

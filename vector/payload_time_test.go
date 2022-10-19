@@ -440,6 +440,17 @@ func TestTimePayload_Apply(t *testing.T) {
 			isNAPayload: false,
 		},
 		{
+			name: "regular brief",
+			applier: func(val time.Time) time.Time {
+				return val.Add(24 * time.Hour)
+			},
+			dataIn:      toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z"}),
+			naIn:        []bool{false, true, false},
+			dataOut:     toTimeData([]string{"2006-01-03T15:04:05+07:00", "0001-01-01T00:00:00Z", "1800-06-11T11:00:00Z"}),
+			naOut:       []bool{false, true, false},
+			isNAPayload: false,
+		},
+		{
 			name: "manipulate na",
 			applier: func(idx int, val time.Time, na bool) (time.Time, bool) {
 				if idx == 3 {
@@ -578,7 +589,7 @@ func TestTimePayload_Summarize(t *testing.T) {
 			summarizer: summarizer,
 			dataIn:     toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z"}),
 			naIn:       []bool{false, false, true},
-			dataOut:    []time.Time{time.Time{}},
+			dataOut:    []time.Time{{}},
 			naOut:      []bool{true},
 		},
 		{
@@ -586,7 +597,7 @@ func TestTimePayload_Summarize(t *testing.T) {
 			summarizer: func(int, int, bool) bool { return true },
 			dataIn:     toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z"}),
 			naIn:       []bool{false, false, false},
-			dataOut:    []time.Time{time.Time{}},
+			dataOut:    []time.Time{{}},
 			naOut:      []bool{true},
 		},
 	}
@@ -1163,6 +1174,16 @@ func TestTimePayload_ApplyTo(t *testing.T) {
 			},
 			dataOut:     toTimeData([]string{"0001-01-01T00:00:00Z", "0001-01-01T00:00:00Z", "2020-01-01T12:30:00+03:00"}),
 			naOut:       []bool{true, true, false},
+			isNAPayload: false,
+		},
+		{
+			name:    "regular brief",
+			indices: []int{1, 2},
+			applier: func(val time.Time) time.Time {
+				return val
+			},
+			dataOut:     toTimeData([]string{"2021-01-01T12:30:00+03:00", "0001-01-01T00:00:00Z", "2020-01-01T12:30:00+03:00"}),
+			naOut:       []bool{false, true, false},
 			isNAPayload: false,
 		},
 		{
