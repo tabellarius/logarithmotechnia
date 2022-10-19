@@ -193,6 +193,11 @@ func TestComplexPayload_SupportsWhicher(t *testing.T) {
 			isSupported: true,
 		},
 		{
+			name:        "func(complex128) bool",
+			filter:      func(complex128) bool { return true },
+			isSupported: true,
+		},
+		{
 			name:        "func(int, int, bool) bool",
 			filter:      func(int, int, bool) bool { return true },
 			isSupported: false,

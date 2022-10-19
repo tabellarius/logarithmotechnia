@@ -472,6 +472,16 @@ func TestFloatPayload_SupportsWhicher(t *testing.T) {
 			isSupported: true,
 		},
 		{
+			name:        "func(float64, bool) bool",
+			filter:      func(float64, bool) bool { return true },
+			isSupported: true,
+		},
+		{
+			name:        "func(float64) bool",
+			filter:      func(float64) bool { return true },
+			isSupported: true,
+		},
+		{
 			name:        "func(int, int, bool) bool",
 			filter:      func(int, int, bool) bool { return true },
 			isSupported: false,

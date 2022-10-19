@@ -1,12 +1,13 @@
 Add brief whicher (only val)
 Add compact and brief summarizer
+Divide Comparable to Comparable and Equalable; remove Comparable for bool
+interface{} -> any
 Arithmetic functions
 Finder interface for InterfacePayload
 Comparator for Interface payload(?)
-(?) Update() + Clone()
 Add NewDefNAable() for DefNAble
 Review type conversions
 Add df.Err and logger
 Rework factorizable payloads
-interface{} -> any
 InterfacePayload -> AnyPayload
+IsOdd(), IsEven(), IsNth() functions (return bool)

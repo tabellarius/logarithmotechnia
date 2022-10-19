@@ -452,6 +452,11 @@ func TestIntegerPayload_SupportsWhicher(t *testing.T) {
 			isSupported: true,
 		},
 		{
+			name:        "func(int) bool",
+			filter:      func(int) bool { return true },
+			isSupported: true,
+		},
+		{
 			name:        "func(int, float64, bool) bool",
 			filter:      func(int, float64, bool) bool { return true },
 			isSupported: false,

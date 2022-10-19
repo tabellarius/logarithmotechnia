@@ -108,6 +108,74 @@ func adjustToBiggerSize[T any](srcData []T, size int) []T {
 	return data
 }
 
+func supportsWhicher[T any](whicher any) bool {
+	if _, ok := whicher.(func(int, T, bool) bool); ok {
+		return true
+	}
+
+	if _, ok := whicher.(func(T, bool) bool); ok {
+		return true
+	}
+
+	if _, ok := whicher.(func(T) bool); ok {
+		return true
+	}
+
+	return false
+}
+
+func which[T any](inData []T, inNA []bool, whicher any) []bool {
+	if byFunc, ok := whicher.(func(int, T, bool) bool); ok {
+		return selectByFunc(inData, inNA, byFunc)
+	}
+
+	if byFunc, ok := whicher.(func(T, bool) bool); ok {
+		return selectByCompactFunc(inData, inNA, byFunc)
+	}
+
+	if byFunc, ok := whicher.(func(T) bool); ok {
+		return selectByBriefFunc(inData, inNA, byFunc)
+	}
+
+	return make([]bool, len(inData))
+}
+
+func selectByFunc[T any](inData []T, inNA []bool, byFunc func(int, T, bool) bool) []bool {
+	booleans := make([]bool, len(inData))
+
+	for idx, val := range inData {
+		if byFunc(idx+1, val, inNA[idx]) {
+			booleans[idx] = true
+		}
+	}
+
+	return booleans
+}
+
+func selectByCompactFunc[T any](inData []T, inNA []bool, byFunc func(T, bool) bool) []bool {
+	booleans := make([]bool, len(inData))
+
+	for idx, val := range inData {
+		if byFunc(val, inNA[idx]) {
+			booleans[idx] = true
+		}
+	}
+
+	return booleans
+}
+
+func selectByBriefFunc[T any](inData []T, inNA []bool, byFunc func(T) bool) []bool {
+	booleans := make([]bool, len(inData))
+
+	for idx, val := range inData {
+		if !inNA[idx] && byFunc(val) {
+			booleans[idx] = true
+		}
+	}
+
+	return booleans
+}
+
 func supportsApplier[T any](applier any) bool {
 	if _, ok := applier.(func(int, T, bool) (T, bool)); ok {
 		return true
@@ -216,7 +284,7 @@ func applyTo[T any](indices []int, inData []T, inNA []bool, applier any, naDef T
 	}
 
 	if applyFunc, ok := applier.(func(T) T); ok {
-		data, na = applyToByBriefFunc(indices, inData, inNA, applyFunc, naDef)
+		data, na = applyToByBriefFunc(indices, inData, inNA, applyFunc)
 	}
 
 	return data, na
@@ -268,7 +336,7 @@ func applyToByCompactFunc[T any](indices []int, inData []T, inNA []bool,
 	return data, na
 }
 
-func applyToByBriefFunc[T any](indices []int, inData []T, inNA []bool, applyFunc func(T) T, naDef T) ([]T, []bool) {
+func applyToByBriefFunc[T any](indices []int, inData []T, inNA []bool, applyFunc func(T) T) ([]T, []bool) {
 	length := len(inData)
 
 	data := make([]T, length)
@@ -326,54 +394,6 @@ func groupsForData[T comparable](srcData []T, srcNA []bool) ([][]int, []interfac
 	}
 
 	return groups, values
-}
-
-func which[T any](inData []T, inNA []bool, whicher any) []bool {
-	if byFunc, ok := whicher.(func(int, T, bool) bool); ok {
-		return selectByFunc(inData, inNA, byFunc)
-	}
-
-	if byFunc, ok := whicher.(func(T, bool) bool); ok {
-		return selectByCompactFunc(inData, inNA, byFunc)
-	}
-
-	return make([]bool, len(inData))
-}
-
-func selectByFunc[T any](inData []T, inNA []bool, byFunc func(int, T, bool) bool) []bool {
-	booleans := make([]bool, len(inData))
-
-	for idx, val := range inData {
-		if byFunc(idx+1, val, inNA[idx]) {
-			booleans[idx] = true
-		}
-	}
-
-	return booleans
-}
-
-func selectByCompactFunc[T any](inData []T, inNA []bool, byFunc func(T, bool) bool) []bool {
-	booleans := make([]bool, len(inData))
-
-	for idx, val := range inData {
-		if byFunc(val, inNA[idx]) {
-			booleans[idx] = true
-		}
-	}
-
-	return booleans
-}
-
-func supportsWhicher[T any](whicher any) bool {
-	if _, ok := whicher.(func(int, T, bool) bool); ok {
-		return true
-	}
-
-	if _, ok := whicher.(func(T, bool) bool); ok {
-		return true
-	}
-
-	return false
 }
 
 func supportsSummarizer[T any](summarizer any) bool {

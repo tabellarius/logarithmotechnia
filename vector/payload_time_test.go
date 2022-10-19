@@ -321,6 +321,11 @@ func TestTimePayload_SupportsWhicher(t *testing.T) {
 			isSupported: true,
 		},
 		{
+			name:        "func(time.Time) bool",
+			filter:      func(time.Time) bool { return true },
+			isSupported: true,
+		},
+		{
 			name:        "func(int, int, bool) bool",
 			filter:      func(int, int, bool) bool { return true },
 			isSupported: false,

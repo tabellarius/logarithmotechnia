@@ -184,6 +184,11 @@ func TestInterfacePayload_SupportsWhicher(t *testing.T) {
 			isSupported: true,
 		},
 		{
+			name:        "func(interface{}) bool",
+			filter:      func(interface{}) bool { return true },
+			isSupported: true,
+		},
+		{
 			name:        "func(int, float64, bool) bool",
 			filter:      func(int, float64, bool) bool { return true },
 			isSupported: false,
