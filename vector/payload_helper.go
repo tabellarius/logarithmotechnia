@@ -108,8 +108,45 @@ func adjustToBiggerSize[T any](srcData []T, size int) []T {
 	return data
 }
 
-func applyByFunc[T any](inData []T, inNA []bool, length int,
+func supportsApplier[T any](applier any) bool {
+	if _, ok := applier.(func(int, T, bool) (T, bool)); ok {
+		return true
+	}
+
+	if _, ok := applier.(func(T, bool) (T, bool)); ok {
+		return true
+	}
+
+	if _, ok := applier.(func(T) T); ok {
+		return true
+	}
+
+	return false
+}
+
+func apply[T any](inData []T, inNA []bool, applier any, naDef T) ([]T, []bool) {
+	var data []T = nil
+	var na []bool = nil
+
+	if applyFunc, ok := applier.(func(int, T, bool) (T, bool)); ok {
+		data, na = applyByFunc(inData, inNA, applyFunc, naDef)
+	}
+
+	if applyFunc, ok := applier.(func(T, bool) (T, bool)); ok {
+		data, na = applyByCompactFunc(inData, inNA, applyFunc, naDef)
+	}
+
+	if applyFunc, ok := applier.(func(T) T); ok {
+		data, na = applyByBriefFunc(inData, inNA, applyFunc, naDef)
+	}
+
+	return data, na
+}
+
+func applyByFunc[T any](inData []T, inNA []bool,
 	applyFunc func(int, T, bool) (T, bool), naDef T) ([]T, []bool) {
+	length := len(inData)
+
 	data := make([]T, length)
 	na := make([]bool, length)
 
@@ -125,8 +162,10 @@ func applyByFunc[T any](inData []T, inNA []bool, length int,
 	return data, na
 }
 
-func applyByCompactFunc[T any](inData []T, inNA []bool, length int,
+func applyByCompactFunc[T any](inData []T, inNA []bool,
 	applyFunc func(T, bool) (T, bool), naDef T) ([]T, []bool) {
+	length := len(inData)
+
 	data := make([]T, length)
 	na := make([]bool, length)
 
@@ -137,6 +176,47 @@ func applyByCompactFunc[T any](inData []T, inNA []bool, length int,
 		}
 		data[i] = dataVal
 		na[i] = naVal
+	}
+
+	return data, na
+}
+
+func applyByBriefFunc[T any](inData []T, inNA []bool,
+	applyFunc func(T) T, naDef T) ([]T, []bool) {
+	length := len(inData)
+
+	data := make([]T, length)
+	na := make([]bool, length)
+
+	for i := 0; i < length; i++ {
+		dataVal := naDef
+		naVal := true
+		if !inNA[i] {
+			dataVal = applyFunc(inData[i])
+			naVal = false
+		}
+
+		data[i] = dataVal
+		na[i] = naVal
+	}
+
+	return data, na
+}
+
+func applyTo[T any](indices []int, inData []T, inNA []bool, applier any, naDef T) ([]T, []bool) {
+	var data []T = nil
+	var na []bool = nil
+
+	if applyFunc, ok := applier.(func(int, T, bool) (T, bool)); ok {
+		data, na = applyToByFunc(indices, inData, inNA, applyFunc, naDef)
+	}
+
+	if applyFunc, ok := applier.(func(T, bool) (T, bool)); ok {
+		data, na = applyToByCompactFunc(indices, inData, inNA, applyFunc, naDef)
+	}
+
+	if applyFunc, ok := applier.(func(T) T); ok {
+		data, na = applyToByBriefFunc(indices, inData, inNA, applyFunc, naDef)
 	}
 
 	return data, na
@@ -183,6 +263,25 @@ func applyToByCompactFunc[T any](indices []int, inData []T, inNA []bool,
 		}
 		data[idx] = dataVal
 		na[idx] = naVal
+	}
+
+	return data, na
+}
+
+func applyToByBriefFunc[T any](indices []int, inData []T, inNA []bool, applyFunc func(T) T, naDef T) ([]T, []bool) {
+	length := len(inData)
+
+	data := make([]T, length)
+	na := make([]bool, length)
+
+	copy(data, inData)
+	copy(na, inNA)
+
+	for _, idx := range indices {
+		idx = idx - 1
+		if !inNA[idx] {
+			data[idx] = applyFunc(inData[idx])
+		}
 	}
 
 	return data, na
@@ -271,18 +370,6 @@ func supportsWhicher[T any](whicher any) bool {
 	}
 
 	if _, ok := whicher.(func(T, bool) bool); ok {
-		return true
-	}
-
-	return false
-}
-
-func supportsApplier[T any](applier any) bool {
-	if _, ok := applier.(func(int, T, bool) (T, bool)); ok {
-		return true
-	}
-
-	if _, ok := applier.(func(T, bool) (T, bool)); ok {
 		return true
 	}
 

@@ -9,6 +9,7 @@ type BooleanWhicherFunc = func(int, bool, bool) bool
 type BooleanWhicherCompactFunc = func(bool, bool) bool
 type BooleanApplierFunc = func(int, bool, bool) (bool, bool)
 type BooleanApplierCompactFunc = func(bool, bool) (bool, bool)
+type BooleanApplierBriefFunc = func(bool) bool
 type BooleanSummarizerFunc = func(int, bool, bool, bool) (bool, bool)
 
 type booleanPayload struct {
@@ -53,35 +54,23 @@ func (p *booleanPayload) SupportsApplier(applier any) bool {
 }
 
 func (p *booleanPayload) Apply(applier any) Payload {
-	if applyFunc, ok := applier.(BooleanApplierFunc); ok {
-		data, na := applyByFunc(p.data, p.na, p.length, applyFunc, false)
+	data, na := apply(p.data, p.na, applier, false)
 
-		return BooleanPayload(data, na, p.Options()...)
+	if data == nil {
+		return NAPayload(p.length)
 	}
 
-	if applyFunc, ok := applier.(BooleanApplierCompactFunc); ok {
-		data, na := applyByCompactFunc(p.data, p.na, p.length, applyFunc, false)
-
-		return BooleanPayload(data, na, p.Options()...)
-	}
-
-	return NAPayload(p.length)
+	return BooleanPayload(data, na, p.Options()...)
 }
 
 func (p *booleanPayload) ApplyTo(indices []int, applier any) Payload {
-	if applyFunc, ok := applier.(BooleanApplierFunc); ok {
-		data, na := applyToByFunc(indices, p.data, p.na, applyFunc, false)
+	data, na := applyTo(indices, p.data, p.na, applier, false)
 
-		return BooleanPayload(data, na, p.Options()...)
+	if data == nil {
+		return NAPayload(p.length)
 	}
 
-	if applyFunc, ok := applier.(BooleanApplierCompactFunc); ok {
-		data, na := applyToByCompactFunc(indices, p.data, p.na, applyFunc, false)
-
-		return BooleanPayload(data, na, p.Options()...)
-	}
-
-	return NAPayload(p.length)
+	return BooleanPayload(data, na, p.Options()...)
 }
 
 func (p *booleanPayload) SupportsSummarizer(summarizer any) bool {

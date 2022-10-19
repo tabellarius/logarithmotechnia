@@ -599,6 +599,17 @@ func TestFloatPayload_Apply(t *testing.T) {
 			isNAPayload: false,
 		},
 		{
+			name: "regular brief",
+			applier: func(val float64) float64 {
+				return val * 2
+			},
+			dataIn:      []float64{1, 9, 3, 5, 7},
+			naIn:        []bool{false, true, false, true, false},
+			dataOut:     []float64{2, math.NaN(), 6, math.NaN(), 14},
+			naOut:       []bool{false, true, false, true, false},
+			isNAPayload: false,
+		},
+		{
 			name: "manipulate na",
 			applier: func(idx int, val float64, na bool) (float64, bool) {
 				if idx == 5 {
@@ -1311,6 +1322,16 @@ func TestFloatPayload_ApplyTo(t *testing.T) {
 			},
 			dataOut:     []float64{3, math.NaN(), 3, math.NaN(), 15},
 			naOut:       []bool{false, false, false, true, false},
+			isNAPayload: false,
+		},
+		{
+			name:    "regular brief",
+			indices: []int{1, 2, 5},
+			applier: func(val float64) float64 {
+				return val * 3
+			},
+			dataOut:     []float64{3, math.NaN(), 3, math.NaN(), 15},
+			naOut:       []bool{false, true, false, true, false},
 			isNAPayload: false,
 		},
 		{

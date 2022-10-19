@@ -57,35 +57,23 @@ func (p *timePayload) SupportsApplier(applier any) bool {
 }
 
 func (p *timePayload) Apply(applier any) Payload {
-	if applyFunc, ok := applier.(TimeApplierFunc); ok {
-		data, na := applyByFunc(p.data, p.na, p.length, applyFunc, time.Time{})
+	data, na := apply(p.data, p.na, applier, time.Time{})
 
-		return TimePayload(data, na)
+	if data == nil {
+		return NAPayload(p.length)
 	}
 
-	if applyFunc, ok := applier.(TimeApplierCompactFunc); ok {
-		data, na := applyByCompactFunc(p.data, p.na, p.length, applyFunc, time.Time{})
-
-		return TimePayload(data, na)
-	}
-
-	return NAPayload(p.length)
+	return TimePayload(data, na)
 }
 
 func (p *timePayload) ApplyTo(indices []int, applier any) Payload {
-	if applyFunc, ok := applier.(TimeApplierFunc); ok {
-		data, na := applyToByFunc(indices, p.data, p.na, applyFunc, time.Time{})
+	data, na := applyTo(indices, p.data, p.na, applier, time.Time{})
 
-		return TimePayload(data, na, p.Options()...)
+	if data == nil {
+		return NAPayload(p.length)
 	}
 
-	if applyFunc, ok := applier.(TimeApplierCompactFunc); ok {
-		data, na := applyToByCompactFunc(indices, p.data, p.na, applyFunc, time.Time{})
-
-		return TimePayload(data, na, p.Options()...)
-	}
-
-	return NAPayload(p.length)
+	return TimePayload(data, na, p.Options()...)
 }
 
 func (p *timePayload) SupportsSummarizer(summarizer any) bool {

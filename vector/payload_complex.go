@@ -58,36 +58,23 @@ func (p *complexPayload) SupportsApplier(applier any) bool {
 }
 
 func (p *complexPayload) Apply(applier any) Payload {
-	if applyFunc, ok := applier.(ComplexApplierFunc); ok {
-		data, na := applyByFunc(p.data, p.na, p.length, applyFunc, cmplx.NaN())
+	data, na := apply(p.data, p.na, applier, cmplx.NaN())
 
-		return ComplexPayload(data, na, p.Options()...)
+	if data == nil {
+		return NAPayload(p.length)
 	}
 
-	if applyFunc, ok := applier.(ComplexApplierCompactFunc); ok {
-		data, na := applyByCompactFunc(p.data, p.na, p.length, applyFunc, cmplx.NaN())
-
-		return ComplexPayload(data, na, p.Options()...)
-	}
-
-	return NAPayload(p.length)
-
+	return ComplexPayload(data, na, p.Options()...)
 }
 
 func (p *complexPayload) ApplyTo(indices []int, applier any) Payload {
-	if applyFunc, ok := applier.(ComplexApplierFunc); ok {
-		data, na := applyToByFunc(indices, p.data, p.na, applyFunc, cmplx.NaN())
+	data, na := applyTo(indices, p.data, p.na, applier, cmplx.NaN())
 
-		return ComplexPayload(data, na, p.Options()...)
+	if data == nil {
+		return NAPayload(p.length)
 	}
 
-	if applyFunc, ok := applier.(ComplexApplierCompactFunc); ok {
-		data, na := applyToByCompactFunc(indices, p.data, p.na, applyFunc, cmplx.NaN())
-
-		return ComplexPayload(data, na, p.Options()...)
-	}
-
-	return NAPayload(p.length)
+	return ComplexPayload(data, na, p.Options()...)
 }
 
 func (p *complexPayload) SupportsSummarizer(summarizer any) bool {

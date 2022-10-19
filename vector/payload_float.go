@@ -59,35 +59,23 @@ func (p *floatPayload) SupportsApplier(applier any) bool {
 }
 
 func (p *floatPayload) Apply(applier any) Payload {
-	if applyFunc, ok := applier.(FloatApplierFunc); ok {
-		data, na := applyByFunc(p.data, p.na, p.length, applyFunc, math.NaN())
+	data, na := apply(p.data, p.na, applier, math.NaN())
 
-		return FloatPayload(data, na, p.Options()...)
+	if data == nil {
+		return NAPayload(p.length)
 	}
 
-	if applyFunc, ok := applier.(FloatApplierCompactFunc); ok {
-		data, na := applyByCompactFunc(p.data, p.na, p.length, applyFunc, math.NaN())
-
-		return FloatPayload(data, na, p.Options()...)
-	}
-
-	return NAPayload(p.length)
+	return FloatPayload(data, na, p.Options()...)
 }
 
 func (p *floatPayload) ApplyTo(indices []int, applier any) Payload {
-	if applyFunc, ok := applier.(FloatApplierFunc); ok {
-		data, na := applyToByFunc(indices, p.data, p.na, applyFunc, math.NaN())
+	data, na := applyTo(indices, p.data, p.na, applier, math.NaN())
 
-		return FloatPayload(data, na, p.Options()...)
+	if data == nil {
+		return NAPayload(p.length)
 	}
 
-	if applyFunc, ok := applier.(FloatApplierCompactFunc); ok {
-		data, na := applyToByCompactFunc(indices, p.data, p.na, applyFunc, math.NaN())
-
-		return FloatPayload(data, na, p.Options()...)
-	}
-
-	return NAPayload(p.length)
+	return FloatPayload(data, na, p.Options()...)
 }
 
 func (p *floatPayload) SupportsSummarizer(summarizer any) bool {

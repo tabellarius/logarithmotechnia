@@ -612,6 +612,15 @@ func TestBooleanPayload_Apply(t *testing.T) {
 			isNAPayload: false,
 		},
 		{
+			name:        "regular brief",
+			applier:     func(val bool) bool { return !val },
+			dataIn:      []bool{true, true, true, false, false},
+			naIn:        []bool{false, true, false, true, false},
+			dataOut:     []bool{false, false, false, false, true},
+			naOut:       []bool{false, true, false, true, false},
+			isNAPayload: false,
+		},
+		{
 			name:        "incorrect applier",
 			applier:     func(int, int, bool) bool { return true },
 			dataIn:      []bool{true, true, false, false, true},
@@ -1270,6 +1279,16 @@ func TestBooleanPayload_ApplyTo(t *testing.T) {
 			},
 			dataOut:     []bool{false, true, true, false, true},
 			naOut:       []bool{false, false, false, true, false},
+			isNAPayload: false,
+		},
+		{
+			name:    "regular brief",
+			indices: []int{1, 2, 5},
+			applier: func(val bool) bool {
+				return !val
+			},
+			dataOut:     []bool{false, false, true, false, true},
+			naOut:       []bool{false, true, false, true, false},
 			isNAPayload: false,
 		},
 		{
