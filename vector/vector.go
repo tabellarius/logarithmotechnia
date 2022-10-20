@@ -58,7 +58,7 @@ type Vector interface {
 
 	Finder
 	Has(interface{}) bool
-	Equalable
+	Comparable
 	Ordered
 	Arrangeable
 
@@ -139,7 +139,7 @@ type Finder interface {
 	FindAll(interface{}) []int
 }
 
-type Equalable interface {
+type Comparable interface {
 	Eq(interface{}) []bool
 	Neq(interface{}) []bool
 }
@@ -726,10 +726,10 @@ func (v *vector) Has(needle interface{}) bool {
 	return false
 }
 
-/* Equalable interface */
+/* Comparable interface */
 
 func (v *vector) Eq(val interface{}) []bool {
-	if comparee, ok := v.payload.(Equalable); ok {
+	if comparee, ok := v.payload.(Comparable); ok {
 		return comparee.Eq(val)
 	}
 
@@ -737,7 +737,7 @@ func (v *vector) Eq(val interface{}) []bool {
 }
 
 func (v *vector) Neq(val interface{}) []bool {
-	if comparee, ok := v.payload.(Equalable); ok {
+	if comparee, ok := v.payload.(Comparable); ok {
 		return comparee.Neq(val)
 	}
 

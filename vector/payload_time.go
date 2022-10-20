@@ -195,34 +195,11 @@ func (p *timePayload) StrForElem(idx int) string {
 /* Finder interface */
 
 func (p *timePayload) Find(needle interface{}) int {
-	val, ok := needle.(time.Time)
-	if !ok {
-		return 0
-	}
-
-	for i, datum := range p.data {
-		if !p.na[i] && val.Equal(datum) {
-			return i + 1
-		}
-	}
-
-	return 0
+	return findFn(needle, p.data, p.na, p.convertComparator, p.eqFn)
 }
 
 func (p *timePayload) FindAll(needle interface{}) []int {
-	val, ok := needle.(time.Time)
-	if !ok {
-		return []int{}
-	}
-
-	found := []int{}
-	for i, datum := range p.data {
-		if !p.na[i] && val.Equal(datum) {
-			found = append(found, i+1)
-		}
-	}
-
-	return found
+	return findAllFn(needle, p.data, p.na, p.convertComparator, p.eqFn)
 }
 
 /* Ordered interface */

@@ -333,34 +333,11 @@ func (p *stringPayload) adjustToBiggerSize(size int) Payload {
 /* Finder interface */
 
 func (p *stringPayload) Find(needle interface{}) int {
-	val, ok := needle.(string)
-	if !ok {
-		return 0
-	}
-
-	for i, datum := range p.data {
-		if !p.na[i] && val == datum {
-			return i + 1
-		}
-	}
-
-	return 0
+	return find(needle, p.data, p.na, p.convertComparator)
 }
 
 func (p *stringPayload) FindAll(needle interface{}) []int {
-	val, ok := needle.(string)
-	if !ok {
-		return []int{}
-	}
-
-	found := []int{}
-	for i, datum := range p.data {
-		if !p.na[i] && val == datum {
-			found = append(found, i+1)
-		}
-	}
-
-	return found
+	return findAll(needle, p.data, p.na, p.convertComparator)
 }
 
 func (p *stringPayload) Eq(val interface{}) []bool {
