@@ -59,7 +59,7 @@ type Vector interface {
 	Finder
 	Has(interface{}) bool
 	Equalable
-	Comparable
+	Ordered
 	Arrangeable
 
 	IsUniquer
@@ -144,7 +144,7 @@ type Equalable interface {
 	Neq(interface{}) []bool
 }
 
-type Comparable interface {
+type Ordered interface {
 	Gt(interface{}) []bool
 	Lt(interface{}) []bool
 	Gte(interface{}) []bool
@@ -749,10 +749,10 @@ func (v *vector) Neq(val interface{}) []bool {
 	return cmp
 }
 
-/* Comparable interface */
+/* Ordered interface */
 
 func (v *vector) Gt(val interface{}) []bool {
-	if comparee, ok := v.payload.(Comparable); ok {
+	if comparee, ok := v.payload.(Ordered); ok {
 		return comparee.Gt(val)
 	}
 
@@ -760,7 +760,7 @@ func (v *vector) Gt(val interface{}) []bool {
 }
 
 func (v *vector) Lt(val interface{}) []bool {
-	if comparee, ok := v.payload.(Comparable); ok {
+	if comparee, ok := v.payload.(Ordered); ok {
 		return comparee.Lt(val)
 	}
 
@@ -768,7 +768,7 @@ func (v *vector) Lt(val interface{}) []bool {
 }
 
 func (v *vector) Gte(val interface{}) []bool {
-	if comparee, ok := v.payload.(Comparable); ok {
+	if comparee, ok := v.payload.(Ordered); ok {
 		return comparee.Gte(val)
 	}
 
@@ -776,7 +776,7 @@ func (v *vector) Gte(val interface{}) []bool {
 }
 
 func (v *vector) Lte(val interface{}) []bool {
-	if comparee, ok := v.payload.(Comparable); ok {
+	if comparee, ok := v.payload.(Ordered); ok {
 		return comparee.Lte(val)
 	}
 

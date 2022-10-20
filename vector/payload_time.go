@@ -225,132 +225,44 @@ func (p *timePayload) FindAll(needle interface{}) []int {
 	return found
 }
 
-/* Comparable interface */
+/* Ordered interface */
 
 func (p *timePayload) Eq(val interface{}) []bool {
-	cmp := make([]bool, p.length)
-
-	v, ok := val.(time.Time)
-	if !ok {
-		return cmp
-	}
-
-	for i, datum := range p.data {
-		if p.na[i] {
-			cmp[i] = false
-		} else {
-			cmp[i] = datum.Equal(v)
-		}
-	}
-
-	return cmp
+	return eqFn(val, p.data, p.na, p.convertComparator, p.eqFn)
 }
 
 func (p *timePayload) Neq(val interface{}) []bool {
-	cmp := make([]bool, p.length)
+	return neqFn(val, p.data, p.na, p.convertComparator, p.eqFn)
+}
 
+func (p *timePayload) convertComparator(val interface{}) (time.Time, bool) {
 	v, ok := val.(time.Time)
-	if !ok {
-		for i := range p.data {
-			cmp[i] = true
-		}
 
-		return cmp
-	}
+	return v, ok
+}
 
-	for i, datum := range p.data {
-		if p.na[i] {
-			cmp[i] = true
-		} else {
-			cmp[i] = !datum.Equal(v)
-		}
-	}
-
-	return cmp
+func (p *timePayload) eqFn(f, s time.Time) bool {
+	return f.Equal(s)
 }
 
 func (p *timePayload) Gt(val interface{}) []bool {
-	cmp := make([]bool, p.length)
+	return gtFn(val, p.data, p.na, p.convertComparator, p.gtFn)
+}
 
-	v, ok := val.(time.Time)
-	if !ok {
-		return cmp
-	}
-
-	for i, datum := range p.data {
-		if p.na[i] {
-			cmp[i] = false
-		} else {
-			if p.na[i] {
-				cmp[i] = false
-			} else {
-				cmp[i] = datum.After(v)
-			}
-		}
-	}
-
-	return cmp
+func (p *timePayload) gtFn(f, s time.Time) bool {
+	return f.After(s)
 }
 
 func (p *timePayload) Lt(val interface{}) []bool {
-	cmp := make([]bool, p.length)
-
-	v, ok := val.(time.Time)
-	if !ok {
-		return cmp
-	}
-
-	for i, datum := range p.data {
-		if p.na[i] {
-			cmp[i] = false
-		} else {
-			if p.na[i] {
-				cmp[i] = false
-			} else {
-				cmp[i] = datum.Before(v)
-			}
-		}
-	}
-
-	return cmp
+	return ltFn(val, p.data, p.na, p.convertComparator, p.gtFn)
 }
 
 func (p *timePayload) Gte(val interface{}) []bool {
-	cmp := make([]bool, p.length)
-
-	v, ok := val.(time.Time)
-	if !ok {
-		return cmp
-	}
-
-	for i, datum := range p.data {
-		if p.na[i] {
-			cmp[i] = false
-		} else {
-			cmp[i] = datum.After(v) || datum.Equal(v)
-		}
-	}
-
-	return cmp
+	return gteFn(val, p.data, p.na, p.convertComparator, p.eqFn, p.gtFn)
 }
 
 func (p *timePayload) Lte(val interface{}) []bool {
-	cmp := make([]bool, p.length)
-
-	v, ok := val.(time.Time)
-	if !ok {
-		return cmp
-	}
-
-	for i, datum := range p.data {
-		if p.na[i] {
-			cmp[i] = false
-		} else {
-			cmp[i] = datum.Before(v) || datum.Equal(v)
-		}
-	}
-
-	return cmp
+	return lteFn(val, p.data, p.na, p.convertComparator, p.eqFn, p.gtFn)
 }
 
 func (p *timePayload) Groups() ([][]int, []interface{}) {

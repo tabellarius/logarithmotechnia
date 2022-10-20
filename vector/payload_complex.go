@@ -326,72 +326,14 @@ func (p *complexPayload) FindAll(needle interface{}) []int {
 	return found
 }
 
-/* Comparable interface */
+/* Ordered interface */
 
 func (p *complexPayload) Eq(val interface{}) []bool {
-	cmp := make([]bool, p.length)
-
-	v, ok := p.convertComparator(val)
-	if !ok {
-		return cmp
-	}
-
-	for i, datum := range p.data {
-		if p.na[i] {
-			cmp[i] = false
-		} else {
-			cmp[i] = datum == v
-		}
-	}
-
-	return cmp
+	return eq(val, p.data, p.na, p.convertComparator)
 }
 
 func (p *complexPayload) Neq(val interface{}) []bool {
-	cmp := make([]bool, p.length)
-
-	v, ok := p.convertComparator(val)
-	if !ok {
-		for i := range p.data {
-			cmp[i] = true
-		}
-
-		return cmp
-	}
-
-	for i, datum := range p.data {
-		if p.na[i] {
-			cmp[i] = true
-		} else {
-			cmp[i] = datum != v
-		}
-	}
-
-	return cmp
-}
-
-func (p *complexPayload) Gt(interface{}) []bool {
-	cmp := make([]bool, p.length)
-
-	return cmp
-}
-
-func (p *complexPayload) Lt(interface{}) []bool {
-	cmp := make([]bool, p.length)
-
-	return cmp
-}
-
-func (p *complexPayload) Gte(interface{}) []bool {
-	cmp := make([]bool, p.length)
-
-	return cmp
-}
-
-func (p *complexPayload) Lte(interface{}) []bool {
-	cmp := make([]bool, p.length)
-
-	return cmp
+	return neq(val, p.data, p.na, p.convertComparator)
 }
 
 func (p *complexPayload) convertComparator(val interface{}) (complex128, bool) {
