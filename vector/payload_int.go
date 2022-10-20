@@ -265,36 +265,13 @@ func (p *integerPayload) StrForElem(idx int) string {
 }
 
 func (p *integerPayload) Find(needle interface{}) int {
-	val, ok := p.convertComparator(needle)
-	if !ok {
-		return 0
-	}
-
-	for i, datum := range p.data {
-		if !p.na[i] && val == datum {
-			return i + 1
-		}
-	}
-
-	return 0
+	return find(needle, p.data, p.na, p.convertComparator)
 }
 
 /* Finder interface */
 
 func (p *integerPayload) FindAll(needle interface{}) []int {
-	val, ok := p.convertComparator(needle)
-	if !ok {
-		return []int{}
-	}
-
-	found := []int{}
-	for i, datum := range p.data {
-		if !p.na[i] && val == datum {
-			found = append(found, i+1)
-		}
-	}
-
-	return found
+	return findAll(needle, p.data, p.na, p.convertComparator)
 }
 
 func (p *integerPayload) Eq(val interface{}) []bool {

@@ -279,51 +279,12 @@ func (p *complexPayload) StrForElem(idx int) string {
 
 /* Finder interface */
 
-func (p *complexPayload) Find(needle interface{}) int {
-	var val complex128
-
-	switch v := needle.(type) {
-	case complex128:
-		val = v
-	case float64:
-		val = complex(v, 0)
-	case int:
-		val = complex(float64(v), 0)
-	default:
-		return 0
-	}
-
-	for i, datum := range p.data {
-		if !p.na[i] && val == datum {
-			return i + 1
-		}
-	}
-
-	return 0
+func (p *complexPayload) Find(needle any) int {
+	return find(needle, p.data, p.na, p.convertComparator)
 }
 
 func (p *complexPayload) FindAll(needle interface{}) []int {
-	var val complex128
-
-	switch v := needle.(type) {
-	case complex128:
-		val = v
-	case float64:
-		val = complex(v, 0)
-	case int:
-		val = complex(float64(v), 0)
-	default:
-		return []int{}
-	}
-
-	found := []int{}
-	for i, datum := range p.data {
-		if !p.na[i] && val == datum {
-			found = append(found, i+1)
-		}
-	}
-
-	return found
+	return findAll(needle, p.data, p.na, p.convertComparator)
 }
 
 /* Ordered interface */

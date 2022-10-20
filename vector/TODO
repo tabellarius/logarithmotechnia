@@ -1,11 +1,11 @@
-Divide Comparable to Comparable and Equalable; remove Comparable for bool
 interface{} -> any
 Arithmetic functions
 Finder interface for InterfacePayload
 Comparator for Interface payload(?)
+InterfacePayload -> AnyPayload
+IsOdd(), IsEven(), IsNth() functions (return bool)
+
 Add NewDefNAable() for DefNAble
 Review type conversions
 Add df.Err and logger
 Rework factorizable payloads
-InterfacePayload -> AnyPayload
-IsOdd(), IsEven(), IsNth() functions (return bool)

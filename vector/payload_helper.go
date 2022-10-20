@@ -668,3 +668,66 @@ func lteFn[T any](val any, inData []T, inNA []bool, convertor func(any) (T, bool
 
 	return cmp
 }
+
+func find[T comparable](needle any, inData []T, inNA []bool, convertor func(any) (T, bool)) int {
+	val, ok := convertor(needle)
+	if !ok {
+		return 0
+	}
+
+	for i, datum := range inData {
+		if !inNA[i] && val == datum {
+			return i + 1
+		}
+	}
+
+	return 0
+}
+
+func findFn[T comparable](needle any, inData []T, inNA []bool, convertor func(any) (T, bool), eqFn func(T, T) bool) int {
+	val, ok := convertor(needle)
+	if !ok {
+		return 0
+	}
+
+	for i, datum := range inData {
+		if !inNA[i] && eqFn(val, datum) {
+			return i + 1
+		}
+	}
+
+	return 0
+}
+
+func findAll[T comparable](needle any, inData []T, inNA []bool, convertor func(any) (T, bool)) []int {
+	val, ok := convertor(needle)
+	if !ok {
+		return []int{}
+	}
+
+	found := []int{}
+	for i, datum := range inData {
+		if !inNA[i] && val == datum {
+			found = append(found, i+1)
+		}
+	}
+
+	return found
+}
+
+func findAllFn[T comparable](needle any, inData []T, inNA []bool, convertor func(any) (T, bool),
+	eqFn func(T, T) bool) []int {
+	val, ok := convertor(needle)
+	if !ok {
+		return []int{}
+	}
+
+	found := []int{}
+	for i, datum := range inData {
+		if !inNA[i] && eqFn(val, datum) {
+			found = append(found, i+1)
+		}
+	}
+
+	return found
+}
