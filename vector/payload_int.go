@@ -8,12 +8,6 @@ import (
 
 const maxIntPrint = 15
 
-type IntegerWhicherFunc = func(int, int, bool) bool
-type IntegerWhicherCompactFunc = func(int, bool) bool
-type IntegerApplierFunc = func(int, int, bool) (int, bool)
-type IntegerApplierCompactFunc = func(int, bool) (int, bool)
-type IntegerSummarizerFunc = func(int, int, int, bool) (int, bool)
-
 // integerPayload is a structure, subsisting Integer vectors
 type integerPayload struct {
 	length int

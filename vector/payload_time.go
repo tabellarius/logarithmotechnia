@@ -4,12 +4,6 @@ import (
 	"time"
 )
 
-type TimeWhicherFunc = func(int, time.Time, bool) bool
-type TimeWhicherCompactFunc = func(time.Time, bool) bool
-type TimeApplierFunc = func(int, time.Time, bool) (time.Time, bool)
-type TimeApplierCompactFunc = func(time.Time, bool) (time.Time, bool)
-type TimeSummarizerFunc = func(int, time.Time, time.Time, bool) (time.Time, bool)
-
 type TimePrinter struct {
 	Format string
 }

@@ -5,13 +5,6 @@ import (
 	"math/cmplx"
 )
 
-type BooleanWhicherFunc = func(int, bool, bool) bool
-type BooleanWhicherCompactFunc = func(bool, bool) bool
-type BooleanApplierFunc = func(int, bool, bool) (bool, bool)
-type BooleanApplierCompactFunc = func(bool, bool) (bool, bool)
-type BooleanApplierBriefFunc = func(bool) bool
-type BooleanSummarizerFunc = func(int, bool, bool, bool) (bool, bool)
-
 type booleanPayload struct {
 	length int
 	data   []bool

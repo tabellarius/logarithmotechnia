@@ -6,12 +6,6 @@ import (
 	"strconv"
 )
 
-type FloatWhicherFunc = func(int, float64, bool) bool
-type FloatWhicherCompactFunc = func(float64, bool) bool
-type FloatApplierFunc = func(int, float64, bool) (float64, bool)
-type FloatApplierCompactFunc = func(float64, bool) (float64, bool)
-type FloatSummarizerFunc = func(int, float64, float64, bool) (float64, bool)
-
 type FloatPrinter struct {
 	Precision int
 }

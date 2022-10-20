@@ -6,12 +6,6 @@ import (
 	"strconv"
 )
 
-type ComplexWhicherFunc = func(int, complex128, bool) bool
-type ComplexWhicherCompactFunc = func(complex128, bool) bool
-type ComplexApplierFunc = func(int, complex128, bool) (complex128, bool)
-type ComplexApplierCompactFunc = func(complex128, bool) (complex128, bool)
-type ComplexSummarizerFunc = func(int, complex128, complex128, bool) (complex128, bool)
-
 type ComplexPrinter struct {
 	Precision int
 }

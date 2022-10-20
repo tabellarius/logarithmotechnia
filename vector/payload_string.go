@@ -6,12 +6,6 @@ import (
 	"strconv"
 )
 
-type StringWhicherFunc = func(int, string, bool) bool
-type StringWhicherCompactFunc = func(string, bool) bool
-type StringApplierFunc = func(int, string, bool) (string, bool)
-type StringApplierCompactFunc = func(string, bool) (string, bool)
-type StringSummarizerFunc = func(int, string, string, bool) (string, bool)
-
 type stringPayload struct {
 	length int
 	data   []string
