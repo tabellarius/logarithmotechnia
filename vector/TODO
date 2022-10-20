@@ -1,8 +1,6 @@
-interface{} -> any
 Arithmetic functions
 Finder interface for InterfacePayload
 Comparator for Interface payload(?)
-InterfacePayload -> AnyPayload
 IsOdd(), IsEven(), IsNth() functions (return bool)
 
 Add NewDefNAable() for DefNAble

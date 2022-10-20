@@ -361,25 +361,25 @@ func TestStringPayload_Interfaces(t *testing.T) {
 	testData := []struct {
 		in    []string
 		inNA  []bool
-		out   []interface{}
+		out   []any
 		outNA []bool
 	}{
 		{
 			in:    []string{"1", "3", "0", "100", ""},
 			inNA:  []bool{false, false, false, false, false},
-			out:   []interface{}{"1", "3", "0", "100", ""},
+			out:   []any{"1", "3", "0", "100", ""},
 			outNA: []bool{false, false, false, false, false},
 		},
 		{
 			in:    []string{"10", "", "12", "14", "1110"},
 			inNA:  []bool{false, false, false, true, true},
-			out:   []interface{}{"10", "", "12", nil, nil},
+			out:   []any{"10", "", "12", nil, nil},
 			outNA: []bool{false, false, false, true, true},
 		},
 		{
 			in:    []string{"1", "3", "0", "100", "", "-11", "-10"},
 			inNA:  []bool{false, false, false, false, false, false, true},
-			out:   []interface{}{"1", "3", "0", "100", "", "-11", nil},
+			out:   []any{"1", "3", "0", "100", "", "-11", nil},
 			outNA: []bool{false, false, false, false, false, false, true},
 		},
 	}
@@ -389,9 +389,9 @@ func TestStringPayload_Interfaces(t *testing.T) {
 			vec := StringWithNA(data.in, data.inNA)
 			payload := vec.(*vector).payload.(*stringPayload)
 
-			interfaces, na := payload.Interfaces()
+			interfaces, na := payload.Anies()
 			if !reflect.DeepEqual(interfaces, data.out) {
-				t.Error(fmt.Sprintf("Interfaces (%v) are not equal to data.out (%v)\n", interfaces, data.out))
+				t.Error(fmt.Sprintf("Anies (%v) are not equal to data.out (%v)\n", interfaces, data.out))
 			}
 			if !reflect.DeepEqual(na, data.outNA) {
 				t.Error(fmt.Sprintf("IsNA (%v) are not equal to data.outNA (%v)\n", na, data.outNA))
@@ -450,7 +450,7 @@ func TestStringPayload_ByIndices(t *testing.T) {
 func TestStringPayload_SupportsWhicher(t *testing.T) {
 	testData := []struct {
 		name        string
-		filter      interface{}
+		filter      any
 		isSupported bool
 	}{
 		{
@@ -488,7 +488,7 @@ func TestStringPayload_SupportsWhicher(t *testing.T) {
 func TestStringPayload_Whicher(t *testing.T) {
 	testData := []struct {
 		name string
-		fn   interface{}
+		fn   any
 		out  []bool
 	}{
 		{
@@ -533,7 +533,7 @@ func TestStringPayload_Whicher(t *testing.T) {
 func TestStringPayload_SupportsApplier(t *testing.T) {
 	testData := []struct {
 		name        string
-		applier     interface{}
+		applier     any
 		isSupported bool
 	}{
 		{
@@ -566,7 +566,7 @@ func TestStringPayload_SupportsApplier(t *testing.T) {
 func TestStringPayload_Apply(t *testing.T) {
 	testData := []struct {
 		name        string
-		applier     interface{}
+		applier     any
 		dataIn      []string
 		naIn        []bool
 		dataOut     []string
@@ -658,7 +658,7 @@ func TestStringPayload_Apply(t *testing.T) {
 func TestStringPayload_SupportsSummarizer(t *testing.T) {
 	testData := []struct {
 		name        string
-		summarizer  interface{}
+		summarizer  any
 		isSupported bool
 	}{
 		{
@@ -690,7 +690,7 @@ func TestStringPayload_Summarize(t *testing.T) {
 
 	testData := []struct {
 		name       string
-		summarizer interface{}
+		summarizer any
 		dataIn     []string
 		naIn       []bool
 		dataOut    []string
@@ -836,7 +836,7 @@ func TestStringPayload_Find(t *testing.T) {
 
 	testData := []struct {
 		name   string
-		needle interface{}
+		needle any
 		pos    int
 	}{
 		{"existent", "4", 4},
@@ -861,7 +861,7 @@ func TestStringPayload_FindAll(t *testing.T) {
 
 	testData := []struct {
 		name   string
-		needle interface{}
+		needle any
 		pos    []int
 	}{
 		{"existent", "1", []int{1, 3}},
@@ -886,7 +886,7 @@ func TestStringPayload_Eq(t *testing.T) {
 		[]bool{false, false, true, false, false}).(*stringPayload)
 
 	testData := []struct {
-		eq  interface{}
+		eq  any
 		cmp []bool
 	}{
 		{"2", []bool{true, false, false, true, false}},
@@ -914,7 +914,7 @@ func TestStringPayload_Neq(t *testing.T) {
 		[]bool{false, false, true, false, false}).(*stringPayload)
 
 	testData := []struct {
-		eq  interface{}
+		eq  any
 		cmp []bool
 	}{
 		{"2", []bool{false, true, true, false, true}},
@@ -941,7 +941,7 @@ func TestStringPayload_Gt(t *testing.T) {
 		[]bool{false, false, false, true, false}).(*stringPayload)
 
 	testData := []struct {
-		val interface{}
+		val any
 		cmp []bool
 	}{
 		{"zero", []bool{false, false, true, false, false}},
@@ -965,7 +965,7 @@ func TestStringPayload_Lt(t *testing.T) {
 		[]bool{false, false, false, true, false}).(*stringPayload)
 
 	testData := []struct {
-		val interface{}
+		val any
 		cmp []bool
 	}{
 		{"zero", []bool{true, false, false, false, true}},
@@ -989,7 +989,7 @@ func TestStringPayload_Gte(t *testing.T) {
 		[]bool{false, false, false, true, false}).(*stringPayload)
 
 	testData := []struct {
-		val interface{}
+		val any
 		cmp []bool
 	}{
 		{"zero", []bool{false, true, true, false, false}},
@@ -1013,7 +1013,7 @@ func TestStringPayload_Lte(t *testing.T) {
 		[]bool{false, false, false, true, false}).(*stringPayload)
 
 	testData := []struct {
-		val interface{}
+		val any
 		cmp []bool
 	}{
 		{"zero", []bool{true, true, false, false, true}},
@@ -1037,20 +1037,20 @@ func TestStringPayload_Groups(t *testing.T) {
 		name    string
 		payload Payload
 		groups  [][]int
-		values  []interface{}
+		values  []any
 	}{
 		{
 			name:    "normal",
 			payload: StringPayload([]string{"aa", "bb", "bb", "aa", "cc", "dd", "aa"}, nil),
 			groups:  [][]int{{1, 4, 7}, {2, 3}, {5}, {6}},
-			values:  []interface{}{"aa", "bb", "cc", "dd"},
+			values:  []any{"aa", "bb", "cc", "dd"},
 		},
 		{
 			name: "with NA",
 			payload: StringPayload([]string{"aa", "bb", "bb", "aa", "cc", "dd", "aa"},
 				[]bool{false, false, false, false, true, false, false}),
 			groups: [][]int{{1, 4, 7}, {2, 3}, {6}, {5}},
-			values: []interface{}{"aa", "bb", "dd", nil},
+			values: []any{"aa", "bb", "dd", nil},
 		},
 	}
 
@@ -1163,17 +1163,17 @@ func TestStringPayload_Pick(t *testing.T) {
 	testData := []struct {
 		name string
 		idx  int
-		val  interface{}
+		val  any
 	}{
 		{
 			name: "normal 2",
 			idx:  2,
-			val:  interface{}("b"),
+			val:  any("b"),
 		},
 		{
 			name: "normal 5",
 			idx:  5,
-			val:  interface{}("c"),
+			val:  any("c"),
 		},
 		{
 			name: "na",
@@ -1208,17 +1208,17 @@ func TestStringPayload_Data(t *testing.T) {
 	testData := []struct {
 		name    string
 		payload Payload
-		outData []interface{}
+		outData []any
 	}{
 		{
 			name:    "empty",
 			payload: StringPayload([]string{}, []bool{}),
-			outData: []interface{}{},
+			outData: []any{},
 		},
 		{
 			name:    "non-empty",
 			payload: StringPayload([]string{"a", "b", "a", "b", "c"}, []bool{false, false, true, true, false}),
-			outData: []interface{}{"a", "b", nil, nil, "c"},
+			outData: []any{"a", "b", nil, nil, "c"},
 		},
 	}
 
@@ -1240,7 +1240,7 @@ func TestStringPayload_ApplyTo(t *testing.T) {
 	testData := []struct {
 		name        string
 		indices     []int
-		applier     interface{}
+		applier     any
 		dataOut     []string
 		naOut       []bool
 		isNAPayload bool

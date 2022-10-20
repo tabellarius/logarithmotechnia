@@ -15,7 +15,7 @@ type FromToColIndices struct {
 	to   int
 }
 
-func (df *Dataframe) Select(selectors ...interface{}) *Dataframe {
+func (df *Dataframe) Select(selectors ...any) *Dataframe {
 	if len(selectors) == 0 {
 		return df.Clone()
 	}

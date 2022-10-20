@@ -11,7 +11,7 @@ import (
 func TestNew(t *testing.T) {
 	testData := []struct {
 		name          string
-		columns       interface{}
+		columns       any
 		columnNames   []string
 		dfColumns     []vector.Vector
 		dfColumnNames []string
@@ -271,7 +271,7 @@ func TestDataframe_C(t *testing.T) {
 	}, vector.OptionColumnNames([]string{"int", "string", "bool"}))
 
 	testData := []struct {
-		selector interface{}
+		selector any
 		column   vector.Vector
 	}{
 		{"int", vector.IntegerWithNA([]int{1, 2, 3}, nil)},

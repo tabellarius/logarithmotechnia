@@ -289,14 +289,14 @@ func (df *Dataframe) determineColumns(conf vector.Configuration, src *Dataframe)
 }
 
 type joinNode struct {
-	groupVal interface{}
-	groupMap map[interface{}]*joinNode
+	groupVal any
+	groupMap map[any]*joinNode
 	indices  []int
-	values   []interface{}
+	values   []any
 	keyLen   int
 }
 
-func (n *joinNode) getIndicesFor(key []interface{}) []int {
+func (n *joinNode) getIndicesFor(key []any) []int {
 	if len(key) == 0 {
 		return nil
 	}
@@ -313,8 +313,8 @@ func (n *joinNode) getIndicesFor(key []interface{}) []int {
 	return node.getIndicesFor(key[1:])
 }
 
-func (n *joinNode) getKeys() [][]interface{} {
-	keys := [][]interface{}{}
+func (n *joinNode) getKeys() [][]any {
+	keys := [][]any{}
 
 	if n.keyLen == 0 {
 		return keys
@@ -324,11 +324,11 @@ func (n *joinNode) getKeys() [][]interface{} {
 		if n.keyLen > 1 {
 			subKeys := n.groupMap[val].getKeys()
 			for _, subKey := range subKeys {
-				key := append([]interface{}{val}, subKey...)
+				key := append([]any{val}, subKey...)
 				keys = append(keys, key)
 			}
 		} else {
-			keys = append(keys, []interface{}{val})
+			keys = append(keys, []any{val})
 		}
 	}
 
@@ -361,7 +361,7 @@ func fillJoinTree(df *Dataframe, node *joinNode, columns []string) {
 
 	isAdditionalColumns := len(columns) > 1
 
-	node.groupMap = map[interface{}]*joinNode{}
+	node.groupMap = map[any]*joinNode{}
 	node.keyLen = len(columns)
 	column := columns[0]
 

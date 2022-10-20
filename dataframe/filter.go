@@ -5,7 +5,7 @@ import (
 	"logarithmotechnia/vector"
 )
 
-func (df *Dataframe) Filter(filter interface{}) *Dataframe {
+func (df *Dataframe) Filter(filter any) *Dataframe {
 	if indices, ok := filter.([]int); ok {
 		return df.ByIndices(indices)
 	}

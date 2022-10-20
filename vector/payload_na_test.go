@@ -519,22 +519,22 @@ func TestNaPayload_Times(t *testing.T) {
 func TestNaPayload_Interfaces(t *testing.T) {
 	testData := []struct {
 		length  int
-		outData []interface{}
+		outData []any
 		outNA   []bool
 	}{
 		{
 			length:  5,
-			outData: []interface{}{nil, nil, nil, nil, nil},
+			outData: []any{nil, nil, nil, nil, nil},
 			outNA:   []bool{true, true, true, true, true},
 		},
 		{
 			length:  3,
-			outData: []interface{}{nil, nil, nil},
+			outData: []any{nil, nil, nil},
 			outNA:   []bool{true, true, true},
 		},
 		{
 			length:  0,
-			outData: []interface{}{},
+			outData: []any{},
 			outNA:   []bool{},
 		},
 	}
@@ -543,9 +543,9 @@ func TestNaPayload_Interfaces(t *testing.T) {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
 			payload := NA(data.length).(*vector).payload.(*naPayload)
 
-			interfaces, na := payload.Interfaces()
+			interfaces, na := payload.Anies()
 			if !reflect.DeepEqual(interfaces, data.outData) {
-				t.Error(fmt.Sprintf("Interfaces (%v) are not equal to expected (%v)",
+				t.Error(fmt.Sprintf("Anies (%v) are not equal to expected (%v)",
 					interfaces, data.outData))
 			}
 			if !reflect.DeepEqual(na, data.outNA) {
@@ -685,7 +685,7 @@ func TestNaPayload_Pick(t *testing.T) {
 	testData := []struct {
 		name string
 		idx  int
-		val  interface{}
+		val  any
 	}{
 		{
 			name: "normal 2",
@@ -730,17 +730,17 @@ func TestNaPayload_Data(t *testing.T) {
 	testData := []struct {
 		name    string
 		payload Payload
-		outData []interface{}
+		outData []any
 	}{
 		{
 			name:    "empty",
 			payload: NAPayload(0),
-			outData: []interface{}{},
+			outData: []any{},
 		},
 		{
 			name:    "non-empty",
 			payload: NAPayload(5),
-			outData: []interface{}{nil, nil, nil, nil, nil},
+			outData: []any{nil, nil, nil, nil, nil},
 		},
 	}
 

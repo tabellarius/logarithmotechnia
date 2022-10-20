@@ -366,25 +366,25 @@ func TestBooleanPayload_Interfaces(t *testing.T) {
 	testData := []struct {
 		in    []bool
 		inNA  []bool
-		out   []interface{}
+		out   []any
 		outNA []bool
 	}{
 		{
 			in:    []bool{true, true, false, true, false},
 			inNA:  []bool{false, false, false, false, false},
-			out:   []interface{}{true, true, false, true, false},
+			out:   []any{true, true, false, true, false},
 			outNA: []bool{false, false, false, false, false},
 		},
 		{
 			in:    []bool{true, false, true, true, true},
 			inNA:  []bool{false, false, false, true, true},
-			out:   []interface{}{true, false, true, nil, nil},
+			out:   []any{true, false, true, nil, nil},
 			outNA: []bool{false, false, false, true, true},
 		},
 		{
 			in:    []bool{true, true, false, true, false, true, true},
 			inNA:  []bool{false, false, false, false, false, false, true},
-			out:   []interface{}{true, true, false, true, false, true, nil},
+			out:   []any{true, true, false, true, false, true, nil},
 			outNA: []bool{false, false, false, false, false, false, true},
 		},
 	}
@@ -394,9 +394,9 @@ func TestBooleanPayload_Interfaces(t *testing.T) {
 			vec := BooleanWithNA(data.in, data.inNA)
 			payload := vec.(*vector).payload.(*booleanPayload)
 
-			interfaces, na := payload.Interfaces()
+			interfaces, na := payload.Anies()
 			if !reflect.DeepEqual(interfaces, data.out) {
-				t.Error(fmt.Sprintf("Interfaces (%v) are not equal to data.out (%v)\n", interfaces, data.out))
+				t.Error(fmt.Sprintf("Anies (%v) are not equal to data.out (%v)\n", interfaces, data.out))
 			}
 			if !reflect.DeepEqual(na, data.outNA) {
 				t.Error(fmt.Sprintf("NA (%v) are not equal to data.outNA (%v)\n", na, data.outNA))
@@ -455,7 +455,7 @@ func TestBooleanPayload_ByIndices(t *testing.T) {
 func TestBooleanPayload_SupportsWhicher(t *testing.T) {
 	testData := []struct {
 		name        string
-		filter      interface{}
+		filter      any
 		isSupported bool
 	}{
 		{
@@ -493,7 +493,7 @@ func TestBooleanPayload_SupportsWhicher(t *testing.T) {
 func TestBooleanPayload_Whicher(t *testing.T) {
 	testData := []struct {
 		name string
-		fn   interface{}
+		fn   any
 		out  []bool
 	}{
 		{
@@ -538,7 +538,7 @@ func TestBooleanPayload_Whicher(t *testing.T) {
 func TestBooleanPayload_SupportsApplier(t *testing.T) {
 	testData := []struct {
 		name        string
-		applier     interface{}
+		applier     any
 		isSupported bool
 	}{
 		{
@@ -571,7 +571,7 @@ func TestBooleanPayload_SupportsApplier(t *testing.T) {
 func TestBooleanPayload_Apply(t *testing.T) {
 	testData := []struct {
 		name        string
-		applier     interface{}
+		applier     any
 		dataIn      []bool
 		naIn        []bool
 		dataOut     []bool
@@ -663,7 +663,7 @@ func TestBooleanPayload_Apply(t *testing.T) {
 func TestBooleanPayload_SupportsSummarizer(t *testing.T) {
 	testData := []struct {
 		name        string
-		summarizer  interface{}
+		summarizer  any
 		isSupported bool
 	}{
 		{
@@ -699,7 +699,7 @@ func TestBooleanPayload_Summarize(t *testing.T) {
 
 	testData := []struct {
 		name       string
-		summarizer interface{}
+		summarizer any
 		dataIn     []bool
 		naIn       []bool
 		dataOut    []bool
@@ -853,7 +853,7 @@ func TestBooleanPayload_Find(t *testing.T) {
 
 	testData := []struct {
 		name   string
-		needle interface{}
+		needle any
 		pos    int
 	}{
 		{"existent", true, 1},
@@ -878,7 +878,7 @@ func TestBooleanPayload_FindAll(t *testing.T) {
 
 	testData := []struct {
 		name   string
-		needle interface{}
+		needle any
 		pos    []int
 	}{
 		{"existent", true, []int{1, 3, 5}},
@@ -910,7 +910,7 @@ func TestBooleanPayload_Eq(t *testing.T) {
 		[]bool{false, false, true, false, false}).(*booleanPayload)
 
 	testData := []struct {
-		eq  interface{}
+		eq  any
 		cmp []bool
 	}{
 		{true, []bool{true, false, false, false, true}},
@@ -935,7 +935,7 @@ func TestBooleanPayload_Neq(t *testing.T) {
 		[]bool{false, false, true, false, false}).(*booleanPayload)
 
 	testData := []struct {
-		val interface{}
+		val any
 		cmp []bool
 	}{
 		{true, []bool{false, true, true, true, false}},
@@ -960,20 +960,20 @@ func TestBooleanPayload_Groups(t *testing.T) {
 		name    string
 		payload Payload
 		groups  [][]int
-		values  []interface{}
+		values  []any
 	}{
 		{
 			name:    "normal",
 			payload: BooleanPayload([]bool{true, false, true, true, false}, nil),
 			groups:  [][]int{{1, 3, 4}, {2, 5}},
-			values:  []interface{}{true, false},
+			values:  []any{true, false},
 		},
 		{
 			name: "with NA",
 			payload: BooleanPayload([]bool{true, false, true, true, false},
 				[]bool{false, false, true, false, false}),
 			groups: [][]int{{1, 4}, {2, 5}, {3}},
-			values: []interface{}{true, false, nil},
+			values: []any{true, false, nil},
 		},
 	}
 
@@ -1085,17 +1085,17 @@ func TestBooleanPayload_Pick(t *testing.T) {
 	testData := []struct {
 		name string
 		idx  int
-		val  interface{}
+		val  any
 	}{
 		{
 			name: "normal 2",
 			idx:  2,
-			val:  interface{}(false),
+			val:  any(false),
 		},
 		{
 			name: "normal 5",
 			idx:  5,
-			val:  interface{}(true),
+			val:  any(true),
 		},
 		{
 			name: "na",
@@ -1130,17 +1130,17 @@ func TestBooleanPayload_Data(t *testing.T) {
 	testData := []struct {
 		name    string
 		payload Payload
-		outData []interface{}
+		outData []any
 	}{
 		{
 			name:    "empty",
 			payload: BooleanPayload([]bool{}, []bool{}),
-			outData: []interface{}{},
+			outData: []any{},
 		},
 		{
 			name:    "non-empty",
 			payload: BooleanPayload([]bool{true, false, true, false, true}, []bool{false, false, true, true, false}),
-			outData: []interface{}{true, false, nil, nil, true},
+			outData: []any{true, false, nil, nil, true},
 		},
 	}
 
@@ -1162,7 +1162,7 @@ func TestBooleanPayload_ApplyTo(t *testing.T) {
 	testData := []struct {
 		name        string
 		indices     []int
-		applier     interface{}
+		applier     any
 		dataOut     []bool
 		naOut       []bool
 		isNAPayload bool

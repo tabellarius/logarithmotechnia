@@ -4,7 +4,7 @@ import (
 	"logarithmotechnia/vector"
 )
 
-func (df *Dataframe) BindColumns(arguments ...interface{}) *Dataframe {
+func (df *Dataframe) BindColumns(arguments ...any) *Dataframe {
 	dataframes := []*Dataframe{}
 	for _, arg := range arguments {
 		switch arg.(type) {
@@ -46,7 +46,7 @@ func bindTwoDataframesByColumns(src, app *Dataframe) *Dataframe {
 	return New(columns, options...)
 }
 
-func (df *Dataframe) BindRows(arguments ...interface{}) *Dataframe {
+func (df *Dataframe) BindRows(arguments ...any) *Dataframe {
 	dataframes := []*Dataframe{}
 	for _, arg := range arguments {
 		switch arg.(type) {

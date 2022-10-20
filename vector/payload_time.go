@@ -4,12 +4,6 @@ import (
 	"time"
 )
 
-type TimeWhicherFunc = func(int, time.Time, bool) bool
-type TimeWhicherCompactFunc = func(time.Time, bool) bool
-type TimeApplierFunc = func(int, time.Time, bool) (time.Time, bool)
-type TimeApplierCompactFunc = func(time.Time, bool) (time.Time, bool)
-type TimeSummarizerFunc = func(int, time.Time, time.Time, bool) (time.Time, bool)
-
 type TimePrinter struct {
 	Format string
 }
@@ -30,11 +24,11 @@ func (p *timePayload) Len() int {
 	return p.length
 }
 
-func (p *timePayload) Pick(idx int) interface{} {
+func (p *timePayload) Pick(idx int) any {
 	return pickValueWithNA(idx, p.data, p.na, p.length)
 }
 
-func (p *timePayload) Data() []interface{} {
+func (p *timePayload) Data() []any {
 	return dataWithNAToInterfaceArray(p.data, p.na)
 }
 
@@ -80,7 +74,7 @@ func (p *timePayload) SupportsSummarizer(summarizer any) bool {
 	return supportsSummarizer[time.Time](summarizer)
 }
 
-func (p *timePayload) Summarize(summarizer interface{}) Payload {
+func (p *timePayload) Summarize(summarizer any) Payload {
 	val, na := summarize(p.data, p.na, summarizer, time.Time{}, time.Time{})
 
 	return TimePayload([]time.Time{val}, []bool{na})
@@ -121,12 +115,12 @@ func (p *timePayload) Times() ([]time.Time, []bool) {
 	return data, na
 }
 
-func (p *timePayload) Interfaces() ([]interface{}, []bool) {
+func (p *timePayload) Anies() ([]any, []bool) {
 	if p.length == 0 {
-		return []interface{}{}, []bool{}
+		return []any{}, []bool{}
 	}
 
-	data := make([]interface{}, p.length)
+	data := make([]any, p.length)
 	for i := 0; i < p.length; i++ {
 		if p.na[i] {
 			data[i] = nil
@@ -194,25 +188,25 @@ func (p *timePayload) StrForElem(idx int) string {
 
 /* Finder interface */
 
-func (p *timePayload) Find(needle interface{}) int {
+func (p *timePayload) Find(needle any) int {
 	return findFn(needle, p.data, p.na, p.convertComparator, p.eqFn)
 }
 
-func (p *timePayload) FindAll(needle interface{}) []int {
+func (p *timePayload) FindAll(needle any) []int {
 	return findAllFn(needle, p.data, p.na, p.convertComparator, p.eqFn)
 }
 
 /* Ordered interface */
 
-func (p *timePayload) Eq(val interface{}) []bool {
+func (p *timePayload) Eq(val any) []bool {
 	return eqFn(val, p.data, p.na, p.convertComparator, p.eqFn)
 }
 
-func (p *timePayload) Neq(val interface{}) []bool {
+func (p *timePayload) Neq(val any) []bool {
 	return neqFn(val, p.data, p.na, p.convertComparator, p.eqFn)
 }
 
-func (p *timePayload) convertComparator(val interface{}) (time.Time, bool) {
+func (p *timePayload) convertComparator(val any) (time.Time, bool) {
 	v, ok := val.(time.Time)
 
 	return v, ok
@@ -222,7 +216,7 @@ func (p *timePayload) eqFn(f, s time.Time) bool {
 	return f.Equal(s)
 }
 
-func (p *timePayload) Gt(val interface{}) []bool {
+func (p *timePayload) Gt(val any) []bool {
 	return gtFn(val, p.data, p.na, p.convertComparator, p.gtFn)
 }
 
@@ -230,19 +224,19 @@ func (p *timePayload) gtFn(f, s time.Time) bool {
 	return f.After(s)
 }
 
-func (p *timePayload) Lt(val interface{}) []bool {
+func (p *timePayload) Lt(val any) []bool {
 	return ltFn(val, p.data, p.na, p.convertComparator, p.gtFn)
 }
 
-func (p *timePayload) Gte(val interface{}) []bool {
+func (p *timePayload) Gte(val any) []bool {
 	return gteFn(val, p.data, p.na, p.convertComparator, p.eqFn, p.gtFn)
 }
 
-func (p *timePayload) Lte(val interface{}) []bool {
+func (p *timePayload) Lte(val any) []bool {
 	return lteFn(val, p.data, p.na, p.convertComparator, p.eqFn, p.gtFn)
 }
 
-func (p *timePayload) Groups() ([][]int, []interface{}) {
+func (p *timePayload) Groups() ([][]int, []any) {
 	groups, values := groupsForData(p.data, p.na)
 
 	return groups, values

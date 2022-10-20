@@ -6,12 +6,6 @@ import (
 	"strconv"
 )
 
-type FloatWhicherFunc = func(int, float64, bool) bool
-type FloatWhicherCompactFunc = func(float64, bool) bool
-type FloatApplierFunc = func(int, float64, bool) (float64, bool)
-type FloatApplierCompactFunc = func(float64, bool) (float64, bool)
-type FloatSummarizerFunc = func(int, float64, float64, bool) (float64, bool)
-
 type FloatPrinter struct {
 	Precision int
 }
@@ -32,11 +26,11 @@ func (p *floatPayload) Len() int {
 	return p.length
 }
 
-func (p *floatPayload) Pick(idx int) interface{} {
+func (p *floatPayload) Pick(idx int) any {
 	return pickValueWithNA(idx, p.data, p.na, p.length)
 }
 
-func (p *floatPayload) Data() []interface{} {
+func (p *floatPayload) Data() []any {
 	return dataWithNAToInterfaceArray(p.data, p.na)
 }
 
@@ -82,7 +76,7 @@ func (p *floatPayload) SupportsSummarizer(summarizer any) bool {
 	return supportsSummarizer[float64](summarizer)
 }
 
-func (p *floatPayload) Summarize(summarizer interface{}) Payload {
+func (p *floatPayload) Summarize(summarizer any) Payload {
 	val, na := summarize(p.data, p.na, summarizer, 0.0, math.NaN())
 
 	return FloatPayload([]float64{val}, []bool{na}, p.Options()...)
@@ -184,12 +178,12 @@ func (p *floatPayload) Strings() ([]string, []bool) {
 	return data, na
 }
 
-func (p *floatPayload) Interfaces() ([]interface{}, []bool) {
+func (p *floatPayload) Anies() ([]any, []bool) {
 	if p.length == 0 {
-		return []interface{}{}, []bool{}
+		return []any{}, []bool{}
 	}
 
-	data := make([]interface{}, p.length)
+	data := make([]any, p.length)
 	for i := 0; i < p.length; i++ {
 		if p.na[i] {
 			data[i] = nil
@@ -279,35 +273,35 @@ func (p *floatPayload) Find(needle any) int {
 	return find(needle, p.data, p.na, p.convertComparator)
 }
 
-func (p *floatPayload) FindAll(needle interface{}) []int {
+func (p *floatPayload) FindAll(needle any) []int {
 	return findAll(needle, p.data, p.na, p.convertComparator)
 }
 
-func (p *floatPayload) Eq(val interface{}) []bool {
+func (p *floatPayload) Eq(val any) []bool {
 	return eq(val, p.data, p.na, p.convertComparator)
 }
 
-func (p *floatPayload) Neq(val interface{}) []bool {
+func (p *floatPayload) Neq(val any) []bool {
 	return neq(val, p.data, p.na, p.convertComparator)
 }
 
-func (p *floatPayload) Gt(val interface{}) []bool {
+func (p *floatPayload) Gt(val any) []bool {
 	return gt(val, p.data, p.na, p.convertComparator)
 }
 
-func (p *floatPayload) Lt(val interface{}) []bool {
+func (p *floatPayload) Lt(val any) []bool {
 	return lt(val, p.data, p.na, p.convertComparator)
 }
 
-func (p *floatPayload) Gte(val interface{}) []bool {
+func (p *floatPayload) Gte(val any) []bool {
 	return gte(val, p.data, p.na, p.convertComparator)
 }
 
-func (p *floatPayload) Lte(val interface{}) []bool {
+func (p *floatPayload) Lte(val any) []bool {
 	return lte(val, p.data, p.na, p.convertComparator)
 }
 
-func (p *floatPayload) convertComparator(val interface{}) (float64, bool) {
+func (p *floatPayload) convertComparator(val any) (float64, bool) {
 	var v float64
 	ok := true
 	switch val.(type) {
@@ -346,7 +340,7 @@ func (p *floatPayload) convertComparator(val interface{}) (float64, bool) {
 	return v, ok
 }
 
-func (p *floatPayload) Groups() ([][]int, []interface{}) {
+func (p *floatPayload) Groups() ([][]int, []any) {
 	groups, values := groupsForData(p.data, p.na)
 
 	return groups, values

@@ -6,53 +6,48 @@ import (
 	"time"
 )
 
-type InterfaceWhicherFunc = func(int, interface{}, bool) bool
-type InterfaceWhicherCompactFunc = func(interface{}, bool) bool
-type InterfaceApplierFunc = func(int, interface{}, bool) (interface{}, bool)
-type InterfaceApplierCompactFunc = func(interface{}, bool) (interface{}, bool)
-type InterfaceSummarizerFunc = func(int, interface{}, interface{}, bool) (interface{}, bool)
-type InterfacePrinterFunc = func(interface{}) string
+type AnyPrinterFunc = func(any) string
 
-type InterfaceConvertors struct {
-	Intabler     func(idx int, val interface{}, na bool) (int, bool)
-	Floatabler   func(idx int, val interface{}, na bool) (float64, bool)
-	Complexabler func(idx int, val interface{}, na bool) (complex128, bool)
-	Boolabler    func(idx int, val interface{}, na bool) (bool, bool)
-	Stringabler  func(idx int, val interface{}, na bool) (string, bool)
-	Timeabler    func(idx int, val interface{}, na bool) (time.Time, bool)
+type AnyConvertors struct {
+	Intabler     func(idx int, val any, na bool) (int, bool)
+	Floatabler   func(idx int, val any, na bool) (float64, bool)
+	Complexabler func(idx int, val any, na bool) (complex128, bool)
+	Boolabler    func(idx int, val any, na bool) (bool, bool)
+	Stringabler  func(idx int, val any, na bool) (string, bool)
+	Timeabler    func(idx int, val any, na bool) (time.Time, bool)
 }
 
-type interfacePayload struct {
+type anyPayload struct {
 	length     int
-	data       []interface{}
-	printer    InterfacePrinterFunc
-	convertors *InterfaceConvertors
+	data       []any
+	printer    AnyPrinterFunc
+	convertors *AnyConvertors
 	DefNAble
 }
 
-func (p *interfacePayload) Type() string {
-	return "interface"
+func (p *anyPayload) Type() string {
+	return "any"
 }
 
-func (p *interfacePayload) Len() int {
+func (p *anyPayload) Len() int {
 	return p.length
 }
 
-func (p *interfacePayload) Pick(idx int) interface{} {
+func (p *anyPayload) Pick(idx int) any {
 	return pickValueWithNA(idx, p.data, p.na, p.length)
 }
 
-func (p *interfacePayload) Data() []interface{} {
+func (p *anyPayload) Data() []any {
 	return dataWithNAToInterfaceArray(p.data, p.na)
 }
 
-func (p *interfacePayload) ByIndices(indices []int) Payload {
+func (p *anyPayload) ByIndices(indices []int) Payload {
 	data, na := byIndices(indices, p.data, p.na, nil)
 
 	return InterfacePayload(data, na, p.Options()...)
 }
 
-func (p *interfacePayload) StrForElem(idx int) string {
+func (p *anyPayload) StrForElem(idx int) string {
 	if p.na[idx-1] {
 		return "NA"
 	}
@@ -64,19 +59,19 @@ func (p *interfacePayload) StrForElem(idx int) string {
 	return ""
 }
 
-func (p *interfacePayload) SupportsWhicher(whicher any) bool {
+func (p *anyPayload) SupportsWhicher(whicher any) bool {
 	return supportsWhicher[any](whicher)
 }
 
-func (p *interfacePayload) Which(whicher any) []bool {
+func (p *anyPayload) Which(whicher any) []bool {
 	return which(p.data, p.na, whicher)
 }
 
-func (p *interfacePayload) SupportsApplier(applier any) bool {
+func (p *anyPayload) SupportsApplier(applier any) bool {
 	return supportsApplier[any](applier)
 }
 
-func (p *interfacePayload) Apply(applier any) Payload {
+func (p *anyPayload) Apply(applier any) Payload {
 	data, na := apply(p.data, p.na, applier, 0)
 
 	if data == nil {
@@ -86,7 +81,7 @@ func (p *interfacePayload) Apply(applier any) Payload {
 	return InterfacePayload(data, na, p.Options()...)
 }
 
-func (p *interfacePayload) ApplyTo(indices []int, applier any) Payload {
+func (p *anyPayload) ApplyTo(indices []int, applier any) Payload {
 	data, na := applyTo(indices, p.data, p.na, applier, nil)
 
 	if data == nil {
@@ -96,17 +91,17 @@ func (p *interfacePayload) ApplyTo(indices []int, applier any) Payload {
 	return InterfacePayload(data, na, p.Options()...)
 }
 
-func (p *interfacePayload) SupportsSummarizer(summarizer any) bool {
+func (p *anyPayload) SupportsSummarizer(summarizer any) bool {
 	return supportsSummarizer[any](summarizer)
 }
 
-func (p *interfacePayload) Summarize(summarizer interface{}) Payload {
+func (p *anyPayload) Summarize(summarizer any) Payload {
 	val, na := summarize(p.data, p.na, summarizer, nil, nil)
 
-	return InterfacePayload([]interface{}{val}, []bool{na}, p.Options()...)
+	return InterfacePayload([]any{val}, []bool{na}, p.Options()...)
 }
 
-func (p *interfacePayload) Integers() ([]int, []bool) {
+func (p *anyPayload) Integers() ([]int, []bool) {
 	if p.length == 0 {
 		return []int{}, []bool{}
 	}
@@ -126,7 +121,7 @@ func (p *interfacePayload) Integers() ([]int, []bool) {
 	return data, na
 }
 
-func (p *interfacePayload) Floats() ([]float64, []bool) {
+func (p *anyPayload) Floats() ([]float64, []bool) {
 	if p.length == 0 {
 		return []float64{}, []bool{}
 	}
@@ -146,7 +141,7 @@ func (p *interfacePayload) Floats() ([]float64, []bool) {
 	return data, na
 }
 
-func (p *interfacePayload) Complexes() ([]complex128, []bool) {
+func (p *anyPayload) Complexes() ([]complex128, []bool) {
 	if p.length == 0 {
 		return []complex128{}, []bool{}
 	}
@@ -166,7 +161,7 @@ func (p *interfacePayload) Complexes() ([]complex128, []bool) {
 	return data, na
 }
 
-func (p *interfacePayload) Booleans() ([]bool, []bool) {
+func (p *anyPayload) Booleans() ([]bool, []bool) {
 	if p.length == 0 {
 		return []bool{}, []bool{}
 	}
@@ -186,7 +181,7 @@ func (p *interfacePayload) Booleans() ([]bool, []bool) {
 	return data, na
 }
 
-func (p *interfacePayload) Strings() ([]string, []bool) {
+func (p *anyPayload) Strings() ([]string, []bool) {
 	if p.length == 0 {
 		return []string{}, []bool{}
 	}
@@ -206,7 +201,7 @@ func (p *interfacePayload) Strings() ([]string, []bool) {
 	return data, na
 }
 
-func (p *interfacePayload) Times() ([]time.Time, []bool) {
+func (p *anyPayload) Times() ([]time.Time, []bool) {
 	if p.length == 0 {
 		return []time.Time{}, []bool{}
 	}
@@ -226,12 +221,12 @@ func (p *interfacePayload) Times() ([]time.Time, []bool) {
 	return data, na
 }
 
-func (p *interfacePayload) Interfaces() ([]interface{}, []bool) {
+func (p *anyPayload) Anies() ([]any, []bool) {
 	if p.length == 0 {
-		return []interface{}{}, []bool{}
+		return []any{}, []bool{}
 	}
 
-	data := make([]interface{}, p.length)
+	data := make([]any, p.length)
 	copy(data, p.data)
 
 	na := make([]bool, p.length)
@@ -240,19 +235,19 @@ func (p *interfacePayload) Interfaces() ([]interface{}, []bool) {
 	return data, na
 }
 
-func (p *interfacePayload) Append(payload Payload) Payload {
+func (p *anyPayload) Append(payload Payload) Payload {
 	length := p.length + payload.Len()
 
-	var vals []interface{}
+	var vals []any
 	var na []bool
 
-	if interfaceable, ok := payload.(Interfaceable); ok {
-		vals, na = interfaceable.Interfaces()
+	if interfaceable, ok := payload.(Anyable); ok {
+		vals, na = interfaceable.Anies()
 	} else {
-		vals, na = NAPayload(payload.Len()).(Interfaceable).Interfaces()
+		vals, na = NAPayload(payload.Len()).(Anyable).Anies()
 	}
 
-	newVals := make([]interface{}, length)
+	newVals := make([]any, length)
 	newNA := make([]bool, length)
 
 	copy(newVals, p.data)
@@ -263,7 +258,7 @@ func (p *interfacePayload) Append(payload Payload) Payload {
 	return InterfacePayload(newVals, newNA, p.Options()...)
 }
 
-func (p *interfacePayload) Adjust(size int) Payload {
+func (p *anyPayload) Adjust(size int) Payload {
 	if size < p.length {
 		return p.adjustToLesserSize(size)
 	}
@@ -275,23 +270,23 @@ func (p *interfacePayload) Adjust(size int) Payload {
 	return p
 }
 
-func (p *interfacePayload) adjustToLesserSize(size int) Payload {
+func (p *anyPayload) adjustToLesserSize(size int) Payload {
 	data, na := adjustToLesserSizeWithNA(p.data, p.na, size)
 
 	return InterfacePayload(data, na, p.Options()...)
 }
 
-func (p *interfacePayload) adjustToBiggerSize(size int) Payload {
+func (p *anyPayload) adjustToBiggerSize(size int) Payload {
 	data, na := adjustToBiggerSizeWithNA(p.data, p.na, p.length, size)
 
 	return InterfacePayload(data, na, p.Options()...)
 }
 
-func (p *interfacePayload) Options() []Option {
+func (p *anyPayload) Options() []Option {
 	return []Option{}
 }
 
-func InterfacePayload(data []interface{}, na []bool, options ...Option) Payload {
+func InterfacePayload(data []any, na []bool, options ...Option) Payload {
 	length := len(data)
 	conf := MergeOptions(options)
 
@@ -305,7 +300,7 @@ func InterfacePayload(data []interface{}, na []bool, options ...Option) Payload 
 		}
 	}
 
-	vecData := make([]interface{}, length)
+	vecData := make([]any, length)
 	for i := 0; i < length; i++ {
 		if vecNA[i] {
 			vecData[i] = nil
@@ -314,7 +309,7 @@ func InterfacePayload(data []interface{}, na []bool, options ...Option) Payload 
 		}
 	}
 
-	payload := &interfacePayload{
+	payload := &anyPayload{
 		length:     length,
 		data:       vecData,
 		printer:    nil,
@@ -325,21 +320,21 @@ func InterfacePayload(data []interface{}, na []bool, options ...Option) Payload 
 	}
 
 	if conf.HasOption(KeyOptionInterfacePrinterFunc) {
-		payload.printer = conf.Value(KeyOptionInterfacePrinterFunc).(InterfacePrinterFunc)
+		payload.printer = conf.Value(KeyOptionInterfacePrinterFunc).(AnyPrinterFunc)
 	}
 
 	if conf.HasOption(KeyOptionInterfaceConvertors) {
-		payload.convertors = conf.Value(KeyOptionInterfaceConvertors).(*InterfaceConvertors)
+		payload.convertors = conf.Value(KeyOptionInterfaceConvertors).(*AnyConvertors)
 	}
 
 	return payload
 
 }
 
-func InterfaceWithNA(data []interface{}, na []bool, options ...Option) Vector {
+func AnyWithNA(data []any, na []bool, options ...Option) Vector {
 	return New(InterfacePayload(data, na, options...), options...)
 }
 
-func Interface(data []interface{}, options ...Option) Vector {
-	return InterfaceWithNA(data, nil, options...)
+func Any(data []any, options ...Option) Vector {
+	return AnyWithNA(data, nil, options...)
 }

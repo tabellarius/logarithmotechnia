@@ -221,7 +221,7 @@ func TestTimePayload_Interfaces(t *testing.T) {
 	testData := []struct {
 		in    []string
 		inNA  []bool
-		out   []interface{}
+		out   []any
 		outNA []bool
 	}{
 		{
@@ -244,9 +244,9 @@ func TestTimePayload_Interfaces(t *testing.T) {
 			vec := TimeWithNA(timeData, data.inNA)
 			payload := vec.(*vector).payload.(*timePayload)
 
-			interfaces, na := payload.Interfaces()
+			interfaces, na := payload.Anies()
 			if !reflect.DeepEqual(interfaces, data.out) {
-				t.Error(fmt.Sprintf("Interfaces (%v) are not equal to timeData (%v)\n", interfaces, data.out))
+				t.Error(fmt.Sprintf("Anies (%v) are not equal to timeData (%v)\n", interfaces, data.out))
 			}
 			if !reflect.DeepEqual(na, data.outNA) {
 				t.Error(fmt.Sprintf("IsNA (%v) are not equal to data.outNA (%v)\n", na, data.outNA))
@@ -307,7 +307,7 @@ func TestTimePayload_ByIndices(t *testing.T) {
 func TestTimePayload_SupportsWhicher(t *testing.T) {
 	testData := []struct {
 		name        string
-		filter      interface{}
+		filter      any
 		isSupported bool
 	}{
 		{
@@ -345,7 +345,7 @@ func TestTimePayload_SupportsWhicher(t *testing.T) {
 func TestTimePayload_Whicher(t *testing.T) {
 	testData := []struct {
 		name   string
-		filter interface{}
+		filter any
 		out    []bool
 	}{
 		{
@@ -382,7 +382,7 @@ func TestTimePayload_Whicher(t *testing.T) {
 func TestTimePayload_SupportsApplier(t *testing.T) {
 	testData := []struct {
 		name        string
-		applier     interface{}
+		applier     any
 		isSupported bool
 	}{
 		{
@@ -415,7 +415,7 @@ func TestTimePayload_SupportsApplier(t *testing.T) {
 func TestTimePayload_Apply(t *testing.T) {
 	testData := []struct {
 		name        string
-		applier     interface{}
+		applier     any
 		dataIn      []time.Time
 		naIn        []bool
 		dataOut     []time.Time
@@ -518,8 +518,8 @@ func toTimeData(times []string) []time.Time {
 	return timeData
 }
 
-func toTimeInterfaceData(times []string) []interface{} {
-	timeData := make([]interface{}, len(times))
+func toTimeInterfaceData(times []string) []any {
+	timeData := make([]any, len(times))
 
 	for i := 0; i < len(times); i++ {
 		if times[i] == "" {
@@ -539,7 +539,7 @@ func toTimeInterfaceData(times []string) []interface{} {
 func TestTimePayload_SupportsSummarizer(t *testing.T) {
 	testData := []struct {
 		name        string
-		summarizer  interface{}
+		summarizer  any
 		isSupported bool
 	}{
 		{
@@ -575,7 +575,7 @@ func TestTimePayload_Summarize(t *testing.T) {
 
 	testData := []struct {
 		name       string
-		summarizer interface{}
+		summarizer any
 		dataIn     []time.Time
 		naIn       []bool
 		dataOut    []time.Time
@@ -737,7 +737,7 @@ func TestTimePayload_Find(t *testing.T) {
 
 	testData := []struct {
 		name   string
-		needle interface{}
+		needle any
 		pos    int
 	}{
 		{"existent", existent, 2},
@@ -767,7 +767,7 @@ func TestTimePayload_FindAll(t *testing.T) {
 
 	testData := []struct {
 		name   string
-		needle interface{}
+		needle any
 		pos    []int
 	}{
 		{"existent", existent, []int{1, 3}},
@@ -793,7 +793,7 @@ func TestTimePayload_Eq(t *testing.T) {
 	date, _ := time.Parse(time.RFC3339, "2020-01-01T12:30:00+03:00")
 
 	testData := []struct {
-		eq  interface{}
+		eq  any
 		cmp []bool
 	}{
 		{date, []bool{false, false, false, true}},
@@ -819,7 +819,7 @@ func TestTimePayload_Neq(t *testing.T) {
 	date, _ := time.Parse(time.RFC3339, "2020-01-01T12:30:00+03:00")
 
 	testData := []struct {
-		eq  interface{}
+		eq  any
 		cmp []bool
 	}{
 		{date, []bool{true, true, true, false}},
@@ -845,7 +845,7 @@ func TestTimePayload_Gt(t *testing.T) {
 	date, _ := time.Parse(time.RFC3339, "2020-01-01T12:30:00+03:00")
 
 	testData := []struct {
-		eq  interface{}
+		eq  any
 		cmp []bool
 	}{
 		{date, []bool{false, true, false, false}},
@@ -871,7 +871,7 @@ func TestTimePayload_Lt(t *testing.T) {
 	date, _ := time.Parse(time.RFC3339, "2020-01-01T12:30:00+03:00")
 
 	testData := []struct {
-		eq  interface{}
+		eq  any
 		cmp []bool
 	}{
 		{date, []bool{true, false, false, false}},
@@ -897,7 +897,7 @@ func TestTimePayload_Gte(t *testing.T) {
 	date, _ := time.Parse(time.RFC3339, "2020-01-01T12:30:00+03:00")
 
 	testData := []struct {
-		eq  interface{}
+		eq  any
 		cmp []bool
 	}{
 		{date, []bool{false, true, false, true}},
@@ -923,7 +923,7 @@ func TestTimePayload_Lte(t *testing.T) {
 	date, _ := time.Parse(time.RFC3339, "2020-01-01T12:30:00+03:00")
 
 	testData := []struct {
-		eq  interface{}
+		eq  any
 		cmp []bool
 	}{
 		{date, []bool{true, false, false, true}},
@@ -948,14 +948,14 @@ func TestTimePayload_Groups(t *testing.T) {
 		name    string
 		payload Payload
 		groups  [][]int
-		values  []interface{}
+		values  []any
 	}{
 		{
 			name: "normal",
 			payload: TimePayload(toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00",
 				"2020-01-01T12:30:00+03:00", "2020-01-01T12:30:00+03:00"}), nil),
 			groups: [][]int{{1}, {2}, {3, 4}},
-			values: []interface{}{
+			values: []any{
 				toTimeData([]string{"2006-01-02T15:04:05+07:00"})[0],
 				toTimeData([]string{"2021-01-01T12:30:00+03:00"})[0],
 				toTimeData([]string{"2020-01-01T12:30:00+03:00"})[0],
@@ -966,7 +966,7 @@ func TestTimePayload_Groups(t *testing.T) {
 			payload: TimePayload(toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00",
 				"2020-01-01T12:30:00+03:00", "2020-01-01T12:30:00+03:00"}), []bool{false, true, false, false}),
 			groups: [][]int{{1}, {3, 4}, {2}},
-			values: []interface{}{
+			values: []any{
 				toTimeData([]string{"2006-01-02T15:04:05+07:00"})[0],
 				toTimeData([]string{"2020-01-01T12:30:00+03:00"})[0],
 				nil,
@@ -1076,17 +1076,17 @@ func TestTimePayload_Pick(t *testing.T) {
 	testData := []struct {
 		name string
 		idx  int
-		val  interface{}
+		val  any
 	}{
 		{
 			name: "normal 1",
 			idx:  1,
-			val:  interface{}(times[0]),
+			val:  any(times[0]),
 		},
 		{
 			name: "normal 3",
 			idx:  3,
-			val:  interface{}(times[2]),
+			val:  any(times[2]),
 		},
 		{
 			name: "na",
@@ -1123,17 +1123,17 @@ func TestTimePayload_Data(t *testing.T) {
 	testData := []struct {
 		name    string
 		payload Payload
-		outData []interface{}
+		outData []any
 	}{
 		{
 			name:    "empty",
 			payload: TimePayload([]time.Time{}, []bool{}),
-			outData: []interface{}{},
+			outData: []any{},
 		},
 		{
 			name:    "non-empty",
 			payload: TimePayload(times, []bool{false, true, false}),
-			outData: []interface{}{times[0], nil, times[2]},
+			outData: []any{times[0], nil, times[2]},
 		},
 	}
 
@@ -1156,7 +1156,7 @@ func TestTimePayload_ApplyTo(t *testing.T) {
 	testData := []struct {
 		name        string
 		indices     []int
-		applier     interface{}
+		applier     any
 		dataOut     []time.Time
 		naOut       []bool
 		isNAPayload bool

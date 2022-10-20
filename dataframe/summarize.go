@@ -2,7 +2,7 @@ package dataframe
 
 import "logarithmotechnia/vector"
 
-func (df *Dataframe) Summarize(columns ...interface{}) *Dataframe {
+func (df *Dataframe) Summarize(columns ...any) *Dataframe {
 	if !df.IsGrouped() {
 		return df
 	}

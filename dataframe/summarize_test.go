@@ -21,14 +21,14 @@ func TestDataframe_Summarize(t *testing.T) {
 	testData := []struct {
 		name        string
 		groupedDf   *Dataframe
-		summarizers []interface{}
+		summarizers []any
 		vecs        []vector.Vector
 		columnNames []string
 	}{
 		{
 			name:      "vectors",
 			groupedDf: groupedByD,
-			summarizers: []interface{}{
+			summarizers: []any{
 				groupedByD.Cn("A").Sum(),
 				groupedByD.Cn("B").Sum(),
 			},
@@ -42,7 +42,7 @@ func TestDataframe_Summarize(t *testing.T) {
 		{
 			name:      "columns",
 			groupedDf: groupedByD,
-			summarizers: []interface{}{
+			summarizers: []any{
 				Column{"Column A", groupedByD.Cn("A").Sum()},
 				Column{"Column B", groupedByD.Cn("B").Sum()},
 			},
@@ -56,7 +56,7 @@ func TestDataframe_Summarize(t *testing.T) {
 		{
 			name:      "vector array",
 			groupedDf: groupedByD,
-			summarizers: []interface{}{
+			summarizers: []any{
 				[]vector.Vector{
 					groupedByD.Cn("A").Sum(),
 					groupedByD.Cn("B").Sum(),
@@ -72,7 +72,7 @@ func TestDataframe_Summarize(t *testing.T) {
 		{
 			name:      "column array",
 			groupedDf: groupedByD,
-			summarizers: []interface{}{
+			summarizers: []any{
 				[]Column{
 					{"Column A", groupedByD.Cn("A").Sum()},
 					{"Column B", groupedByD.Cn("B").Sum()},

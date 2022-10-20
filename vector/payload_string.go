@@ -6,12 +6,6 @@ import (
 	"strconv"
 )
 
-type StringWhicherFunc = func(int, string, bool) bool
-type StringWhicherCompactFunc = func(string, bool) bool
-type StringApplierFunc = func(int, string, bool) (string, bool)
-type StringApplierCompactFunc = func(string, bool) (string, bool)
-type StringSummarizerFunc = func(int, string, string, bool) (string, bool)
-
 type stringPayload struct {
 	length int
 	data   []string
@@ -27,11 +21,11 @@ func (p *stringPayload) Len() int {
 	return p.length
 }
 
-func (p *stringPayload) Pick(idx int) interface{} {
+func (p *stringPayload) Pick(idx int) any {
 	return pickValueWithNA(idx, p.data, p.na, p.length)
 }
 
-func (p *stringPayload) Data() []interface{} {
+func (p *stringPayload) Data() []any {
 	return dataWithNAToInterfaceArray(p.data, p.na)
 }
 
@@ -77,7 +71,7 @@ func (p *stringPayload) SupportsSummarizer(summarizer any) bool {
 	return supportsSummarizer[string](summarizer)
 }
 
-func (p *stringPayload) Summarize(summarizer interface{}) Payload {
+func (p *stringPayload) Summarize(summarizer any) Payload {
 	val, na := summarize(p.data, p.na, summarizer, "", "")
 
 	return StringPayload([]string{val}, []bool{na}, p.Options()...)
@@ -196,12 +190,12 @@ func (p *stringPayload) Strings() ([]string, []bool) {
 	return data, na
 }
 
-func (p *stringPayload) Interfaces() ([]interface{}, []bool) {
+func (p *stringPayload) Anies() ([]any, []bool) {
 	if p.length == 0 {
-		return []interface{}{}, []bool{}
+		return []any{}, []bool{}
 	}
 
-	data := make([]interface{}, p.length)
+	data := make([]any, p.length)
 	for i := 0; i < p.length; i++ {
 		if p.na[i] {
 			data[i] = nil
@@ -239,7 +233,7 @@ func (p *stringPayload) Append(payload Payload) Payload {
 	return StringPayload(newVals, newNA, p.Options()...)
 }
 
-func (p *stringPayload) Groups() ([][]int, []interface{}) {
+func (p *stringPayload) Groups() ([][]int, []any) {
 	groupMap := map[string][]int{}
 	ordered := []string{}
 	na := []int{}
@@ -269,9 +263,9 @@ func (p *stringPayload) Groups() ([][]int, []interface{}) {
 		groups = append(groups, na)
 	}
 
-	values := make([]interface{}, len(groups))
+	values := make([]any, len(groups))
 	for i, val := range ordered {
-		values[i] = interface{}(val)
+		values[i] = any(val)
 	}
 	if len(na) > 0 {
 		values[len(values)-1] = nil
@@ -332,39 +326,39 @@ func (p *stringPayload) adjustToBiggerSize(size int) Payload {
 
 /* Finder interface */
 
-func (p *stringPayload) Find(needle interface{}) int {
+func (p *stringPayload) Find(needle any) int {
 	return find(needle, p.data, p.na, p.convertComparator)
 }
 
-func (p *stringPayload) FindAll(needle interface{}) []int {
+func (p *stringPayload) FindAll(needle any) []int {
 	return findAll(needle, p.data, p.na, p.convertComparator)
 }
 
-func (p *stringPayload) Eq(val interface{}) []bool {
+func (p *stringPayload) Eq(val any) []bool {
 	return eq(val, p.data, p.na, p.convertComparator)
 }
 
-func (p *stringPayload) Neq(val interface{}) []bool {
+func (p *stringPayload) Neq(val any) []bool {
 	return neq(val, p.data, p.na, p.convertComparator)
 }
 
-func (p *stringPayload) Gt(val interface{}) []bool {
+func (p *stringPayload) Gt(val any) []bool {
 	return gt(val, p.data, p.na, p.convertComparator)
 }
 
-func (p *stringPayload) Lt(val interface{}) []bool {
+func (p *stringPayload) Lt(val any) []bool {
 	return lt(val, p.data, p.na, p.convertComparator)
 }
 
-func (p *stringPayload) Gte(val interface{}) []bool {
+func (p *stringPayload) Gte(val any) []bool {
 	return gte(val, p.data, p.na, p.convertComparator)
 }
 
-func (p *stringPayload) Lte(val interface{}) []bool {
+func (p *stringPayload) Lte(val any) []bool {
 	return lte(val, p.data, p.na, p.convertComparator)
 }
 
-func (p *stringPayload) convertComparator(val interface{}) (string, bool) {
+func (p *stringPayload) convertComparator(val any) (string, bool) {
 	var v string
 	ok := true
 	switch val.(type) {
