@@ -363,128 +363,28 @@ func (p *stringPayload) FindAll(needle interface{}) []int {
 	return found
 }
 
-/* Comparable interface */
-
 func (p *stringPayload) Eq(val interface{}) []bool {
-	cmp := make([]bool, p.length)
-
-	v, ok := p.convertComparator(val)
-	if !ok {
-		return cmp
-	}
-
-	for i, datum := range p.data {
-		if p.na[i] {
-			cmp[i] = false
-		} else {
-			cmp[i] = datum == v
-		}
-	}
-
-	return cmp
+	return eq(val, p.data, p.na, p.convertComparator)
 }
 
 func (p *stringPayload) Neq(val interface{}) []bool {
-	cmp := make([]bool, p.length)
-
-	v, ok := p.convertComparator(val)
-	if !ok {
-		for i := range p.data {
-			cmp[i] = true
-		}
-
-		return cmp
-	}
-
-	for i, datum := range p.data {
-		if p.na[i] {
-			cmp[i] = true
-		} else {
-			cmp[i] = datum != v
-		}
-	}
-
-	return cmp
+	return neq(val, p.data, p.na, p.convertComparator)
 }
 
 func (p *stringPayload) Gt(val interface{}) []bool {
-	cmp := make([]bool, p.length)
-
-	v, ok := p.convertComparator(val)
-	if !ok {
-		return cmp
-	}
-
-	for i, datum := range p.data {
-		if p.na[i] {
-			cmp[i] = false
-		} else {
-			cmp[i] = datum > v
-		}
-	}
-
-	return cmp
+	return gt(val, p.data, p.na, p.convertComparator)
 }
 
 func (p *stringPayload) Lt(val interface{}) []bool {
-	cmp := make([]bool, p.length)
-
-	v, ok := p.convertComparator(val)
-	if !ok {
-		return cmp
-	}
-
-	for i, datum := range p.data {
-		if p.na[i] {
-			cmp[i] = false
-		} else {
-			cmp[i] = datum < v
-		}
-	}
-
-	return cmp
+	return lt(val, p.data, p.na, p.convertComparator)
 }
 
 func (p *stringPayload) Gte(val interface{}) []bool {
-	cmp := make([]bool, p.length)
-
-	v, ok := p.convertComparator(val)
-	if !ok {
-		return cmp
-	}
-
-	for i, datum := range p.data {
-		if p.na[i] {
-			cmp[i] = false
-		} else {
-			cmp[i] = datum >= v
-		}
-	}
-
-	return cmp
+	return gte(val, p.data, p.na, p.convertComparator)
 }
 
 func (p *stringPayload) Lte(val interface{}) []bool {
-	cmp := make([]bool, p.length)
-
-	v, ok := p.convertComparator(val)
-	if !ok {
-		return cmp
-	}
-
-	for i, datum := range p.data {
-		if p.na[i] {
-			cmp[i] = false
-		} else {
-			if p.na[i] {
-				cmp[i] = false
-			} else {
-				cmp[i] = datum <= v
-			}
-		}
-	}
-
-	return cmp
+	return lte(val, p.data, p.na, p.convertComparator)
 }
 
 func (p *stringPayload) convertComparator(val interface{}) (string, bool) {

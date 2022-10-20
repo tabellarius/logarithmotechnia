@@ -303,48 +303,18 @@ func (p *booleanPayload) FindAll(needle interface{}) []int {
 	return found
 }
 
-/* Equalable interface */
-
 func (p *booleanPayload) Eq(val interface{}) []bool {
-	cmp := make([]bool, p.length)
-
-	v, ok := val.(bool)
-	if !ok {
-		return cmp
-	}
-
-	for i, datum := range p.data {
-		if p.na[i] {
-			cmp[i] = false
-		} else {
-			cmp[i] = datum == v
-		}
-	}
-
-	return cmp
+	return eq(val, p.data, p.na, p.convertComparator)
 }
 
 func (p *booleanPayload) Neq(val interface{}) []bool {
-	cmp := make([]bool, p.length)
+	return neq(val, p.data, p.na, p.convertComparator)
+}
+
+func (p *booleanPayload) convertComparator(val interface{}) (bool, bool) {
 	v, ok := val.(bool)
 
-	if !ok {
-		for i := range p.data {
-			cmp[i] = true
-		}
-
-		return cmp
-	}
-
-	for i, datum := range p.data {
-		if p.na[i] {
-			cmp[i] = true
-		} else {
-			cmp[i] = datum != v
-		}
-	}
-
-	return cmp
+	return v, ok
 }
 
 func (p *booleanPayload) IsUnique() []bool {

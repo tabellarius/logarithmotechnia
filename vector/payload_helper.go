@@ -1,5 +1,7 @@
 package vector
 
+import "golang.org/x/exp/constraints"
+
 func pickValueWithNA[T any](idx int, data []T, na []bool, maxLen int) interface{} {
 	if idx < 1 || idx > maxLen {
 		return nil
@@ -425,4 +427,244 @@ func summarizeByFunc[T any](inData []T, inNA []bool, fn func(int, T, T, bool) (T
 	}
 
 	return val, false
+}
+
+func eq[T comparable](val any, inData []T, inNA []bool, convertor func(any) (T, bool)) []bool {
+	cmp := make([]bool, len(inData))
+
+	v, ok := convertor(val)
+	if !ok {
+		return cmp
+	}
+
+	for i, datum := range inData {
+		if inNA[i] {
+			cmp[i] = false
+		} else {
+			cmp[i] = datum == v
+		}
+	}
+
+	return cmp
+}
+
+func eqFn[T any](val any, inData []T, inNA []bool, convertor func(any) (T, bool), eqFn func(T, T) bool) []bool {
+	cmp := make([]bool, len(inData))
+
+	v, ok := convertor(val)
+	if !ok {
+		return cmp
+	}
+
+	for i, datum := range inData {
+		if inNA[i] {
+			cmp[i] = false
+		} else {
+			cmp[i] = eqFn(datum, v)
+		}
+	}
+
+	return cmp
+}
+
+func neq[T comparable](val any, inData []T, inNA []bool, convertor func(any) (T, bool)) []bool {
+	cmp := make([]bool, len(inData))
+	v, ok := convertor(val)
+
+	if !ok {
+		for i := range inData {
+			cmp[i] = true
+		}
+
+		return cmp
+	}
+
+	for i, datum := range inData {
+		if inNA[i] {
+			cmp[i] = true
+		} else {
+			cmp[i] = datum != v
+		}
+	}
+
+	return cmp
+}
+
+func neqFn[T any](val any, inData []T, inNA []bool, convertor func(any) (T, bool), eqFn func(T, T) bool) []bool {
+	cmp := make([]bool, len(inData))
+	v, ok := convertor(val)
+
+	if !ok {
+		for i := range inData {
+			cmp[i] = true
+		}
+
+		return cmp
+	}
+
+	for i, datum := range inData {
+		if inNA[i] {
+			cmp[i] = true
+		} else {
+			cmp[i] = !eqFn(datum, v)
+		}
+	}
+
+	return cmp
+}
+
+func gt[T constraints.Ordered](val any, inData []T, inNA []bool, convertor func(any) (T, bool)) []bool {
+	cmp := make([]bool, len(inData))
+
+	v, ok := convertor(val)
+	if !ok {
+		return cmp
+	}
+
+	for i, datum := range inData {
+		if inNA[i] {
+			cmp[i] = false
+		} else {
+			cmp[i] = datum > v
+		}
+	}
+
+	return cmp
+}
+
+func gtFn[T any](val any, inData []T, inNA []bool, convertor func(any) (T, bool),
+	gtFn func(T, T) bool) []bool {
+	cmp := make([]bool, len(inData))
+
+	v, ok := convertor(val)
+	if !ok {
+		return cmp
+	}
+
+	for i, datum := range inData {
+		if inNA[i] {
+			cmp[i] = false
+		} else {
+			cmp[i] = gtFn(datum, v)
+		}
+	}
+
+	return cmp
+}
+
+func lt[T constraints.Ordered](val any, inData []T, inNA []bool, convertor func(any) (T, bool)) []bool {
+	cmp := make([]bool, len(inData))
+
+	v, ok := convertor(val)
+	if !ok {
+		return cmp
+	}
+
+	for i, datum := range inData {
+		if inNA[i] {
+			cmp[i] = false
+		} else {
+			cmp[i] = datum < v
+		}
+	}
+
+	return cmp
+}
+
+func ltFn[T any](val any, inData []T, inNA []bool, convertor func(any) (T, bool),
+	gtFn func(T, T) bool) []bool {
+	cmp := make([]bool, len(inData))
+
+	v, ok := convertor(val)
+	if !ok {
+		return cmp
+	}
+
+	for i, datum := range inData {
+		if inNA[i] {
+			cmp[i] = false
+		} else {
+			cmp[i] = gtFn(v, datum)
+		}
+	}
+
+	return cmp
+}
+
+func gte[T constraints.Ordered](val any, inData []T, inNA []bool, convertor func(any) (T, bool)) []bool {
+	cmp := make([]bool, len(inData))
+
+	v, ok := convertor(val)
+	if !ok {
+		return cmp
+	}
+
+	for i, datum := range inData {
+		if inNA[i] {
+			cmp[i] = false
+		} else {
+			cmp[i] = datum >= v
+		}
+	}
+
+	return cmp
+}
+
+func gteFn[T any](val any, inData []T, inNA []bool, convertor func(any) (T, bool),
+	eqFn func(T, T) bool, gtFn func(T, T) bool) []bool {
+	cmp := make([]bool, len(inData))
+
+	v, ok := convertor(val)
+	if !ok {
+		return cmp
+	}
+
+	for i, datum := range inData {
+		if inNA[i] {
+			cmp[i] = false
+		} else {
+			cmp[i] = gtFn(datum, v) || eqFn(datum, v)
+		}
+	}
+
+	return cmp
+}
+
+func lte[T constraints.Ordered](val any, inData []T, inNA []bool, convertor func(any) (T, bool)) []bool {
+	cmp := make([]bool, len(inData))
+
+	v, ok := convertor(val)
+	if !ok {
+		return cmp
+	}
+
+	for i, datum := range inData {
+		if inNA[i] {
+			cmp[i] = false
+		} else {
+			cmp[i] = datum <= v
+		}
+	}
+
+	return cmp
+}
+
+func lteFn[T any](val any, inData []T, inNA []bool, convertor func(any) (T, bool),
+	eqFn func(T, T) bool, gtFn func(T, T) bool) []bool {
+	cmp := make([]bool, len(inData))
+
+	v, ok := convertor(val)
+	if !ok {
+		return cmp
+	}
+
+	for i, datum := range inData {
+		if inNA[i] {
+			cmp[i] = false
+		} else {
+			cmp[i] = gtFn(v, datum) || eqFn(v, datum)
+		}
+	}
+
+	return cmp
 }
