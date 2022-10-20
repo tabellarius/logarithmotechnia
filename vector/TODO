@@ -1,5 +1,3 @@
-Add brief whicher (only val)
-Add compact and brief summarizer
 Divide Comparable to Comparable and Equalable; remove Comparable for bool
 interface{} -> any
 Arithmetic functions

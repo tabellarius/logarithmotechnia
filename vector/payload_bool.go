@@ -303,7 +303,7 @@ func (p *booleanPayload) FindAll(needle interface{}) []int {
 	return found
 }
 
-/* Finder interface */
+/* Equalable interface */
 
 func (p *booleanPayload) Eq(val interface{}) []bool {
 	cmp := make([]bool, p.length)
@@ -324,8 +324,6 @@ func (p *booleanPayload) Eq(val interface{}) []bool {
 	return cmp
 }
 
-/* Comparable interface */
-
 func (p *booleanPayload) Neq(val interface{}) []bool {
 	cmp := make([]bool, p.length)
 	v, ok := val.(bool)
@@ -343,82 +341,6 @@ func (p *booleanPayload) Neq(val interface{}) []bool {
 			cmp[i] = true
 		} else {
 			cmp[i] = datum != v
-		}
-	}
-
-	return cmp
-}
-
-func (p *booleanPayload) Gt(val interface{}) []bool {
-	cmp := make([]bool, p.length)
-
-	v, ok := val.(bool)
-	if !ok {
-		return cmp
-	}
-
-	for i, datum := range p.data {
-		if p.na[i] {
-			cmp[i] = false
-		} else {
-			cmp[i] = v == true && datum == false
-		}
-	}
-
-	return cmp
-}
-
-func (p *booleanPayload) Lt(val interface{}) []bool {
-	cmp := make([]bool, p.length)
-
-	v, ok := val.(bool)
-	if !ok {
-		return cmp
-	}
-
-	for i, datum := range p.data {
-		if p.na[i] {
-			cmp[i] = false
-		} else {
-			cmp[i] = v == false && datum == true
-		}
-	}
-
-	return cmp
-}
-
-func (p *booleanPayload) Gte(val interface{}) []bool {
-	cmp := make([]bool, p.length)
-
-	v, ok := val.(bool)
-	if !ok {
-		return cmp
-	}
-
-	for i, datum := range p.data {
-		if p.na[i] {
-			cmp[i] = false
-		} else {
-			cmp[i] = !(v == false && datum == true)
-		}
-	}
-
-	return cmp
-}
-
-func (p *booleanPayload) Lte(val interface{}) []bool {
-	cmp := make([]bool, p.length)
-
-	v, ok := val.(bool)
-	if !ok {
-		return cmp
-	}
-
-	for i, datum := range p.data {
-		if p.na[i] {
-			cmp[i] = false
-		} else {
-			cmp[i] = !(v == true && datum == false)
 		}
 	}
 
