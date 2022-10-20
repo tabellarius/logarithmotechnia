@@ -4,7 +4,7 @@ import (
 	"logarithmotechnia/vector"
 )
 
-func (df *Dataframe) GroupBy(selectors ...interface{}) *Dataframe {
+func (df *Dataframe) GroupBy(selectors ...any) *Dataframe {
 	columns := []string{}
 	for _, selector := range selectors {
 		switch selector.(type) {

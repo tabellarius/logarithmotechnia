@@ -179,7 +179,7 @@ func TestComplexPayload_ByIndices(t *testing.T) {
 func TestComplexPayload_SupportsWhicher(t *testing.T) {
 	testData := []struct {
 		name        string
-		filter      interface{}
+		filter      any
 		isSupported bool
 	}{
 		{
@@ -217,7 +217,7 @@ func TestComplexPayload_SupportsWhicher(t *testing.T) {
 func TestComplexPayload_Whicher(t *testing.T) {
 	testData := []struct {
 		name string
-		fn   interface{}
+		fn   any
 		out  []bool
 	}{
 		{
@@ -262,7 +262,7 @@ func TestComplexPayload_Whicher(t *testing.T) {
 func TestComplexPayload_SupportsApplier(t *testing.T) {
 	testData := []struct {
 		name        string
-		applier     interface{}
+		applier     any
 		isSupported bool
 	}{
 		{
@@ -295,7 +295,7 @@ func TestComplexPayload_SupportsApplier(t *testing.T) {
 func TestComplexPayload_Apply(t *testing.T) {
 	testData := []struct {
 		name        string
-		applier     interface{}
+		applier     any
 		dataIn      []complex128
 		naIn        []bool
 		dataOut     []complex128
@@ -474,25 +474,25 @@ func TestComplexPayload_Interfaces(t *testing.T) {
 	testData := []struct {
 		in    []complex128
 		inNA  []bool
-		out   []interface{}
+		out   []any
 		outNA []bool
 	}{
 		{
 			in:    []complex128{1 + 0i, 3 + 0i, 0 + 0i, 100 + 0i, 0 + 0i},
 			inNA:  []bool{false, false, false, false, false},
-			out:   []interface{}{1 + 0i, 3 + 0i, 0 + 0i, 100 + 0i, 0 + 0i},
+			out:   []any{1 + 0i, 3 + 0i, 0 + 0i, 100 + 0i, 0 + 0i},
 			outNA: []bool{false, false, false, false, false},
 		},
 		{
 			in:    []complex128{10 + 0i, 0 + 0i, 12 + 0i, 14 + 0i, 1110 + 0i},
 			inNA:  []bool{false, false, false, true, true},
-			out:   []interface{}{10 + 0i, 0 + 0i, 12 + 0i, nil, nil},
+			out:   []any{10 + 0i, 0 + 0i, 12 + 0i, nil, nil},
 			outNA: []bool{false, false, false, true, true},
 		},
 		{
 			in:    []complex128{1 + 0i, 3 + 0i, 0 + 0i, 100 + 0i, 0 + 0i, -11 + 0i, -10 + 0i},
 			inNA:  []bool{false, false, false, false, false, false, true},
-			out:   []interface{}{1 + 0i, 3 + 0i, 0 + 0i, 100 + 0i, 0 + 0i, -11 + 0i, nil},
+			out:   []any{1 + 0i, 3 + 0i, 0 + 0i, 100 + 0i, 0 + 0i, -11 + 0i, nil},
 			outNA: []bool{false, false, false, false, false, false, true},
 		},
 	}
@@ -502,9 +502,9 @@ func TestComplexPayload_Interfaces(t *testing.T) {
 			vec := ComplexWithNA(data.in, data.inNA)
 			payload := vec.(*vector).payload.(*complexPayload)
 
-			interfaces, na := payload.Interfaces()
+			interfaces, na := payload.Anies()
 			if !reflect.DeepEqual(interfaces, data.out) {
-				t.Error(fmt.Sprintf("Interfaces (%v) are not equal to data.out (%v)\n", interfaces, data.out))
+				t.Error(fmt.Sprintf("Anies (%v) are not equal to data.out (%v)\n", interfaces, data.out))
 			}
 			if !reflect.DeepEqual(na, data.outNA) {
 				t.Error(fmt.Sprintf("NA (%v) are not equal to data.outNA (%v)\n", na, data.outNA))
@@ -646,7 +646,7 @@ func TestComplexPayload_Strings(t *testing.T) {
 func TestComplexPayload_SupportsSummarizer(t *testing.T) {
 	testData := []struct {
 		name        string
-		summarizer  interface{}
+		summarizer  any
 		isSupported bool
 	}{
 		{
@@ -682,7 +682,7 @@ func TestComplexPayload_Summarize(t *testing.T) {
 
 	testData := []struct {
 		name       string
-		summarizer interface{}
+		summarizer any
 		dataIn     []complex128
 		naIn       []bool
 		dataOut    []complex128
@@ -862,7 +862,7 @@ func TestComlexPayload_Find(t *testing.T) {
 
 	testData := []struct {
 		name   string
-		needle interface{}
+		needle any
 		pos    int
 	}{
 		{"existent", 3 + 2i, 4},
@@ -889,7 +889,7 @@ func TestComplexPayload_FindAll(t *testing.T) {
 
 	testData := []struct {
 		name   string
-		needle interface{}
+		needle any
 		pos    []int
 	}{
 		{"existent", 1 + 0i, []int{1, 3}},
@@ -916,7 +916,7 @@ func TestComplexPayload_Eq(t *testing.T) {
 		[]bool{false, false, true, false, false}).(*complexPayload)
 
 	testData := []struct {
-		eq  interface{}
+		eq  any
 		cmp []bool
 	}{
 		{1 + 1.5i, []bool{true, false, false, true, false}},
@@ -949,7 +949,7 @@ func TestComplexPayload_Neq(t *testing.T) {
 		[]bool{false, false, true, false, false}).(*complexPayload)
 
 	testData := []struct {
-		val interface{}
+		val any
 		cmp []bool
 	}{
 		{1 + 1.5i, []bool{false, true, true, false, true}},
@@ -982,20 +982,20 @@ func TestComplexPayload_Groups(t *testing.T) {
 		name    string
 		payload Payload
 		groups  [][]int
-		values  []interface{}
+		values  []any
 	}{
 		{
 			name:    "normal",
 			payload: ComplexPayload([]complex128{-20, 10, 4, -20, 7, -20, 10, -20, 4, 10}, nil),
 			groups:  [][]int{{1, 4, 6, 8}, {2, 7, 10}, {3, 9}, {5}},
-			values:  []interface{}{-20 + 0i, 10 + 0i, 4 + 0i, 7 + 0i},
+			values:  []any{-20 + 0i, 10 + 0i, 4 + 0i, 7 + 0i},
 		},
 		{
 			name: "with NA",
 			payload: ComplexPayload([]complex128{-20, 10, 4, -20, 10, -20, 10, -20, 4, 7},
 				[]bool{false, false, false, false, false, false, true, true, false, false}),
 			groups: [][]int{{1, 4, 6}, {2, 5}, {3, 9}, {10}, {7, 8}},
-			values: []interface{}{-20 + 0i, 10 + 0i, 4 + 0i, 7 + 0i, nil},
+			values: []any{-20 + 0i, 10 + 0i, 4 + 0i, 7 + 0i, nil},
 		},
 	}
 
@@ -1108,17 +1108,17 @@ func TestComplexPayload_Pick(t *testing.T) {
 	testData := []struct {
 		name string
 		idx  int
-		val  interface{}
+		val  any
 	}{
 		{
 			name: "normal 2",
 			idx:  2,
-			val:  interface{}(2 + 2i),
+			val:  any(2 + 2i),
 		},
 		{
 			name: "normal 5",
 			idx:  5,
-			val:  interface{}(5 + 5i),
+			val:  any(5 + 5i),
 		},
 		{
 			name: "na",
@@ -1153,17 +1153,17 @@ func TestComplexPayload_Data(t *testing.T) {
 	testData := []struct {
 		name    string
 		payload Payload
-		outData []interface{}
+		outData []any
 	}{
 		{
 			name:    "empty",
 			payload: ComplexPayload([]complex128{}, []bool{}),
-			outData: []interface{}{},
+			outData: []any{},
 		},
 		{
 			name:    "non-empty",
 			payload: ComplexPayload([]complex128{1 + 1i, 2 + 2i, 3 + 3i, 4 + 4i, 5 + 5i}, []bool{false, false, true, true, false}),
-			outData: []interface{}{1 + 1i, 2 + 2i, nil, nil, 5 + 5i},
+			outData: []any{1 + 1i, 2 + 2i, nil, nil, 5 + 5i},
 		},
 	}
 
@@ -1185,7 +1185,7 @@ func TestComplexPayload_ApplyTo(t *testing.T) {
 	testData := []struct {
 		name        string
 		indices     []int
-		applier     interface{}
+		applier     any
 		dataOut     []complex128
 		naOut       []bool
 		isNAPayload bool

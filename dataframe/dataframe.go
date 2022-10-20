@@ -43,7 +43,7 @@ func (df *Dataframe) Cn(name string) vector.Vector {
 	return nil
 }
 
-func (df *Dataframe) C(selector interface{}) vector.Vector {
+func (df *Dataframe) C(selector any) vector.Vector {
 	if index, ok := selector.(int); ok {
 		return df.Ci(index)
 	}
@@ -145,7 +145,7 @@ func generateColumnNames(length int) []string {
 	return names
 }
 
-func New(data interface{}, options ...vector.Option) *Dataframe {
+func New(data any, options ...vector.Option) *Dataframe {
 	var df *Dataframe
 	switch data.(type) {
 	case []vector.Vector:

@@ -24,11 +24,11 @@ func (p *integerPayload) Len() int {
 	return p.length
 }
 
-func (p *integerPayload) Pick(idx int) interface{} {
+func (p *integerPayload) Pick(idx int) any {
 	return pickValueWithNA(idx, p.data, p.na, p.length)
 }
 
-func (p *integerPayload) Data() []interface{} {
+func (p *integerPayload) Data() []any {
 	return dataWithNAToInterfaceArray(p.data, p.na)
 }
 
@@ -74,7 +74,7 @@ func (p *integerPayload) SupportsSummarizer(summarizer any) bool {
 	return supportsSummarizer[int](summarizer)
 }
 
-func (p *integerPayload) Summarize(summarizer interface{}) Payload {
+func (p *integerPayload) Summarize(summarizer any) Payload {
 	val, na := summarize(p.data, p.na, summarizer, 0, 0)
 
 	return IntegerPayload([]int{val}, []bool{na}, p.Options()...)
@@ -177,12 +177,12 @@ func (p *integerPayload) Strings() ([]string, []bool) {
 	return data, na
 }
 
-func (p *integerPayload) Interfaces() ([]interface{}, []bool) {
+func (p *integerPayload) Anies() ([]any, []bool) {
 	if p.length == 0 {
-		return []interface{}{}, []bool{}
+		return []any{}, []bool{}
 	}
 
-	data := make([]interface{}, p.length)
+	data := make([]any, p.length)
 	for i := 0; i < p.length; i++ {
 		if p.na[i] {
 			data[i] = nil
@@ -244,7 +244,7 @@ func (p *integerPayload) adjustToBiggerSize(size int) Payload {
 	return IntegerPayload(data, na, p.Options()...)
 }
 
-func (p *integerPayload) Groups() ([][]int, []interface{}) {
+func (p *integerPayload) Groups() ([][]int, []any) {
 	groups, values := groupsForData(p.data, p.na)
 
 	return groups, values
@@ -258,41 +258,41 @@ func (p *integerPayload) StrForElem(idx int) string {
 	return strconv.Itoa(p.data[idx-1])
 }
 
-func (p *integerPayload) Find(needle interface{}) int {
+func (p *integerPayload) Find(needle any) int {
 	return find(needle, p.data, p.na, p.convertComparator)
 }
 
 /* Finder interface */
 
-func (p *integerPayload) FindAll(needle interface{}) []int {
+func (p *integerPayload) FindAll(needle any) []int {
 	return findAll(needle, p.data, p.na, p.convertComparator)
 }
 
-func (p *integerPayload) Eq(val interface{}) []bool {
+func (p *integerPayload) Eq(val any) []bool {
 	return eq(val, p.data, p.na, p.convertComparator)
 }
 
-func (p *integerPayload) Neq(val interface{}) []bool {
+func (p *integerPayload) Neq(val any) []bool {
 	return neq(val, p.data, p.na, p.convertComparator)
 }
 
-func (p *integerPayload) Gt(val interface{}) []bool {
+func (p *integerPayload) Gt(val any) []bool {
 	return gt(val, p.data, p.na, p.convertComparator)
 }
 
-func (p *integerPayload) Lt(val interface{}) []bool {
+func (p *integerPayload) Lt(val any) []bool {
 	return lt(val, p.data, p.na, p.convertComparator)
 }
 
-func (p *integerPayload) Gte(val interface{}) []bool {
+func (p *integerPayload) Gte(val any) []bool {
 	return gte(val, p.data, p.na, p.convertComparator)
 }
 
-func (p *integerPayload) Lte(val interface{}) []bool {
+func (p *integerPayload) Lte(val any) []bool {
 	return lte(val, p.data, p.na, p.convertComparator)
 }
 
-func (p *integerPayload) convertComparator(val interface{}) (int, bool) {
+func (p *integerPayload) convertComparator(val any) (int, bool) {
 	var v int
 	ok := true
 	switch val.(type) {

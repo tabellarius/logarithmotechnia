@@ -18,48 +18,48 @@ func TestInterface(t *testing.T) {
 
 	testData := []struct {
 		name    string
-		data    []interface{}
+		data    []any
 		na      []bool
-		outData []interface{}
+		outData []any
 	}{
 		{
 			name:    "normal + false na",
-			data:    []interface{}{1, 2, 3, 4, 5},
+			data:    []any{1, 2, 3, 4, 5},
 			na:      []bool{false, false, false, false, false},
-			outData: []interface{}{1, 2, 3, 4, 5},
+			outData: []any{1, 2, 3, 4, 5},
 		},
 		{
 			name:    "normal + empty na",
-			data:    []interface{}{1, 2, 3, 4, 5},
+			data:    []any{1, 2, 3, 4, 5},
 			na:      []bool{},
-			outData: []interface{}{1, 2, 3, 4, 5},
+			outData: []any{1, 2, 3, 4, 5},
 		},
 		{
 			name:    "normal + nil na",
-			data:    []interface{}{1, 2, 3, 4, 5},
+			data:    []any{1, 2, 3, 4, 5},
 			na:      nil,
-			outData: []interface{}{1, 2, 3, 4, 5},
+			outData: []any{1, 2, 3, 4, 5},
 		},
 		{
 			name:    "normal + mixed na",
-			data:    []interface{}{1, 2, 3, 4, 5},
+			data:    []any{1, 2, 3, 4, 5},
 			na:      []bool{false, true, true, true, false},
-			outData: []interface{}{1, nil, nil, nil, 5},
+			outData: []any{1, nil, nil, nil, 5},
 		},
 	}
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			v := InterfaceWithNA(data.data, data.na).(*vector)
+			v := AnyWithNA(data.data, data.na).(*vector)
 
 			length := len(data.data)
 			if v.length != length {
 				t.Error(fmt.Sprintf("Vector length (%d) is not equal to data length (%d)\n", v.length, length))
 			}
 
-			payload, ok := v.payload.(*interfacePayload)
+			payload, ok := v.payload.(*anyPayload)
 			if !ok {
-				t.Error("Payload is not interfacePayload")
+				t.Error("Payload is not anyPayload")
 			} else {
 				if !reflect.DeepEqual(payload.data, data.outData) {
 					t.Error(fmt.Sprintf("Payload data (%v) is not equal to correct data (%v)\n",
@@ -84,7 +84,7 @@ func TestInterface(t *testing.T) {
 }
 
 func testInterfaceEmpty(t *testing.T) {
-	vec := InterfaceWithNA([]interface{}{1, 2, 3, 4, 5}, []bool{false, false, true, false})
+	vec := AnyWithNA([]any{1, 2, 3, 4, 5}, []bool{false, false, true, false})
 	naPayload, ok := vec.(*vector).payload.(*naPayload)
 	if !ok || naPayload.Len() > 0 {
 		t.Error("Vector's payload is not empty")
@@ -92,26 +92,26 @@ func testInterfaceEmpty(t *testing.T) {
 }
 
 func TestInterfacePayload_Type(t *testing.T) {
-	vec := InterfaceWithNA([]interface{}{}, nil)
-	if vec.Type() != "interface" {
+	vec := AnyWithNA([]any{}, nil)
+	if vec.Type() != "any" {
 		t.Error("Type is incorrect.")
 	}
 }
 
 func TestInterfacePayload_Len(t *testing.T) {
 	testData := []struct {
-		in        []interface{}
+		in        []any
 		outLength int
 	}{
-		{[]interface{}{1, 2, 3, 4, 5}, 5},
-		{[]interface{}{1, 2, 3}, 3},
-		{[]interface{}{}, 0},
+		{[]any{1, 2, 3, 4, 5}, 5},
+		{[]any{1, 2, 3}, 3},
+		{[]any{}, 0},
 		{nil, 0},
 	}
 
 	for i, data := range testData {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			payload := InterfaceWithNA(data.in, nil).(*vector).payload
+			payload := AnyWithNA(data.in, nil).(*vector).payload
 			if payload.Len() != data.outLength {
 				t.Error(fmt.Sprintf("Payloads's length (%d) is not equal to out (%d)",
 					payload.Len(), data.outLength))
@@ -121,42 +121,42 @@ func TestInterfacePayload_Len(t *testing.T) {
 }
 
 func TestInterfacePayload_ByIndices(t *testing.T) {
-	vec := InterfaceWithNA([]interface{}{1, 2, 3, 4, 5}, []bool{false, false, false, false, true})
+	vec := AnyWithNA([]any{1, 2, 3, 4, 5}, []bool{false, false, false, false, true})
 	testData := []struct {
 		name    string
 		indices []int
-		out     []interface{}
+		out     []any
 		outNA   []bool
 	}{
 		{
 			name:    "all",
 			indices: []int{1, 2, 3, 4, 5},
-			out:     []interface{}{1, 2, 3, 4, nil},
+			out:     []any{1, 2, 3, 4, nil},
 			outNA:   []bool{false, false, false, false, true},
 		},
 		{
 			name:    "all reverse",
 			indices: []int{5, 4, 3, 2, 1},
-			out:     []interface{}{nil, 4, 3, 2, 1},
+			out:     []any{nil, 4, 3, 2, 1},
 			outNA:   []bool{true, false, false, false, false},
 		},
 		{
 			name:    "some",
 			indices: []int{5, 1, 3},
-			out:     []interface{}{nil, 1, 3},
+			out:     []any{nil, 1, 3},
 			outNA:   []bool{true, false, false},
 		},
 		{
 			name:    "some",
 			indices: []int{5, 1, 3, 0},
-			out:     []interface{}{nil, 1, 3, nil},
+			out:     []any{nil, 1, 3, nil},
 			outNA:   []bool{true, false, false, true},
 		},
 	}
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			payload := vec.ByIndices(data.indices).(*vector).payload.(*interfacePayload)
+			payload := vec.ByIndices(data.indices).(*vector).payload.(*anyPayload)
 			if !reflect.DeepEqual(payload.data, data.out) {
 				t.Error(fmt.Sprintf("payload.data (%v) is not equal to data.out (%v)", payload.data, data.out))
 			}
@@ -170,22 +170,22 @@ func TestInterfacePayload_ByIndices(t *testing.T) {
 func TestInterfacePayload_SupportsWhicher(t *testing.T) {
 	testData := []struct {
 		name        string
-		filter      interface{}
+		filter      any
 		isSupported bool
 	}{
 		{
-			name:        "func(int, interface{}, bool) bool",
-			filter:      func(int, interface{}, bool) bool { return true },
+			name:        "func(int, any, bool) bool",
+			filter:      func(int, any, bool) bool { return true },
 			isSupported: true,
 		},
 		{
-			name:        "func(interface{}, bool) bool",
-			filter:      func(interface{}, bool) bool { return true },
+			name:        "func(any, bool) bool",
+			filter:      func(any, bool) bool { return true },
 			isSupported: true,
 		},
 		{
-			name:        "func(interface{}) bool",
-			filter:      func(interface{}) bool { return true },
+			name:        "func(any) bool",
+			filter:      func(any) bool { return true },
 			isSupported: true,
 		},
 		{
@@ -195,7 +195,7 @@ func TestInterfacePayload_SupportsWhicher(t *testing.T) {
 		},
 	}
 
-	payload := InterfaceWithNA([]interface{}{1}, nil).(*vector).payload.(Whichable)
+	payload := AnyWithNA([]any{1}, nil).(*vector).payload.(Whichable)
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
 			if payload.SupportsWhicher(data.filter) != data.isSupported {
@@ -208,27 +208,27 @@ func TestInterfacePayload_SupportsWhicher(t *testing.T) {
 func TestInterfacePayload_Which(t *testing.T) {
 	testData := []struct {
 		name string
-		fn   interface{}
+		fn   any
 		out  []bool
 	}{
 		{
 			name: "Odd",
-			fn:   func(idx int, _ interface{}, _ bool) bool { return idx%2 == 1 },
+			fn:   func(idx int, _ any, _ bool) bool { return idx%2 == 1 },
 			out:  []bool{true, false, true, false, true, false, true, false, true, false},
 		},
 		{
 			name: "Even",
-			fn:   func(idx int, _ interface{}, _ bool) bool { return idx%2 == 0 },
+			fn:   func(idx int, _ any, _ bool) bool { return idx%2 == 0 },
 			out:  []bool{false, true, false, true, false, true, false, true, false, true},
 		},
 		{
 			name: "Nth(3)",
-			fn:   func(idx int, _ interface{}, _ bool) bool { return idx%3 == 0 },
+			fn:   func(idx int, _ any, _ bool) bool { return idx%3 == 0 },
 			out:  []bool{false, false, true, false, false, true, false, false, true, false},
 		},
 		{
 			name: "Not boolean compact",
-			fn:   func(val interface{}, _ bool) bool { _, ok := val.(bool); return !ok },
+			fn:   func(val any, _ bool) bool { _, ok := val.(bool); return !ok },
 			out:  []bool{false, false, true, false, false, true, false, false, true, false},
 		},
 		{
@@ -238,7 +238,7 @@ func TestInterfacePayload_Which(t *testing.T) {
 		},
 	}
 
-	payload := InterfaceWithNA([]interface{}{true, false, 1, false, true, 2.5, true, false, "true", false}, nil).(*vector).payload.(Whichable)
+	payload := AnyWithNA([]any{true, false, 1, false, true, 2.5, true, false, "true", false}, nil).(*vector).payload.(Whichable)
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
@@ -253,17 +253,17 @@ func TestInterfacePayload_Which(t *testing.T) {
 func TestInterfacePayload_SupportsApplier(t *testing.T) {
 	testData := []struct {
 		name        string
-		applier     interface{}
+		applier     any
 		isSupported bool
 	}{
 		{
-			name:        "func(int, interface{}, bool) (bool, bool)",
-			applier:     func(int, interface{}, bool) (interface{}, bool) { return 1, true },
+			name:        "func(int, any, bool) (bool, bool)",
+			applier:     func(int, any, bool) (any, bool) { return 1, true },
 			isSupported: true,
 		},
 		{
-			name:        "func(interface{}, bool) (bool, bool)",
-			applier:     func(interface{}, bool) (interface{}, bool) { return 1, true },
+			name:        "func(any, bool) (bool, bool)",
+			applier:     func(any, bool) (any, bool) { return 1, true },
 			isSupported: true,
 		},
 		{
@@ -273,7 +273,7 @@ func TestInterfacePayload_SupportsApplier(t *testing.T) {
 		},
 	}
 
-	payload := InterfaceWithNA([]interface{}{}, nil).(*vector).payload.(Appliable)
+	payload := AnyWithNA([]any{}, nil).(*vector).payload.(Appliable)
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
 			if payload.SupportsApplier(data.applier) != data.isSupported {
@@ -286,78 +286,78 @@ func TestInterfacePayload_SupportsApplier(t *testing.T) {
 func TestInterfacePayload_Apply(t *testing.T) {
 	testData := []struct {
 		name        string
-		applier     interface{}
-		dataIn      []interface{}
+		applier     any
+		dataIn      []any
 		naIn        []bool
-		dataOut     []interface{}
+		dataOut     []any
 		naOut       []bool
 		isNAPayload bool
 	}{
 		{
 			name: "regular",
-			applier: func(idx int, val interface{}, na bool) (interface{}, bool) {
+			applier: func(idx int, val any, na bool) (any, bool) {
 				if idx == 5 {
 					return 5, na
 				}
 				return val, na
 			},
-			dataIn:      []interface{}{true, true, true, false, false},
+			dataIn:      []any{true, true, true, false, false},
 			naIn:        []bool{false, true, false, true, false},
-			dataOut:     []interface{}{true, nil, true, nil, 5},
+			dataOut:     []any{true, nil, true, nil, 5},
 			naOut:       []bool{false, true, false, true, false},
 			isNAPayload: false,
 		},
 		{
 			name: "regular compact",
-			applier: func(val interface{}, na bool) (interface{}, bool) {
+			applier: func(val any, na bool) (any, bool) {
 				if val == false {
 					return 0, na
 				}
 
 				return val, na
 			},
-			dataIn:      []interface{}{true, true, true, false, false},
+			dataIn:      []any{true, true, true, false, false},
 			naIn:        []bool{false, true, false, true, false},
-			dataOut:     []interface{}{true, nil, true, nil, 0},
+			dataOut:     []any{true, nil, true, nil, 0},
 			naOut:       []bool{false, true, false, true, false},
 			isNAPayload: false,
 		},
 		{
 			name: "regular brief",
-			applier: func(val interface{}) interface{} {
+			applier: func(val any) any {
 				if val == false {
 					return 0
 				}
 
 				return val
 			},
-			dataIn:      []interface{}{true, true, true, false, false},
+			dataIn:      []any{true, true, true, false, false},
 			naIn:        []bool{false, true, false, true, false},
-			dataOut:     []interface{}{true, nil, true, nil, 0},
+			dataOut:     []any{true, nil, true, nil, 0},
 			naOut:       []bool{false, true, false, true, false},
 			isNAPayload: false,
 		},
 		{
 			name: "manipulate na",
-			applier: func(idx int, val interface{}, na bool) (interface{}, bool) {
+			applier: func(idx int, val any, na bool) (any, bool) {
 				newNA := na
 				if idx == 5 {
 					newNA = true
 				}
 				return val, newNA
 			},
-			dataIn:      []interface{}{true, true, false, false, true},
+			dataIn:      []any{true, true, false, false, true},
 			naIn:        []bool{false, true, false, true, false},
-			dataOut:     []interface{}{true, nil, false, nil, nil},
+			dataOut:     []any{true, nil, false, nil, nil},
 			naOut:       []bool{false, true, false, true, true},
 			isNAPayload: false,
 		},
 		{
 			name:        "incorrect applier",
 			applier:     func(int, int, bool) bool { return true },
-			dataIn:      []interface{}{true, true, false, false, true},
+			dataIn:      []any{true, true, false, false, true},
 			naIn:        []bool{false, true, false, true, false},
-			dataOut:     []interface{}{nil, nil, nil, nil, nil},
+			dataOut:     []any{nil, nil, nil, nil, nil},
 			naOut:       []bool{true, true, true, true, true},
 			isNAPayload: true,
 		},
@@ -365,10 +365,10 @@ func TestInterfacePayload_Apply(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			payload := InterfaceWithNA(data.dataIn, data.naIn).(*vector).payload.(Appliable).Apply(data.applier)
+			payload := AnyWithNA(data.dataIn, data.naIn).(*vector).payload.(Appliable).Apply(data.applier)
 
 			if !data.isNAPayload {
-				payloadOut := payload.(*interfacePayload)
+				payloadOut := payload.(*anyPayload)
 				if !reflect.DeepEqual(data.dataOut, payloadOut.data) {
 					t.Error(fmt.Sprintf("Output data (%v) does not match expected (%v)",
 						payloadOut.data, data.dataOut))
@@ -388,7 +388,7 @@ func TestInterfacePayload_Apply(t *testing.T) {
 }
 
 func TestInterfacePayload_Integers(t *testing.T) {
-	convertor := func(idx int, val interface{}, na bool) (int, bool) {
+	convertor := func(idx int, val any, na bool) (int, bool) {
 		if na {
 			return 0, true
 		}
@@ -405,15 +405,15 @@ func TestInterfacePayload_Integers(t *testing.T) {
 
 	testData := []struct {
 		name      string
-		dataIn    []interface{}
+		dataIn    []any
 		naIn      []bool
-		convertor func(idx int, val interface{}, na bool) (int, bool)
+		convertor func(idx int, val any, na bool) (int, bool)
 		dataOut   []int
 		naOut     []bool
 	}{
 		{
 			name:      "regular",
-			dataIn:    []interface{}{1, 2.5, "three", 4 + 3i, 5, 0},
+			dataIn:    []any{1, 2.5, "three", 4 + 3i, 5, 0},
 			naIn:      []bool{false, false, false, false, true, false},
 			convertor: convertor,
 			dataOut:   []int{1, 2, 0, 0, 0, 0},
@@ -421,7 +421,7 @@ func TestInterfacePayload_Integers(t *testing.T) {
 		},
 		{
 			name:      "without convertor",
-			dataIn:    []interface{}{1, 2.5, "three", 4 + 3i, 5, 0},
+			dataIn:    []any{1, 2.5, "three", 4 + 3i, 5, 0},
 			naIn:      []bool{false, false, false, false, true, false},
 			convertor: nil,
 			dataOut:   []int{0, 0, 0, 0, 0, 0},
@@ -429,7 +429,7 @@ func TestInterfacePayload_Integers(t *testing.T) {
 		},
 		{
 			name:      "empty",
-			dataIn:    []interface{}{},
+			dataIn:    []any{},
 			naIn:      []bool{},
 			convertor: convertor,
 			dataOut:   []int{},
@@ -439,9 +439,9 @@ func TestInterfacePayload_Integers(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			vec := InterfaceWithNA(data.dataIn, data.naIn,
-				OptionInterfaceConvertors(&InterfaceConvertors{Intabler: data.convertor}))
-			payload := vec.(*vector).payload.(*interfacePayload)
+			vec := AnyWithNA(data.dataIn, data.naIn,
+				OptionInterfaceConvertors(&AnyConvertors{Intabler: data.convertor}))
+			payload := vec.(*vector).payload.(*anyPayload)
 
 			integers, na := payload.Integers()
 			if !reflect.DeepEqual(integers, data.dataOut) {
@@ -455,7 +455,7 @@ func TestInterfacePayload_Integers(t *testing.T) {
 }
 
 func TestInterfacePayload_Floats(t *testing.T) {
-	convertor := func(idx int, val interface{}, na bool) (float64, bool) {
+	convertor := func(idx int, val any, na bool) (float64, bool) {
 		if na {
 			return math.NaN(), true
 		}
@@ -472,15 +472,15 @@ func TestInterfacePayload_Floats(t *testing.T) {
 
 	testData := []struct {
 		name      string
-		dataIn    []interface{}
+		dataIn    []any
 		naIn      []bool
-		convertor func(idx int, val interface{}, na bool) (float64, bool)
+		convertor func(idx int, val any, na bool) (float64, bool)
 		dataOut   []float64
 		naOut     []bool
 	}{
 		{
 			name:      "regular",
-			dataIn:    []interface{}{1, 2.5, "three", 4 + 3i, 5, 0},
+			dataIn:    []any{1, 2.5, "three", 4 + 3i, 5, 0},
 			naIn:      []bool{false, false, false, false, true, false},
 			convertor: convertor,
 			dataOut:   []float64{1, 2.5, math.NaN(), math.NaN(), math.NaN(), 0},
@@ -488,7 +488,7 @@ func TestInterfacePayload_Floats(t *testing.T) {
 		},
 		{
 			name:      "without convertor",
-			dataIn:    []interface{}{1, 2.5, "three", 4 + 3i, 5, 0},
+			dataIn:    []any{1, 2.5, "three", 4 + 3i, 5, 0},
 			naIn:      []bool{false, false, false, false, true, false},
 			convertor: nil,
 			dataOut:   []float64{math.NaN(), math.NaN(), math.NaN(), math.NaN(), math.NaN(), math.NaN()},
@@ -496,7 +496,7 @@ func TestInterfacePayload_Floats(t *testing.T) {
 		},
 		{
 			name:      "empty",
-			dataIn:    []interface{}{},
+			dataIn:    []any{},
 			naIn:      []bool{},
 			convertor: convertor,
 			dataOut:   []float64{},
@@ -506,9 +506,9 @@ func TestInterfacePayload_Floats(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			vec := InterfaceWithNA(data.dataIn, data.naIn,
-				OptionInterfaceConvertors(&InterfaceConvertors{Floatabler: data.convertor}))
-			payload := vec.(*vector).payload.(*interfacePayload)
+			vec := AnyWithNA(data.dataIn, data.naIn,
+				OptionInterfaceConvertors(&AnyConvertors{Floatabler: data.convertor}))
+			payload := vec.(*vector).payload.(*anyPayload)
 
 			floats, na := payload.Floats()
 			if !util.EqualFloatArrays(floats, data.dataOut) {
@@ -522,7 +522,7 @@ func TestInterfacePayload_Floats(t *testing.T) {
 }
 
 func TestInterfacePayload_Complexes(t *testing.T) {
-	convertor := func(idx int, val interface{}, na bool) (complex128, bool) {
+	convertor := func(idx int, val any, na bool) (complex128, bool) {
 		if na {
 			return cmplx.NaN(), true
 		}
@@ -541,15 +541,15 @@ func TestInterfacePayload_Complexes(t *testing.T) {
 
 	testData := []struct {
 		name      string
-		dataIn    []interface{}
+		dataIn    []any
 		naIn      []bool
-		convertor func(idx int, val interface{}, na bool) (complex128, bool)
+		convertor func(idx int, val any, na bool) (complex128, bool)
 		dataOut   []complex128
 		naOut     []bool
 	}{
 		{
 			name:      "regular",
-			dataIn:    []interface{}{1, 2.5, "three", 4 + 3i, 5, 0},
+			dataIn:    []any{1, 2.5, "three", 4 + 3i, 5, 0},
 			naIn:      []bool{false, false, false, false, true, false},
 			convertor: convertor,
 			dataOut:   []complex128{1, 2.5, cmplx.NaN(), 4 + 3i, cmplx.NaN(), 0},
@@ -557,7 +557,7 @@ func TestInterfacePayload_Complexes(t *testing.T) {
 		},
 		{
 			name:      "without convertor",
-			dataIn:    []interface{}{1, 2.5, "three", 4 + 3i, 5, 0},
+			dataIn:    []any{1, 2.5, "three", 4 + 3i, 5, 0},
 			naIn:      []bool{false, false, false, false, true, false},
 			convertor: nil,
 			dataOut:   []complex128{cmplx.NaN(), cmplx.NaN(), cmplx.NaN(), cmplx.NaN(), cmplx.NaN(), cmplx.NaN()},
@@ -565,7 +565,7 @@ func TestInterfacePayload_Complexes(t *testing.T) {
 		},
 		{
 			name:      "empty",
-			dataIn:    []interface{}{},
+			dataIn:    []any{},
 			naIn:      []bool{},
 			convertor: convertor,
 			dataOut:   []complex128{},
@@ -575,9 +575,9 @@ func TestInterfacePayload_Complexes(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			vec := InterfaceWithNA(data.dataIn, data.naIn,
-				OptionInterfaceConvertors(&InterfaceConvertors{Complexabler: data.convertor}))
-			payload := vec.(*vector).payload.(*interfacePayload)
+			vec := AnyWithNA(data.dataIn, data.naIn,
+				OptionInterfaceConvertors(&AnyConvertors{Complexabler: data.convertor}))
+			payload := vec.(*vector).payload.(*anyPayload)
 
 			complexes, na := payload.Complexes()
 			if !util.EqualComplexArrays(complexes, data.dataOut) {
@@ -591,7 +591,7 @@ func TestInterfacePayload_Complexes(t *testing.T) {
 }
 
 func TestInterfacePayload_Booleans(t *testing.T) {
-	convertor := func(idx int, val interface{}, na bool) (bool, bool) {
+	convertor := func(idx int, val any, na bool) (bool, bool) {
 		if na {
 			return false, true
 		}
@@ -608,15 +608,15 @@ func TestInterfacePayload_Booleans(t *testing.T) {
 
 	testData := []struct {
 		name      string
-		dataIn    []interface{}
+		dataIn    []any
 		naIn      []bool
-		convertor func(idx int, val interface{}, na bool) (bool, bool)
+		convertor func(idx int, val any, na bool) (bool, bool)
 		dataOut   []bool
 		naOut     []bool
 	}{
 		{
 			name:      "regular",
-			dataIn:    []interface{}{1, -2, "three", true, 5, 0},
+			dataIn:    []any{1, -2, "three", true, 5, 0},
 			naIn:      []bool{false, false, false, false, true, false},
 			convertor: convertor,
 			dataOut:   []bool{true, false, false, true, false, false},
@@ -624,7 +624,7 @@ func TestInterfacePayload_Booleans(t *testing.T) {
 		},
 		{
 			name:      "without convertor",
-			dataIn:    []interface{}{1, -2, "three", 4 + 3i, 5, 0},
+			dataIn:    []any{1, -2, "three", 4 + 3i, 5, 0},
 			naIn:      []bool{false, false, false, false, true, false},
 			convertor: nil,
 			dataOut:   []bool{false, false, false, false, false, false},
@@ -632,7 +632,7 @@ func TestInterfacePayload_Booleans(t *testing.T) {
 		},
 		{
 			name:      "empty",
-			dataIn:    []interface{}{},
+			dataIn:    []any{},
 			naIn:      []bool{},
 			convertor: convertor,
 			dataOut:   []bool{},
@@ -642,9 +642,9 @@ func TestInterfacePayload_Booleans(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			vec := InterfaceWithNA(data.dataIn, data.naIn,
-				OptionInterfaceConvertors(&InterfaceConvertors{Boolabler: data.convertor}))
-			payload := vec.(*vector).payload.(*interfacePayload)
+			vec := AnyWithNA(data.dataIn, data.naIn,
+				OptionInterfaceConvertors(&AnyConvertors{Boolabler: data.convertor}))
+			payload := vec.(*vector).payload.(*anyPayload)
 
 			bools, na := payload.Booleans()
 			if !reflect.DeepEqual(bools, data.dataOut) {
@@ -658,7 +658,7 @@ func TestInterfacePayload_Booleans(t *testing.T) {
 }
 
 func TestInterfacePayload_Strings(t *testing.T) {
-	convertor := func(idx int, val interface{}, na bool) (string, bool) {
+	convertor := func(idx int, val any, na bool) (string, bool) {
 		if na {
 			return "", true
 		}
@@ -675,15 +675,15 @@ func TestInterfacePayload_Strings(t *testing.T) {
 
 	testData := []struct {
 		name      string
-		dataIn    []interface{}
+		dataIn    []any
 		naIn      []bool
-		convertor func(idx int, val interface{}, na bool) (string, bool)
+		convertor func(idx int, val any, na bool) (string, bool)
 		dataOut   []string
 		naOut     []bool
 	}{
 		{
 			name:      "regular",
-			dataIn:    []interface{}{1, 2.5, "three", 4 + 3i, 5, 0},
+			dataIn:    []any{1, 2.5, "three", 4 + 3i, 5, 0},
 			naIn:      []bool{false, false, false, false, true, false},
 			convertor: convertor,
 			dataOut:   []string{"1", "", "three", "", "", "0"},
@@ -691,7 +691,7 @@ func TestInterfacePayload_Strings(t *testing.T) {
 		},
 		{
 			name:      "without convertor",
-			dataIn:    []interface{}{1, 2.5, "three", 4 + 3i, 5, 0},
+			dataIn:    []any{1, 2.5, "three", 4 + 3i, 5, 0},
 			naIn:      []bool{false, false, false, false, true, false},
 			convertor: nil,
 			dataOut:   []string{"", "", "", "", "", ""},
@@ -699,7 +699,7 @@ func TestInterfacePayload_Strings(t *testing.T) {
 		},
 		{
 			name:      "empty",
-			dataIn:    []interface{}{},
+			dataIn:    []any{},
 			naIn:      []bool{},
 			convertor: convertor,
 			dataOut:   []string{},
@@ -709,9 +709,9 @@ func TestInterfacePayload_Strings(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			vec := InterfaceWithNA(data.dataIn, data.naIn,
-				OptionInterfaceConvertors(&InterfaceConvertors{Stringabler: data.convertor}))
-			payload := vec.(*vector).payload.(*interfacePayload)
+			vec := AnyWithNA(data.dataIn, data.naIn,
+				OptionInterfaceConvertors(&AnyConvertors{Stringabler: data.convertor}))
+			payload := vec.(*vector).payload.(*anyPayload)
 
 			strings, na := payload.Strings()
 			if !reflect.DeepEqual(strings, data.dataOut) {
@@ -725,7 +725,7 @@ func TestInterfacePayload_Strings(t *testing.T) {
 }
 
 func TestInterfacePayload_Times(t *testing.T) {
-	convertor := func(idx int, val interface{}, na bool) (time.Time, bool) {
+	convertor := func(idx int, val any, na bool) (time.Time, bool) {
 		if na {
 			return time.Time{}, true
 		}
@@ -740,15 +740,15 @@ func TestInterfacePayload_Times(t *testing.T) {
 
 	testData := []struct {
 		name      string
-		dataIn    []interface{}
+		dataIn    []any
 		naIn      []bool
-		convertor func(idx int, val interface{}, na bool) (time.Time, bool)
+		convertor func(idx int, val any, na bool) (time.Time, bool)
 		dataOut   []time.Time
 		naOut     []bool
 	}{
 		{
 			name:      "regular",
-			dataIn:    []interface{}{1625270725, "three", 1625270725},
+			dataIn:    []any{1625270725, "three", 1625270725},
 			naIn:      []bool{false, false, true},
 			convertor: convertor,
 			dataOut:   toTimeData([]string{"2021-07-03T03:05:25+03:00", "0001-01-01T00:00:00Z", "0001-01-01T00:00:00Z"}),
@@ -756,7 +756,7 @@ func TestInterfacePayload_Times(t *testing.T) {
 		},
 		{
 			name:      "without convertor",
-			dataIn:    []interface{}{1625270725, "three", 1625270725},
+			dataIn:    []any{1625270725, "three", 1625270725},
 			naIn:      []bool{false, false, true},
 			convertor: nil,
 			dataOut:   toTimeData([]string{"0001-01-01T00:00:00Z", "0001-01-01T00:00:00Z", "0001-01-01T00:00:00Z"}),
@@ -764,7 +764,7 @@ func TestInterfacePayload_Times(t *testing.T) {
 		},
 		{
 			name:      "empty",
-			dataIn:    []interface{}{},
+			dataIn:    []any{},
 			naIn:      []bool{},
 			convertor: convertor,
 			dataOut:   []time.Time{},
@@ -774,9 +774,9 @@ func TestInterfacePayload_Times(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			vec := InterfaceWithNA(data.dataIn, data.naIn,
-				OptionInterfaceConvertors(&InterfaceConvertors{Timeabler: data.convertor}))
-			payload := vec.(*vector).payload.(*interfacePayload)
+			vec := AnyWithNA(data.dataIn, data.naIn,
+				OptionInterfaceConvertors(&AnyConvertors{Timeabler: data.convertor}))
+			payload := vec.(*vector).payload.(*anyPayload)
 
 			times, na := payload.Times()
 			if !reflect.DeepEqual(times, data.dataOut) {
@@ -790,7 +790,7 @@ func TestInterfacePayload_Times(t *testing.T) {
 }
 
 func TestInterfacePayload_Interfaces(t *testing.T) {
-	convertor := func(idx int, val interface{}, na bool) (int, bool) {
+	convertor := func(idx int, val any, na bool) (int, bool) {
 		if na {
 			return 0, true
 		}
@@ -807,37 +807,37 @@ func TestInterfacePayload_Interfaces(t *testing.T) {
 
 	testData := []struct {
 		name      string
-		dataIn    []interface{}
+		dataIn    []any
 		naIn      []bool
-		convertor func(idx int, val interface{}, na bool) (int, bool)
-		dataOut   []interface{}
+		convertor func(idx int, val any, na bool) (int, bool)
+		dataOut   []any
 		naOut     []bool
 	}{
 		{
 			name:      "regular",
-			dataIn:    []interface{}{1, 2.5, "three", 4 + 3i, 5, 0},
+			dataIn:    []any{1, 2.5, "three", 4 + 3i, 5, 0},
 			naIn:      []bool{false, false, false, false, true, false},
 			convertor: convertor,
-			dataOut:   []interface{}{1, 2.5, "three", 4 + 3i, nil, 0},
+			dataOut:   []any{1, 2.5, "three", 4 + 3i, nil, 0},
 			naOut:     []bool{false, false, false, false, true, false},
 		},
 		{
 			name:      "empty",
-			dataIn:    []interface{}{},
+			dataIn:    []any{},
 			naIn:      []bool{},
 			convertor: convertor,
-			dataOut:   []interface{}{},
+			dataOut:   []any{},
 			naOut:     []bool{},
 		},
 	}
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			vec := InterfaceWithNA(data.dataIn, data.naIn,
-				OptionInterfaceConvertors(&InterfaceConvertors{Intabler: data.convertor}))
-			payload := vec.(*vector).payload.(*interfacePayload)
+			vec := AnyWithNA(data.dataIn, data.naIn,
+				OptionInterfaceConvertors(&AnyConvertors{Intabler: data.convertor}))
+			payload := vec.(*vector).payload.(*anyPayload)
 
-			interfaces, na := payload.Interfaces()
+			interfaces, na := payload.Anies()
 			if !reflect.DeepEqual(interfaces, data.dataOut) {
 				t.Error(fmt.Sprintf("Result data (%v) is not equal to expected (%v)", interfaces, data.dataOut))
 			}
@@ -851,12 +851,12 @@ func TestInterfacePayload_Interfaces(t *testing.T) {
 func TestInterfacePayload_SupportsSummarizer(t *testing.T) {
 	testData := []struct {
 		name        string
-		summarizer  interface{}
+		summarizer  any
 		isSupported bool
 	}{
 		{
 			name:        "valid",
-			summarizer:  func(int, interface{}, interface{}, bool) (interface{}, bool) { return 0, true },
+			summarizer:  func(int, any, any, bool) (any, bool) { return 0, true },
 			isSupported: true,
 		},
 		{
@@ -866,7 +866,7 @@ func TestInterfacePayload_SupportsSummarizer(t *testing.T) {
 		},
 	}
 
-	payload := InterfaceWithNA([]interface{}{}, nil).(*vector).payload.(Summarizable)
+	payload := AnyWithNA([]any{}, nil).(*vector).payload.(Summarizable)
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
 			if payload.SupportsSummarizer(data.summarizer) != data.isSupported {
@@ -877,53 +877,53 @@ func TestInterfacePayload_SupportsSummarizer(t *testing.T) {
 }
 
 func TestInterfacePayload_Summarize(t *testing.T) {
-	summarizer := func(idx int, prev interface{}, cur interface{}, na bool) (interface{}, bool) {
+	summarizer := func(idx int, prev any, cur any, na bool) (any, bool) {
 		if idx == 1 {
 			return cur, false
 		}
 
-		return interface{}(idx), na
+		return any(idx), na
 	}
 
 	testData := []struct {
 		name       string
-		summarizer interface{}
-		dataIn     []interface{}
+		summarizer any
+		dataIn     []any
 		naIn       []bool
-		dataOut    []interface{}
+		dataOut    []any
 		naOut      []bool
 	}{
 		{
 			name:       "true",
 			summarizer: summarizer,
-			dataIn:     []interface{}{1, 2, 1, 6, 5},
+			dataIn:     []any{1, 2, 1, 6, 5},
 			naIn:       []bool{false, false, false, false, false},
-			dataOut:    []interface{}{5},
+			dataOut:    []any{5},
 			naOut:      []bool{false},
 		},
 		{
 			name:       "NA",
 			summarizer: summarizer,
-			dataIn:     []interface{}{1, 2, 1, 6, 5},
+			dataIn:     []any{1, 2, 1, 6, 5},
 			naIn:       []bool{false, false, false, false, true},
-			dataOut:    []interface{}{nil},
+			dataOut:    []any{nil},
 			naOut:      []bool{true},
 		},
 		{
 			name:       "incorrect applier",
 			summarizer: func(int, int, bool) bool { return true },
-			dataIn:     []interface{}{1, 2, 1, 6, 5},
+			dataIn:     []any{1, 2, 1, 6, 5},
 			naIn:       []bool{false, true, false, true, false},
-			dataOut:    []interface{}{nil},
+			dataOut:    []any{nil},
 			naOut:      []bool{true},
 		},
 	}
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			payload := InterfaceWithNA(data.dataIn, data.naIn).(*vector).payload.(Summarizable).Summarize(data.summarizer)
+			payload := AnyWithNA(data.dataIn, data.naIn).(*vector).payload.(Summarizable).Summarize(data.summarizer)
 
-			payloadOut := payload.(*interfacePayload)
+			payloadOut := payload.(*anyPayload)
 			if !reflect.DeepEqual(data.dataOut, payloadOut.data) {
 				t.Error(fmt.Sprintf("Output data (%v) does not match expected (%v)",
 					data.dataOut, payloadOut.data))
@@ -937,37 +937,37 @@ func TestInterfacePayload_Summarize(t *testing.T) {
 }
 
 func TestInterfacePayload_Append(t *testing.T) {
-	payload := InterfacePayload([]interface{}{1, 2, 3}, nil)
+	payload := InterfacePayload([]any{1, 2, 3}, nil)
 
 	testData := []struct {
 		name    string
 		vec     Vector
-		outData []interface{}
+		outData []any
 		outNA   []bool
 	}{
 		{
 			name:    "boolean",
 			vec:     BooleanWithNA([]bool{true, true}, []bool{true, false}),
-			outData: []interface{}{1, 2, 3, nil, true},
+			outData: []any{1, 2, 3, nil, true},
 			outNA:   []bool{false, false, false, true, false},
 		},
 		{
 			name:    "integer",
 			vec:     IntegerWithNA([]int{4, 5}, []bool{true, false}),
-			outData: []interface{}{1, 2, 3, nil, 5},
+			outData: []any{1, 2, 3, nil, 5},
 			outNA:   []bool{false, false, false, true, false},
 		},
 		{
 			name:    "na",
 			vec:     NA(2),
-			outData: []interface{}{1, 2, 3, nil, nil},
+			outData: []any{1, 2, 3, nil, nil},
 			outNA:   []bool{false, false, false, true, true},
 		},
 	}
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			outPayload := payload.Append(data.vec.Payload()).(*interfacePayload)
+			outPayload := payload.Append(data.vec.Payload()).(*anyPayload)
 
 			if !reflect.DeepEqual(data.outData, outPayload.data) {
 				t.Error(fmt.Sprintf("Output data (%v) does not match expected (%v)",
@@ -982,39 +982,39 @@ func TestInterfacePayload_Append(t *testing.T) {
 }
 
 func TestInterfacePayload_Adjust(t *testing.T) {
-	payload5 := InterfacePayload([]interface{}{1, 2, 3, 4, 5}, nil).(*interfacePayload)
-	payload3 := InterfacePayload([]interface{}{1, 2, 3}, []bool{false, false, true}).(*interfacePayload)
+	payload5 := InterfacePayload([]any{1, 2, 3, 4, 5}, nil).(*anyPayload)
+	payload3 := InterfacePayload([]any{1, 2, 3}, []bool{false, false, true}).(*anyPayload)
 
 	testData := []struct {
 		name       string
-		inPayload  *interfacePayload
+		inPayload  *anyPayload
 		size       int
-		outPaylout *interfacePayload
+		outPaylout *anyPayload
 	}{
 		{
 			inPayload:  payload5,
 			name:       "same",
 			size:       5,
-			outPaylout: InterfacePayload([]interface{}{1, 2, 3, 4, 5}, nil).(*interfacePayload),
+			outPaylout: InterfacePayload([]any{1, 2, 3, 4, 5}, nil).(*anyPayload),
 		},
 		{
 			inPayload:  payload5,
 			name:       "lesser",
 			size:       3,
-			outPaylout: InterfacePayload([]interface{}{1, 2, 3}, nil).(*interfacePayload),
+			outPaylout: InterfacePayload([]any{1, 2, 3}, nil).(*anyPayload),
 		},
 		{
 			inPayload: payload3,
 			name:      "bigger",
 			size:      10,
-			outPaylout: InterfacePayload([]interface{}{1, 2, 0, 1, 2, 0, 1, 2, 0, 1},
-				[]bool{false, false, true, false, false, true, false, false, true, false}).(*interfacePayload),
+			outPaylout: InterfacePayload([]any{1, 2, 0, 1, 2, 0, 1, 2, 0, 1},
+				[]bool{false, false, true, false, false, true, false, false, true, false}).(*anyPayload),
 		},
 	}
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			outPayload := data.inPayload.Adjust(data.size).(*interfacePayload)
+			outPayload := data.inPayload.Adjust(data.size).(*anyPayload)
 
 			if !reflect.DeepEqual(outPayload.data, data.outPaylout.data) {
 				t.Error(fmt.Sprintf("Output data (%v) does not match expected (%v)",
@@ -1029,22 +1029,22 @@ func TestInterfacePayload_Adjust(t *testing.T) {
 }
 
 func TestInterfacePayload_Pick(t *testing.T) {
-	payload := InterfacePayload([]interface{}{"a", "b", "a", "b", "c"}, []bool{false, false, true, true, false})
+	payload := InterfacePayload([]any{"a", "b", "a", "b", "c"}, []bool{false, false, true, true, false})
 
 	testData := []struct {
 		name string
 		idx  int
-		val  interface{}
+		val  any
 	}{
 		{
 			name: "normal 2",
 			idx:  2,
-			val:  interface{}("b"),
+			val:  any("b"),
 		},
 		{
 			name: "normal 5",
 			idx:  5,
-			val:  interface{}("c"),
+			val:  any("c"),
 		},
 		{
 			name: "na",
@@ -1079,17 +1079,17 @@ func TestInterfacePayload_Data(t *testing.T) {
 	testData := []struct {
 		name    string
 		payload Payload
-		outData []interface{}
+		outData []any
 	}{
 		{
 			name:    "empty",
-			payload: InterfacePayload([]interface{}{}, []bool{}),
-			outData: []interface{}{},
+			payload: InterfacePayload([]any{}, []bool{}),
+			outData: []any{},
 		},
 		{
 			name:    "non-empty",
-			payload: InterfacePayload([]interface{}{"a", "b", "a", "b", "c"}, []bool{false, false, true, true, false}),
-			outData: []interface{}{"a", "b", nil, nil, "c"},
+			payload: InterfacePayload([]any{"a", "b", "a", "b", "c"}, []bool{false, false, true, true, false}),
+			outData: []any{"a", "b", nil, nil, "c"},
 		},
 	}
 
@@ -1111,7 +1111,7 @@ func TestInterfacePayload_ApplyTo(t *testing.T) {
 	testData := []struct {
 		name        string
 		indices     []int
-		applier     interface{}
+		applier     any
 		dataOut     []any
 		naOut       []bool
 		isNAPayload bool
@@ -1175,7 +1175,7 @@ func TestInterfacePayload_ApplyTo(t *testing.T) {
 			payload := srcPayload.(Appliable).ApplyTo(data.indices, data.applier)
 
 			if !data.isNAPayload {
-				payloadOut := payload.(*interfacePayload)
+				payloadOut := payload.(*anyPayload)
 				if !reflect.DeepEqual(data.dataOut, payloadOut.data) {
 					t.Error(fmt.Sprintf("Output data (%v) does not match expected (%v)",
 						data.dataOut, payloadOut.data))

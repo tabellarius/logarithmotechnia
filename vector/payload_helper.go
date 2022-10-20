@@ -2,7 +2,7 @@ package vector
 
 import "golang.org/x/exp/constraints"
 
-func pickValueWithNA[T any](idx int, data []T, na []bool, maxLen int) interface{} {
+func pickValueWithNA[T any](idx int, data []T, na []bool, maxLen int) any {
 	if idx < 1 || idx > maxLen {
 		return nil
 	}
@@ -11,20 +11,20 @@ func pickValueWithNA[T any](idx int, data []T, na []bool, maxLen int) interface{
 		return nil
 	}
 
-	return interface{}(data[idx-1])
+	return any(data[idx-1])
 }
 
-func pickValue[T any](idx int, data []T, maxLen int) interface{} {
+func pickValue[T any](idx int, data []T, maxLen int) any {
 	if idx < 1 || idx > maxLen {
 		return nil
 	}
 
-	return interface{}(data[idx-1])
+	return any(data[idx-1])
 }
 
-func dataWithNAToInterfaceArray[T any](data []T, na []bool) []interface{} {
+func dataWithNAToInterfaceArray[T any](data []T, na []bool) []any {
 	dataLen := len(data)
-	outData := make([]interface{}, dataLen)
+	outData := make([]any, dataLen)
 
 	for idx, val := range data {
 		if na[idx] {
@@ -357,7 +357,7 @@ func applyToByBriefFunc[T any](indices []int, inData []T, inNA []bool, applyFunc
 	return data, na
 }
 
-func groupsForData[T comparable](srcData []T, srcNA []bool) ([][]int, []interface{}) {
+func groupsForData[T comparable](srcData []T, srcNA []bool) ([][]int, []any) {
 	groupMap := map[T][]int{}
 	ordered := []T{}
 	na := []int{}
@@ -387,9 +387,9 @@ func groupsForData[T comparable](srcData []T, srcNA []bool) ([][]int, []interfac
 		groups = append(groups, na)
 	}
 
-	values := make([]interface{}, len(groups))
+	values := make([]any, len(groups))
 	for i, val := range ordered {
-		values[i] = interface{}(val)
+		values[i] = any(val)
 	}
 	if len(na) > 0 {
 		values[len(values)-1] = nil

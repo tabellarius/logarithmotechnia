@@ -25,11 +25,11 @@ func (p *complexPayload) Len() int {
 	return p.length
 }
 
-func (p *complexPayload) Pick(idx int) interface{} {
+func (p *complexPayload) Pick(idx int) any {
 	return pickValueWithNA(idx, p.data, p.na, p.length)
 }
 
-func (p *complexPayload) Data() []interface{} {
+func (p *complexPayload) Data() []any {
 	return dataWithNAToInterfaceArray(p.data, p.na)
 }
 
@@ -75,7 +75,7 @@ func (p *complexPayload) SupportsSummarizer(summarizer any) bool {
 	return supportsSummarizer[complex128](summarizer)
 }
 
-func (p *complexPayload) Summarize(summarizer interface{}) Payload {
+func (p *complexPayload) Summarize(summarizer any) Payload {
 	val, na := summarize(p.data, p.na, summarizer, 0+0i, cmplx.NaN())
 
 	return ComplexPayload([]complex128{val}, []bool{na}, p.Options()...)
@@ -174,12 +174,12 @@ func (p *complexPayload) Strings() ([]string, []bool) {
 	return data, na
 }
 
-func (p *complexPayload) Interfaces() ([]interface{}, []bool) {
+func (p *complexPayload) Anies() ([]any, []bool) {
 	if p.length == 0 {
-		return []interface{}{}, []bool{}
+		return []any{}, []bool{}
 	}
 
-	data := make([]interface{}, p.length)
+	data := make([]any, p.length)
 	for i := 0; i < p.length; i++ {
 		if p.na[i] {
 			data[i] = nil
@@ -247,7 +247,7 @@ func (p *complexPayload) Options() []Option {
 	}
 }
 
-func (p *complexPayload) Groups() ([][]int, []interface{}) {
+func (p *complexPayload) Groups() ([][]int, []any) {
 	groups, values := groupsForData(p.data, p.na)
 
 	return groups, values
@@ -277,21 +277,21 @@ func (p *complexPayload) Find(needle any) int {
 	return find(needle, p.data, p.na, p.convertComparator)
 }
 
-func (p *complexPayload) FindAll(needle interface{}) []int {
+func (p *complexPayload) FindAll(needle any) []int {
 	return findAll(needle, p.data, p.na, p.convertComparator)
 }
 
 /* Ordered interface */
 
-func (p *complexPayload) Eq(val interface{}) []bool {
+func (p *complexPayload) Eq(val any) []bool {
 	return eq(val, p.data, p.na, p.convertComparator)
 }
 
-func (p *complexPayload) Neq(val interface{}) []bool {
+func (p *complexPayload) Neq(val any) []bool {
 	return neq(val, p.data, p.na, p.convertComparator)
 }
 
-func (p *complexPayload) convertComparator(val interface{}) (complex128, bool) {
+func (p *complexPayload) convertComparator(val any) (complex128, bool) {
 	var v complex128
 	ok := true
 	switch val.(type) {

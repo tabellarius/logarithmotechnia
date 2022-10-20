@@ -14,35 +14,35 @@ const KeyOptionJoinBy = "join_by_columns"
 const KeyOptionGroupIndex = "group_index"
 const KeyOptionVectorName = "vector_name"
 
-//deprecated
+// deprecated
 type Config struct {
 	FloatPrinter     *FloatPrinter
 	ComplexPrinter   *ComplexPrinter
 	TimePrinter      *TimePrinter
-	InterfacePrinter func(payload interface{}) string
-	Convertors       *InterfaceConvertors
+	InterfacePrinter func(payload any) string
+	Convertors       *AnyConvertors
 }
 
 type Option interface {
 	Key() string
-	Value() interface{}
+	Value() any
 }
 
 type ConfOption struct {
 	key   string
-	value interface{}
+	value any
 }
 
 func (o ConfOption) Key() string {
 	return o.key
 }
 
-func (o ConfOption) Value() interface{} {
+func (o ConfOption) Value() any {
 	return o.value
 }
 
 type Configuration struct {
-	options map[string]interface{}
+	options map[string]any
 }
 
 func (conf Configuration) HasOption(name string) bool {
@@ -51,13 +51,13 @@ func (conf Configuration) HasOption(name string) bool {
 	return ok
 }
 
-func (conf Configuration) Value(name string) interface{} {
+func (conf Configuration) Value(name string) any {
 	return conf.options[name]
 }
 
 func MergeOptions(options []Option) Configuration {
 	conf := Configuration{
-		options: map[string]interface{}{},
+		options: map[string]any{},
 	}
 
 	for _, option := range options {
@@ -79,11 +79,11 @@ func OptionTimeFormat(format string) Option {
 	return ConfOption{KeyOptionTimeFormat, format}
 }
 
-func OptionInterfacePrinterFunc(fn InterfacePrinterFunc) Option {
+func OptionInterfacePrinterFunc(fn AnyPrinterFunc) Option {
 	return ConfOption{KeyOptionInterfacePrinterFunc, fn}
 }
 
-func OptionInterfaceConvertors(convertors *InterfaceConvertors) Option {
+func OptionInterfaceConvertors(convertors *AnyConvertors) Option {
 	return ConfOption{KeyOptionInterfaceConvertors, convertors}
 }
 

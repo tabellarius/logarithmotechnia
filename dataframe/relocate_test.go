@@ -11,13 +11,13 @@ func TestDataframe_Relocate(t *testing.T) {
 
 	testData := []struct {
 		name      string
-		selectors []interface{}
-		options   []interface{}
+		selectors []any
+		options   []any
 		columns   []vector.Vector
 	}{
 		{
 			name:      "string",
-			selectors: []interface{}{"name"},
+			selectors: []any{"name"},
 			columns: []vector.Vector{
 				vector.IntegerWithNA([]int{31, 3, 24, 41, 33}, nil),
 				vector.StringWithNA([]string{"m", "", "f", "m", "f"}, []bool{false, true, false, false, false}),
@@ -29,7 +29,7 @@ func TestDataframe_Relocate(t *testing.T) {
 		},
 		{
 			name:      "[]string",
-			selectors: []interface{}{[]string{"name", "gender"}},
+			selectors: []any{[]string{"name", "gender"}},
 			columns: []vector.Vector{
 				vector.IntegerWithNA([]int{31, 3, 24, 41, 33}, nil),
 				vector.IntegerWithNA([]int{110000, 0, 50000, 120000, 80000}, nil),
@@ -41,7 +41,7 @@ func TestDataframe_Relocate(t *testing.T) {
 		},
 		{
 			name:      "string + []string",
-			selectors: []interface{}{"salary", []string{"name", "gender"}},
+			selectors: []any{"salary", []string{"name", "gender"}},
 			columns: []vector.Vector{
 				vector.IntegerWithNA([]int{31, 3, 24, 41, 33}, nil),
 				vector.BooleanWithNA([]bool{true, true, true, false, true}, nil),
@@ -53,8 +53,8 @@ func TestDataframe_Relocate(t *testing.T) {
 		},
 		{
 			name:      "string + []string + after column",
-			selectors: []interface{}{"salary", []string{"name", "gender"}},
-			options:   []interface{}{vector.OptionAfterColumn("active")},
+			selectors: []any{"salary", []string{"name", "gender"}},
+			options:   []any{vector.OptionAfterColumn("active")},
 			columns: []vector.Vector{
 				vector.IntegerWithNA([]int{31, 3, 24, 41, 33}, nil),
 				vector.BooleanWithNA([]bool{true, true, true, false, true}, nil),
@@ -66,8 +66,8 @@ func TestDataframe_Relocate(t *testing.T) {
 		},
 		{
 			name:      "string + []string + before column",
-			selectors: []interface{}{"salary", []string{"name", "gender"}},
-			options:   []interface{}{vector.OptionBeforeColumn("active")},
+			selectors: []any{"salary", []string{"name", "gender"}},
+			options:   []any{vector.OptionBeforeColumn("active")},
 			columns: []vector.Vector{
 				vector.IntegerWithNA([]int{31, 3, 24, 41, 33}, nil),
 				vector.IntegerWithNA([]int{110000, 0, 50000, 120000, 80000}, nil),
@@ -79,7 +79,7 @@ func TestDataframe_Relocate(t *testing.T) {
 		},
 		{
 			name:      "string",
-			selectors: []interface{}{"name"},
+			selectors: []any{"name"},
 			columns: []vector.Vector{
 				vector.IntegerWithNA([]int{31, 3, 24, 41, 33}, nil),
 				vector.StringWithNA([]string{"m", "", "f", "m", "f"}, []bool{false, true, false, false, false}),
@@ -91,7 +91,7 @@ func TestDataframe_Relocate(t *testing.T) {
 		},
 		{
 			name:      "boolean full",
-			selectors: []interface{}{[]bool{true, false, true, false, true, false}},
+			selectors: []any{[]bool{true, false, true, false, true, false}},
 			columns: []vector.Vector{
 				vector.IntegerWithNA([]int{31, 3, 24, 41, 33}, nil),
 				vector.IntegerWithNA([]int{110000, 0, 50000, 120000, 80000}, nil),
@@ -103,7 +103,7 @@ func TestDataframe_Relocate(t *testing.T) {
 		},
 		{
 			name:      "boolean partial",
-			selectors: []interface{}{[]bool{true, false}},
+			selectors: []any{[]bool{true, false}},
 			columns: []vector.Vector{
 				vector.IntegerWithNA([]int{31, 3, 24, 41, 33}, nil),
 				vector.IntegerWithNA([]int{110000, 0, 50000, 120000, 80000}, nil),

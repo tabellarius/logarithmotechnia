@@ -4,7 +4,7 @@ import (
 	"logarithmotechnia/vector"
 )
 
-func (df *Dataframe) Arrange(args ...interface{}) *Dataframe {
+func (df *Dataframe) Arrange(args ...any) *Dataframe {
 	potentialColumns := []string{}
 	options := []vector.Option{}
 

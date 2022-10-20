@@ -15,7 +15,7 @@ func TestDataframe_Filter(t *testing.T) {
 
 	testData := []struct {
 		name      string
-		selector  interface{}
+		selector  any
 		dfColumns []vector.Vector
 	}{
 		{

@@ -20,12 +20,12 @@ func (p *naPayload) Len() int {
 	return p.length
 }
 
-func (p *naPayload) Pick(int) interface{} {
+func (p *naPayload) Pick(int) any {
 	return nil
 }
 
-func (p *naPayload) Data() []interface{} {
-	outData := make([]interface{}, p.length)
+func (p *naPayload) Data() []any {
+	outData := make([]any, p.length)
 
 	for i := 0; i < p.length; i++ {
 		outData[i] = nil
@@ -166,12 +166,12 @@ func (p *naPayload) Times() ([]time.Time, []bool) {
 	return data, p.naArray()
 }
 
-func (p *naPayload) Interfaces() ([]interface{}, []bool) {
+func (p *naPayload) Anies() ([]any, []bool) {
 	if p.length == 0 {
-		return []interface{}{}, []bool{}
+		return []any{}, []bool{}
 	}
 
-	data := make([]interface{}, p.length)
+	data := make([]any, p.length)
 
 	return data, p.naArray()
 }

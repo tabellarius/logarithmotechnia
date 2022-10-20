@@ -4,8 +4,8 @@ import (
 	"logarithmotechnia/vector"
 )
 
-func (df *Dataframe) Relocate(arguments ...interface{}) *Dataframe {
-	selectors := []interface{}{}
+func (df *Dataframe) Relocate(arguments ...any) *Dataframe {
+	selectors := []any{}
 	options := []vector.Option{}
 
 	for _, argument := range arguments {

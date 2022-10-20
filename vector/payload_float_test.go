@@ -245,25 +245,25 @@ func TestFloatPayload_Interfaces(t *testing.T) {
 	testData := []struct {
 		in    []float64
 		inNA  []bool
-		out   []interface{}
+		out   []any
 		outNA []bool
 	}{
 		{
 			in:    []float64{1, 3, 0, 100, 0},
 			inNA:  []bool{false, false, false, false, false},
-			out:   []interface{}{1.0, 3.0, 0.0, 100.0, 0.0},
+			out:   []any{1.0, 3.0, 0.0, 100.0, 0.0},
 			outNA: []bool{false, false, false, false, false},
 		},
 		{
 			in:    []float64{10, 0, 12, 14, 1110},
 			inNA:  []bool{false, false, false, true, true},
-			out:   []interface{}{10.0, 0.0, 12.0, nil, nil},
+			out:   []any{10.0, 0.0, 12.0, nil, nil},
 			outNA: []bool{false, false, false, true, true},
 		},
 		{
 			in:    []float64{1, 3, 0, 100, 0, -11, -10},
 			inNA:  []bool{false, false, false, false, false, false, true},
-			out:   []interface{}{1.0, 3.0, 0.0, 100.0, 0.0, -11.0, nil},
+			out:   []any{1.0, 3.0, 0.0, 100.0, 0.0, -11.0, nil},
 			outNA: []bool{false, false, false, false, false, false, true},
 		},
 	}
@@ -273,9 +273,9 @@ func TestFloatPayload_Interfaces(t *testing.T) {
 			vec := FloatWithNA(data.in, data.inNA)
 			payload := vec.(*vector).payload.(*floatPayload)
 
-			interfaces, na := payload.Interfaces()
+			interfaces, na := payload.Anies()
 			if !reflect.DeepEqual(interfaces, data.out) {
-				t.Error(fmt.Sprintf("Interfaces (%v) are not equal to data.out (%v)\n", interfaces, data.out))
+				t.Error(fmt.Sprintf("Anies (%v) are not equal to data.out (%v)\n", interfaces, data.out))
 			}
 			if !reflect.DeepEqual(na, data.outNA) {
 				t.Error(fmt.Sprintf("NA (%v) are not equal to data.outNA (%v)\n", na, data.outNA))
@@ -463,7 +463,7 @@ func TestFloatPayload_ByIndices(t *testing.T) {
 func TestFloatPayload_SupportsWhicher(t *testing.T) {
 	testData := []struct {
 		name        string
-		filter      interface{}
+		filter      any
 		isSupported bool
 	}{
 		{
@@ -501,7 +501,7 @@ func TestFloatPayload_SupportsWhicher(t *testing.T) {
 func TestFloatPayload_Whicher(t *testing.T) {
 	testData := []struct {
 		name string
-		fn   interface{}
+		fn   any
 		out  []bool
 	}{
 		{
@@ -546,7 +546,7 @@ func TestFloatPayload_Whicher(t *testing.T) {
 func TestFloatPayload_SupportsApplier(t *testing.T) {
 	testData := []struct {
 		name        string
-		applier     interface{}
+		applier     any
 		isSupported bool
 	}{
 		{
@@ -579,7 +579,7 @@ func TestFloatPayload_SupportsApplier(t *testing.T) {
 func TestFloatPayload_Apply(t *testing.T) {
 	testData := []struct {
 		name        string
-		applier     interface{}
+		applier     any
 		dataIn      []float64
 		naIn        []bool
 		dataOut     []float64
@@ -671,7 +671,7 @@ func TestFloatPayload_Apply(t *testing.T) {
 func TestFloatPayload_SupportsSummarizer(t *testing.T) {
 	testData := []struct {
 		name        string
-		summarizer  interface{}
+		summarizer  any
 		isSupported bool
 	}{
 		{
@@ -707,7 +707,7 @@ func TestFloatPayload_Summarize(t *testing.T) {
 
 	testData := []struct {
 		name       string
-		summarizer interface{}
+		summarizer any
 		dataIn     []float64
 		naIn       []bool
 		dataOut    []float64
@@ -887,7 +887,7 @@ func TestFloatPayload_Find(t *testing.T) {
 
 	testData := []struct {
 		name   string
-		needle interface{}
+		needle any
 		pos    int
 	}{
 		{"existent", 4.1, 4},
@@ -913,7 +913,7 @@ func TestFloatPayload_FindAll(t *testing.T) {
 
 	testData := []struct {
 		name   string
-		needle interface{}
+		needle any
 		pos    []int
 	}{
 		{"existent", 1, []int{1, 3}},
@@ -938,7 +938,7 @@ func TestFloatPayload_Eq(t *testing.T) {
 	payload := FloatPayload([]float64{1.5, 0, 1.5, 1.5, 1}, []bool{false, false, true, false, false}).(*floatPayload)
 
 	testData := []struct {
-		eq  interface{}
+		eq  any
 		cmp []bool
 	}{
 		{1.5, []bool{true, false, false, true, false}},
@@ -973,7 +973,7 @@ func TestFloatPayload_Neq(t *testing.T) {
 	payload := FloatPayload([]float64{1.5, 0, 1.5, 1.5, 1}, []bool{false, false, true, false, false}).(*floatPayload)
 
 	testData := []struct {
-		eq  interface{}
+		eq  any
 		cmp []bool
 	}{
 		{1.5, []bool{false, true, true, false, true}},
@@ -1007,7 +1007,7 @@ func TestFloatPayload_Gt(t *testing.T) {
 	payload := FloatPayload([]float64{1.5, 0, 1.5, 1.5, 1}, []bool{false, false, true, false, false}).(*floatPayload)
 
 	testData := []struct {
-		val interface{}
+		val any
 		cmp []bool
 	}{
 		{1.0, []bool{true, false, false, true, false}},
@@ -1030,7 +1030,7 @@ func TestFloatPayload_Lt(t *testing.T) {
 	payload := FloatPayload([]float64{1.5, 0, 1.5, 1.5, 1}, []bool{false, false, true, false, false}).(*floatPayload)
 
 	testData := []struct {
-		val interface{}
+		val any
 		cmp []bool
 	}{
 		{1.0, []bool{false, true, false, false, false}},
@@ -1053,7 +1053,7 @@ func TestFloatPayload_Gte(t *testing.T) {
 	payload := FloatPayload([]float64{1.5, 0, 1.5, 1.5, 1}, []bool{false, false, true, false, false}).(*floatPayload)
 
 	testData := []struct {
-		val interface{}
+		val any
 		cmp []bool
 	}{
 		{1.0, []bool{true, false, false, true, true}},
@@ -1076,7 +1076,7 @@ func TestFloatPayload_Lte(t *testing.T) {
 	payload := FloatPayload([]float64{1.5, 0, 1.5, 1.5, 1}, []bool{false, false, true, false, false}).(*floatPayload)
 
 	testData := []struct {
-		val interface{}
+		val any
 		cmp []bool
 	}{
 		{1.0, []bool{false, true, false, false, true}},
@@ -1100,20 +1100,20 @@ func TestFloatPayload_Groups(t *testing.T) {
 		name    string
 		payload Payload
 		groups  [][]int
-		values  []interface{}
+		values  []any
 	}{
 		{
 			name:    "normal",
 			payload: FloatPayload([]float64{-20, 10, 4, -20, 7, -20, 10, -20, 4, 10}, nil),
 			groups:  [][]int{{1, 4, 6, 8}, {2, 7, 10}, {3, 9}, {5}},
-			values:  []interface{}{-20.0, 10.0, 4.0, 7.0},
+			values:  []any{-20.0, 10.0, 4.0, 7.0},
 		},
 		{
 			name: "with NA",
 			payload: FloatPayload([]float64{-20, 10, 4, -20, 10, -20, 10, -20, 4, 7},
 				[]bool{false, false, false, false, false, false, true, true, false, false}),
 			groups: [][]int{{1, 4, 6}, {2, 5}, {3, 9}, {10}, {7, 8}},
-			values: []interface{}{-20.0, 10.0, 4.0, 7.0, nil},
+			values: []any{-20.0, 10.0, 4.0, 7.0, nil},
 		},
 	}
 
@@ -1226,17 +1226,17 @@ func TestFloatPayload_Pick(t *testing.T) {
 	testData := []struct {
 		name string
 		idx  int
-		val  interface{}
+		val  any
 	}{
 		{
 			name: "normal 2",
 			idx:  2,
-			val:  interface{}(2.0),
+			val:  any(2.0),
 		},
 		{
 			name: "normal 5",
 			idx:  5,
-			val:  interface{}(5.0),
+			val:  any(5.0),
 		},
 		{
 			name: "na",
@@ -1271,17 +1271,17 @@ func TestFloatPayload_Data(t *testing.T) {
 	testData := []struct {
 		name    string
 		payload Payload
-		outData []interface{}
+		outData []any
 	}{
 		{
 			name:    "empty",
 			payload: FloatPayload([]float64{}, []bool{}),
-			outData: []interface{}{},
+			outData: []any{},
 		},
 		{
 			name:    "non-empty",
 			payload: FloatPayload([]float64{1, 2, 3, 4, 5}, []bool{false, false, true, true, false}),
-			outData: []interface{}{1.0, 2.0, nil, nil, 5.0},
+			outData: []any{1.0, 2.0, nil, nil, 5.0},
 		},
 	}
 
@@ -1303,7 +1303,7 @@ func TestFloatPayload_ApplyTo(t *testing.T) {
 	testData := []struct {
 		name        string
 		indices     []int
-		applier     interface{}
+		applier     any
 		dataOut     []float64
 		naOut       []bool
 		isNAPayload bool

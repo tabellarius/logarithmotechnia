@@ -20,11 +20,11 @@ func (p *booleanPayload) Len() int {
 	return p.length
 }
 
-func (p *booleanPayload) Pick(idx int) interface{} {
+func (p *booleanPayload) Pick(idx int) any {
 	return pickValueWithNA(idx, p.data, p.na, p.length)
 }
 
-func (p *booleanPayload) Data() []interface{} {
+func (p *booleanPayload) Data() []any {
 	return dataWithNAToInterfaceArray(p.data, p.na)
 }
 
@@ -180,12 +180,12 @@ func (p *booleanPayload) Strings() ([]string, []bool) {
 	return data, na
 }
 
-func (p *booleanPayload) Interfaces() ([]interface{}, []bool) {
+func (p *booleanPayload) Anies() ([]any, []bool) {
 	if p.length == 0 {
-		return []interface{}{}, []bool{}
+		return []any{}, []bool{}
 	}
 
-	data := make([]interface{}, p.length)
+	data := make([]any, p.length)
 	for i := 0; i < p.length; i++ {
 		if p.na[i] {
 			data[i] = nil
@@ -247,7 +247,7 @@ func (p *booleanPayload) adjustToBiggerSize(size int) Payload {
 	return BooleanPayload(data, na)
 }
 
-func (p *booleanPayload) Groups() ([][]int, []interface{}) {
+func (p *booleanPayload) Groups() ([][]int, []any) {
 	groups, values := groupsForData(p.data, p.na)
 
 	return groups, values
@@ -269,19 +269,19 @@ func (p *booleanPayload) Find(needle any) int {
 	return find(needle, p.data, p.na, p.convertComparator)
 }
 
-func (p *booleanPayload) FindAll(needle interface{}) []int {
+func (p *booleanPayload) FindAll(needle any) []int {
 	return findAll(needle, p.data, p.na, p.convertComparator)
 }
 
-func (p *booleanPayload) Eq(val interface{}) []bool {
+func (p *booleanPayload) Eq(val any) []bool {
 	return eq(val, p.data, p.na, p.convertComparator)
 }
 
-func (p *booleanPayload) Neq(val interface{}) []bool {
+func (p *booleanPayload) Neq(val any) []bool {
 	return neq(val, p.data, p.na, p.convertComparator)
 }
 
-func (p *booleanPayload) convertComparator(val interface{}) (bool, bool) {
+func (p *booleanPayload) convertComparator(val any) (bool, bool) {
 	v, ok := val.(bool)
 
 	return v, ok

@@ -18,18 +18,18 @@ type Vector interface {
 
 	ByIndices(indices []int) Vector
 	FromTo(from, to int) Vector
-	Filter(whicher interface{}) Vector
-	SupportsWhicher(whicher interface{}) bool
-	Which(whicher interface{}) []bool
-	SupportsApplier(applier interface{}) bool
-	Apply(applier interface{}) Vector
-	ApplyTo(whicher interface{}, applier interface{}) Vector
+	Filter(whicher any) Vector
+	SupportsWhicher(whicher any) bool
+	Which(whicher any) []bool
+	SupportsApplier(applier any) bool
+	Apply(applier any) Vector
+	ApplyTo(whicher any, applier any) Vector
 	Append(vec Vector) Vector
 	Adjust(size int) Vector
-	Pick(idx int) interface{}
-	Data() []interface{}
+	Pick(idx int) any
+	Data() []any
 
-	Groups() ([][]int, []interface{})
+	Groups() ([][]int, []any)
 	Ungroup() Vector
 	IsGrouped() bool
 	GroupByIndices(index GroupIndex) Vector
@@ -46,7 +46,7 @@ type Vector interface {
 	Stringable
 	Complexable
 	Timeable
-	Interfaceable
+	Anyable
 	AsInteger(options ...Option) Vector
 	AsFloat(options ...Option) Vector
 	AsComplex(options ...Option) Vector
@@ -57,7 +57,7 @@ type Vector interface {
 	Transform(fn TransformFunc) Vector
 
 	Finder
-	Has(interface{}) bool
+	Has(any) bool
 	Comparable
 	Ordered
 	Arrangeable
@@ -80,24 +80,24 @@ type Payload interface {
 	Append(payload Payload) Payload
 	Adjust(size int) Payload
 	Options() []Option
-	Pick(idx int) interface{}
-	Data() []interface{}
+	Pick(idx int) any
+	Data() []any
 }
 
 type Whichable interface {
-	SupportsWhicher(whicher interface{}) bool
-	Which(whicher interface{}) []bool
+	SupportsWhicher(whicher any) bool
+	Which(whicher any) []bool
 }
 
 type Appliable interface {
-	SupportsApplier(applier interface{}) bool
-	Apply(applier interface{}) Payload
-	ApplyTo(indices []int, applier interface{}) Payload
+	SupportsApplier(applier any) bool
+	Apply(applier any) Payload
+	ApplyTo(indices []int, applier any) Payload
 }
 
 type Summarizable interface {
-	SupportsSummarizer(summarizer interface{}) bool
-	Summarize(summarizer interface{}) Payload
+	SupportsSummarizer(summarizer any) bool
+	Summarize(summarizer any) Payload
 }
 
 type Intable interface {
@@ -124,31 +124,31 @@ type Timeable interface {
 	Times() ([]time.Time, []bool)
 }
 
-type Interfaceable interface {
-	Interfaces() ([]interface{}, []bool)
+type Anyable interface {
+	Anies() ([]any, []bool)
 }
 
-type TransformFunc = func([]interface{}, []bool) Payload
+type TransformFunc = func([]any, []bool) Payload
 
 type Configurable interface {
 	Options() []Option
 }
 
 type Finder interface {
-	Find(interface{}) int
-	FindAll(interface{}) []int
+	Find(any) int
+	FindAll(any) []int
 }
 
 type Comparable interface {
-	Eq(interface{}) []bool
-	Neq(interface{}) []bool
+	Eq(any) []bool
+	Neq(any) []bool
 }
 
 type Ordered interface {
-	Gt(interface{}) []bool
-	Lt(interface{}) []bool
-	Gte(interface{}) []bool
-	Lte(interface{}) []bool
+	Gt(any) []bool
+	Lt(any) []bool
+	Gte(any) []bool
+	Lte(any) []bool
 }
 
 type Arrangeable interface {
@@ -157,7 +157,7 @@ type Arrangeable interface {
 }
 
 type Grouper interface {
-	Groups() ([][]int, []interface{})
+	Groups() ([][]int, []any)
 }
 
 type IsUniquer interface {
@@ -232,7 +232,7 @@ func (v *vector) FromTo(from, to int) Vector {
 	return v.ByIndices(v.filterByFromTo(from, to))
 }
 
-func (v *vector) Filter(whicher interface{}) Vector {
+func (v *vector) Filter(whicher any) Vector {
 	if index, ok := whicher.(int); ok {
 		return v.ByIndices([]int{index})
 	}
@@ -252,7 +252,7 @@ func (v *vector) Filter(whicher interface{}) Vector {
 	return NA(0)
 }
 
-func (v *vector) SupportsWhicher(whicher interface{}) bool {
+func (v *vector) SupportsWhicher(whicher any) bool {
 	payload, ok := v.payload.(Whichable)
 	if ok {
 		return payload.SupportsWhicher(whicher)
@@ -261,7 +261,7 @@ func (v *vector) SupportsWhicher(whicher interface{}) bool {
 	return false
 }
 
-func (v *vector) Which(whicher interface{}) []bool {
+func (v *vector) Which(whicher any) []bool {
 	payload, ok := v.payload.(Whichable)
 	if ok && payload.SupportsWhicher(whicher) {
 		return payload.Which(whicher)
@@ -270,7 +270,7 @@ func (v *vector) Which(whicher interface{}) []bool {
 	return make([]bool, v.length)
 }
 
-func (v *vector) SupportsApplier(applier interface{}) bool {
+func (v *vector) SupportsApplier(applier any) bool {
 	payload, ok := v.payload.(Appliable)
 	if ok {
 		return payload.SupportsApplier(applier)
@@ -279,7 +279,7 @@ func (v *vector) SupportsApplier(applier interface{}) bool {
 	return false
 }
 
-func (v *vector) Apply(applier interface{}) Vector {
+func (v *vector) Apply(applier any) Vector {
 	payload, ok := v.payload.(Appliable)
 	if !ok || !payload.SupportsApplier(applier) {
 		return NA(v.Len())
@@ -290,7 +290,7 @@ func (v *vector) Apply(applier interface{}) Vector {
 	return New(newPayload, v.Options()...)
 }
 
-func (v *vector) ApplyTo(whicher interface{}, applier interface{}) Vector {
+func (v *vector) ApplyTo(whicher any, applier any) Vector {
 	payload, ok := v.payload.(Appliable)
 	if !ok {
 		return NA(v.length)
@@ -416,20 +416,20 @@ func (v *vector) Adjust(size int) Vector {
 	return New(newPayload, v.Options()...)
 }
 
-func (v *vector) Pick(idx int) interface{} {
+func (v *vector) Pick(idx int) any {
 	return v.payload.Pick(idx)
 }
 
-func (v *vector) Data() []interface{} {
+func (v *vector) Data() []any {
 	return v.payload.Data()
 }
 
-func (v *vector) Groups() ([][]int, []interface{}) {
+func (v *vector) Groups() ([][]int, []any) {
 	if groupper, ok := v.payload.(Grouper); ok {
 		return groupper.Groups()
 	}
 
-	return [][]int{incIndices(indicesArray(v.length))}, []interface{}{nil}
+	return [][]int{incIndices(indicesArray(v.length))}, []any{nil}
 }
 
 func (v *vector) IsGrouped() bool {
@@ -611,12 +611,12 @@ func (v *vector) Times() ([]time.Time, []bool) {
 	return NA(v.length).Times()
 }
 
-func (v *vector) Interfaces() ([]interface{}, []bool) {
-	if payload, ok := v.payload.(Interfaceable); ok {
-		return payload.Interfaces()
+func (v *vector) Anies() ([]any, []bool) {
+	if payload, ok := v.payload.(Anyable); ok {
+		return payload.Anies()
 	}
 
-	return NA(v.length).Interfaces()
+	return NA(v.length).Anies()
 }
 
 func (v *vector) AsInteger(options ...Option) Vector {
@@ -680,18 +680,18 @@ func (v *vector) AsTime(options ...Option) Vector {
 }
 
 func (v *vector) AsInterface(options ...Option) Vector {
-	if payload, ok := v.payload.(Interfaceable); ok {
-		values, na := payload.Interfaces()
+	if payload, ok := v.payload.(Anyable); ok {
+		values, na := payload.Anies()
 
-		return InterfaceWithNA(values, na, options...)
+		return AnyWithNA(values, na, options...)
 	}
 
 	return NA(v.length)
 }
 
 func (v *vector) Transform(fn TransformFunc) Vector {
-	if interfaceable, ok := v.Payload().(Interfaceable); ok {
-		values, na := interfaceable.Interfaces()
+	if interfaceable, ok := v.Payload().(Anyable); ok {
+		values, na := interfaceable.Anies()
 		payload := fn(values, na)
 
 		return New(payload, v.Options()...)
@@ -700,7 +700,7 @@ func (v *vector) Transform(fn TransformFunc) Vector {
 	return NA(v.length)
 }
 
-func (v *vector) Find(needle interface{}) int {
+func (v *vector) Find(needle any) int {
 	if finder, ok := v.payload.(Finder); ok {
 		return finder.Find(needle)
 	}
@@ -710,7 +710,7 @@ func (v *vector) Find(needle interface{}) int {
 
 /* Finder interface */
 
-func (v *vector) FindAll(needle interface{}) []int {
+func (v *vector) FindAll(needle any) []int {
 	if finder, ok := v.payload.(Finder); ok {
 		return finder.FindAll(needle)
 	}
@@ -718,7 +718,7 @@ func (v *vector) FindAll(needle interface{}) []int {
 	return []int{}
 }
 
-func (v *vector) Has(needle interface{}) bool {
+func (v *vector) Has(needle any) bool {
 	if finder, ok := v.payload.(Finder); ok {
 		return finder.Find(needle) > 0
 	}
@@ -728,7 +728,7 @@ func (v *vector) Has(needle interface{}) bool {
 
 /* Comparable interface */
 
-func (v *vector) Eq(val interface{}) []bool {
+func (v *vector) Eq(val any) []bool {
 	if comparee, ok := v.payload.(Comparable); ok {
 		return comparee.Eq(val)
 	}
@@ -736,7 +736,7 @@ func (v *vector) Eq(val interface{}) []bool {
 	return make([]bool, v.length)
 }
 
-func (v *vector) Neq(val interface{}) []bool {
+func (v *vector) Neq(val any) []bool {
 	if comparee, ok := v.payload.(Comparable); ok {
 		return comparee.Neq(val)
 	}
@@ -751,7 +751,7 @@ func (v *vector) Neq(val interface{}) []bool {
 
 /* Ordered interface */
 
-func (v *vector) Gt(val interface{}) []bool {
+func (v *vector) Gt(val any) []bool {
 	if comparee, ok := v.payload.(Ordered); ok {
 		return comparee.Gt(val)
 	}
@@ -759,7 +759,7 @@ func (v *vector) Gt(val interface{}) []bool {
 	return make([]bool, v.length)
 }
 
-func (v *vector) Lt(val interface{}) []bool {
+func (v *vector) Lt(val any) []bool {
 	if comparee, ok := v.payload.(Ordered); ok {
 		return comparee.Lt(val)
 	}
@@ -767,7 +767,7 @@ func (v *vector) Lt(val interface{}) []bool {
 	return make([]bool, v.length)
 }
 
-func (v *vector) Gte(val interface{}) []bool {
+func (v *vector) Gte(val any) []bool {
 	if comparee, ok := v.payload.(Ordered); ok {
 		return comparee.Gte(val)
 	}
@@ -775,7 +775,7 @@ func (v *vector) Gte(val interface{}) []bool {
 	return make([]bool, v.length)
 }
 
-func (v *vector) Lte(val interface{}) []bool {
+func (v *vector) Lte(val any) []bool {
 	if comparee, ok := v.payload.(Ordered); ok {
 		return comparee.Lte(val)
 	}
