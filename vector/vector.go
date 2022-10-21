@@ -71,9 +71,14 @@ type Vector interface {
 	Even() []bool
 	Nth(int) []bool
 
+	Add(...Vector) Vector
+	Sub(...Vector) Vector
+	Mul(...Vector) Vector
+	Div(...Vector) Vector
+
 	Options() []Option
 
-	SummerV
+	Sum() Vector
 }
 
 type Payload interface {

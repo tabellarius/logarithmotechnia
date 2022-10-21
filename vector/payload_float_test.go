@@ -223,6 +223,12 @@ func TestFloatPayload_Integers(t *testing.T) {
 			out:   []int{1, 3, 0, 100, 0, -11, 0},
 			outNA: []bool{false, false, false, false, false, false, true},
 		},
+		{
+			in:    []float64{1, 2, math.NaN(), math.Inf(1), math.Inf(-1)},
+			inNA:  []bool{false, false, false, false, false},
+			out:   []int{1, 2, 0, 0, 0},
+			outNA: []bool{false, false, true, true, true},
+		},
 	}
 
 	for i, data := range testData {

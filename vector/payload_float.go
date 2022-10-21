@@ -88,16 +88,19 @@ func (p *floatPayload) Integers() ([]int, []bool) {
 	}
 
 	data := make([]int, p.length)
+	na := make([]bool, p.Len())
+	copy(na, p.na)
+
 	for i := 0; i < p.length; i++ {
 		if p.na[i] {
 			data[i] = 0
+		} else if math.IsNaN(p.data[i]) || math.IsInf(p.data[i], 1) || math.IsInf(p.data[i], -1) {
+			data[i] = 0
+			na[i] = true
 		} else {
 			data[i] = int(p.data[i])
 		}
 	}
-
-	na := make([]bool, p.Len())
-	copy(na, p.na)
 
 	return data, na
 }
@@ -126,11 +129,7 @@ func (p *floatPayload) Complexes() ([]complex128, []bool) {
 		if p.na[i] {
 			data[i] = cmplx.NaN()
 		} else {
-			if math.IsNaN(p.data[i]) {
-				data[i] = cmplx.NaN()
-			} else {
-				data[i] = complex(p.data[i], 0)
-			}
+			data[i] = complex(p.data[i], 0)
 		}
 	}
 
