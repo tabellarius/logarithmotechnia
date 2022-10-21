@@ -1,7 +1,6 @@
 Arithmetic functions
-Finder interface for InterfacePayload
-Comparator for Interface payload(?)
-IsOdd(), IsEven(), IsNth() functions (return bool)
+Finder interface for AnyPayload
+Comparator for Any payload(?)
 
 Add NewDefNAable() for DefNAble
 Review type conversions

@@ -1963,3 +1963,112 @@ func TestVector_Coalesce(t *testing.T) {
 		})
 	}
 }
+
+func TestVector_Even(t *testing.T) {
+	testData := []struct {
+		name        string
+		vec         Vector
+		outBooleans []bool
+	}{
+		{
+			name:        "five",
+			vec:         Integer([]int{1, 2, 3, 4, 5}),
+			outBooleans: []bool{false, true, false, true, false},
+		},
+		{
+			name:        "eight",
+			vec:         Float([]float64{1, 2, 3, 4, 5, 6, 7, 8}),
+			outBooleans: []bool{false, true, false, true, false, true, false, true},
+		},
+		{
+			name:        "empty",
+			vec:         Any([]any{}),
+			outBooleans: []bool{},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			outBooleans := data.vec.Even()
+			if !reflect.DeepEqual(outBooleans, data.outBooleans) {
+				t.Error(fmt.Sprintf("vec.Even() (%v) does not match data.outBooleans (%v)", outBooleans, data.outBooleans))
+			}
+		})
+	}
+}
+
+func TestVector_Odd(t *testing.T) {
+	testData := []struct {
+		name        string
+		vec         Vector
+		outBooleans []bool
+	}{
+		{
+			name:        "five",
+			vec:         Integer([]int{1, 2, 3, 4, 5}),
+			outBooleans: []bool{true, false, true, false, true},
+		},
+		{
+			name:        "eight",
+			vec:         Float([]float64{1, 2, 3, 4, 5, 6, 7, 8}),
+			outBooleans: []bool{true, false, true, false, true, false, true, false},
+		},
+		{
+			name:        "empty",
+			vec:         Time([]time.Time{}),
+			outBooleans: []bool{},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			outBooleans := data.vec.Odd()
+			if !reflect.DeepEqual(outBooleans, data.outBooleans) {
+				t.Error(fmt.Sprintf("vec.Even() (%v) does not match data.outBooleans (%v)", outBooleans, data.outBooleans))
+			}
+		})
+	}
+}
+
+func TestVector_Nth(t *testing.T) {
+	testData := []struct {
+		name        string
+		nth         int
+		vec         Vector
+		outBooleans []bool
+	}{
+		{
+			name:        "every 3",
+			nth:         3,
+			vec:         Integer([]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}),
+			outBooleans: []bool{false, false, true, false, false, true, false, false, true, false},
+		},
+		{
+			name:        "every 5",
+			nth:         5,
+			vec:         Integer([]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}),
+			outBooleans: []bool{false, false, false, false, true, false, false, false, false, true},
+		},
+		{
+			name:        "every 1",
+			nth:         1,
+			vec:         Integer([]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}),
+			outBooleans: []bool{true, true, true, true, true, true, true, true, true, true},
+		},
+		{
+			name:        "empty",
+			nth:         3,
+			vec:         Time([]time.Time{}),
+			outBooleans: []bool{},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			outBooleans := data.vec.Nth(data.nth)
+			if !reflect.DeepEqual(outBooleans, data.outBooleans) {
+				t.Error(fmt.Sprintf("vec.Even() (%v) does not match data.outBooleans (%v)", outBooleans, data.outBooleans))
+			}
+		})
+	}
+}
