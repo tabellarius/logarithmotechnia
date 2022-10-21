@@ -937,7 +937,7 @@ func TestInterfacePayload_Summarize(t *testing.T) {
 }
 
 func TestInterfacePayload_Append(t *testing.T) {
-	payload := InterfacePayload([]any{1, 2, 3}, nil)
+	payload := AnyPayload([]any{1, 2, 3}, nil)
 
 	testData := []struct {
 		name    string
@@ -982,8 +982,8 @@ func TestInterfacePayload_Append(t *testing.T) {
 }
 
 func TestInterfacePayload_Adjust(t *testing.T) {
-	payload5 := InterfacePayload([]any{1, 2, 3, 4, 5}, nil).(*anyPayload)
-	payload3 := InterfacePayload([]any{1, 2, 3}, []bool{false, false, true}).(*anyPayload)
+	payload5 := AnyPayload([]any{1, 2, 3, 4, 5}, nil).(*anyPayload)
+	payload3 := AnyPayload([]any{1, 2, 3}, []bool{false, false, true}).(*anyPayload)
 
 	testData := []struct {
 		name       string
@@ -995,19 +995,19 @@ func TestInterfacePayload_Adjust(t *testing.T) {
 			inPayload:  payload5,
 			name:       "same",
 			size:       5,
-			outPaylout: InterfacePayload([]any{1, 2, 3, 4, 5}, nil).(*anyPayload),
+			outPaylout: AnyPayload([]any{1, 2, 3, 4, 5}, nil).(*anyPayload),
 		},
 		{
 			inPayload:  payload5,
 			name:       "lesser",
 			size:       3,
-			outPaylout: InterfacePayload([]any{1, 2, 3}, nil).(*anyPayload),
+			outPaylout: AnyPayload([]any{1, 2, 3}, nil).(*anyPayload),
 		},
 		{
 			inPayload: payload3,
 			name:      "bigger",
 			size:      10,
-			outPaylout: InterfacePayload([]any{1, 2, 0, 1, 2, 0, 1, 2, 0, 1},
+			outPaylout: AnyPayload([]any{1, 2, 0, 1, 2, 0, 1, 2, 0, 1},
 				[]bool{false, false, true, false, false, true, false, false, true, false}).(*anyPayload),
 		},
 	}
@@ -1029,7 +1029,7 @@ func TestInterfacePayload_Adjust(t *testing.T) {
 }
 
 func TestInterfacePayload_Pick(t *testing.T) {
-	payload := InterfacePayload([]any{"a", "b", "a", "b", "c"}, []bool{false, false, true, true, false})
+	payload := AnyPayload([]any{"a", "b", "a", "b", "c"}, []bool{false, false, true, true, false})
 
 	testData := []struct {
 		name string
@@ -1083,12 +1083,12 @@ func TestInterfacePayload_Data(t *testing.T) {
 	}{
 		{
 			name:    "empty",
-			payload: InterfacePayload([]any{}, []bool{}),
+			payload: AnyPayload([]any{}, []bool{}),
 			outData: []any{},
 		},
 		{
 			name:    "non-empty",
-			payload: InterfacePayload([]any{"a", "b", "a", "b", "c"}, []bool{false, false, true, true, false}),
+			payload: AnyPayload([]any{"a", "b", "a", "b", "c"}, []bool{false, false, true, true, false}),
 			outData: []any{"a", "b", nil, nil, "c"},
 		},
 	}
@@ -1106,7 +1106,7 @@ func TestInterfacePayload_Data(t *testing.T) {
 }
 
 func TestInterfacePayload_ApplyTo(t *testing.T) {
-	srcPayload := InterfacePayload([]any{1, 2, 3, 4, 5}, []bool{false, true, false, true, false})
+	srcPayload := AnyPayload([]any{1, 2, 3, 4, 5}, []bool{false, true, false, true, false})
 
 	testData := []struct {
 		name        string

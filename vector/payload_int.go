@@ -51,13 +51,7 @@ func (p *integerPayload) SupportsApplier(applier any) bool {
 }
 
 func (p *integerPayload) Apply(applier any) Payload {
-	data, na := apply(p.data, p.na, applier, 0)
-
-	if data == nil {
-		return NAPayload(p.length)
-	}
-
-	return IntegerPayload(data, na, p.Options()...)
+	return apply(p.data, p.na, applier, p.Options())
 }
 
 func (p *integerPayload) ApplyTo(indices []int, applier any) Payload {

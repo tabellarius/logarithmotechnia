@@ -503,7 +503,7 @@ func TestVector_AsInterface(t *testing.T) {
 
 	for i, data := range testData {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			vec := data.vec.AsInterface()
+			vec := data.vec.AsAny()
 			if data.isNA {
 				if _, ok := vec.Payload().(*naPayload); ok {
 					if vec.Len() != data.vec.Len() {

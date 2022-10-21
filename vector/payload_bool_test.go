@@ -7,6 +7,7 @@ import (
 	"reflect"
 	"strconv"
 	"testing"
+	"time"
 )
 
 func TestBoolean(t *testing.T) {
@@ -551,6 +552,108 @@ func TestBooleanPayload_SupportsApplier(t *testing.T) {
 			applier:     func(bool, bool) (bool, bool) { return true, true },
 			isSupported: true,
 		},
+		{
+			name:        "func(bool) bool)",
+			applier:     func(bool) bool { return true },
+			isSupported: true,
+		},
+
+		{
+			name:        "func(int, bool, bool) (any, bool)",
+			applier:     func(int, bool, bool) (any, bool) { return true, true },
+			isSupported: true,
+		},
+		{
+			name:        "func(bool, bool) (any, bool)",
+			applier:     func(bool, bool) (any, bool) { return true, true },
+			isSupported: true,
+		},
+		{
+			name:        "func(bool) any)",
+			applier:     func(bool) any { return true },
+			isSupported: true,
+		},
+
+		{
+			name:        "func(int, bool, bool) (complex128, bool)",
+			applier:     func(int, bool, bool) (complex128, bool) { return 0, true },
+			isSupported: true,
+		},
+		{
+			name:        "func(bool, bool) (complex128, bool)",
+			applier:     func(bool, bool) (complex128, bool) { return 0, true },
+			isSupported: true,
+		},
+		{
+			name:        "func(bool) complex128)",
+			applier:     func(bool) complex128 { return 0 },
+			isSupported: true,
+		},
+
+		{
+			name:        "func(int, bool, bool) (float64, bool)",
+			applier:     func(int, bool, bool) (float64, bool) { return 0, true },
+			isSupported: true,
+		},
+		{
+			name:        "func(bool, bool) (float64, bool)",
+			applier:     func(bool, bool) (float64, bool) { return 0, true },
+			isSupported: true,
+		},
+		{
+			name:        "func(bool) float64)",
+			applier:     func(bool) float64 { return 0 },
+			isSupported: true,
+		},
+
+		{
+			name:        "func(int, bool, bool) (int, bool)",
+			applier:     func(int, bool, bool) (int, bool) { return 0, true },
+			isSupported: true,
+		},
+		{
+			name:        "func(bool, bool) (int, bool)",
+			applier:     func(bool, bool) (int, bool) { return 0, true },
+			isSupported: true,
+		},
+		{
+			name:        "func(bool) int)",
+			applier:     func(bool) int { return 0 },
+			isSupported: true,
+		},
+
+		{
+			name:        "func(int, bool, bool) (string, bool)",
+			applier:     func(int, bool, bool) (string, bool) { return "", true },
+			isSupported: true,
+		},
+		{
+			name:        "func(bool, bool) (string, bool)",
+			applier:     func(bool, bool) (string, bool) { return "", true },
+			isSupported: true,
+		},
+		{
+			name:        "func(bool) string)",
+			applier:     func(bool) string { return "" },
+			isSupported: true,
+		},
+
+		{
+			name:        "func(int, bool, bool) (time.Time, bool)",
+			applier:     func(int, bool, bool) (time.Time, bool) { return time.Time{}, true },
+			isSupported: true,
+		},
+		{
+			name:        "func(bool, bool) (time.Time, bool)",
+			applier:     func(bool, bool) (time.Time, bool) { return time.Time{}, true },
+			isSupported: true,
+		},
+		{
+			name:        "func(bool) time.Time)",
+			applier:     func(bool) time.Time { return time.Time{} },
+			isSupported: true,
+		},
+
 		{
 			name:        "func(int, float64, bool) bool",
 			applier:     func(int, int, bool) bool { return true },

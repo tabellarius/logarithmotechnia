@@ -44,7 +44,7 @@ func (p *anyPayload) Data() []any {
 func (p *anyPayload) ByIndices(indices []int) Payload {
 	data, na := byIndices(indices, p.data, p.na, nil)
 
-	return InterfacePayload(data, na, p.Options()...)
+	return AnyPayload(data, na, p.Options()...)
 }
 
 func (p *anyPayload) StrForElem(idx int) string {
@@ -72,13 +72,7 @@ func (p *anyPayload) SupportsApplier(applier any) bool {
 }
 
 func (p *anyPayload) Apply(applier any) Payload {
-	data, na := apply(p.data, p.na, applier, 0)
-
-	if data == nil {
-		return NAPayload(p.length)
-	}
-
-	return InterfacePayload(data, na, p.Options()...)
+	return apply(p.data, p.na, applier, p.Options())
 }
 
 func (p *anyPayload) ApplyTo(indices []int, applier any) Payload {
@@ -88,7 +82,7 @@ func (p *anyPayload) ApplyTo(indices []int, applier any) Payload {
 		return NAPayload(p.length)
 	}
 
-	return InterfacePayload(data, na, p.Options()...)
+	return AnyPayload(data, na, p.Options()...)
 }
 
 func (p *anyPayload) SupportsSummarizer(summarizer any) bool {
@@ -98,7 +92,7 @@ func (p *anyPayload) SupportsSummarizer(summarizer any) bool {
 func (p *anyPayload) Summarize(summarizer any) Payload {
 	val, na := summarize(p.data, p.na, summarizer, nil, nil)
 
-	return InterfacePayload([]any{val}, []bool{na}, p.Options()...)
+	return AnyPayload([]any{val}, []bool{na}, p.Options()...)
 }
 
 func (p *anyPayload) Integers() ([]int, []bool) {
@@ -255,7 +249,7 @@ func (p *anyPayload) Append(payload Payload) Payload {
 	copy(newNA, p.na)
 	copy(newNA[p.length:], na)
 
-	return InterfacePayload(newVals, newNA, p.Options()...)
+	return AnyPayload(newVals, newNA, p.Options()...)
 }
 
 func (p *anyPayload) Adjust(size int) Payload {
@@ -273,20 +267,20 @@ func (p *anyPayload) Adjust(size int) Payload {
 func (p *anyPayload) adjustToLesserSize(size int) Payload {
 	data, na := adjustToLesserSizeWithNA(p.data, p.na, size)
 
-	return InterfacePayload(data, na, p.Options()...)
+	return AnyPayload(data, na, p.Options()...)
 }
 
 func (p *anyPayload) adjustToBiggerSize(size int) Payload {
 	data, na := adjustToBiggerSizeWithNA(p.data, p.na, p.length, size)
 
-	return InterfacePayload(data, na, p.Options()...)
+	return AnyPayload(data, na, p.Options()...)
 }
 
 func (p *anyPayload) Options() []Option {
 	return []Option{}
 }
 
-func InterfacePayload(data []any, na []bool, options ...Option) Payload {
+func AnyPayload(data []any, na []bool, options ...Option) Payload {
 	length := len(data)
 	conf := MergeOptions(options)
 
@@ -332,7 +326,7 @@ func InterfacePayload(data []any, na []bool, options ...Option) Payload {
 }
 
 func AnyWithNA(data []any, na []bool, options ...Option) Vector {
-	return New(InterfacePayload(data, na, options...), options...)
+	return New(AnyPayload(data, na, options...), options...)
 }
 
 func Any(data []any, options ...Option) Vector {

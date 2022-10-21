@@ -53,7 +53,7 @@ type Vector interface {
 	AsBoolean(options ...Option) Vector
 	AsString(options ...Option) Vector
 	AsTime(options ...Option) Vector
-	AsInterface(options ...Option) Vector
+	AsAny(options ...Option) Vector
 	Transform(fn TransformFunc) Vector
 
 	Finder
@@ -688,7 +688,7 @@ func (v *vector) AsTime(options ...Option) Vector {
 	return NA(v.length)
 }
 
-func (v *vector) AsInterface(options ...Option) Vector {
+func (v *vector) AsAny(options ...Option) Vector {
 	if payload, ok := v.payload.(Anyable); ok {
 		values, na := payload.Anies()
 
