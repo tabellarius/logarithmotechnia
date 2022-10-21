@@ -86,5 +86,24 @@ func (v *vector) Mul(vectors ...Vector) Vector {
 }
 
 func (v *vector) Div(vectors ...Vector) Vector {
-	return nil
+	if len(vectors) == 0 {
+		return v
+	}
+
+	divider, ok := v.payload.(Divider)
+	if !ok {
+		return NA(v.length)
+	}
+
+	var payload Payload
+	for _, vec := range vectors {
+		payload = divider.Div(vec.Payload())
+		if dividable, ok := payload.(Divider); ok {
+			divider = dividable
+		} else {
+			return NA(v.length)
+		}
+	}
+
+	return New(payload, v.Options()...)
 }

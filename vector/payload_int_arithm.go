@@ -89,3 +89,33 @@ func (p *integerPayload) Mul(p2 Payload) Payload {
 
 	return IntegerPayload(integers, na, p.Options()...)
 }
+
+func (p *integerPayload) Div(p2 Payload) Payload {
+	integers := make([]int, p.length)
+	na := make([]bool, p.length)
+
+	if p.length != p2.Len() {
+		p2 = p2.Adjust(p.length)
+	}
+
+	var divIntegers []int
+	var divNA []bool
+	if pType, ok := p2.(*integerPayload); ok {
+		divIntegers = pType.data
+		divNA = pType.na
+	} else if intable, ok := p2.(Intable); ok {
+		divIntegers, divNA = intable.Integers()
+	} else {
+		return NAPayload(p.length)
+	}
+
+	for i := 0; i < p.length; i++ {
+		if p.na[i] || divNA[i] || divIntegers[i] == 0 {
+			na[i] = true
+		} else {
+			integers[i] = p.data[i] / divIntegers[i]
+		}
+	}
+
+	return IntegerPayload(integers, na, p.Options()...)
+}
