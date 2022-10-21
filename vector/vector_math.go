@@ -1,10 +1,6 @@
 package vector
 
-type SummerV interface {
-	Sum() Vector
-}
-
-type SummerP interface {
+type Summer interface {
 	Sum() Payload
 }
 
@@ -19,7 +15,7 @@ func (v *vector) Sum() Vector {
 		return Combine(outValues...)
 	}
 
-	if summer, ok := v.payload.(SummerP); ok {
+	if summer, ok := v.payload.(Summer); ok {
 		return New(summer.Sum(), v.Options()...)
 	}
 
