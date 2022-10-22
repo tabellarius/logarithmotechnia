@@ -1,6 +1,11 @@
 package vector
 
-import "golang.org/x/exp/constraints"
+import (
+	"golang.org/x/exp/constraints"
+	"math"
+	"math/cmplx"
+	"time"
+)
 
 func pickValueWithNA[T any](idx int, data []T, na []bool, maxLen int) any {
 	if idx < 1 || idx > maxLen {
@@ -178,46 +183,62 @@ func selectByBriefFunc[T any](inData []T, inNA []bool, byFunc func(T) bool) []bo
 	return booleans
 }
 
-func supportsApplier[T any](applier any) bool {
-	if _, ok := applier.(func(int, T, bool) (T, bool)); ok {
-		return true
+func apply[T any](inData []T, inNA []bool, applier any, options []Option) Payload {
+	if data, na, ok := applyType[T, bool](inData, inNA, applier, false); ok {
+		return BooleanPayload(data, na, options...)
 	}
 
-	if _, ok := applier.(func(T, bool) (T, bool)); ok {
-		return true
+	if data, na, ok := applyType[T, int](inData, inNA, applier, 0); ok {
+		return IntegerPayload(data, na, options...)
 	}
 
-	if _, ok := applier.(func(T) T); ok {
-		return true
+	if data, na, ok := applyType[T, float64](inData, inNA, applier, math.NaN()); ok {
+		return FloatPayload(data, na, options...)
 	}
 
-	return false
+	if data, na, ok := applyType[T, complex128](inData, inNA, applier, cmplx.NaN()); ok {
+		return ComplexPayload(data, na, options...)
+	}
+
+	if data, na, ok := applyType[T, string](inData, inNA, applier, ""); ok {
+		return StringPayload(data, na, options...)
+	}
+
+	if data, na, ok := applyType[T, time.Time](inData, inNA, applier, time.Time{}); ok {
+		return TimePayload(data, na, options...)
+	}
+
+	if data, na, ok := applyType[T, any](inData, inNA, applier, nil); ok {
+		return AnyPayload(data, na, options...)
+	}
+
+	return NAPayload(len(inData))
 }
 
-func apply[T any](inData []T, inNA []bool, applier any, naDef T) ([]T, []bool) {
-	var data []T = nil
-	var na []bool = nil
-
-	if applyFunc, ok := applier.(func(int, T, bool) (T, bool)); ok {
-		data, na = applyByFunc(inData, inNA, applyFunc, naDef)
+func applyType[T, S any](inData []T, inNA []bool, applier any, naDef S) ([]S, []bool, bool) {
+	if applyFunc, ok := applier.(func(int, T, bool) (S, bool)); ok {
+		data, na := applyByFunc[T, S](inData, inNA, applyFunc, naDef)
+		return data, na, true
 	}
 
-	if applyFunc, ok := applier.(func(T, bool) (T, bool)); ok {
-		data, na = applyByCompactFunc(inData, inNA, applyFunc, naDef)
+	if applyFunc, ok := applier.(func(T, bool) (S, bool)); ok {
+		data, na := applyByCompactFunc[T, S](inData, inNA, applyFunc, naDef)
+		return data, na, true
 	}
 
-	if applyFunc, ok := applier.(func(T) T); ok {
-		data, na = applyByBriefFunc(inData, inNA, applyFunc, naDef)
+	if applyFunc, ok := applier.(func(T) S); ok {
+		data, na := applyByBriefFunc[T, S](inData, inNA, applyFunc, naDef)
+		return data, na, true
 	}
 
-	return data, na
+	return nil, nil, false
 }
 
-func applyByFunc[T any](inData []T, inNA []bool,
-	applyFunc func(int, T, bool) (T, bool), naDef T) ([]T, []bool) {
+func applyByFunc[T, S any](inData []T, inNA []bool,
+	applyFunc func(int, T, bool) (S, bool), naDef S) ([]S, []bool) {
 	length := len(inData)
 
-	data := make([]T, length)
+	data := make([]S, length)
 	na := make([]bool, length)
 
 	for i := 0; i < length; i++ {
@@ -232,11 +253,11 @@ func applyByFunc[T any](inData []T, inNA []bool,
 	return data, na
 }
 
-func applyByCompactFunc[T any](inData []T, inNA []bool,
-	applyFunc func(T, bool) (T, bool), naDef T) ([]T, []bool) {
+func applyByCompactFunc[T, S any](inData []T, inNA []bool,
+	applyFunc func(T, bool) (S, bool), naDef S) ([]S, []bool) {
 	length := len(inData)
 
-	data := make([]T, length)
+	data := make([]S, length)
 	na := make([]bool, length)
 
 	for i := 0; i < length; i++ {
@@ -251,11 +272,11 @@ func applyByCompactFunc[T any](inData []T, inNA []bool,
 	return data, na
 }
 
-func applyByBriefFunc[T any](inData []T, inNA []bool,
-	applyFunc func(T) T, naDef T) ([]T, []bool) {
+func applyByBriefFunc[T, S any](inData []T, inNA []bool,
+	applyFunc func(T) S, naDef S) ([]S, []bool) {
 	length := len(inData)
 
-	data := make([]T, length)
+	data := make([]S, length)
 	na := make([]bool, length)
 
 	for i := 0; i < length; i++ {

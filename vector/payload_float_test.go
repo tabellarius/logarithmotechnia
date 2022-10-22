@@ -549,39 +549,6 @@ func TestFloatPayload_Whicher(t *testing.T) {
 	}
 }
 
-func TestFloatPayload_SupportsApplier(t *testing.T) {
-	testData := []struct {
-		name        string
-		applier     any
-		isSupported bool
-	}{
-		{
-			name:        "func(int, float64, bool) (float64, bool)",
-			applier:     func(int, float64, bool) (float64, bool) { return 0, true },
-			isSupported: true,
-		},
-		{
-			name:        "func(float64, bool) (float64, bool)",
-			applier:     func(float64, bool) (float64, bool) { return 0, true },
-			isSupported: true,
-		},
-		{
-			name:        "func(int, float64, bool) bool",
-			applier:     func(int, float64, bool) bool { return true },
-			isSupported: false,
-		},
-	}
-
-	payload := FloatWithNA([]float64{1}, nil).(*vector).payload.(Appliable)
-	for _, data := range testData {
-		t.Run(data.name, func(t *testing.T) {
-			if payload.SupportsApplier(data.applier) != data.isSupported {
-				t.Error("Applier's support is incorrect.")
-			}
-		})
-	}
-}
-
 func TestFloatPayload_Apply(t *testing.T) {
 	testData := []struct {
 		name        string
@@ -1360,7 +1327,7 @@ func TestFloatPayload_ApplyTo(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			payload := srcPayload.(Appliable).ApplyTo(data.indices, data.applier)
+			payload := srcPayload.(AppliableTo).ApplyTo(data.indices, data.applier)
 
 			if !data.isNAPayload {
 				payloadOut := payload.(*floatPayload)

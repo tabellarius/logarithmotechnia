@@ -250,39 +250,6 @@ func TestInterfacePayload_Which(t *testing.T) {
 	}
 }
 
-func TestInterfacePayload_SupportsApplier(t *testing.T) {
-	testData := []struct {
-		name        string
-		applier     any
-		isSupported bool
-	}{
-		{
-			name:        "func(int, any, bool) (bool, bool)",
-			applier:     func(int, any, bool) (any, bool) { return 1, true },
-			isSupported: true,
-		},
-		{
-			name:        "func(any, bool) (bool, bool)",
-			applier:     func(any, bool) (any, bool) { return 1, true },
-			isSupported: true,
-		},
-		{
-			name:        "func(int, float64, bool) bool",
-			applier:     func(int, int, bool) bool { return true },
-			isSupported: false,
-		},
-	}
-
-	payload := AnyWithNA([]any{}, nil).(*vector).payload.(Appliable)
-	for _, data := range testData {
-		t.Run(data.name, func(t *testing.T) {
-			if payload.SupportsApplier(data.applier) != data.isSupported {
-				t.Error("Applier's support is incorrect.")
-			}
-		})
-	}
-}
-
 func TestInterfacePayload_Apply(t *testing.T) {
 	testData := []struct {
 		name        string
@@ -937,7 +904,7 @@ func TestInterfacePayload_Summarize(t *testing.T) {
 }
 
 func TestInterfacePayload_Append(t *testing.T) {
-	payload := InterfacePayload([]any{1, 2, 3}, nil)
+	payload := AnyPayload([]any{1, 2, 3}, nil)
 
 	testData := []struct {
 		name    string
@@ -982,8 +949,8 @@ func TestInterfacePayload_Append(t *testing.T) {
 }
 
 func TestInterfacePayload_Adjust(t *testing.T) {
-	payload5 := InterfacePayload([]any{1, 2, 3, 4, 5}, nil).(*anyPayload)
-	payload3 := InterfacePayload([]any{1, 2, 3}, []bool{false, false, true}).(*anyPayload)
+	payload5 := AnyPayload([]any{1, 2, 3, 4, 5}, nil).(*anyPayload)
+	payload3 := AnyPayload([]any{1, 2, 3}, []bool{false, false, true}).(*anyPayload)
 
 	testData := []struct {
 		name       string
@@ -995,19 +962,19 @@ func TestInterfacePayload_Adjust(t *testing.T) {
 			inPayload:  payload5,
 			name:       "same",
 			size:       5,
-			outPaylout: InterfacePayload([]any{1, 2, 3, 4, 5}, nil).(*anyPayload),
+			outPaylout: AnyPayload([]any{1, 2, 3, 4, 5}, nil).(*anyPayload),
 		},
 		{
 			inPayload:  payload5,
 			name:       "lesser",
 			size:       3,
-			outPaylout: InterfacePayload([]any{1, 2, 3}, nil).(*anyPayload),
+			outPaylout: AnyPayload([]any{1, 2, 3}, nil).(*anyPayload),
 		},
 		{
 			inPayload: payload3,
 			name:      "bigger",
 			size:      10,
-			outPaylout: InterfacePayload([]any{1, 2, 0, 1, 2, 0, 1, 2, 0, 1},
+			outPaylout: AnyPayload([]any{1, 2, 0, 1, 2, 0, 1, 2, 0, 1},
 				[]bool{false, false, true, false, false, true, false, false, true, false}).(*anyPayload),
 		},
 	}
@@ -1029,7 +996,7 @@ func TestInterfacePayload_Adjust(t *testing.T) {
 }
 
 func TestInterfacePayload_Pick(t *testing.T) {
-	payload := InterfacePayload([]any{"a", "b", "a", "b", "c"}, []bool{false, false, true, true, false})
+	payload := AnyPayload([]any{"a", "b", "a", "b", "c"}, []bool{false, false, true, true, false})
 
 	testData := []struct {
 		name string
@@ -1083,12 +1050,12 @@ func TestInterfacePayload_Data(t *testing.T) {
 	}{
 		{
 			name:    "empty",
-			payload: InterfacePayload([]any{}, []bool{}),
+			payload: AnyPayload([]any{}, []bool{}),
 			outData: []any{},
 		},
 		{
 			name:    "non-empty",
-			payload: InterfacePayload([]any{"a", "b", "a", "b", "c"}, []bool{false, false, true, true, false}),
+			payload: AnyPayload([]any{"a", "b", "a", "b", "c"}, []bool{false, false, true, true, false}),
 			outData: []any{"a", "b", nil, nil, "c"},
 		},
 	}
@@ -1106,7 +1073,7 @@ func TestInterfacePayload_Data(t *testing.T) {
 }
 
 func TestInterfacePayload_ApplyTo(t *testing.T) {
-	srcPayload := InterfacePayload([]any{1, 2, 3, 4, 5}, []bool{false, true, false, true, false})
+	srcPayload := AnyPayload([]any{1, 2, 3, 4, 5}, []bool{false, true, false, true, false})
 
 	testData := []struct {
 		name        string
@@ -1172,7 +1139,7 @@ func TestInterfacePayload_ApplyTo(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			payload := srcPayload.(Appliable).ApplyTo(data.indices, data.applier)
+			payload := srcPayload.(AppliableTo).ApplyTo(data.indices, data.applier)
 
 			if !data.isNAPayload {
 				payloadOut := payload.(*anyPayload)

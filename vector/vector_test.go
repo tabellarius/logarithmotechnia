@@ -503,7 +503,7 @@ func TestVector_AsInterface(t *testing.T) {
 
 	for i, data := range testData {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			vec := data.vec.AsInterface()
+			vec := data.vec.AsAny()
 			if data.isNA {
 				if _, ok := vec.Payload().(*naPayload); ok {
 					if vec.Len() != data.vec.Len() {
@@ -1090,38 +1090,6 @@ func TestVector_Select(t *testing.T) {
 			if !reflect.DeepEqual(selected, data.selected) {
 				t.Error(fmt.Sprintf("data.vec.Which() (%v) is not equal to data.selected (%v)",
 					selected, data.selected))
-			}
-		})
-	}
-}
-
-func TestVector_SupportsApplier(t *testing.T) {
-	testData := []struct {
-		name            string
-		vec             Vector
-		whicher         any
-		supportsApplier bool
-	}{
-		{
-			name:            "integerPayload vector + valid applier",
-			vec:             IntegerWithNA([]int{1, 2, 3}, nil),
-			whicher:         func(_ int, val int, na bool) (int, bool) { return 10 * val, na },
-			supportsApplier: true,
-		},
-		{
-			name:            "integerPayload vector + invalid applier",
-			vec:             IntegerWithNA([]int{1, 2, 3}, nil),
-			whicher:         true,
-			supportsApplier: false,
-		},
-	}
-
-	for _, data := range testData {
-		t.Run(data.name, func(t *testing.T) {
-			supportsApplier := data.vec.SupportsApplier(data.whicher)
-			if supportsApplier != data.supportsApplier {
-				t.Error(fmt.Sprintf("Applier's support (%v) is not equal to expected (%v)",
-					supportsApplier, data.supportsApplier))
 			}
 		})
 	}

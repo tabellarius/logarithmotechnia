@@ -42,18 +42,8 @@ func (p *booleanPayload) Which(whicher any) []bool {
 	return which(p.data, p.na, whicher)
 }
 
-func (p *booleanPayload) SupportsApplier(applier any) bool {
-	return supportsApplier[bool](applier)
-}
-
 func (p *booleanPayload) Apply(applier any) Payload {
-	data, na := apply(p.data, p.na, applier, false)
-
-	if data == nil {
-		return NAPayload(p.length)
-	}
-
-	return BooleanPayload(data, na, p.Options()...)
+	return apply(p.data, p.na, applier, p.Options())
 }
 
 func (p *booleanPayload) ApplyTo(indices []int, applier any) Payload {

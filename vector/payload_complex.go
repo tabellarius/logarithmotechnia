@@ -47,18 +47,8 @@ func (p *complexPayload) Which(whicher any) []bool {
 	return which(p.data, p.na, whicher)
 }
 
-func (p *complexPayload) SupportsApplier(applier any) bool {
-	return supportsApplier[complex128](applier)
-}
-
 func (p *complexPayload) Apply(applier any) Payload {
-	data, na := apply(p.data, p.na, applier, cmplx.NaN())
-
-	if data == nil {
-		return NAPayload(p.length)
-	}
-
-	return ComplexPayload(data, na, p.Options()...)
+	return apply(p.data, p.na, applier, p.Options())
 }
 
 func (p *complexPayload) ApplyTo(indices []int, applier any) Payload {

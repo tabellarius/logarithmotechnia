@@ -43,18 +43,8 @@ func (p *stringPayload) Which(whicher any) []bool {
 	return which(p.data, p.na, whicher)
 }
 
-func (p *stringPayload) SupportsApplier(applier any) bool {
-	return supportsApplier[string](applier)
-}
-
 func (p *stringPayload) Apply(applier any) Payload {
-	data, na := apply(p.data, p.na, applier, "")
-
-	if data == nil {
-		return NAPayload(p.length)
-	}
-
-	return StringPayload(data, na, p.Options()...)
+	return apply(p.data, p.na, applier, p.Options())
 }
 
 func (p *stringPayload) ApplyTo(indices []int, applier any) Payload {

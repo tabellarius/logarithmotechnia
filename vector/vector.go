@@ -21,7 +21,6 @@ type Vector interface {
 	Filter(whicher any) Vector
 	SupportsWhicher(whicher any) bool
 	Which(whicher any) []bool
-	SupportsApplier(applier any) bool
 	Apply(applier any) Vector
 	ApplyTo(whicher any, applier any) Vector
 	Append(vec Vector) Vector
@@ -53,7 +52,7 @@ type Vector interface {
 	AsBoolean(options ...Option) Vector
 	AsString(options ...Option) Vector
 	AsTime(options ...Option) Vector
-	AsInterface(options ...Option) Vector
+	AsAny(options ...Option) Vector
 	Transform(fn TransformFunc) Vector
 
 	Finder
@@ -99,8 +98,11 @@ type Whichable interface {
 }
 
 type Appliable interface {
-	SupportsApplier(applier any) bool
+	Whichable
 	Apply(applier any) Payload
+}
+
+type AppliableTo interface {
 	ApplyTo(indices []int, applier any) Payload
 }
 
@@ -279,18 +281,9 @@ func (v *vector) Which(whicher any) []bool {
 	return make([]bool, v.length)
 }
 
-func (v *vector) SupportsApplier(applier any) bool {
-	payload, ok := v.payload.(Appliable)
-	if ok {
-		return payload.SupportsApplier(applier)
-	}
-
-	return false
-}
-
 func (v *vector) Apply(applier any) Vector {
 	payload, ok := v.payload.(Appliable)
-	if !ok || !payload.SupportsApplier(applier) {
+	if !ok {
 		return NA(v.Len())
 	}
 
@@ -300,7 +293,7 @@ func (v *vector) Apply(applier any) Vector {
 }
 
 func (v *vector) ApplyTo(whicher any, applier any) Vector {
-	payload, ok := v.payload.(Appliable)
+	payload, ok := v.payload.(AppliableTo)
 	if !ok {
 		return NA(v.length)
 	}
@@ -688,7 +681,7 @@ func (v *vector) AsTime(options ...Option) Vector {
 	return NA(v.length)
 }
 
-func (v *vector) AsInterface(options ...Option) Vector {
+func (v *vector) AsAny(options ...Option) Vector {
 	if payload, ok := v.payload.(Anyable); ok {
 		values, na := payload.Anies()
 

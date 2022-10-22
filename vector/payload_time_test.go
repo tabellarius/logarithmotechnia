@@ -379,39 +379,6 @@ func TestTimePayload_Whicher(t *testing.T) {
 	}
 }
 
-func TestTimePayload_SupportsApplier(t *testing.T) {
-	testData := []struct {
-		name        string
-		applier     any
-		isSupported bool
-	}{
-		{
-			name:        "func(int, time.Time, bool) (time.Time, bool)",
-			applier:     func(int, time.Time, bool) (time.Time, bool) { return time.Time{}, true },
-			isSupported: true,
-		},
-		{
-			name:        "func(time.Time, bool) (time.Time, bool)",
-			applier:     func(time.Time, bool) (time.Time, bool) { return time.Time{}, true },
-			isSupported: true,
-		},
-		{
-			name:        "func(int, time.Time, bool) bool",
-			applier:     func(int, time.Time, bool) bool { return true },
-			isSupported: false,
-		},
-	}
-
-	payload := TimeWithNA([]time.Time{}, nil).(*vector).payload.(Appliable)
-	for _, data := range testData {
-		t.Run(data.name, func(t *testing.T) {
-			if payload.SupportsApplier(data.applier) != data.isSupported {
-				t.Error("Applier's support is incorrect.")
-			}
-		})
-	}
-}
-
 func TestTimePayload_Apply(t *testing.T) {
 	testData := []struct {
 		name        string
@@ -1201,7 +1168,7 @@ func TestTimePayload_ApplyTo(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			payload := srcPayload.(Appliable).ApplyTo(data.indices, data.applier)
+			payload := srcPayload.(AppliableTo).ApplyTo(data.indices, data.applier)
 
 			if !data.isNAPayload {
 				payloadOut := payload.(*timePayload)
