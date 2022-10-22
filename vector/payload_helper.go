@@ -183,69 +183,7 @@ func selectByBriefFunc[T any](inData []T, inNA []bool, byFunc func(T) bool) []bo
 	return booleans
 }
 
-func supportsApplier[T any](applier any) bool {
-	if supportsApplierType[T, bool](applier) {
-		return true
-	}
-
-	if supportsApplierType[T, int](applier) {
-		return true
-	}
-
-	if supportsApplierType[T, float64](applier) {
-		return true
-	}
-
-	if supportsApplierType[T, complex128](applier) {
-		return true
-	}
-
-	if supportsApplierType[T, string](applier) {
-		return true
-	}
-
-	if supportsApplierType[T, time.Time](applier) {
-		return true
-	}
-
-	if supportsApplierType[T, any](applier) {
-		return true
-	}
-
-	return false
-}
-
-func supportsApplierType[T, S any](applier any) bool {
-	if _, ok := applier.(func(int, T, bool) (S, bool)); ok {
-		return true
-	}
-
-	if _, ok := applier.(func(T, bool) (S, bool)); ok {
-		return true
-	}
-
-	if _, ok := applier.(func(T) S); ok {
-		return true
-	}
-
-	return false
-}
-
 func apply[T any](inData []T, inNA []bool, applier any, options []Option) Payload {
-	/*
-		if applyFunc, ok := applier.(func(int, T, bool) (T, bool)); ok {
-			data, na = applyByFunc(inData, inNA, applyFunc, naDef)
-		}
-
-		if applyFunc, ok := applier.(func(T, bool) (T, bool)); ok {
-			data, na = applyByCompactFunc(inData, inNA, applyFunc, naDef)
-		}
-
-		if applyFunc, ok := applier.(func(T) T); ok {
-			data, na = applyByBriefFunc(inData, inNA, applyFunc, naDef)
-		}
-	*/
-
 	if data, na, ok := applyType[T, bool](inData, inNA, applier, false); ok {
 		return BooleanPayload(data, na, options...)
 	}

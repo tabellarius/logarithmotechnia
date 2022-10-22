@@ -46,10 +46,6 @@ func (p *timePayload) Which(whicher any) []bool {
 	return which(p.data, p.na, whicher)
 }
 
-func (p *timePayload) SupportsApplier(applier any) bool {
-	return supportsApplier[time.Time](applier)
-}
-
 func (p *timePayload) Apply(applier any) Payload {
 	return apply(p.data, p.na, applier, p.Options())
 }

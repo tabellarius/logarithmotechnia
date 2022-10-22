@@ -21,7 +21,6 @@ type Vector interface {
 	Filter(whicher any) Vector
 	SupportsWhicher(whicher any) bool
 	Which(whicher any) []bool
-	SupportsApplier(applier any) bool
 	Apply(applier any) Vector
 	ApplyTo(whicher any, applier any) Vector
 	Append(vec Vector) Vector
@@ -99,7 +98,6 @@ type Whichable interface {
 }
 
 type Appliable interface {
-	SupportsApplier(applier any) bool
 	Apply(applier any) Payload
 	ApplyTo(indices []int, applier any) Payload
 }
@@ -279,18 +277,9 @@ func (v *vector) Which(whicher any) []bool {
 	return make([]bool, v.length)
 }
 
-func (v *vector) SupportsApplier(applier any) bool {
-	payload, ok := v.payload.(Appliable)
-	if ok {
-		return payload.SupportsApplier(applier)
-	}
-
-	return false
-}
-
 func (v *vector) Apply(applier any) Vector {
 	payload, ok := v.payload.(Appliable)
-	if !ok || !payload.SupportsApplier(applier) {
+	if !ok {
 		return NA(v.Len())
 	}
 

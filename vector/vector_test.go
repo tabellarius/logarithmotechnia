@@ -1095,38 +1095,6 @@ func TestVector_Select(t *testing.T) {
 	}
 }
 
-func TestVector_SupportsApplier(t *testing.T) {
-	testData := []struct {
-		name            string
-		vec             Vector
-		whicher         any
-		supportsApplier bool
-	}{
-		{
-			name:            "integerPayload vector + valid applier",
-			vec:             IntegerWithNA([]int{1, 2, 3}, nil),
-			whicher:         func(_ int, val int, na bool) (int, bool) { return 10 * val, na },
-			supportsApplier: true,
-		},
-		{
-			name:            "integerPayload vector + invalid applier",
-			vec:             IntegerWithNA([]int{1, 2, 3}, nil),
-			whicher:         true,
-			supportsApplier: false,
-		},
-	}
-
-	for _, data := range testData {
-		t.Run(data.name, func(t *testing.T) {
-			supportsApplier := data.vec.SupportsApplier(data.whicher)
-			if supportsApplier != data.supportsApplier {
-				t.Error(fmt.Sprintf("Applier's support (%v) is not equal to expected (%v)",
-					supportsApplier, data.supportsApplier))
-			}
-		})
-	}
-}
-
 func TestVector_Apply(t *testing.T) {
 	testData := []struct {
 		name    string

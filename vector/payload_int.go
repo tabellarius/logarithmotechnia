@@ -46,10 +46,6 @@ func (p *integerPayload) Which(whicher any) []bool {
 	return which(p.data, p.na, whicher)
 }
 
-func (p *integerPayload) SupportsApplier(applier any) bool {
-	return supportsApplier[int](applier)
-}
-
 func (p *integerPayload) Apply(applier any) Payload {
 	return apply(p.data, p.na, applier, p.Options())
 }

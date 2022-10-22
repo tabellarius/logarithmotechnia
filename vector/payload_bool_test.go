@@ -536,141 +536,6 @@ func TestBooleanPayload_Whicher(t *testing.T) {
 	}
 }
 
-func TestBooleanPayload_SupportsApplier(t *testing.T) {
-	testData := []struct {
-		name        string
-		applier     any
-		isSupported bool
-	}{
-		{
-			name:        "func(int, bool, bool) (bool, bool)",
-			applier:     func(int, bool, bool) (bool, bool) { return true, true },
-			isSupported: true,
-		},
-		{
-			name:        "func(bool, bool) (bool, bool)",
-			applier:     func(bool, bool) (bool, bool) { return true, true },
-			isSupported: true,
-		},
-		{
-			name:        "func(bool) bool)",
-			applier:     func(bool) bool { return true },
-			isSupported: true,
-		},
-
-		{
-			name:        "func(int, bool, bool) (any, bool)",
-			applier:     func(int, bool, bool) (any, bool) { return true, true },
-			isSupported: true,
-		},
-		{
-			name:        "func(bool, bool) (any, bool)",
-			applier:     func(bool, bool) (any, bool) { return true, true },
-			isSupported: true,
-		},
-		{
-			name:        "func(bool) any)",
-			applier:     func(bool) any { return true },
-			isSupported: true,
-		},
-
-		{
-			name:        "func(int, bool, bool) (complex128, bool)",
-			applier:     func(int, bool, bool) (complex128, bool) { return 0, true },
-			isSupported: true,
-		},
-		{
-			name:        "func(bool, bool) (complex128, bool)",
-			applier:     func(bool, bool) (complex128, bool) { return 0, true },
-			isSupported: true,
-		},
-		{
-			name:        "func(bool) complex128)",
-			applier:     func(bool) complex128 { return 0 },
-			isSupported: true,
-		},
-
-		{
-			name:        "func(int, bool, bool) (float64, bool)",
-			applier:     func(int, bool, bool) (float64, bool) { return 0, true },
-			isSupported: true,
-		},
-		{
-			name:        "func(bool, bool) (float64, bool)",
-			applier:     func(bool, bool) (float64, bool) { return 0, true },
-			isSupported: true,
-		},
-		{
-			name:        "func(bool) float64)",
-			applier:     func(bool) float64 { return 0 },
-			isSupported: true,
-		},
-
-		{
-			name:        "func(int, bool, bool) (int, bool)",
-			applier:     func(int, bool, bool) (int, bool) { return 0, true },
-			isSupported: true,
-		},
-		{
-			name:        "func(bool, bool) (int, bool)",
-			applier:     func(bool, bool) (int, bool) { return 0, true },
-			isSupported: true,
-		},
-		{
-			name:        "func(bool) int)",
-			applier:     func(bool) int { return 0 },
-			isSupported: true,
-		},
-
-		{
-			name:        "func(int, bool, bool) (string, bool)",
-			applier:     func(int, bool, bool) (string, bool) { return "", true },
-			isSupported: true,
-		},
-		{
-			name:        "func(bool, bool) (string, bool)",
-			applier:     func(bool, bool) (string, bool) { return "", true },
-			isSupported: true,
-		},
-		{
-			name:        "func(bool) string)",
-			applier:     func(bool) string { return "" },
-			isSupported: true,
-		},
-
-		{
-			name:        "func(int, bool, bool) (time.Time, bool)",
-			applier:     func(int, bool, bool) (time.Time, bool) { return time.Time{}, true },
-			isSupported: true,
-		},
-		{
-			name:        "func(bool, bool) (time.Time, bool)",
-			applier:     func(bool, bool) (time.Time, bool) { return time.Time{}, true },
-			isSupported: true,
-		},
-		{
-			name:        "func(bool) time.Time)",
-			applier:     func(bool) time.Time { return time.Time{} },
-			isSupported: true,
-		},
-
-		{
-			name:        "func(int, float64, bool) bool",
-			applier:     func(int, int, bool) bool { return true },
-			isSupported: false,
-		},
-	}
-
-	payload := BooleanWithNA([]bool{}, nil).(*vector).payload.(Appliable)
-	for _, data := range testData {
-		t.Run(data.name, func(t *testing.T) {
-			if payload.SupportsApplier(data.applier) != data.isSupported {
-				t.Error("Applier's support is incorrect.")
-			}
-		})
-	}
-}
-
 func TestBooleanPayload_Apply(t *testing.T) {
 	testData := []struct {
 		name        string
@@ -681,20 +546,6 @@ func TestBooleanPayload_Apply(t *testing.T) {
 		naOut       []bool
 		isNAPayload bool
 	}{
-		{
-			name: "regular",
-			applier: func(idx int, val bool, na bool) (bool, bool) {
-				if idx == 5 {
-					return true, na
-				}
-				return val, na
-			},
-			dataIn:      []bool{true, true, true, false, false},
-			naIn:        []bool{false, true, false, true, false},
-			dataOut:     []bool{true, false, true, false, true},
-			naOut:       []bool{false, true, false, true, false},
-			isNAPayload: false,
-		},
 		{
 			name: "manipulate na",
 			applier: func(idx int, val bool, na bool) (bool, bool) {
@@ -708,6 +559,21 @@ func TestBooleanPayload_Apply(t *testing.T) {
 			naIn:        []bool{false, true, false, true, false},
 			dataOut:     []bool{true, false, false, false, false},
 			naOut:       []bool{false, true, false, true, true},
+			isNAPayload: false,
+		},
+
+		{
+			name: "regular",
+			applier: func(idx int, val bool, na bool) (bool, bool) {
+				if idx == 5 {
+					return true, na
+				}
+				return val, na
+			},
+			dataIn:      []bool{true, true, true, false, false},
+			naIn:        []bool{false, true, false, true, false},
+			dataOut:     []bool{true, false, true, false, true},
+			naOut:       []bool{false, true, false, true, false},
 			isNAPayload: false,
 		},
 		{
@@ -728,6 +594,7 @@ func TestBooleanPayload_Apply(t *testing.T) {
 			naOut:       []bool{false, true, false, true, false},
 			isNAPayload: false,
 		},
+
 		{
 			name:        "incorrect applier",
 			applier:     func(int, int, bool) bool { return true },
@@ -758,6 +625,106 @@ func TestBooleanPayload_Apply(t *testing.T) {
 				if !ok {
 					t.Error("Payload is not NA")
 				}
+			}
+		})
+	}
+}
+
+func TestBooleanPayload_ApplyConvert(t *testing.T) {
+	testData := []struct {
+		name    string
+		applier any
+		payload Payload
+		pType   string
+		outData []any
+		naOut   []any
+	}{
+		{
+			name: "bool -> any",
+			applier: func(val bool) any {
+				if val {
+					return 5
+				} else {
+					return nil
+				}
+			},
+			payload: BooleanPayload([]bool{true, false, true, false, true}, nil),
+			pType:   "any",
+			outData: []any{5, nil, 5, nil, 5},
+		},
+		{
+			name: "bool -> int",
+			applier: func(val bool) int {
+				if val {
+					return 5
+				} else {
+					return 0
+				}
+			},
+			payload: BooleanPayload([]bool{true, false, true, false, true}, nil),
+			pType:   "integer",
+			outData: []any{5, 0, 5, 0, 5},
+		},
+		{
+			name: "bool -> complex128",
+			applier: func(val bool) complex128 {
+				if val {
+					return 5
+				} else {
+					return 0
+				}
+			},
+			payload: BooleanPayload([]bool{true, false, true, false, true}, nil),
+			pType:   "complex",
+			outData: []any{5 + 0i, 0 + 0i, 5 + 0i, 0 + 0i, 5 + 0i},
+		},
+		{
+			name: "bool -> float64",
+			applier: func(val bool) float64 {
+				if val {
+					return 5
+				} else {
+					return 0
+				}
+			},
+			payload: BooleanPayload([]bool{true, false, true, false, true}, nil),
+			pType:   "float",
+			outData: []any{5.0, 0.0, 5.0, 0.0, 5.0},
+		},
+		{
+			name: "bool -> string",
+			applier: func(val bool) string {
+				if val {
+					return "5"
+				} else {
+					return ""
+				}
+			},
+			payload: BooleanPayload([]bool{true, false, true, false, true}, nil),
+			pType:   "string",
+			outData: []any{"5", "", "5", "", "5"},
+		},
+		{
+			name:    "bool -> time",
+			applier: func(val bool) time.Time { return time.Time{} },
+			payload: BooleanPayload([]bool{true, false, true, false, true}, nil),
+			pType:   "time",
+			outData: []any{time.Time{}, time.Time{}, time.Time{}, time.Time{}, time.Time{}},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			newPayload := data.payload.(Appliable).Apply(data.applier)
+			pType := newPayload.Type()
+			outData, _ := newPayload.(Anyable).Anies()
+
+			if pType != data.pType {
+				t.Error(fmt.Sprintf("Payload type (%v) is not equal to expected (%v)", pType, data.pType))
+			}
+
+			if !reflect.DeepEqual(outData, data.outData) {
+				t.Error(fmt.Sprintf("Payload data (%v) is not equal to expected (%v)", outData, data.outData))
 			}
 		})
 	}

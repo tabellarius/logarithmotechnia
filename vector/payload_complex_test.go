@@ -259,39 +259,6 @@ func TestComplexPayload_Whicher(t *testing.T) {
 	}
 }
 
-func TestComplexPayload_SupportsApplier(t *testing.T) {
-	testData := []struct {
-		name        string
-		applier     any
-		isSupported bool
-	}{
-		{
-			name:        "func(int, complex128, bool) (complex128, bool)",
-			applier:     func(int, complex128, bool) (complex128, bool) { return 0, true },
-			isSupported: true,
-		},
-		{
-			name:        "func(complex128, bool) (complex128, bool)",
-			applier:     func(complex128, bool) (complex128, bool) { return 0, true },
-			isSupported: true,
-		},
-		{
-			name:        "func(int, complex128, bool) bool",
-			applier:     func(int, complex128, bool) bool { return true },
-			isSupported: false,
-		},
-	}
-
-	payload := ComplexWithNA([]complex128{}, nil).(*vector).payload.(Appliable)
-	for _, data := range testData {
-		t.Run(data.name, func(t *testing.T) {
-			if payload.SupportsApplier(data.applier) != data.isSupported {
-				t.Error("Applier's support is incorrect.")
-			}
-		})
-	}
-}
-
 func TestComplexPayload_Apply(t *testing.T) {
 	testData := []struct {
 		name        string

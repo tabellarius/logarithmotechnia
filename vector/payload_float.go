@@ -48,10 +48,6 @@ func (p *floatPayload) Which(whicher any) []bool {
 	return which(p.data, p.na, whicher)
 }
 
-func (p *floatPayload) SupportsApplier(applier any) bool {
-	return supportsApplier[float64](applier)
-}
-
 func (p *floatPayload) Apply(applier any) Payload {
 	return apply(p.data, p.na, applier, p.Options())
 }

@@ -538,39 +538,6 @@ func TestIntegerPayload_Whicher(t *testing.T) {
 	}
 }
 
-func TestIntegerPayload_SupportsApplier(t *testing.T) {
-	testData := []struct {
-		name        string
-		applier     any
-		isSupported bool
-	}{
-		{
-			name:        "func(int, int, bool) (int, bool)",
-			applier:     func(int, int, bool) (int, bool) { return 0, true },
-			isSupported: true,
-		},
-		{
-			name:        "func(int, bool) (int, bool)",
-			applier:     func(int, bool) (int, bool) { return 0, true },
-			isSupported: true,
-		},
-		{
-			name:        "func(int, float64, bool) bool",
-			applier:     func(int, int, bool) bool { return true },
-			isSupported: false,
-		},
-	}
-
-	payload := IntegerWithNA([]int{1}, nil).(*vector).payload.(Appliable)
-	for _, data := range testData {
-		t.Run(data.name, func(t *testing.T) {
-			if payload.SupportsApplier(data.applier) != data.isSupported {
-				t.Error("Applier's support is incorrect.")
-			}
-		})
-	}
-}
-
 func TestIntegerPayload_Apply(t *testing.T) {
 	testData := []struct {
 		name        string

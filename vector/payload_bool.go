@@ -42,10 +42,6 @@ func (p *booleanPayload) Which(whicher any) []bool {
 	return which(p.data, p.na, whicher)
 }
 
-func (p *booleanPayload) SupportsApplier(applier any) bool {
-	return supportsApplier[bool](applier)
-}
-
 func (p *booleanPayload) Apply(applier any) Payload {
 	return apply(p.data, p.na, applier, p.Options())
 }

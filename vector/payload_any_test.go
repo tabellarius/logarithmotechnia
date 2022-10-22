@@ -250,39 +250,6 @@ func TestInterfacePayload_Which(t *testing.T) {
 	}
 }
 
-func TestInterfacePayload_SupportsApplier(t *testing.T) {
-	testData := []struct {
-		name        string
-		applier     any
-		isSupported bool
-	}{
-		{
-			name:        "func(int, any, bool) (bool, bool)",
-			applier:     func(int, any, bool) (any, bool) { return 1, true },
-			isSupported: true,
-		},
-		{
-			name:        "func(any, bool) (bool, bool)",
-			applier:     func(any, bool) (any, bool) { return 1, true },
-			isSupported: true,
-		},
-		{
-			name:        "func(int, float64, bool) bool",
-			applier:     func(int, int, bool) bool { return true },
-			isSupported: false,
-		},
-	}
-
-	payload := AnyWithNA([]any{}, nil).(*vector).payload.(Appliable)
-	for _, data := range testData {
-		t.Run(data.name, func(t *testing.T) {
-			if payload.SupportsApplier(data.applier) != data.isSupported {
-				t.Error("Applier's support is incorrect.")
-			}
-		})
-	}
-}
-
 func TestInterfacePayload_Apply(t *testing.T) {
 	testData := []struct {
 		name        string
