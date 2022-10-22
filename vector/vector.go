@@ -53,7 +53,6 @@ type Vector interface {
 	AsString(options ...Option) Vector
 	AsTime(options ...Option) Vector
 	AsAny(options ...Option) Vector
-	Transform(fn TransformFunc) Vector
 
 	Finder
 	Has(any) bool
@@ -138,8 +137,6 @@ type Timeable interface {
 type Anyable interface {
 	Anies() ([]any, []bool)
 }
-
-type TransformFunc = func([]any, []bool) Payload
 
 type Configurable interface {
 	Options() []Option
@@ -686,17 +683,6 @@ func (v *vector) AsAny(options ...Option) Vector {
 		values, na := payload.Anies()
 
 		return AnyWithNA(values, na, options...)
-	}
-
-	return NA(v.length)
-}
-
-func (v *vector) Transform(fn TransformFunc) Vector {
-	if interfaceable, ok := v.Payload().(Anyable); ok {
-		values, na := interfaceable.Anies()
-		payload := fn(values, na)
-
-		return New(payload, v.Options()...)
 	}
 
 	return NA(v.length)
