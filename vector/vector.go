@@ -98,7 +98,11 @@ type Whichable interface {
 }
 
 type Appliable interface {
+	Whichable
 	Apply(applier any) Payload
+}
+
+type AppliableTo interface {
 	ApplyTo(indices []int, applier any) Payload
 }
 
@@ -289,7 +293,7 @@ func (v *vector) Apply(applier any) Vector {
 }
 
 func (v *vector) ApplyTo(whicher any, applier any) Vector {
-	payload, ok := v.payload.(Appliable)
+	payload, ok := v.payload.(AppliableTo)
 	if !ok {
 		return NA(v.length)
 	}

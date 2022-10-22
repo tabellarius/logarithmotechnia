@@ -1280,7 +1280,7 @@ func TestBooleanPayload_ApplyTo(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			payload := srcPayload.(Appliable).ApplyTo(data.indices, data.applier)
+			payload := srcPayload.(AppliableTo).ApplyTo(data.indices, data.applier)
 
 			if !data.isNAPayload {
 				payloadOut := payload.(*booleanPayload)
