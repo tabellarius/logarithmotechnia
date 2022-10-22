@@ -525,33 +525,6 @@ func TestVector_AsInterface(t *testing.T) {
 	}
 }
 
-func TestVector_Transform(t *testing.T) {
-	na := []bool{false, false, true}
-	vec := TimeWithNA(toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00",
-		"1800-06-10T11:00:00Z"}), na)
-	newVec := vec.Transform(func(values []any, na []bool) Payload {
-		integers := make([]int, len(values))
-		for i, val := range values {
-			if na[i] {
-				integers[i] = 0
-			} else {
-				integers[i] = int(val.(time.Time).Unix())
-			}
-		}
-
-		return IntegerPayload(integers, na)
-	})
-
-	payload := newVec.Payload().(*integerPayload)
-	expectedData := []int{1136189045, 1609493400, 0}
-	if !reflect.DeepEqual(payload.data, expectedData) {
-		t.Error(fmt.Sprintf("Payload data (%v) is not equal to expected (%v)", payload.data, expectedData))
-	}
-	if !reflect.DeepEqual(payload.na, na) {
-		t.Error(fmt.Sprintf("Payload data (%v) is not equal to expected (%v)", payload.na, na))
-	}
-}
-
 func TestVector_AsTime(t *testing.T) {
 	testData := []struct {
 		name      string
