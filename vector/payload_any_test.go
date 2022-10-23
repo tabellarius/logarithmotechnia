@@ -1506,6 +1506,63 @@ func TestAnyPayload_FindAll(t *testing.T) {
 
 	employeeData := []any{
 		employee{"John", 1}, employee{"Maria", 2}, employee{"John", 1},
+	}
+
+	fnEq := func(f, s any) bool {
+		return f.(employee).name == s.(employee).name && f.(employee).dep == s.(employee).dep
+	}
+
+	testData := []struct {
+		name    string
+		payload Payload
+		val     any
+		result  []int
+	}{
+		{
+			name:    "with callback, found John",
+			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyCallbacks{eq: fnEq})),
+			val:     employee{"John", 1},
+			result:  []int{1, 3},
+		},
+		{
+			name:    "with callback, found Maria",
+			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyCallbacks{eq: fnEq})),
+			val:     employee{"Maria", 2},
+			result:  []int{2},
+		},
+		{
+			name:    "with callback, not found",
+			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyCallbacks{eq: fnEq})),
+			val:     employee{"John", 2},
+			result:  []int{},
+		},
+		{
+			name:    "without callback",
+			payload: AnyPayload(employeeData, nil),
+			val:     employee{"John", 1},
+			result:  []int{},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			result := data.payload.(*anyPayload).FindAll(data.val)
+
+			if !reflect.DeepEqual(result, data.result) {
+				t.Error(fmt.Sprintf("result (%v) is not equal to data.result (%v", result, data.result))
+			}
+		})
+	}
+}
+
+func TestAnyPayload_IsUnique(t *testing.T) {
+	type employee struct {
+		name string
+		dep  int
+	}
+
+	employeeData := []any{
+		employee{"John", 1}, employee{"Maria", 2}, employee{"John", 1},
 		employee{"John", 2}, employee{"Maria", 2}, employee{"Isaac", 1},
 	}
 
@@ -1551,6 +1608,57 @@ func TestAnyPayload_FindAll(t *testing.T) {
 	}
 }
 
-func TestAnyPayload_IsUnique(t *testing.T) {
+func TestAnyPayload_Coalesce(t *testing.T) {
+	testData := []struct {
+		name         string
+		coalescer    Payload
+		coalescendum Payload
+		outData      []any
+		outNA        []bool
+	}{
+		{
+			name:         "empty",
+			coalescer:    AnyPayload(nil, nil),
+			coalescendum: AnyPayload([]any{}, nil),
+			outData:      []any{},
+			outNA:        []bool{},
+		},
+		{
+			name:         "same type",
+			coalescer:    AnyPayload([]any{1, nil, nil, nil, 5}, []bool{false, true, true, true, false}),
+			coalescendum: AnyPayload([]any{11, 12, nil, 14, 15}, []bool{false, false, true, false, false}),
+			outData:      []any{1, 12, nil, 14, 5},
+			outNA:        []bool{false, false, true, false, false},
+		},
+		{
+			name:         "same type + different size",
+			coalescer:    AnyPayload([]any{1, nil, nil, nil, 5}, []bool{false, true, true, true, false}),
+			coalescendum: AnyPayload([]any{nil, 11}, []bool{true, false}),
+			outData:      []any{1, 11, nil, 11, 5},
+			outNA:        []bool{false, false, true, false, false},
+		},
+		{
+			name:         "different type",
+			coalescer:    AnyPayload([]any{1, nil, nil, nil, 5}, []bool{false, true, true, true, false}),
+			coalescendum: IntegerPayload([]int{0, 10, 0, 112, 0}, []bool{false, false, true, false, false}),
+			outData:      []any{1, 10, nil, 112, 5},
+			outNA:        []bool{false, false, true, false, false},
+		},
+	}
 
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			payload := data.coalescer.(Coalescer).Coalesce(data.coalescendum).(*anyPayload)
+
+			if !reflect.DeepEqual(payload.data, data.outData) {
+				t.Error(fmt.Sprintf("Data (%v) do not match expected (%v)",
+					payload.data, data.outData))
+			}
+
+			if !reflect.DeepEqual(payload.na, data.outNA) {
+				t.Error(fmt.Sprintf("NA (%v) do not match expected (%v)",
+					payload.na, data.outNA))
+			}
+		})
+	}
 }

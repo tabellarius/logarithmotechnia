@@ -184,7 +184,7 @@ func (p *anyPayload) IsUnique() []bool {
 
 	for i := 1; i < p.length; i++ {
 		uniqIdx[i] = i
-		for j := 0; j < i; j++ {
+		for j := i - 1; j >= 0; j-- {
 			if p.fn.eq(p.data[i], p.data[j]) {
 				uniqIdx[i] = j
 				break
@@ -200,6 +200,39 @@ func (p *anyPayload) IsUnique() []bool {
 	}
 
 	return booleans
+}
+
+func (p *anyPayload) Coalesce(payload Payload) Payload {
+	if p.length != payload.Len() {
+		payload = payload.Adjust(p.length)
+	}
+
+	var srcData []any
+	var srcNA []bool
+
+	if same, ok := payload.(*anyPayload); ok {
+		srcData = same.data
+		srcNA = same.na
+	} else if intable, ok := payload.(Anyable); ok {
+		srcData, srcNA = intable.Anies()
+	} else {
+		return p
+	}
+
+	dstData := make([]any, p.length)
+	dstNA := make([]bool, p.length)
+
+	for i := 0; i < p.length; i++ {
+		if p.na[i] && !srcNA[i] {
+			dstData[i] = srcData[i]
+			dstNA[i] = false
+		} else {
+			dstData[i] = p.data[i]
+			dstNA[i] = p.na[i]
+		}
+	}
+
+	return AnyPayload(dstData, dstNA, p.Options()...)
 }
 
 func (p *anyPayload) Integers() ([]int, []bool) {
