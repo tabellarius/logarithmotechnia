@@ -207,23 +207,23 @@ func (p *timePayload) eqFn(f, s time.Time) bool {
 }
 
 func (p *timePayload) Gt(val any) []bool {
-	return gtFn(val, p.data, p.na, p.convertComparator, p.gtFn)
+	return gtFn(val, p.data, p.na, p.convertComparator, p.ltFn)
 }
 
-func (p *timePayload) gtFn(f, s time.Time) bool {
-	return f.After(s)
+func (p *timePayload) ltFn(f, s time.Time) bool {
+	return f.Before(s)
 }
 
 func (p *timePayload) Lt(val any) []bool {
-	return ltFn(val, p.data, p.na, p.convertComparator, p.gtFn)
+	return ltFn(val, p.data, p.na, p.convertComparator, p.ltFn)
 }
 
 func (p *timePayload) Gte(val any) []bool {
-	return gteFn(val, p.data, p.na, p.convertComparator, p.eqFn, p.gtFn)
+	return gteFn(val, p.data, p.na, p.convertComparator, p.eqFn, p.ltFn)
 }
 
 func (p *timePayload) Lte(val any) []bool {
-	return lteFn(val, p.data, p.na, p.convertComparator, p.eqFn, p.gtFn)
+	return lteFn(val, p.data, p.na, p.convertComparator, p.eqFn, p.ltFn)
 }
 
 func (p *timePayload) Groups() ([][]int, []any) {

@@ -407,7 +407,7 @@ func TestInterfacePayload_Integers(t *testing.T) {
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
 			vec := AnyWithNA(data.dataIn, data.naIn,
-				OptionInterfaceConvertors(&AnyConvertors{Intabler: data.convertor}))
+				OptionAnyConvertors(AnyConvertors{Intabler: data.convertor}))
 			payload := vec.(*vector).payload.(*anyPayload)
 
 			integers, na := payload.Integers()
@@ -474,7 +474,7 @@ func TestInterfacePayload_Floats(t *testing.T) {
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
 			vec := AnyWithNA(data.dataIn, data.naIn,
-				OptionInterfaceConvertors(&AnyConvertors{Floatabler: data.convertor}))
+				OptionAnyConvertors(AnyConvertors{Floatabler: data.convertor}))
 			payload := vec.(*vector).payload.(*anyPayload)
 
 			floats, na := payload.Floats()
@@ -543,7 +543,7 @@ func TestInterfacePayload_Complexes(t *testing.T) {
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
 			vec := AnyWithNA(data.dataIn, data.naIn,
-				OptionInterfaceConvertors(&AnyConvertors{Complexabler: data.convertor}))
+				OptionAnyConvertors(AnyConvertors{Complexabler: data.convertor}))
 			payload := vec.(*vector).payload.(*anyPayload)
 
 			complexes, na := payload.Complexes()
@@ -610,7 +610,7 @@ func TestInterfacePayload_Booleans(t *testing.T) {
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
 			vec := AnyWithNA(data.dataIn, data.naIn,
-				OptionInterfaceConvertors(&AnyConvertors{Boolabler: data.convertor}))
+				OptionAnyConvertors(AnyConvertors{Boolabler: data.convertor}))
 			payload := vec.(*vector).payload.(*anyPayload)
 
 			bools, na := payload.Booleans()
@@ -677,7 +677,7 @@ func TestInterfacePayload_Strings(t *testing.T) {
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
 			vec := AnyWithNA(data.dataIn, data.naIn,
-				OptionInterfaceConvertors(&AnyConvertors{Stringabler: data.convertor}))
+				OptionAnyConvertors(AnyConvertors{Stringabler: data.convertor}))
 			payload := vec.(*vector).payload.(*anyPayload)
 
 			strings, na := payload.Strings()
@@ -742,7 +742,7 @@ func TestInterfacePayload_Times(t *testing.T) {
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
 			vec := AnyWithNA(data.dataIn, data.naIn,
-				OptionInterfaceConvertors(&AnyConvertors{Timeabler: data.convertor}))
+				OptionAnyConvertors(AnyConvertors{Timeabler: data.convertor}))
 			payload := vec.(*vector).payload.(*anyPayload)
 
 			times, na := payload.Times()
@@ -801,7 +801,7 @@ func TestInterfacePayload_Interfaces(t *testing.T) {
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
 			vec := AnyWithNA(data.dataIn, data.naIn,
-				OptionInterfaceConvertors(&AnyConvertors{Intabler: data.convertor}))
+				OptionAnyConvertors(AnyConvertors{Intabler: data.convertor}))
 			payload := vec.(*vector).payload.(*anyPayload)
 
 			interfaces, na := payload.Anies()
@@ -956,25 +956,25 @@ func TestInterfacePayload_Adjust(t *testing.T) {
 		name       string
 		inPayload  *anyPayload
 		size       int
-		outPaylout *anyPayload
+		outPayload *anyPayload
 	}{
 		{
 			inPayload:  payload5,
 			name:       "same",
 			size:       5,
-			outPaylout: AnyPayload([]any{1, 2, 3, 4, 5}, nil).(*anyPayload),
+			outPayload: AnyPayload([]any{1, 2, 3, 4, 5}, nil).(*anyPayload),
 		},
 		{
 			inPayload:  payload5,
 			name:       "lesser",
 			size:       3,
-			outPaylout: AnyPayload([]any{1, 2, 3}, nil).(*anyPayload),
+			outPayload: AnyPayload([]any{1, 2, 3}, nil).(*anyPayload),
 		},
 		{
 			inPayload: payload3,
 			name:      "bigger",
 			size:      10,
-			outPaylout: AnyPayload([]any{1, 2, 0, 1, 2, 0, 1, 2, 0, 1},
+			outPayload: AnyPayload([]any{1, 2, 0, 1, 2, 0, 1, 2, 0, 1},
 				[]bool{false, false, true, false, false, true, false, false, true, false}).(*anyPayload),
 		},
 	}
@@ -983,13 +983,13 @@ func TestInterfacePayload_Adjust(t *testing.T) {
 		t.Run(data.name, func(t *testing.T) {
 			outPayload := data.inPayload.Adjust(data.size).(*anyPayload)
 
-			if !reflect.DeepEqual(outPayload.data, data.outPaylout.data) {
+			if !reflect.DeepEqual(outPayload.data, data.outPayload.data) {
 				t.Error(fmt.Sprintf("Output data (%v) does not match expected (%v)",
-					outPayload.data, data.outPaylout.data))
+					outPayload.data, data.outPayload.data))
 			}
-			if !reflect.DeepEqual(outPayload.na, data.outPaylout.na) {
+			if !reflect.DeepEqual(outPayload.na, data.outPayload.na) {
 				t.Error(fmt.Sprintf("Output NA (%v) does not match expected (%v)",
-					outPayload.na, data.outPaylout.na))
+					outPayload.na, data.outPayload.na))
 			}
 		})
 	}
@@ -1156,6 +1156,96 @@ func TestInterfacePayload_ApplyTo(t *testing.T) {
 				if !ok {
 					t.Error("Payload is not NA")
 				}
+			}
+		})
+	}
+}
+
+func TestAnyPayload_Eq(t *testing.T) {
+	type employee struct {
+		name string
+		dep  int
+	}
+
+	employeeData := []any{
+		employee{"John", 1}, employee{"Maria", 1}, employee{"John", 2},
+	}
+
+	fnEq := func(f, s any) bool {
+		return f.(employee).name == s.(employee).name && f.(employee).dep == s.(employee).dep
+	}
+
+	testData := []struct {
+		name    string
+		payload Payload
+		val     any
+		result  []bool
+	}{
+		{
+			name:    "with callback",
+			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyFn{eq: fnEq})),
+			val:     employee{"John", 1},
+			result:  []bool{true, false, false},
+		},
+		{
+			name:    "without callback",
+			payload: AnyPayload(employeeData, nil),
+			val:     employee{"John", 1},
+			result:  []bool{false, false, false},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			result := data.payload.(*anyPayload).Eq(data.val)
+
+			if !reflect.DeepEqual(result, data.result) {
+				t.Error(fmt.Sprintf("result (%v) is not equal to data.result (%v", result, data.result))
+			}
+		})
+	}
+}
+
+func TestAnyPayload_Neq(t *testing.T) {
+	type employee struct {
+		name string
+		dep  int
+	}
+
+	employeeData := []any{
+		employee{"John", 1}, employee{"Maria", 1}, employee{"John", 2},
+	}
+
+	fnEq := func(f, s any) bool {
+		return f.(employee).name == s.(employee).name && f.(employee).dep == s.(employee).dep
+	}
+
+	testData := []struct {
+		name    string
+		payload Payload
+		val     any
+		result  []bool
+	}{
+		{
+			name:    "with callback",
+			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyFn{eq: fnEq})),
+			val:     employee{"John", 1},
+			result:  []bool{false, true, true},
+		},
+		{
+			name:    "without callback",
+			payload: AnyPayload(employeeData, nil),
+			val:     employee{"John", 1},
+			result:  []bool{true, true, true},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			result := data.payload.(*anyPayload).Neq(data.val)
+
+			if !reflect.DeepEqual(result, data.result) {
+				t.Error(fmt.Sprintf("result (%v) is not equal to data.result (%v", result, data.result))
 			}
 		})
 	}

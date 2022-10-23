@@ -17,11 +17,17 @@ type AnyConvertors struct {
 	Timeabler    func(idx int, val any, na bool) (time.Time, bool)
 }
 
+type AnyFn struct {
+	eq func(any, any) bool
+	lt func(any, any) bool
+}
+
 type anyPayload struct {
 	length     int
 	data       []any
 	printer    AnyPrinterFunc
-	convertors *AnyConvertors
+	convertors AnyConvertors
+	fn         AnyFn
 	DefNAble
 }
 
@@ -91,6 +97,26 @@ func (p *anyPayload) Summarize(summarizer any) Payload {
 	return AnyPayload([]any{val}, []bool{na}, p.Options()...)
 }
 
+func (p *anyPayload) convertComparator(val any) (any, bool) {
+	return val, true
+}
+
+func (p *anyPayload) Eq(val any) []bool {
+	if p.fn.eq == nil {
+		return make([]bool, p.length)
+	}
+
+	return eqFn(val, p.data, p.na, p.convertComparator, p.fn.eq)
+}
+
+func (p *anyPayload) Neq(val any) []bool {
+	if p.fn.eq == nil {
+		return trueBooleanArr(p.length)
+	}
+
+	return neqFn(val, p.data, p.na, p.convertComparator, p.fn.eq)
+}
+
 func (p *anyPayload) Integers() ([]int, []bool) {
 	if p.length == 0 {
 		return []int{}, []bool{}
@@ -101,7 +127,7 @@ func (p *anyPayload) Integers() ([]int, []bool) {
 
 	for i := 0; i < p.length; i++ {
 		val, naVal := 0, true
-		if p.convertors != nil && p.convertors.Intabler != nil {
+		if p.convertors.Intabler != nil {
 			val, naVal = p.convertors.Intabler(i+1, p.data[i], p.na[i])
 		}
 		data[i] = val
@@ -121,7 +147,7 @@ func (p *anyPayload) Floats() ([]float64, []bool) {
 
 	for i := 0; i < p.length; i++ {
 		val, naVal := math.NaN(), true
-		if p.convertors != nil && p.convertors.Floatabler != nil {
+		if p.convertors.Floatabler != nil {
 			val, naVal = p.convertors.Floatabler(i+1, p.data[i], p.na[i])
 		}
 		data[i] = val
@@ -141,7 +167,7 @@ func (p *anyPayload) Complexes() ([]complex128, []bool) {
 
 	for i := 0; i < p.length; i++ {
 		val, naVal := cmplx.NaN(), true
-		if p.convertors != nil && p.convertors.Complexabler != nil {
+		if p.convertors.Complexabler != nil {
 			val, naVal = p.convertors.Complexabler(i+1, p.data[i], p.na[i])
 		}
 		data[i] = val
@@ -161,7 +187,7 @@ func (p *anyPayload) Booleans() ([]bool, []bool) {
 
 	for i := 0; i < p.length; i++ {
 		val, naVal := false, true
-		if p.convertors != nil && p.convertors.Boolabler != nil {
+		if p.convertors.Boolabler != nil {
 			val, naVal = p.convertors.Boolabler(i+1, p.data[i], p.na[i])
 		}
 		data[i] = val
@@ -181,7 +207,7 @@ func (p *anyPayload) Strings() ([]string, []bool) {
 
 	for i := 0; i < p.length; i++ {
 		val, naVal := "", true
-		if p.convertors != nil && p.convertors.Stringabler != nil {
+		if p.convertors.Stringabler != nil {
 			val, naVal = p.convertors.Stringabler(i+1, p.data[i], p.na[i])
 		}
 		data[i] = val
@@ -201,7 +227,7 @@ func (p *anyPayload) Times() ([]time.Time, []bool) {
 
 	for i := 0; i < p.length; i++ {
 		val, naVal := time.Time{}, true
-		if p.convertors != nil && p.convertors.Timeabler != nil {
+		if p.convertors.Timeabler != nil {
 			val, naVal = p.convertors.Timeabler(i+1, p.data[i], p.na[i])
 		}
 		data[i] = val
@@ -300,21 +326,24 @@ func AnyPayload(data []any, na []bool, options ...Option) Payload {
 	}
 
 	payload := &anyPayload{
-		length:     length,
-		data:       vecData,
-		printer:    nil,
-		convertors: nil,
+		length:  length,
+		data:    vecData,
+		printer: nil,
 		DefNAble: DefNAble{
 			na: vecNA,
 		},
 	}
 
-	if conf.HasOption(KeyOptionInterfacePrinterFunc) {
-		payload.printer = conf.Value(KeyOptionInterfacePrinterFunc).(AnyPrinterFunc)
+	if conf.HasOption(KeyOptionAnyPrinterFunc) {
+		payload.printer = conf.Value(KeyOptionAnyPrinterFunc).(AnyPrinterFunc)
 	}
 
-	if conf.HasOption(KeyOptionInterfaceConvertors) {
-		payload.convertors = conf.Value(KeyOptionInterfaceConvertors).(*AnyConvertors)
+	if conf.HasOption(KeyOptionAnyConvertors) {
+		payload.convertors = conf.Value(KeyOptionAnyConvertors).(AnyConvertors)
+	}
+
+	if conf.HasOption(KeyOptionAnyCallbacks) {
+		payload.fn = conf.Value(KeyOptionAnyCallbacks).(AnyFn)
 	}
 
 	return payload
