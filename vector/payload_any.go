@@ -17,7 +17,7 @@ type AnyConvertors struct {
 	Timeabler    func(idx int, val any, na bool) (time.Time, bool)
 }
 
-type AnyFn struct {
+type AnyCallbacks struct {
 	eq func(any, any) bool
 	lt func(any, any) bool
 }
@@ -27,7 +27,7 @@ type anyPayload struct {
 	data       []any
 	printer    AnyPrinterFunc
 	convertors AnyConvertors
-	fn         AnyFn
+	fn         AnyCallbacks
 	DefNAble
 }
 
@@ -163,6 +163,43 @@ func (p *anyPayload) Lte(val any) []bool {
 	}
 
 	return lteFn(val, p.data, p.na, p.convertComparator, p.fn.eq, p.fn.lt)
+}
+
+func (p *anyPayload) IsUnique() []bool {
+	if p.fn.eq == nil || p.length == 0 || p.length == 1 {
+		return trueBooleanArr(p.length)
+	}
+
+	uniqIdx := make([]int, p.length)
+
+	naIdx := 0
+	for i := 0; i < p.length; i++ {
+		if p.na[i] {
+			if naIdx == 0 {
+				naIdx = i
+			}
+			uniqIdx[i] = naIdx
+		}
+	}
+
+	for i := 1; i < p.length; i++ {
+		uniqIdx[i] = i
+		for j := 0; j < i; j++ {
+			if p.fn.eq(p.data[i], p.data[j]) {
+				uniqIdx[i] = j
+				break
+			}
+		}
+	}
+
+	booleans := make([]bool, p.length)
+	for i := 0; i < p.length; i++ {
+		if uniqIdx[i] == i {
+			booleans[i] = true
+		}
+	}
+
+	return booleans
 }
 
 func (p *anyPayload) Integers() ([]int, []bool) {
@@ -391,7 +428,7 @@ func AnyPayload(data []any, na []bool, options ...Option) Payload {
 	}
 
 	if conf.HasOption(KeyOptionAnyCallbacks) {
-		payload.fn = conf.Value(KeyOptionAnyCallbacks).(AnyFn)
+		payload.fn = conf.Value(KeyOptionAnyCallbacks).(AnyCallbacks)
 	}
 
 	return payload

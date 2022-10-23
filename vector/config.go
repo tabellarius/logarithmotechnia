@@ -88,7 +88,7 @@ func OptionAnyConvertors(convertors AnyConvertors) Option {
 	return ConfOption{KeyOptionAnyConvertors, convertors}
 }
 
-func OptionAnyCallbacks(callbacks AnyFn) Option {
+func OptionAnyCallbacks(callbacks AnyCallbacks) Option {
 	return ConfOption{KeyOptionAnyCallbacks, callbacks}
 }
 

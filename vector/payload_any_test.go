@@ -1183,7 +1183,7 @@ func TestAnyPayload_Eq(t *testing.T) {
 	}{
 		{
 			name:    "with callback",
-			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyFn{eq: fnEq})),
+			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyCallbacks{eq: fnEq})),
 			val:     employee{"John", 1},
 			result:  []bool{true, false, false},
 		},
@@ -1228,7 +1228,7 @@ func TestAnyPayload_Neq(t *testing.T) {
 	}{
 		{
 			name:    "with callback",
-			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyFn{eq: fnEq})),
+			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyCallbacks{eq: fnEq})),
 			val:     employee{"John", 1},
 			result:  []bool{false, true, true},
 		},
@@ -1274,7 +1274,7 @@ func TestAnyPayload_Gt(t *testing.T) {
 	}{
 		{
 			name:    "with callback",
-			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyFn{lt: fnLt})),
+			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyCallbacks{lt: fnLt})),
 			val:     employee{1, 40000},
 			result:  []bool{true, false, true},
 		},
@@ -1320,7 +1320,7 @@ func TestAnyPayload_Lt(t *testing.T) {
 	}{
 		{
 			name:    "with callback",
-			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyFn{lt: fnLt})),
+			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyCallbacks{lt: fnLt})),
 			val:     employee{1, 40000},
 			result:  []bool{false, true, false},
 		},
@@ -1369,7 +1369,7 @@ func TestAnyPayload_Gte(t *testing.T) {
 	}{
 		{
 			name:    "with callback",
-			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyFn{lt: fnLt, eq: fnEq})),
+			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyCallbacks{lt: fnLt, eq: fnEq})),
 			val:     employee{1, 30000},
 			result:  []bool{true, true, false},
 		},
@@ -1418,7 +1418,7 @@ func TestAnyPayload_Lte(t *testing.T) {
 	}{
 		{
 			name:    "with callback",
-			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyFn{lt: fnLt, eq: fnEq})),
+			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyCallbacks{lt: fnLt, eq: fnEq})),
 			val:     employee{1, 30000},
 			result:  []bool{false, true, true},
 		},
@@ -1463,19 +1463,19 @@ func TestAnyPayload_Find(t *testing.T) {
 	}{
 		{
 			name:    "with callback, found John",
-			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyFn{eq: fnEq})),
+			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyCallbacks{eq: fnEq})),
 			val:     employee{"John", 1},
 			result:  1,
 		},
 		{
 			name:    "with callback, found Maria",
-			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyFn{eq: fnEq})),
+			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyCallbacks{eq: fnEq})),
 			val:     employee{"Maria", 2},
 			result:  2,
 		},
 		{
 			name:    "with callback, not found",
-			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyFn{eq: fnEq})),
+			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyCallbacks{eq: fnEq})),
 			val:     employee{"John", 2},
 			result:  0,
 		},
@@ -1506,6 +1506,7 @@ func TestAnyPayload_FindAll(t *testing.T) {
 
 	employeeData := []any{
 		employee{"John", 1}, employee{"Maria", 2}, employee{"John", 1},
+		employee{"John", 2}, employee{"Maria", 2}, employee{"Isaac", 1},
 	}
 
 	fnEq := func(f, s any) bool {
@@ -1515,42 +1516,41 @@ func TestAnyPayload_FindAll(t *testing.T) {
 	testData := []struct {
 		name    string
 		payload Payload
-		val     any
-		result  []int
+		result  []bool
 	}{
 		{
-			name:    "with callback, found John",
-			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyFn{eq: fnEq})),
-			val:     employee{"John", 1},
-			result:  []int{1, 3},
+			name:    "with callback",
+			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyCallbacks{eq: fnEq})),
+			result:  []bool{true, true, false, true, false, true},
 		},
 		{
-			name:    "with callback, found Maria",
-			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyFn{eq: fnEq})),
-			val:     employee{"Maria", 2},
-			result:  []int{2},
+			name:    "with callback, len = 1",
+			payload: AnyPayload([]any{employee{"John", 1}}, nil, OptionAnyCallbacks(AnyCallbacks{eq: fnEq})),
+			result:  []bool{true},
 		},
 		{
-			name:    "with callback, not found",
-			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyFn{eq: fnEq})),
-			val:     employee{"John", 2},
-			result:  []int{},
+			name:    "with callback, empty",
+			payload: AnyPayload([]any{}, nil, OptionAnyCallbacks(AnyCallbacks{eq: fnEq})),
+			result:  []bool{},
 		},
 		{
 			name:    "without callback",
 			payload: AnyPayload(employeeData, nil),
-			val:     employee{"John", 1},
-			result:  []int{},
+			result:  []bool{true, true, true, true, true, true},
 		},
 	}
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			result := data.payload.(*anyPayload).FindAll(data.val)
+			result := data.payload.(*anyPayload).IsUnique()
 
 			if !reflect.DeepEqual(result, data.result) {
 				t.Error(fmt.Sprintf("result (%v) is not equal to data.result (%v", result, data.result))
 			}
 		})
 	}
+}
+
+func TestAnyPayload_IsUnique(t *testing.T) {
+
 }
