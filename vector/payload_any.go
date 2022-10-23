@@ -53,6 +53,22 @@ func (p *anyPayload) ByIndices(indices []int) Payload {
 	return AnyPayload(data, na, p.Options()...)
 }
 
+func (p *anyPayload) Find(needle any) int {
+	if p.fn.eq == nil {
+		return 0
+	}
+
+	return findFn(needle, p.data, p.na, p.convertComparator, p.fn.eq)
+}
+
+func (p *anyPayload) FindAll(needle any) []int {
+	if p.fn.eq == nil {
+		return []int{}
+	}
+
+	return findAllFn(needle, p.data, p.na, p.convertComparator, p.fn.eq)
+}
+
 func (p *anyPayload) StrForElem(idx int) string {
 	if p.na[idx-1] {
 		return "NA"

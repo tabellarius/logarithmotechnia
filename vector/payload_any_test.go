@@ -1440,3 +1440,117 @@ func TestAnyPayload_Lte(t *testing.T) {
 		})
 	}
 }
+
+func TestAnyPayload_Find(t *testing.T) {
+	type employee struct {
+		name string
+		dep  int
+	}
+
+	employeeData := []any{
+		employee{"John", 1}, employee{"Maria", 2}, employee{"John", 1},
+	}
+
+	fnEq := func(f, s any) bool {
+		return f.(employee).name == s.(employee).name && f.(employee).dep == s.(employee).dep
+	}
+
+	testData := []struct {
+		name    string
+		payload Payload
+		val     any
+		result  int
+	}{
+		{
+			name:    "with callback, found John",
+			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyFn{eq: fnEq})),
+			val:     employee{"John", 1},
+			result:  1,
+		},
+		{
+			name:    "with callback, found Maria",
+			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyFn{eq: fnEq})),
+			val:     employee{"Maria", 2},
+			result:  2,
+		},
+		{
+			name:    "with callback, not found",
+			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyFn{eq: fnEq})),
+			val:     employee{"John", 2},
+			result:  0,
+		},
+		{
+			name:    "without callback",
+			payload: AnyPayload(employeeData, nil),
+			val:     employee{"John", 1},
+			result:  0,
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			result := data.payload.(*anyPayload).Find(data.val)
+
+			if !reflect.DeepEqual(result, data.result) {
+				t.Error(fmt.Sprintf("result (%v) is not equal to data.result (%v", result, data.result))
+			}
+		})
+	}
+}
+
+func TestAnyPayload_FindAll(t *testing.T) {
+	type employee struct {
+		name string
+		dep  int
+	}
+
+	employeeData := []any{
+		employee{"John", 1}, employee{"Maria", 2}, employee{"John", 1},
+	}
+
+	fnEq := func(f, s any) bool {
+		return f.(employee).name == s.(employee).name && f.(employee).dep == s.(employee).dep
+	}
+
+	testData := []struct {
+		name    string
+		payload Payload
+		val     any
+		result  []int
+	}{
+		{
+			name:    "with callback, found John",
+			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyFn{eq: fnEq})),
+			val:     employee{"John", 1},
+			result:  []int{1, 3},
+		},
+		{
+			name:    "with callback, found Maria",
+			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyFn{eq: fnEq})),
+			val:     employee{"Maria", 2},
+			result:  []int{2},
+		},
+		{
+			name:    "with callback, not found",
+			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyFn{eq: fnEq})),
+			val:     employee{"John", 2},
+			result:  []int{},
+		},
+		{
+			name:    "without callback",
+			payload: AnyPayload(employeeData, nil),
+			val:     employee{"John", 1},
+			result:  []int{},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			result := data.payload.(*anyPayload).FindAll(data.val)
+
+			if !reflect.DeepEqual(result, data.result) {
+				t.Error(fmt.Sprintf("result (%v) is not equal to data.result (%v", result, data.result))
+			}
+		})
+	}
+}

@@ -671,7 +671,7 @@ func find[T comparable](needle any, inData []T, inNA []bool, convertor func(any)
 	return 0
 }
 
-func findFn[T comparable](needle any, inData []T, inNA []bool, convertor func(any) (T, bool), eqFn func(T, T) bool) int {
+func findFn[T any](needle any, inData []T, inNA []bool, convertor func(any) (T, bool), eqFn func(T, T) bool) int {
 	val, ok := convertor(needle)
 	if !ok {
 		return 0
@@ -702,7 +702,7 @@ func findAll[T comparable](needle any, inData []T, inNA []bool, convertor func(a
 	return found
 }
 
-func findAllFn[T comparable](needle any, inData []T, inNA []bool, convertor func(any) (T, bool),
+func findAllFn[T any](needle any, inData []T, inNA []bool, convertor func(any) (T, bool),
 	eqFn func(T, T) bool) []int {
 	val, ok := convertor(needle)
 	if !ok {
