@@ -117,6 +117,38 @@ func (p *anyPayload) Neq(val any) []bool {
 	return neqFn(val, p.data, p.na, p.convertComparator, p.fn.eq)
 }
 
+func (p *anyPayload) Gt(val any) []bool {
+	if p.fn.lt == nil {
+		return make([]bool, p.length)
+	}
+
+	return gtFn(val, p.data, p.na, p.convertComparator, p.fn.lt)
+}
+
+func (p *anyPayload) Lt(val any) []bool {
+	if p.fn.lt == nil {
+		return make([]bool, p.length)
+	}
+
+	return ltFn(val, p.data, p.na, p.convertComparator, p.fn.lt)
+}
+
+func (p *anyPayload) Gte(val any) []bool {
+	if p.fn.eq == nil || p.fn.lt == nil {
+		return make([]bool, p.length)
+	}
+
+	return gteFn(val, p.data, p.na, p.convertComparator, p.fn.eq, p.fn.lt)
+}
+
+func (p *anyPayload) Lte(val any) []bool {
+	if p.fn.eq == nil || p.fn.lt == nil {
+		return make([]bool, p.length)
+	}
+
+	return lteFn(val, p.data, p.na, p.convertComparator, p.fn.eq, p.fn.lt)
+}
+
 func (p *anyPayload) Integers() ([]int, []bool) {
 	if p.length == 0 {
 		return []int{}, []bool{}

@@ -1250,3 +1250,193 @@ func TestAnyPayload_Neq(t *testing.T) {
 		})
 	}
 }
+
+func TestAnyPayload_Gt(t *testing.T) {
+	type employee struct {
+		dep    int
+		salary int
+	}
+
+	employeeData := []any{
+		employee{2, 25000}, employee{1, 30000}, employee{1, 50000},
+	}
+
+	fnLt := func(f, s any) bool {
+		return f.(employee).dep < s.(employee).dep || f.(employee).dep == s.(employee).dep &&
+			f.(employee).salary < s.(employee).salary
+	}
+
+	testData := []struct {
+		name    string
+		payload Payload
+		val     any
+		result  []bool
+	}{
+		{
+			name:    "with callback",
+			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyFn{lt: fnLt})),
+			val:     employee{1, 40000},
+			result:  []bool{true, false, true},
+		},
+		{
+			name:    "without callback",
+			payload: AnyPayload(employeeData, nil),
+			val:     employee{1, 40000},
+			result:  []bool{false, false, false},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			result := data.payload.(*anyPayload).Gt(data.val)
+
+			if !reflect.DeepEqual(result, data.result) {
+				t.Error(fmt.Sprintf("result (%v) is not equal to data.result (%v", result, data.result))
+			}
+		})
+	}
+}
+
+func TestAnyPayload_Lt(t *testing.T) {
+	type employee struct {
+		dep    int
+		salary int
+	}
+
+	employeeData := []any{
+		employee{2, 25000}, employee{1, 30000}, employee{1, 50000},
+	}
+
+	fnLt := func(f, s any) bool {
+		return f.(employee).dep < s.(employee).dep || f.(employee).dep == s.(employee).dep &&
+			f.(employee).salary < s.(employee).salary
+	}
+
+	testData := []struct {
+		name    string
+		payload Payload
+		val     any
+		result  []bool
+	}{
+		{
+			name:    "with callback",
+			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyFn{lt: fnLt})),
+			val:     employee{1, 40000},
+			result:  []bool{false, true, false},
+		},
+		{
+			name:    "without callback",
+			payload: AnyPayload(employeeData, nil),
+			val:     employee{1, 40000},
+			result:  []bool{false, false, false},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			result := data.payload.(*anyPayload).Lt(data.val)
+
+			if !reflect.DeepEqual(result, data.result) {
+				t.Error(fmt.Sprintf("result (%v) is not equal to data.result (%v", result, data.result))
+			}
+		})
+	}
+}
+
+func TestAnyPayload_Gte(t *testing.T) {
+	type employee struct {
+		dep    int
+		salary int
+	}
+
+	employeeData := []any{
+		employee{2, 25000}, employee{1, 30000}, employee{1, 25000},
+	}
+
+	fnLt := func(f, s any) bool {
+		return f.(employee).dep < s.(employee).dep || f.(employee).dep == s.(employee).dep &&
+			f.(employee).salary < s.(employee).salary
+	}
+	fnEq := func(f, s any) bool {
+		return f.(employee).dep == s.(employee).dep && f.(employee).salary == s.(employee).salary
+	}
+
+	testData := []struct {
+		name    string
+		payload Payload
+		val     any
+		result  []bool
+	}{
+		{
+			name:    "with callback",
+			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyFn{lt: fnLt, eq: fnEq})),
+			val:     employee{1, 30000},
+			result:  []bool{true, true, false},
+		},
+		{
+			name:    "without callback",
+			payload: AnyPayload(employeeData, nil),
+			val:     employee{1, 30000},
+			result:  []bool{false, false, false},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			result := data.payload.(*anyPayload).Gte(data.val)
+
+			if !reflect.DeepEqual(result, data.result) {
+				t.Error(fmt.Sprintf("result (%v) is not equal to data.result (%v", result, data.result))
+			}
+		})
+	}
+}
+
+func TestAnyPayload_Lte(t *testing.T) {
+	type employee struct {
+		dep    int
+		salary int
+	}
+
+	employeeData := []any{
+		employee{2, 25000}, employee{1, 30000}, employee{1, 25000},
+	}
+
+	fnLt := func(f, s any) bool {
+		return f.(employee).dep < s.(employee).dep || f.(employee).dep == s.(employee).dep &&
+			f.(employee).salary < s.(employee).salary
+	}
+	fnEq := func(f, s any) bool {
+		return f.(employee).dep == s.(employee).dep && f.(employee).salary == s.(employee).salary
+	}
+
+	testData := []struct {
+		name    string
+		payload Payload
+		val     any
+		result  []bool
+	}{
+		{
+			name:    "with callback",
+			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyFn{lt: fnLt, eq: fnEq})),
+			val:     employee{1, 30000},
+			result:  []bool{false, true, true},
+		},
+		{
+			name:    "without callback",
+			payload: AnyPayload(employeeData, nil),
+			val:     employee{1, 30000},
+			result:  []bool{false, false, false},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			result := data.payload.(*anyPayload).Lte(data.val)
+
+			if !reflect.DeepEqual(result, data.result) {
+				t.Error(fmt.Sprintf("result (%v) is not equal to data.result (%v", result, data.result))
+			}
+		})
+	}
+}
