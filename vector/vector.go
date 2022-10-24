@@ -97,11 +97,11 @@ type Whichable interface {
 }
 
 type Appliable interface {
-	Whichable
 	Apply(applier any) Payload
 }
 
 type AppliableTo interface {
+	Whichable
 	ApplyTo(indices []int, applier any) Payload
 }
 

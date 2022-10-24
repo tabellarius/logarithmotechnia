@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-func TestInterface(t *testing.T) {
+func TestAny(t *testing.T) {
 	testInterfaceEmpty(t)
 
 	emptyNA := []bool{false, false, false, false, false}
@@ -91,14 +91,14 @@ func testInterfaceEmpty(t *testing.T) {
 	}
 }
 
-func TestInterfacePayload_Type(t *testing.T) {
+func TestAnyPayload_Type(t *testing.T) {
 	vec := AnyWithNA([]any{}, nil)
 	if vec.Type() != "any" {
 		t.Error("Type is incorrect.")
 	}
 }
 
-func TestInterfacePayload_Len(t *testing.T) {
+func TestAnyPayload_Len(t *testing.T) {
 	testData := []struct {
 		in        []any
 		outLength int
@@ -120,7 +120,7 @@ func TestInterfacePayload_Len(t *testing.T) {
 	}
 }
 
-func TestInterfacePayload_ByIndices(t *testing.T) {
+func TestAnyPayload_ByIndices(t *testing.T) {
 	vec := AnyWithNA([]any{1, 2, 3, 4, 5}, []bool{false, false, false, false, true})
 	testData := []struct {
 		name    string
@@ -167,7 +167,7 @@ func TestInterfacePayload_ByIndices(t *testing.T) {
 	}
 }
 
-func TestInterfacePayload_SupportsWhicher(t *testing.T) {
+func TestAnyPayload_SupportsWhicher(t *testing.T) {
 	testData := []struct {
 		name        string
 		filter      any
@@ -205,7 +205,7 @@ func TestInterfacePayload_SupportsWhicher(t *testing.T) {
 	}
 }
 
-func TestInterfacePayload_Which(t *testing.T) {
+func TestAnyPayload_Which(t *testing.T) {
 	testData := []struct {
 		name string
 		fn   any
@@ -250,7 +250,7 @@ func TestInterfacePayload_Which(t *testing.T) {
 	}
 }
 
-func TestInterfacePayload_Apply(t *testing.T) {
+func TestAnyPayload_Apply(t *testing.T) {
 	testData := []struct {
 		name        string
 		applier     any
@@ -354,7 +354,7 @@ func TestInterfacePayload_Apply(t *testing.T) {
 	}
 }
 
-func TestInterfacePayload_Integers(t *testing.T) {
+func TestAnyPayload_Integers(t *testing.T) {
 	convertor := func(idx int, val any, na bool) (int, bool) {
 		if na {
 			return 0, true
@@ -421,7 +421,7 @@ func TestInterfacePayload_Integers(t *testing.T) {
 	}
 }
 
-func TestInterfacePayload_Floats(t *testing.T) {
+func TestAnyPayload_Floats(t *testing.T) {
 	convertor := func(idx int, val any, na bool) (float64, bool) {
 		if na {
 			return math.NaN(), true
@@ -488,7 +488,7 @@ func TestInterfacePayload_Floats(t *testing.T) {
 	}
 }
 
-func TestInterfacePayload_Complexes(t *testing.T) {
+func TestAnyPayload_Complexes(t *testing.T) {
 	convertor := func(idx int, val any, na bool) (complex128, bool) {
 		if na {
 			return cmplx.NaN(), true
@@ -557,7 +557,7 @@ func TestInterfacePayload_Complexes(t *testing.T) {
 	}
 }
 
-func TestInterfacePayload_Booleans(t *testing.T) {
+func TestAnyPayload_Booleans(t *testing.T) {
 	convertor := func(idx int, val any, na bool) (bool, bool) {
 		if na {
 			return false, true
@@ -624,7 +624,7 @@ func TestInterfacePayload_Booleans(t *testing.T) {
 	}
 }
 
-func TestInterfacePayload_Strings(t *testing.T) {
+func TestAnyPayload_Strings(t *testing.T) {
 	convertor := func(idx int, val any, na bool) (string, bool) {
 		if na {
 			return "", true
@@ -691,7 +691,7 @@ func TestInterfacePayload_Strings(t *testing.T) {
 	}
 }
 
-func TestInterfacePayload_Times(t *testing.T) {
+func TestAnyPayload_Times(t *testing.T) {
 	convertor := func(idx int, val any, na bool) (time.Time, bool) {
 		if na {
 			return time.Time{}, true
@@ -756,7 +756,7 @@ func TestInterfacePayload_Times(t *testing.T) {
 	}
 }
 
-func TestInterfacePayload_Interfaces(t *testing.T) {
+func TestAnyPayload_Interfaces(t *testing.T) {
 	convertor := func(idx int, val any, na bool) (int, bool) {
 		if na {
 			return 0, true
@@ -815,7 +815,7 @@ func TestInterfacePayload_Interfaces(t *testing.T) {
 	}
 }
 
-func TestInterfacePayload_SupportsSummarizer(t *testing.T) {
+func TestAnyPayload_SupportsSummarizer(t *testing.T) {
 	testData := []struct {
 		name        string
 		summarizer  any
@@ -843,7 +843,7 @@ func TestInterfacePayload_SupportsSummarizer(t *testing.T) {
 	}
 }
 
-func TestInterfacePayload_Summarize(t *testing.T) {
+func TestAnyPayload_Summarize(t *testing.T) {
 	summarizer := func(idx int, prev any, cur any, na bool) (any, bool) {
 		if idx == 1 {
 			return cur, false
@@ -903,7 +903,7 @@ func TestInterfacePayload_Summarize(t *testing.T) {
 	}
 }
 
-func TestInterfacePayload_Append(t *testing.T) {
+func TestAnyPayload_Append(t *testing.T) {
 	payload := AnyPayload([]any{1, 2, 3}, nil)
 
 	testData := []struct {
@@ -948,7 +948,7 @@ func TestInterfacePayload_Append(t *testing.T) {
 	}
 }
 
-func TestInterfacePayload_Adjust(t *testing.T) {
+func TestAnyPayload_Adjust(t *testing.T) {
 	payload5 := AnyPayload([]any{1, 2, 3, 4, 5}, nil).(*anyPayload)
 	payload3 := AnyPayload([]any{1, 2, 3}, []bool{false, false, true}).(*anyPayload)
 
@@ -995,7 +995,7 @@ func TestInterfacePayload_Adjust(t *testing.T) {
 	}
 }
 
-func TestInterfacePayload_Pick(t *testing.T) {
+func TestAnyPayload_Pick(t *testing.T) {
 	payload := AnyPayload([]any{"a", "b", "a", "b", "c"}, []bool{false, false, true, true, false})
 
 	testData := []struct {
@@ -1042,7 +1042,7 @@ func TestInterfacePayload_Pick(t *testing.T) {
 	}
 }
 
-func TestInterfacePayload_Data(t *testing.T) {
+func TestAnyPayload_Data(t *testing.T) {
 	testData := []struct {
 		name    string
 		payload Payload
@@ -1072,7 +1072,7 @@ func TestInterfacePayload_Data(t *testing.T) {
 	}
 }
 
-func TestInterfacePayload_ApplyTo(t *testing.T) {
+func TestAnyPayload_ApplyTo(t *testing.T) {
 	srcPayload := AnyPayload([]any{1, 2, 3, 4, 5}, []bool{false, true, false, true, false})
 
 	testData := []struct {
@@ -1658,6 +1658,109 @@ func TestAnyPayload_Coalesce(t *testing.T) {
 			if !reflect.DeepEqual(payload.na, data.outNA) {
 				t.Error(fmt.Sprintf("NA (%v) do not match expected (%v)",
 					payload.na, data.outNA))
+			}
+		})
+	}
+}
+
+func TestAnyPayload_SortedIndices(t *testing.T) {
+	type employee struct {
+		name string
+		dep  int
+	}
+
+	employeeData := []any{
+		employee{"John", 1}, employee{"Maria", 2}, employee{"John", 1},
+		employee{"John", 2}, employee{"Maria", 2}, employee{"Isaac", 1},
+	}
+
+	fnLt := func(f, s any) bool {
+		return f.(employee).dep < s.(employee).dep || f.(employee).dep == s.(employee).dep &&
+			f.(employee).name < s.(employee).name
+	}
+	fnEq := func(f, s any) bool {
+		return f.(employee).name == s.(employee).name && f.(employee).dep == s.(employee).dep
+	}
+
+	testData := []struct {
+		name    string
+		payload Payload
+		result  []int
+	}{
+		{
+			name:    "with callbacks",
+			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyCallbacks{eq: fnEq, lt: fnLt})),
+			result:  []int{6, 1, 3, 4, 2, 5},
+		},
+		{
+			name:    "without callbacks",
+			payload: AnyPayload(employeeData, nil),
+			result:  []int{1, 2, 3, 4, 5, 6},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			result := data.payload.(Arrangeable).SortedIndices()
+
+			if !reflect.DeepEqual(result, data.result) {
+				t.Error(fmt.Sprintf("Result (%v) do not match expected (%v)",
+					result, data.result))
+			}
+		})
+	}
+}
+
+func TestAnyPayload_SortedIndicesWithRanks(t *testing.T) {
+	type employee struct {
+		name string
+		dep  int
+	}
+
+	employeeData := []any{
+		employee{"John", 1}, employee{"Maria", 2}, employee{"John", 1},
+		employee{"John", 2}, employee{"Maria", 2}, employee{"Isaac", 1},
+	}
+
+	fnLt := func(f, s any) bool {
+		return f.(employee).dep < s.(employee).dep || f.(employee).dep == s.(employee).dep &&
+			f.(employee).name < s.(employee).name
+	}
+	fnEq := func(f, s any) bool {
+		return f.(employee).name == s.(employee).name && f.(employee).dep == s.(employee).dep
+	}
+
+	testData := []struct {
+		name    string
+		payload Payload
+		indices []int
+		ranks   []int
+	}{
+		{
+			name:    "with callbacks",
+			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyCallbacks{eq: fnEq, lt: fnLt})),
+			indices: []int{6, 1, 3, 4, 2, 5},
+			ranks:   []int{1, 2, 2, 3, 4, 4},
+		},
+		{
+			name:    "without callbacks",
+			payload: AnyPayload(employeeData, nil),
+			indices: []int{1, 2, 3, 4, 5, 6},
+			ranks:   []int{1, 2, 3, 4, 5, 6},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			indices, ranks := data.payload.(Arrangeable).SortedIndicesWithRanks()
+
+			if !reflect.DeepEqual(indices, data.indices) {
+				t.Error(fmt.Sprintf("Result (%v) do not match expected (%v)",
+					indices, data.indices))
+			}
+			if !reflect.DeepEqual(ranks, data.ranks) {
+				t.Error(fmt.Sprintf("Result (%v) do not match expected (%v)",
+					ranks, data.ranks))
 			}
 		})
 	}

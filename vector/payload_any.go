@@ -29,6 +29,7 @@ type anyPayload struct {
 	convertors AnyConvertors
 	fn         AnyCallbacks
 	DefNAble
+	DefArrangeable
 }
 
 func (p *anyPayload) Type() string {
@@ -464,8 +465,30 @@ func AnyPayload(data []any, na []bool, options ...Option) Payload {
 		payload.fn = conf.Value(KeyOptionAnyCallbacks).(AnyCallbacks)
 	}
 
-	return payload
+	fnLess := func(i, j int) bool {
+		return i < j
+	}
+	fnEqual := func(i, j int) bool {
+		return i == j
+	}
 
+	if payload.fn.lt != nil && payload.fn.eq != nil {
+		fnLess = func(i, j int) bool {
+			return payload.fn.lt(payload.data[i], payload.data[j])
+		}
+		fnEqual = func(i, j int) bool {
+			return payload.fn.eq(payload.data[i], payload.data[j])
+		}
+	}
+
+	payload.DefArrangeable = DefArrangeable{
+		Length:   payload.length,
+		DefNAble: payload.DefNAble,
+		FnLess:   fnLess,
+		FnEqual:  fnEqual,
+	}
+
+	return payload
 }
 
 func AnyWithNA(data []any, na []bool, options ...Option) Vector {
