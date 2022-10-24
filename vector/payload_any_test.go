@@ -756,7 +756,7 @@ func TestAnyPayload_Times(t *testing.T) {
 	}
 }
 
-func TestAnyPayload_Interfaces(t *testing.T) {
+func TestAnyPayload_Anies(t *testing.T) {
 	convertor := func(idx int, val any, na bool) (int, bool) {
 		if na {
 			return 0, true
@@ -1761,6 +1761,73 @@ func TestAnyPayload_SortedIndicesWithRanks(t *testing.T) {
 			if !reflect.DeepEqual(ranks, data.ranks) {
 				t.Error(fmt.Sprintf("Result (%v) do not match expected (%v)",
 					ranks, data.ranks))
+			}
+		})
+	}
+}
+
+func TestAnyPayload_Groups(t *testing.T) {
+	type employee struct {
+		name string
+		dep  int
+	}
+
+	employeeData := []any{
+		employee{"John", 1}, employee{"Maria", 2}, employee{"John", 1},
+		employee{"John", 2}, employee{"Maria", 2}, employee{"Isaac", 1},
+	}
+
+	fnHashInt := func(val any) int {
+		return val.(employee).dep
+	}
+	fnHashStr := func(val any) string {
+		return val.(employee).name
+	}
+
+	testData := []struct {
+		name    string
+		payload Payload
+		groups  [][]int
+		values  []any
+	}{
+		{
+			name:    "with string hash callback",
+			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyCallbacks{hashStr: fnHashStr})),
+			groups:  [][]int{{1, 3, 4}, {2, 5}, {6}},
+			values:  []any{employee{"John", 1}, employee{"Maria", 2}, employee{"Isaac", 1}},
+		},
+		{
+			name:    "with int hash callback",
+			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyCallbacks{hashInt: fnHashInt})),
+			groups:  [][]int{{1, 3, 6}, {2, 4, 5}},
+			values:  []any{employee{"John", 1}, employee{"Maria", 2}},
+		},
+		{
+			name: "with int and str hash callbacks",
+			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyCallbacks{hashStr: fnHashStr,
+				hashInt: fnHashInt})),
+			groups: [][]int{{1, 3, 6}, {2, 4, 5}},
+			values: []any{employee{"John", 1}, employee{"Maria", 2}},
+		},
+		{
+			name:    "without callbacks",
+			payload: AnyPayload(employeeData, nil),
+			groups:  [][]int{{1}, {2}, {3}, {4}, {5}, {6}},
+			values:  employeeData,
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			groups, values := data.payload.(Grouper).Groups()
+
+			if !reflect.DeepEqual(groups, data.groups) {
+				t.Error(fmt.Sprintf("Result (%v) do not match expected (%v)",
+					groups, data.groups))
+			}
+			if !reflect.DeepEqual(values, data.values) {
+				t.Error(fmt.Sprintf("Result (%v) do not match expected (%v)",
+					values, data.values))
 			}
 		})
 	}

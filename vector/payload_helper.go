@@ -385,6 +385,48 @@ func groupsForData[T comparable](srcData []T, srcNA []bool) ([][]int, []any) {
 	return groups, values
 }
 
+func groupsForDataWithHash[T any, S comparable](srcData []T, srcNA []bool, fnHash func(T) S) ([][]int, []any) {
+	groupMap := map[S][]int{}
+	ordered := []T{}
+	na := []int{}
+
+	for i, val := range srcData {
+		idx := i + 1
+		h := fnHash(val)
+
+		if srcNA[i] {
+			na = append(na, idx)
+			continue
+		}
+
+		if _, ok := groupMap[h]; !ok {
+			groupMap[h] = []int{}
+			ordered = append(ordered, val)
+		}
+
+		groupMap[h] = append(groupMap[h], idx)
+	}
+
+	groups := make([][]int, len(ordered))
+	for i, val := range ordered {
+		groups[i] = groupMap[fnHash(val)]
+	}
+
+	if len(na) > 0 {
+		groups = append(groups, na)
+	}
+
+	values := make([]any, len(groups))
+	for i, val := range ordered {
+		values[i] = any(val)
+	}
+	if len(na) > 0 {
+		values[len(values)-1] = nil
+	}
+
+	return groups, values
+}
+
 func supportsSummarizer[T any](summarizer any) bool {
 	if _, ok := summarizer.(func(int, T, T, bool) (T, bool)); ok {
 		return true

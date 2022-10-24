@@ -18,8 +18,10 @@ type AnyConvertors struct {
 }
 
 type AnyCallbacks struct {
-	eq func(any, any) bool
-	lt func(any, any) bool
+	eq      func(any, any) bool
+	lt      func(any, any) bool
+	hashInt func(any) int
+	hashStr func(any) string
 }
 
 type anyPayload struct {
@@ -201,6 +203,29 @@ func (p *anyPayload) IsUnique() []bool {
 	}
 
 	return booleans
+}
+
+func (p *anyPayload) Groups() ([][]int, []any) {
+	if p.fn.hashInt != nil {
+		return groupsForDataWithHash(p.data, p.na, p.fn.hashInt)
+	}
+
+	if p.fn.hashStr != nil {
+		return groupsForDataWithHash(p.data, p.na, p.fn.hashStr)
+	}
+
+	data := make([]int, p.length)
+	for i := 0; i < p.length; i++ {
+		data[i] = i
+	}
+
+	groups, _ := groupsForData(data, p.na)
+	values := make([]any, p.length)
+	for i := 0; i < p.length; i++ {
+		values[i] = p.data[i]
+	}
+
+	return groups, values
 }
 
 func (p *anyPayload) Coalesce(payload Payload) Payload {
