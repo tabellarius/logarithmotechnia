@@ -3,8 +3,9 @@ package vector
 const KeyOptionPrecision = "precision"
 const KeyOptionFormat = "format"
 const KeyOptionTimeFormat = "time_format"
-const KeyOptionInterfacePrinterFunc = "interface_printer_func"
-const KeyOptionInterfaceConvertors = "interface_convertors"
+const KeyOptionAnyPrinterFunc = "any_printer_func"
+const KeyOptionAnyConvertors = "any_convertors"
+const KeyOptionAnyCallbacks = "any_callbacks"
 const KeyOptionBeforeColumn = "before_column"
 const KeyOptionAfterColumn = "after_column"
 const KeyOptionColumnNames = "column_names"
@@ -79,12 +80,16 @@ func OptionTimeFormat(format string) Option {
 	return ConfOption{KeyOptionTimeFormat, format}
 }
 
-func OptionInterfacePrinterFunc(fn AnyPrinterFunc) Option {
-	return ConfOption{KeyOptionInterfacePrinterFunc, fn}
+func OptionAnyPrinterFunc(fn AnyPrinterFunc) Option {
+	return ConfOption{KeyOptionAnyPrinterFunc, fn}
 }
 
-func OptionInterfaceConvertors(convertors *AnyConvertors) Option {
-	return ConfOption{KeyOptionInterfaceConvertors, convertors}
+func OptionAnyConvertors(convertors AnyConvertors) Option {
+	return ConfOption{KeyOptionAnyConvertors, convertors}
+}
+
+func OptionAnyCallbacks(callbacks AnyCallbacks) Option {
+	return ConfOption{KeyOptionAnyCallbacks, callbacks}
 }
 
 func OptionBeforeColumn(name string) Option {

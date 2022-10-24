@@ -19,14 +19,6 @@ func pickValueWithNA[T any](idx int, data []T, na []bool, maxLen int) any {
 	return any(data[idx-1])
 }
 
-func pickValue[T any](idx int, data []T, maxLen int) any {
-	if idx < 1 || idx > maxLen {
-		return nil
-	}
-
-	return any(data[idx-1])
-}
-
 func dataWithNAToInterfaceArray[T any](data []T, na []bool) []any {
 	dataLen := len(data)
 	outData := make([]any, dataLen)
@@ -87,32 +79,6 @@ func adjustToBiggerSizeWithNA[T any](srcData []T, srcNA []bool, length int, size
 	na = na[:size]
 
 	return data, na
-}
-
-func adjustToLesserSize[T any](srcData []T, size int) []T {
-	data := make([]T, size)
-
-	copy(data, srcData)
-
-	return data
-}
-
-func adjustToBiggerSize[T any](srcData []T, size int) []T {
-	length := len(srcData)
-	cycles := size / length
-	if size%length > 0 {
-		cycles++
-	}
-
-	data := make([]T, cycles*length)
-
-	for i := 0; i < cycles; i++ {
-		copy(data[i*length:], srcData)
-	}
-
-	data = data[:size]
-
-	return data
 }
 
 func supportsWhicher[T any](whicher any) bool {
@@ -419,6 +385,48 @@ func groupsForData[T comparable](srcData []T, srcNA []bool) ([][]int, []any) {
 	return groups, values
 }
 
+func groupsForDataWithHash[T any, S comparable](srcData []T, srcNA []bool, fnHash func(T) S) ([][]int, []any) {
+	groupMap := map[S][]int{}
+	ordered := []T{}
+	na := []int{}
+
+	for i, val := range srcData {
+		idx := i + 1
+		h := fnHash(val)
+
+		if srcNA[i] {
+			na = append(na, idx)
+			continue
+		}
+
+		if _, ok := groupMap[h]; !ok {
+			groupMap[h] = []int{}
+			ordered = append(ordered, val)
+		}
+
+		groupMap[h] = append(groupMap[h], idx)
+	}
+
+	groups := make([][]int, len(ordered))
+	for i, val := range ordered {
+		groups[i] = groupMap[fnHash(val)]
+	}
+
+	if len(na) > 0 {
+		groups = append(groups, na)
+	}
+
+	values := make([]any, len(groups))
+	for i, val := range ordered {
+		values[i] = any(val)
+	}
+	if len(na) > 0 {
+		values[len(values)-1] = nil
+	}
+
+	return groups, values
+}
+
 func supportsSummarizer[T any](summarizer any) bool {
 	if _, ok := summarizer.(func(int, T, T, bool) (T, bool)); ok {
 		return true
@@ -554,7 +562,7 @@ func gt[T constraints.Ordered](val any, inData []T, inNA []bool, convertor func(
 }
 
 func gtFn[T any](val any, inData []T, inNA []bool, convertor func(any) (T, bool),
-	gtFn func(T, T) bool) []bool {
+	ltFn func(T, T) bool) []bool {
 	cmp := make([]bool, len(inData))
 
 	v, ok := convertor(val)
@@ -566,7 +574,7 @@ func gtFn[T any](val any, inData []T, inNA []bool, convertor func(any) (T, bool)
 		if inNA[i] {
 			cmp[i] = false
 		} else {
-			cmp[i] = gtFn(datum, v)
+			cmp[i] = ltFn(v, datum)
 		}
 	}
 
@@ -593,7 +601,7 @@ func lt[T constraints.Ordered](val any, inData []T, inNA []bool, convertor func(
 }
 
 func ltFn[T any](val any, inData []T, inNA []bool, convertor func(any) (T, bool),
-	gtFn func(T, T) bool) []bool {
+	ltFn func(T, T) bool) []bool {
 	cmp := make([]bool, len(inData))
 
 	v, ok := convertor(val)
@@ -605,7 +613,7 @@ func ltFn[T any](val any, inData []T, inNA []bool, convertor func(any) (T, bool)
 		if inNA[i] {
 			cmp[i] = false
 		} else {
-			cmp[i] = gtFn(v, datum)
+			cmp[i] = ltFn(datum, v)
 		}
 	}
 
@@ -632,7 +640,7 @@ func gte[T constraints.Ordered](val any, inData []T, inNA []bool, convertor func
 }
 
 func gteFn[T any](val any, inData []T, inNA []bool, convertor func(any) (T, bool),
-	eqFn func(T, T) bool, gtFn func(T, T) bool) []bool {
+	eqFn func(T, T) bool, ltFn func(T, T) bool) []bool {
 	cmp := make([]bool, len(inData))
 
 	v, ok := convertor(val)
@@ -644,7 +652,7 @@ func gteFn[T any](val any, inData []T, inNA []bool, convertor func(any) (T, bool
 		if inNA[i] {
 			cmp[i] = false
 		} else {
-			cmp[i] = gtFn(datum, v) || eqFn(datum, v)
+			cmp[i] = ltFn(v, datum) || eqFn(datum, v)
 		}
 	}
 
@@ -671,7 +679,7 @@ func lte[T constraints.Ordered](val any, inData []T, inNA []bool, convertor func
 }
 
 func lteFn[T any](val any, inData []T, inNA []bool, convertor func(any) (T, bool),
-	eqFn func(T, T) bool, gtFn func(T, T) bool) []bool {
+	eqFn func(T, T) bool, ltFn func(T, T) bool) []bool {
 	cmp := make([]bool, len(inData))
 
 	v, ok := convertor(val)
@@ -683,7 +691,7 @@ func lteFn[T any](val any, inData []T, inNA []bool, convertor func(any) (T, bool
 		if inNA[i] {
 			cmp[i] = false
 		} else {
-			cmp[i] = gtFn(v, datum) || eqFn(v, datum)
+			cmp[i] = ltFn(datum, v) || eqFn(v, datum)
 		}
 	}
 
@@ -705,7 +713,7 @@ func find[T comparable](needle any, inData []T, inNA []bool, convertor func(any)
 	return 0
 }
 
-func findFn[T comparable](needle any, inData []T, inNA []bool, convertor func(any) (T, bool), eqFn func(T, T) bool) int {
+func findFn[T any](needle any, inData []T, inNA []bool, convertor func(any) (T, bool), eqFn func(T, T) bool) int {
 	val, ok := convertor(needle)
 	if !ok {
 		return 0
@@ -736,7 +744,7 @@ func findAll[T comparable](needle any, inData []T, inNA []bool, convertor func(a
 	return found
 }
 
-func findAllFn[T comparable](needle any, inData []T, inNA []bool, convertor func(any) (T, bool),
+func findAllFn[T any](needle any, inData []T, inNA []bool, convertor func(any) (T, bool),
 	eqFn func(T, T) bool) []int {
 	val, ok := convertor(needle)
 	if !ok {
