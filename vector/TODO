@@ -1,7 +1,0 @@
-Finder interface for AnyPayload
-Comparator for Any payload(?)
-
-Add NewDefNAable() for DefNAble
-Review type conversions
-Add df.Err and logger
-Rework factorizable payloads
