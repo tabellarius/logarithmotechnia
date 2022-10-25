@@ -208,6 +208,10 @@ func (p *naPayload) Options() []Option {
 	return []Option{}
 }
 
+func (p *naPayload) SetOption(string, any) bool {
+	return false
+}
+
 func NAPayload(length int, _ ...Option) Payload {
 	if length < 0 {
 		length = 0

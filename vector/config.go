@@ -56,6 +56,12 @@ func (conf Configuration) Value(name string) any {
 	return conf.options[name]
 }
 
+func (conf Configuration) SetOptions(payload Payload) {
+	for str, val := range conf.options {
+		payload.SetOption(str, val)
+	}
+}
+
 func MergeOptions(options []Option) Configuration {
 	conf := Configuration{
 		options: map[string]any{},

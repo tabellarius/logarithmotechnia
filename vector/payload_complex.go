@@ -237,6 +237,15 @@ func (p *complexPayload) Options() []Option {
 	}
 }
 
+func (p *complexPayload) SetOption(name string, val any) bool {
+	if name == KeyOptionPrecision {
+		p.printer.Precision = val.(int)
+		return true
+	}
+
+	return false
+}
+
 func (p *complexPayload) Groups() ([][]int, []any) {
 	groups, values := groupsForData(p.data, p.na)
 
@@ -370,11 +379,7 @@ func ComplexPayload(data []complex128, na []bool, options ...Option) Payload {
 		Precision: 3,
 	}
 
-	if conf.HasOption(KeyOptionPrecision) {
-		printer.Precision = conf.Value(KeyOptionPrecision).(int)
-	}
-
-	return &complexPayload{
+	payload := &complexPayload{
 		length:  length,
 		data:    vecData,
 		printer: printer,
@@ -382,6 +387,9 @@ func ComplexPayload(data []complex128, na []bool, options ...Option) Payload {
 			na: vecNA,
 		},
 	}
+	conf.SetOptions(payload)
+
+	return payload
 }
 
 func (p *complexPayload) IsUnique() []bool {

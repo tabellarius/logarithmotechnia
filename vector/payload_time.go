@@ -266,6 +266,14 @@ func (p *timePayload) Options() []Option {
 	}
 }
 
+func (p *timePayload) SetOption(name string, val any) bool {
+	if name == KeyOptionTimeFormat {
+		p.printer.Format = val.(string)
+	}
+
+	return false
+}
+
 func TimePayload(data []time.Time, na []bool, options ...Option) Payload {
 	length := len(data)
 	conf := MergeOptions(options)
@@ -290,9 +298,6 @@ func TimePayload(data []time.Time, na []bool, options ...Option) Payload {
 	}
 
 	printer := TimePrinter{Format: time.RFC3339}
-	if conf.HasOption(KeyOptionTimeFormat) {
-		printer.Format = conf.Value(KeyOptionTimeFormat).(string)
-	}
 
 	payload := &timePayload{
 		length:  length,
@@ -302,6 +307,8 @@ func TimePayload(data []time.Time, na []bool, options ...Option) Payload {
 			na: vecNA,
 		},
 	}
+
+	conf.SetOptions(payload)
 
 	payload.DefArrangeable = DefArrangeable{
 		Length:   payload.length,
