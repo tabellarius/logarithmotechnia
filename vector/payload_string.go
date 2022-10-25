@@ -424,6 +424,10 @@ func (p *stringPayload) Options() []Option {
 	return []Option{}
 }
 
+func (p *stringPayload) SetOption(string, any) bool {
+	return false
+}
+
 func StringPayload(data []string, na []bool, _ ...Option) Payload {
 	length := len(data)
 

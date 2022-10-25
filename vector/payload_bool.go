@@ -307,6 +307,10 @@ func (p *booleanPayload) Options() []Option {
 	return []Option{}
 }
 
+func (p *booleanPayload) SetOption(string, any) bool {
+	return false
+}
+
 func (p *booleanPayload) Coalesce(payload Payload) Payload {
 	if p.length != payload.Len() {
 		payload = payload.Adjust(p.length)

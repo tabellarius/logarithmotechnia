@@ -446,6 +446,25 @@ func (p *anyPayload) Options() []Option {
 	return []Option{}
 }
 
+func (p *anyPayload) SetOption(name string, val any) bool {
+	if name == KeyOptionAnyPrinterFunc {
+		p.printer = val.(AnyPrinterFunc)
+		return true
+	}
+
+	if name == KeyOptionAnyConvertors {
+		p.convertors = val.(AnyConvertors)
+		return true
+	}
+
+	if name == KeyOptionAnyCallbacks {
+		p.fn = val.(AnyCallbacks)
+		return true
+	}
+
+	return false
+}
+
 func AnyPayload(data []any, na []bool, options ...Option) Payload {
 	length := len(data)
 	conf := MergeOptions(options)
@@ -478,17 +497,7 @@ func AnyPayload(data []any, na []bool, options ...Option) Payload {
 		},
 	}
 
-	if conf.HasOption(KeyOptionAnyPrinterFunc) {
-		payload.printer = conf.Value(KeyOptionAnyPrinterFunc).(AnyPrinterFunc)
-	}
-
-	if conf.HasOption(KeyOptionAnyConvertors) {
-		payload.convertors = conf.Value(KeyOptionAnyConvertors).(AnyConvertors)
-	}
-
-	if conf.HasOption(KeyOptionAnyCallbacks) {
-		payload.fn = conf.Value(KeyOptionAnyCallbacks).(AnyCallbacks)
-	}
+	conf.SetOptions(payload)
 
 	fnLess := func(i, j int) bool {
 		return i < j

@@ -75,6 +75,7 @@ type Vector interface {
 	Div(...Vector) Vector
 
 	Options() []Option
+	SetOption(string, any) bool
 
 	Sum() Vector
 }
@@ -87,6 +88,7 @@ type Payload interface {
 	Append(payload Payload) Payload
 	Adjust(size int) Payload
 	Options() []Option
+	SetOption(string, any) bool
 	Pick(idx int) any
 	Data() []any
 }
@@ -869,6 +871,10 @@ func (v *vector) Options() []Option {
 	return []Option{
 		OptionVectorName(v.name),
 	}
+}
+
+func (v *vector) SetOption(name string, val any) bool {
+	return v.payload.SetOption(name, val)
 }
 
 // New creates a vector part of the future vector. This function is used by public functions which create

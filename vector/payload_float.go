@@ -418,6 +418,15 @@ func (p *floatPayload) Options() []Option {
 	}
 }
 
+func (p *floatPayload) SetOption(name string, val any) bool {
+	if name == KeyOptionPrecision {
+		p.printer.Precision = val.(int)
+		return true
+	}
+
+	return false
+}
+
 func FloatPayload(data []float64, na []bool, options ...Option) Payload {
 	length := len(data)
 	conf := MergeOptions(options)
@@ -445,10 +454,6 @@ func FloatPayload(data []float64, na []bool, options ...Option) Payload {
 		Precision: 3,
 	}
 
-	if conf.HasOption(KeyOptionPrecision) {
-		printer.Precision = conf.Value(KeyOptionPrecision).(int)
-	}
-
 	payload := &floatPayload{
 		length:  length,
 		data:    vecData,
@@ -457,6 +462,8 @@ func FloatPayload(data []float64, na []bool, options ...Option) Payload {
 			na: vecNA,
 		},
 	}
+
+	conf.SetOptions(payload)
 
 	payload.DefArrangeable = DefArrangeable{
 		Length:   payload.length,
