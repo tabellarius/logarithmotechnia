@@ -88,6 +88,33 @@ func (df *Dataframe) Columns() []vector.Vector {
 	return df.columns
 }
 
+func (df *Dataframe) Pick(idx int) map[string]any {
+	rowMap := map[string]any{}
+	if idx < 1 || idx > df.rowNum {
+		return rowMap
+	}
+
+	for _, column := range df.columns {
+		rowMap[column.Name()] = column.Pick(idx)
+	}
+
+	return rowMap
+}
+
+func (df *Dataframe) Traverse(traverser any) {
+	if fn, ok := traverser.(func(int, map[string]any)); ok {
+		for i := 1; i <= df.rowNum; i++ {
+			fn(i, df.Pick(i))
+		}
+	}
+
+	if fn, ok := traverser.(func(map[string]any)); ok {
+		for i := 1; i <= df.rowNum; i++ {
+			fn(df.Pick(i))
+		}
+	}
+}
+
 func (df *Dataframe) IsEmpty() bool {
 	return df.colNum == 0
 }
