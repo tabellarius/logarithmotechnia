@@ -483,3 +483,78 @@ func TestDataframe_IsValidColumnIndex(t *testing.T) {
 		})
 	}
 }
+
+func TestDataframe_Pick(t *testing.T) {
+	df := New([]vector.Vector{
+		vector.IntegerWithNA([]int{1, 2, 3}, nil),
+		vector.StringWithNA([]string{"1", "2", "3"}, nil),
+		vector.BooleanWithNA([]bool{true, false, true}, nil),
+	}, vector.OptionColumnNames([]string{"int", "string", "bool"}))
+
+	testData := []struct {
+		index  int
+		rowMap map[string]any
+	}{
+		{
+			index:  1,
+			rowMap: map[string]any{"int": 1, "string": "1", "bool": true},
+		},
+		{
+			index:  2,
+			rowMap: map[string]any{"int": 2, "string": "2", "bool": false},
+		},
+		{
+			index:  3,
+			rowMap: map[string]any{"int": 3, "string": "3", "bool": true},
+		},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			rowMap := df.Pick(data.index)
+
+			if !reflect.DeepEqual(rowMap, data.rowMap) {
+				t.Error(fmt.Sprintf("Map (%v) is not equal to expected (%v)",
+					rowMap, data.rowMap))
+			}
+		})
+	}
+}
+
+func TestDataframe_Traverse(t *testing.T) {
+	df := New([]vector.Vector{
+		vector.IntegerWithNA([]int{1, 2, 3}, nil),
+		vector.StringWithNA([]string{"1", "2", "3"}, nil),
+		vector.BooleanWithNA([]bool{true, false, true}, nil),
+	}, vector.OptionColumnNames([]string{"int", "string", "bool"}))
+
+	fMapDf := map[int]map[string]any{}
+	trF := func(idx int, val map[string]any) {
+		fMapDf[idx] = val
+	}
+	df.Traverse(trF)
+	refFMapDf := map[int]map[string]any{
+		1: {"int": 1, "string": "1", "bool": true},
+		2: {"int": 2, "string": "2", "bool": false},
+		3: {"int": 3, "string": "3", "bool": true},
+	}
+
+	if !reflect.DeepEqual(fMapDf, refFMapDf) {
+		t.Error(fmt.Sprintf("fMapDf %v is not equal to %v", fMapDf, refFMapDf))
+	}
+
+	arrMapDf := []map[string]any{}
+	trC := func(val map[string]any) {
+		arrMapDf = append(arrMapDf, val)
+	}
+	df.Traverse(trC)
+	refArrMapDf := []map[string]any{
+		{"int": 1, "string": "1", "bool": true},
+		{"int": 2, "string": "2", "bool": false},
+		{"int": 3, "string": "3", "bool": true},
+	}
+
+	if !reflect.DeepEqual(arrMapDf, refArrMapDf) {
+		t.Error(fmt.Sprintf("arrMapDf %v is not equal to %v", arrMapDf, refArrMapDf))
+	}
+}
