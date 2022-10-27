@@ -60,6 +60,10 @@ func (p *timePayload) ApplyTo(indices []int, applier any) Payload {
 	return TimePayload(data, na, p.Options()...)
 }
 
+func (p *timePayload) Traverse(traverser any) {
+	traverse(p.data, p.na, traverser)
+}
+
 func (p *timePayload) SupportsSummarizer(summarizer any) bool {
 	return supportsSummarizer[time.Time](summarizer)
 }

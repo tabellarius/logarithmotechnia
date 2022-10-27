@@ -1301,3 +1301,52 @@ func TestBooleanPayload_ApplyTo(t *testing.T) {
 		})
 	}
 }
+
+func TestBooleanPayload_Traverse(t *testing.T) {
+	payload := BooleanPayload([]bool{true, true, true, true, true}, []bool{false, false, true, false, true})
+
+	cntFull, cntCompact, cntBrief := 0, 0, 0
+	trF := func(int, bool, bool) { cntFull++ }
+	trC := func(bool, bool) { cntCompact++ }
+	trB := func(bool) { cntBrief++ }
+
+	testData := []struct {
+		name      string
+		payload   Payload
+		traverser any
+		expected  int
+		result    *int
+	}{
+		{
+			name:      "full",
+			payload:   payload,
+			traverser: trF,
+			expected:  5,
+			result:    &cntFull,
+		},
+		{
+			name:      "compact",
+			payload:   payload,
+			traverser: trC,
+			expected:  5,
+			result:    &cntCompact,
+		},
+		{
+			name:      "brief",
+			payload:   payload,
+			traverser: trB,
+			expected:  3,
+			result:    &cntBrief,
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			data.payload.(Traversable).Traverse(data.traverser)
+
+			if *data.result != data.expected {
+				t.Error(fmt.Sprintf("Counter (%v) is not equal to expected (%v)", *data.result, data.expected))
+			}
+		})
+	}
+}

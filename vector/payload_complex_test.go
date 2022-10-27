@@ -1224,3 +1224,52 @@ func TestComplexPayload_ApplyTo(t *testing.T) {
 		})
 	}
 }
+
+func TestComplexPayload_Traverse(t *testing.T) {
+	payload := ComplexPayload([]complex128{1, 2, 3, 4, 5}, []bool{false, false, true, false, true})
+
+	cntFull, cntCompact, cntBrief := 0, 0, 0
+	trF := func(int, complex128, bool) { cntFull++ }
+	trC := func(complex128, bool) { cntCompact++ }
+	trB := func(complex128) { cntBrief++ }
+
+	testData := []struct {
+		name      string
+		payload   Payload
+		traverser any
+		expected  int
+		result    *int
+	}{
+		{
+			name:      "full",
+			payload:   payload,
+			traverser: trF,
+			expected:  5,
+			result:    &cntFull,
+		},
+		{
+			name:      "compact",
+			payload:   payload,
+			traverser: trC,
+			expected:  5,
+			result:    &cntCompact,
+		},
+		{
+			name:      "brief",
+			payload:   payload,
+			traverser: trB,
+			expected:  3,
+			result:    &cntBrief,
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			data.payload.(Traversable).Traverse(data.traverser)
+
+			if *data.result != data.expected {
+				t.Error(fmt.Sprintf("Counter (%v) is not equal to expected (%v)", *data.result, data.expected))
+			}
+		})
+	}
+}

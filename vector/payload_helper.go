@@ -325,6 +325,30 @@ func applyToByCompactFunc[T any](indices []int, inData []T, inNA []bool,
 	return data, na
 }
 
+func traverse[T any](inData []T, inNA []bool, traverser any) {
+	length := len(inData)
+
+	if fn, ok := traverser.(func(int, T, bool)); ok {
+		for i := 0; i < length; i++ {
+			fn(i, inData[i], inNA[i])
+		}
+	}
+
+	if fn, ok := traverser.(func(T, bool)); ok {
+		for i := 0; i < length; i++ {
+			fn(inData[i], inNA[i])
+		}
+	}
+
+	if fn, ok := traverser.(func(T)); ok {
+		for i := 0; i < length; i++ {
+			if !inNA[i] {
+				fn(inData[i])
+			}
+		}
+	}
+}
+
 func applyToByBriefFunc[T any](indices []int, inData []T, inNA []bool, applyFunc func(T) T) ([]T, []bool) {
 	length := len(inData)
 

@@ -50,6 +50,10 @@ func (p *integerPayload) Apply(applier any) Payload {
 	return apply(p.data, p.na, applier, p.Options())
 }
 
+func (p *integerPayload) Traverse(traverser any) {
+	traverse(p.data, p.na, traverser)
+}
+
 func (p *integerPayload) ApplyTo(indices []int, applier any) Payload {
 	data, na := applyTo(indices, p.data, p.na, applier, 0)
 

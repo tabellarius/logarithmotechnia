@@ -23,6 +23,7 @@ type Vector interface {
 	Which(whicher any) []bool
 	Apply(applier any) Vector
 	ApplyTo(whicher any, applier any) Vector
+	Traverse(traverser any)
 	Append(vec Vector) Vector
 	Adjust(size int) Vector
 	Pick(idx int) any
@@ -105,6 +106,10 @@ type Appliable interface {
 type AppliableTo interface {
 	Whichable
 	ApplyTo(indices []int, applier any) Payload
+}
+
+type Traversable interface {
+	Traverse(traverser any)
 }
 
 type Summarizable interface {
@@ -403,6 +408,12 @@ func (v *vector) byFromToWithRemove(from, to int) []int {
 	}
 
 	return indices
+}
+
+func (v *vector) Traverse(traverser any) {
+	if payload, ok := v.payload.(Traversable); ok {
+		payload.Traverse(traverser)
+	}
 }
 
 func (v *vector) Append(vec Vector) Vector {

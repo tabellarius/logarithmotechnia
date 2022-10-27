@@ -52,6 +52,10 @@ func (p *floatPayload) Apply(applier any) Payload {
 	return apply(p.data, p.na, applier, p.Options())
 }
 
+func (p *floatPayload) Traverse(traverser any) {
+	traverse(p.data, p.na, traverser)
+}
+
 func (p *floatPayload) ApplyTo(indices []int, applier any) Payload {
 	data, na := applyTo(indices, p.data, p.na, applier, math.NaN())
 
