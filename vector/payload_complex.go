@@ -61,6 +61,10 @@ func (p *complexPayload) ApplyTo(indices []int, applier any) Payload {
 	return ComplexPayload(data, na, p.Options()...)
 }
 
+func (p *complexPayload) Traverse(traverser any) {
+	traverse(p.data, p.na, traverser)
+}
+
 func (p *complexPayload) SupportsSummarizer(summarizer any) bool {
 	return supportsSummarizer[complex128](summarizer)
 }

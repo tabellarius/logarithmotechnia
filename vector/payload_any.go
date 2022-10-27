@@ -106,6 +106,10 @@ func (p *anyPayload) ApplyTo(indices []int, applier any) Payload {
 	return AnyPayload(data, na, p.Options()...)
 }
 
+func (p *anyPayload) Traverse(traverser any) {
+	traverse(p.data, p.na, traverser)
+}
+
 func (p *anyPayload) SupportsSummarizer(summarizer any) bool {
 	return supportsSummarizer[any](summarizer)
 }
