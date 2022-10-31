@@ -1,10 +1,16 @@
 package vector
 
 import (
+	"golang.org/x/exp/slices"
 	"math"
 	"math/cmplx"
 	"strconv"
 )
+
+type StringToBooleanConverter interface {
+	TrueValues() []string
+	FalseValues() []string
+}
 
 type stringPayload struct {
 	length int
@@ -155,17 +161,27 @@ func (p *stringPayload) Booleans() ([]bool, []bool) {
 	}
 
 	data := make([]bool, p.length)
+	na := make([]bool, p.length)
+	copy(na, p.na)
+
+	converter := DefaultStringToBoolConverter()
+	trueValues := converter.TrueValues()
+	falseValues := converter.FalseValues()
 
 	for i := 0; i < p.length; i++ {
 		if p.na[i] {
 			data[i] = false
 		} else {
-			data[i] = p.data[i] != ""
+			if slices.Contains(trueValues, p.data[i]) {
+				data[i] = true
+			} else if slices.Contains(falseValues, p.data[i]) {
+				data[i] = false
+			} else {
+				data[i] = false
+				na[i] = true
+			}
 		}
 	}
-
-	na := make([]bool, p.length)
-	copy(na, p.na)
 
 	return data, na
 }
@@ -482,4 +498,19 @@ func StringWithNA(data []string, na []bool, options ...Option) Vector {
 
 func String(data []string, options ...Option) Vector {
 	return StringWithNA(data, nil, options...)
+}
+
+type defStringToBooleanConverter struct {
+}
+
+func (d defStringToBooleanConverter) TrueValues() []string {
+	return []string{"true", "TRUE", "t", "T", "1"}
+}
+
+func (d defStringToBooleanConverter) FalseValues() []string {
+	return []string{"false", "FALSE", "f", "F", "0"}
+}
+
+func DefaultStringToBoolConverter() StringToBooleanConverter {
+	return defStringToBooleanConverter{}
 }
