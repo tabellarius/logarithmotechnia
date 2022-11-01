@@ -136,22 +136,10 @@ func TestStringPayload_Booleans(t *testing.T) {
 		outNA []bool
 	}{
 		{
-			in:    []string{"1", "3", "", "100", ""},
-			inNA:  []bool{false, false, false, false, false},
-			out:   []bool{true, true, false, true, false},
-			outNA: []bool{false, false, false, false, false},
-		},
-		{
-			in:    []string{"10", "", "12", "14", "1110"},
-			inNA:  []bool{false, false, false, true, true},
-			out:   []bool{true, false, true, false, false},
-			outNA: []bool{false, false, false, true, true},
-		},
-		{
-			in:    []string{"1", "3", "", "100", "", "-11", "-10"},
-			inNA:  []bool{false, false, false, false, false, false, true},
-			out:   []bool{true, true, false, true, false, true, false},
-			outNA: []bool{false, false, false, false, false, false, true},
+			in:    []string{"true", "t", "false", "f", "T", "F", "23", "", "true"},
+			inNA:  []bool{false, false, false, false, false, false, false, false, true},
+			out:   []bool{true, true, false, false, true, false, false, false, false},
+			outNA: []bool{false, false, false, false, false, false, true, true, true},
 		},
 	}
 

@@ -1,6 +1,8 @@
 package vector
 
 import (
+	"fmt"
+	"logarithmotechnia/util"
 	"reflect"
 )
 
@@ -66,11 +68,11 @@ func CompareVectorsForTest(one, two Vector) bool {
 	case *complexPayload:
 		p1 := vec1.payload.(*complexPayload)
 		p2 := vec2.payload.(*complexPayload)
-		ok = reflect.DeepEqual(p1.data, p2.data) && reflect.DeepEqual(p1.na, p2.na)
+		ok = util.EqualComplexArrays(p1.data, p2.data) && reflect.DeepEqual(p1.na, p2.na)
 	case *floatPayload:
 		p1 := vec1.payload.(*floatPayload)
 		p2 := vec2.payload.(*floatPayload)
-		ok = reflect.DeepEqual(p1.data, p2.data) && reflect.DeepEqual(p1.na, p2.na)
+		ok = util.EqualFloatArrays(p1.data, p2.data) && reflect.DeepEqual(p1.na, p2.na)
 	case *anyPayload:
 		p1 := vec1.payload.(*anyPayload)
 		p2 := vec2.payload.(*anyPayload)
@@ -99,6 +101,8 @@ func CompareVectorArrs(arr1, arr2 []Vector) bool {
 
 	for i := range arr1 {
 		if !CompareVectorsForTest(arr1[i], arr2[i]) {
+			fmt.Println(arr1[i])
+			fmt.Println(arr2[i])
 			return false
 		}
 	}
