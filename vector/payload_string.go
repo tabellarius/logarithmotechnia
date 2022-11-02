@@ -17,6 +17,7 @@ type stringPayload struct {
 	data   []string
 	DefNAble
 	DefArrangeable
+	StringToBooleanConverter
 }
 
 func (p *stringPayload) Type() string {
@@ -164,9 +165,8 @@ func (p *stringPayload) Booleans() ([]bool, []bool) {
 	na := make([]bool, p.length)
 	copy(na, p.na)
 
-	converter := DefaultStringToBoolConverter()
-	trueValues := converter.TrueValues()
-	falseValues := converter.FalseValues()
+	trueValues := p.TrueValues()
+	falseValues := p.FalseValues()
 
 	for i := 0; i < p.length; i++ {
 		if p.na[i] {
@@ -444,12 +444,17 @@ func (p *stringPayload) Options() []Option {
 	return []Option{}
 }
 
-func (p *stringPayload) SetOption(string, any) bool {
+func (p *stringPayload) SetOption(name string, val any) bool {
+	if name == KeyOptionStringToBooleanConverter {
+		p.StringToBooleanConverter = val.(StringToBooleanConverter)
+	}
+
 	return false
 }
 
-func StringPayload(data []string, na []bool, _ ...Option) Payload {
+func StringPayload(data []string, na []bool, options ...Option) Payload {
 	length := len(data)
+	conf := MergeOptions(options)
 
 	vecNA := make([]bool, length)
 	if len(na) > 0 {
@@ -487,6 +492,11 @@ func StringPayload(data []string, na []bool, _ ...Option) Payload {
 		FnEqual: func(i, j int) bool {
 			return payload.data[i] == payload.data[j]
 		},
+	}
+
+	conf.SetOptions(payload)
+	if payload.StringToBooleanConverter == nil {
+		payload.StringToBooleanConverter = DefaultStringToBoolConverter()
 	}
 
 	return payload
