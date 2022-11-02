@@ -7,6 +7,7 @@ import (
 	"reflect"
 	"strconv"
 	"testing"
+	"time"
 )
 
 func TestString(t *testing.T) {
@@ -345,7 +346,7 @@ func TestStringPayload_Strings(t *testing.T) {
 	}
 }
 
-func TestStringPayload_Interfaces(t *testing.T) {
+func TestStringPayload_Anies(t *testing.T) {
 	testData := []struct {
 		in    []string
 		inNA  []bool
@@ -377,9 +378,46 @@ func TestStringPayload_Interfaces(t *testing.T) {
 			vec := StringWithNA(data.in, data.inNA)
 			payload := vec.(*vector).payload.(*stringPayload)
 
-			interfaces, na := payload.Anies()
-			if !reflect.DeepEqual(interfaces, data.out) {
-				t.Error(fmt.Sprintf("Anies (%v) are not equal to data.out (%v)\n", interfaces, data.out))
+			anies, na := payload.Anies()
+			if !reflect.DeepEqual(anies, data.out) {
+				t.Error(fmt.Sprintf("Anies (%v) are not equal to data.out (%v)\n", anies, data.out))
+			}
+			if !reflect.DeepEqual(na, data.outNA) {
+				t.Error(fmt.Sprintf("IsNA (%v) are not equal to data.outNA (%v)\n", na, data.outNA))
+			}
+		})
+	}
+}
+
+func TestStringPayload_Times(t *testing.T) {
+	testData := []struct {
+		name    string
+		payload Payload
+		out     []time.Time
+		outNA   []bool
+	}{
+		{
+			name: "default format",
+			payload: StringPayload([]string{"2020-01-01T11:01:25+03:00", "2022-03-24 20:22:00", ""},
+				[]bool{false, false, true}),
+			out:   toTimeData([]string{"2020-01-01T11:01:25+03:00", "0001-01-01T00:00:00Z", "0001-01-01T00:00:00Z"}),
+			outNA: []bool{false, true, true},
+		},
+		{
+			name: "non-default time format",
+			payload: StringPayload([]string{"01 Jan 22 11:01 +0300", "2022-03-24 20:22:00", ""},
+				[]bool{false, false, true}, OptionTimeFormat(time.RFC822Z)),
+			out:   toTimeData([]string{"2022-01-01T11:01:00+03:00", "0001-01-01T00:00:00Z", "0001-01-01T00:00:00Z"}),
+			outNA: []bool{false, true, true},
+		},
+	}
+
+	for i, data := range testData {
+		t.Run(strconv.Itoa(i), func(t *testing.T) {
+			times, na := data.payload.(Timeable).Times()
+
+			if !reflect.DeepEqual(times, data.out) {
+				t.Error(fmt.Sprintf("Times (%v) are not equal to data.out (%v)\n", times, data.out))
 			}
 			if !reflect.DeepEqual(na, data.outNA) {
 				t.Error(fmt.Sprintf("IsNA (%v) are not equal to data.outNA (%v)\n", na, data.outNA))

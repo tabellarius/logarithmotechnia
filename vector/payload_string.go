@@ -5,6 +5,7 @@ import (
 	"math"
 	"math/cmplx"
 	"strconv"
+	"time"
 )
 
 type StringToBooleanConverter interface {
@@ -18,6 +19,7 @@ type stringPayload struct {
 	DefNAble
 	DefArrangeable
 	StringToBooleanConverter
+	timeFormat string
 }
 
 func (p *stringPayload) Type() string {
@@ -78,6 +80,26 @@ func (p *stringPayload) Summarize(summarizer any) Payload {
 	return StringPayload([]string{val}, []bool{na}, p.Options()...)
 }
 
+func (p *stringPayload) Anies() ([]any, []bool) {
+	if p.length == 0 {
+		return []any{}, []bool{}
+	}
+
+	data := make([]any, p.length)
+	for i := 0; i < p.length; i++ {
+		if p.na[i] {
+			data[i] = nil
+		} else {
+			data[i] = p.data[i]
+		}
+	}
+
+	na := make([]bool, p.length)
+	copy(na, p.na)
+
+	return data, na
+}
+
 func (p *stringPayload) Integers() ([]int, []bool) {
 	if p.length == 0 {
 		return []int{}, []bool{}
@@ -124,6 +146,30 @@ func (p *stringPayload) Floats() ([]float64, []bool) {
 			} else {
 				data[i] = num
 			}
+		}
+	}
+
+	return data, na
+}
+
+func (p *stringPayload) Times() ([]time.Time, []bool) {
+	if p.length == 0 {
+		return []time.Time{}, []bool{}
+	}
+
+	data := make([]time.Time, p.length)
+	na := make([]bool, p.Len())
+	copy(na, p.na)
+
+	for i := 0; i < p.length; i++ {
+		if p.na[i] {
+			continue
+		}
+		date, err := time.Parse(p.timeFormat, p.data[i])
+		if err == nil {
+			data[i] = date
+		} else {
+			na[i] = true
 		}
 	}
 
@@ -195,26 +241,6 @@ func (p *stringPayload) Strings() ([]string, []bool) {
 	copy(data, p.data)
 
 	na := make([]bool, p.Len())
-	copy(na, p.na)
-
-	return data, na
-}
-
-func (p *stringPayload) Anies() ([]any, []bool) {
-	if p.length == 0 {
-		return []any{}, []bool{}
-	}
-
-	data := make([]any, p.length)
-	for i := 0; i < p.length; i++ {
-		if p.na[i] {
-			data[i] = nil
-		} else {
-			data[i] = p.data[i]
-		}
-	}
-
-	na := make([]bool, p.length)
 	copy(na, p.na)
 
 	return data, na
@@ -449,6 +475,10 @@ func (p *stringPayload) SetOption(name string, val any) bool {
 		p.StringToBooleanConverter = val.(StringToBooleanConverter)
 	}
 
+	if name == KeyOptionTimeFormat {
+		p.timeFormat = val.(string)
+	}
+
 	return false
 }
 
@@ -481,6 +511,7 @@ func StringPayload(data []string, na []bool, options ...Option) Payload {
 		DefNAble: DefNAble{
 			na: vecNA,
 		},
+		timeFormat: time.RFC3339,
 	}
 
 	payload.DefArrangeable = DefArrangeable{
