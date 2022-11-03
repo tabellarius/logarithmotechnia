@@ -1,0 +1,12 @@
+Name;DepType;Salary;KPI;Group;Active
+John;research;120000;1.45;A;true
+Jane;research;11A0000;2.3;A;t
+Jack;production;80000;3;B;false
+Robert;research;140000;1;B;f
+Marcius;production;D90000;0.67;A;TRUE
+Catullus;logistics;100000;K0.9;A;T
+Marcia;production;60000;1.44;B;FALSE
+Gera;sales;150000;1.8;A;F
+Zeus;sales;225000;1.125;A;1
+Hephaestus;factory;150000;1.4;B;0
+Hades;;175000;;A;no

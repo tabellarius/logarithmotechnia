@@ -1,16 +1,25 @@
 package vector
 
 import (
+	"golang.org/x/exp/slices"
 	"math"
 	"math/cmplx"
 	"strconv"
+	"time"
 )
+
+type StringToBooleanConverter interface {
+	TrueValues() []string
+	FalseValues() []string
+}
 
 type stringPayload struct {
 	length int
 	data   []string
 	DefNAble
 	DefArrangeable
+	StringToBooleanConverter
+	timeFormat string
 }
 
 func (p *stringPayload) Type() string {
@@ -71,6 +80,26 @@ func (p *stringPayload) Summarize(summarizer any) Payload {
 	return StringPayload([]string{val}, []bool{na}, p.Options()...)
 }
 
+func (p *stringPayload) Anies() ([]any, []bool) {
+	if p.length == 0 {
+		return []any{}, []bool{}
+	}
+
+	data := make([]any, p.length)
+	for i := 0; i < p.length; i++ {
+		if p.na[i] {
+			data[i] = nil
+		} else {
+			data[i] = p.data[i]
+		}
+	}
+
+	na := make([]bool, p.length)
+	copy(na, p.na)
+
+	return data, na
+}
+
 func (p *stringPayload) Integers() ([]int, []bool) {
 	if p.length == 0 {
 		return []int{}, []bool{}
@@ -123,6 +152,30 @@ func (p *stringPayload) Floats() ([]float64, []bool) {
 	return data, na
 }
 
+func (p *stringPayload) Times() ([]time.Time, []bool) {
+	if p.length == 0 {
+		return []time.Time{}, []bool{}
+	}
+
+	data := make([]time.Time, p.length)
+	na := make([]bool, p.Len())
+	copy(na, p.na)
+
+	for i := 0; i < p.length; i++ {
+		if p.na[i] {
+			continue
+		}
+		date, err := time.Parse(p.timeFormat, p.data[i])
+		if err == nil {
+			data[i] = date
+		} else {
+			na[i] = true
+		}
+	}
+
+	return data, na
+}
+
 func (p *stringPayload) Complexes() ([]complex128, []bool) {
 	if p.length == 0 {
 		return []complex128{}, []bool{}
@@ -155,17 +208,26 @@ func (p *stringPayload) Booleans() ([]bool, []bool) {
 	}
 
 	data := make([]bool, p.length)
+	na := make([]bool, p.length)
+	copy(na, p.na)
+
+	trueValues := p.TrueValues()
+	falseValues := p.FalseValues()
 
 	for i := 0; i < p.length; i++ {
 		if p.na[i] {
 			data[i] = false
 		} else {
-			data[i] = p.data[i] != ""
+			if slices.Contains(trueValues, p.data[i]) {
+				data[i] = true
+			} else if slices.Contains(falseValues, p.data[i]) {
+				data[i] = false
+			} else {
+				data[i] = false
+				na[i] = true
+			}
 		}
 	}
-
-	na := make([]bool, p.length)
-	copy(na, p.na)
 
 	return data, na
 }
@@ -179,26 +241,6 @@ func (p *stringPayload) Strings() ([]string, []bool) {
 	copy(data, p.data)
 
 	na := make([]bool, p.Len())
-	copy(na, p.na)
-
-	return data, na
-}
-
-func (p *stringPayload) Anies() ([]any, []bool) {
-	if p.length == 0 {
-		return []any{}, []bool{}
-	}
-
-	data := make([]any, p.length)
-	for i := 0; i < p.length; i++ {
-		if p.na[i] {
-			data[i] = nil
-		} else {
-			data[i] = p.data[i]
-		}
-	}
-
-	na := make([]bool, p.length)
 	copy(na, p.na)
 
 	return data, na
@@ -428,12 +470,21 @@ func (p *stringPayload) Options() []Option {
 	return []Option{}
 }
 
-func (p *stringPayload) SetOption(string, any) bool {
+func (p *stringPayload) SetOption(name string, val any) bool {
+	if name == KeyOptionStringToBooleanConverter {
+		p.StringToBooleanConverter = val.(StringToBooleanConverter)
+	}
+
+	if name == KeyOptionTimeFormat {
+		p.timeFormat = val.(string)
+	}
+
 	return false
 }
 
-func StringPayload(data []string, na []bool, _ ...Option) Payload {
+func StringPayload(data []string, na []bool, options ...Option) Payload {
 	length := len(data)
+	conf := MergeOptions(options)
 
 	vecNA := make([]bool, length)
 	if len(na) > 0 {
@@ -460,6 +511,7 @@ func StringPayload(data []string, na []bool, _ ...Option) Payload {
 		DefNAble: DefNAble{
 			na: vecNA,
 		},
+		timeFormat: time.RFC3339,
 	}
 
 	payload.DefArrangeable = DefArrangeable{
@@ -473,6 +525,11 @@ func StringPayload(data []string, na []bool, _ ...Option) Payload {
 		},
 	}
 
+	conf.SetOptions(payload)
+	if payload.StringToBooleanConverter == nil {
+		payload.StringToBooleanConverter = DefaultStringToBoolConverter()
+	}
+
 	return payload
 }
 
@@ -482,4 +539,19 @@ func StringWithNA(data []string, na []bool, options ...Option) Vector {
 
 func String(data []string, options ...Option) Vector {
 	return StringWithNA(data, nil, options...)
+}
+
+type defStringToBooleanConverter struct {
+}
+
+func (d defStringToBooleanConverter) TrueValues() []string {
+	return []string{"true", "TRUE", "t", "T", "1"}
+}
+
+func (d defStringToBooleanConverter) FalseValues() []string {
+	return []string{"false", "FALSE", "f", "F", "0"}
+}
+
+func DefaultStringToBoolConverter() StringToBooleanConverter {
+	return defStringToBooleanConverter{}
 }

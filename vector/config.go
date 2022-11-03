@@ -3,6 +3,7 @@ package vector
 const KeyOptionPrecision = "precision"
 const KeyOptionFormat = "format"
 const KeyOptionTimeFormat = "time_format"
+const KeyOptionStringToBooleanConverter = "string_boolean_converter"
 const KeyOptionAnyPrinterFunc = "any_printer_func"
 const KeyOptionAnyConvertors = "any_convertors"
 const KeyOptionAnyCallbacks = "any_callbacks"
