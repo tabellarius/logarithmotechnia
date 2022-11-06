@@ -21,3 +21,13 @@ func reverseIndices(indices []int) []int {
 
 	return newIndices
 }
+
+func anyArrToTyped[T any](data []any) []T {
+	outData := make([]T, len(data))
+
+	for i, val := range data {
+		outData[i] = val.(T)
+	}
+
+	return outData
+}
