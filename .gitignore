@@ -1,4 +1,5 @@
-/logarithmotechnia
 /.Rhistory
 .Rproj.user
 /csv/
+.idea
+.gitignore

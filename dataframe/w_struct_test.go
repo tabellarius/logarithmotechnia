@@ -15,13 +15,15 @@ func TestFromStructs(t *testing.T) {
 	}
 
 	type A struct {
-		Title    string
-		Status   int
-		Kpi      float64
-		Cpx      complex128
-		IsActive bool
-		Date     time.Time
-		Misc     Finance
+		Title     string
+		Status    int `lth:"status"`
+		OldStatus int `lto:"skip"`
+		Kpi       float64
+		Cpx       complex128
+		IsActive  bool `lth:"is_active"`
+		Date      time.Time
+		OldDate   time.Time
+		Misc      Finance
 	}
 
 	now := time.Now()
@@ -56,12 +58,13 @@ func TestFromStructs(t *testing.T) {
 		},
 	}
 
-	df, err := FromStructs(stArr)
+	df, err := FromStructs(stArr, StructOptionHeaderMap(map[string]string{"Date": "date"}),
+		StructOptionSkipFields("OldDate"))
 	if err != nil {
 		t.Error(err)
 	}
 
-	columnNames := []string{"Title", "Status", "Kpi", "Cpx", "IsActive", "Date", "Misc"}
+	columnNames := []string{"Title", "status", "Kpi", "Cpx", "is_active", "date", "Misc"}
 	columns := []vector.Vector{
 		vector.String([]string{"Baron", "Earl", "King"}),
 		vector.Integer([]int{1, 3, 5}),

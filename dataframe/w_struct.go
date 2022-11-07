@@ -2,17 +2,21 @@ package dataframe
 
 import (
 	"errors"
+	"golang.org/x/exp/slices"
 	"logarithmotechnia/vector"
 	"reflect"
+	"strings"
 	"time"
 )
 
 const optionStructHeaderMap = "structHeaderMap"
 const optionStructDataframeOptions = "structDataframeOptions"
+const optionStructSkipFields = "structSkipFields"
 
 type confStruct struct {
-	headerMap map[string]string
-	dfOptions []vector.Option
+	headerMap   map[string]string
+	dfOptions   []vector.Option
+	skipColumns []string
 }
 
 func FromStructs(stArr any, options ...Option) (*Dataframe, error) {
@@ -29,7 +33,7 @@ func FromStructs(stArr any, options ...Option) (*Dataframe, error) {
 		return New([]vector.Vector{}), nil
 	}
 
-	data, types, order := getDataAndTypes(stArrVal, stArrVal.Len())
+	data, types, order := getDataAndTypes(stArrVal, stArrVal.Len(), conf)
 	if len(order) == 0 {
 		return New([]vector.Vector{}, conf.dfOptions...), nil
 	}
@@ -41,8 +45,9 @@ func FromStructs(stArr any, options ...Option) (*Dataframe, error) {
 
 func createStructConf(options ...Option) confStruct {
 	conf := confStruct{
-		headerMap: map[string]string{},
-		dfOptions: []vector.Option{},
+		headerMap:   map[string]string{},
+		dfOptions:   []vector.Option{},
+		skipColumns: []string{},
 	}
 
 	for _, option := range options {
@@ -51,30 +56,50 @@ func createStructConf(options ...Option) confStruct {
 			conf.headerMap = option.val.(map[string]string)
 		case optionStructDataframeOptions:
 			conf.dfOptions = option.val.([]vector.Option)
+		case optionStructSkipFields:
+			conf.skipColumns = option.val.([]string)
 		}
 	}
 
 	return conf
 }
 
-func getDataAndTypes(stArrVal reflect.Value, length int) (map[string][]any, map[string]string, []string) {
+func getDataAndTypes(stArrVal reflect.Value, length int, conf confStruct) (map[string][]any, map[string]string, []string) {
 	data, types := map[string][]any{}, map[string]string{}
 
 	stVal := stArrVal.Index(0)
 	stType := stVal.Type()
-	order := make([]string, stType.NumField())
+	order := make([]string, 0, stType.NumField())
+	nameMap := map[string]string{}
 	for i := 0; i < stType.NumField(); i++ {
 		name := stType.Field(i).Name
-		data[name] = make([]any, length)
-		types[name] = getFieldType(stVal.Field(i))
-		order[i] = name
+		tagName := stType.Field(i).Tag.Get("lth")
+		if tagName == "" {
+			tagName = name
+		}
+		if _, ok := conf.headerMap[name]; ok {
+			tagName = conf.headerMap[name]
+		}
+
+		fOpt := stType.Field(i).Tag.Get("lto")
+		if slices.Contains(strings.Split(fOpt, ","), "skip") || slices.Contains(conf.skipColumns, name) {
+			continue
+		}
+
+		nameMap[name] = tagName
+		data[nameMap[name]] = make([]any, length)
+		types[nameMap[name]] = getFieldType(stVal.Field(i))
+		order = append(order, nameMap[name])
 	}
 
 	for i := 0; i < stArrVal.Len(); i++ {
 		stVal = stArrVal.Index(i)
 		for j := 0; j < stType.NumField(); j++ {
 			name := stVal.Type().Field(j).Name
-			data[name][i] = stVal.Field(j).Interface()
+			if _, ok := nameMap[name]; !ok {
+				continue
+			}
+			data[nameMap[name]][i] = stVal.Field(j).Interface()
 		}
 	}
 
@@ -142,5 +167,12 @@ func StructOptionDataFrameOptions(options ...vector.Option) Option {
 	return Option{
 		name: optionStructDataframeOptions,
 		val:  options,
+	}
+}
+
+func StructOptionSkipFields(fields ...string) Option {
+	return Option{
+		name: optionStructSkipFields,
+		val:  fields,
 	}
 }
