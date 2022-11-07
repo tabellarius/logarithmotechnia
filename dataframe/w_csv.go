@@ -19,6 +19,7 @@ type confCSV struct {
 	colNames      []string
 	skipFirstLine bool
 	separator     rune
+	dfOptions     []vector.Option
 }
 
 type Option struct {
@@ -86,7 +87,8 @@ func FromCSV(reader io.Reader, options ...Option) (*Dataframe, error) {
 	}
 	vecs = convertVectors(vecs, types)
 
-	df := New(vecs, vector.OptionColumnNames(conf.colNames))
+	dfOptions := append(conf.dfOptions, vector.OptionColumnNames(conf.colNames))
+	df := New(vecs, dfOptions...)
 
 	return df, nil
 }
@@ -97,6 +99,7 @@ func combineCSVConfig(options ...Option) confCSV {
 		colNames:      []string{},
 		skipFirstLine: true,
 		separator:     ',',
+		dfOptions:     []vector.Option{},
 	}
 
 	for _, option := range options {
@@ -105,6 +108,8 @@ func combineCSVConfig(options ...Option) confCSV {
 			conf.skipFirstLine = option.val.(bool)
 		case optionCSVSeparator:
 			conf.separator = option.val.(rune)
+		case optionCSVDataframeOptions:
+			conf.dfOptions = option.val.([]vector.Option)
 		}
 	}
 
@@ -175,6 +180,13 @@ func CSVOptionSeparator(separator rune) Option {
 }
 
 func CSVOptionDataframeOptions(options ...vector.Option) Option {
+	return Option{
+		name: optionCSVDataframeOptions,
+		val:  options,
+	}
+}
+
+func CSVOptionDataFrameOptions(options ...vector.Option) Option {
 	return Option{
 		name: optionCSVDataframeOptions,
 		val:  options,

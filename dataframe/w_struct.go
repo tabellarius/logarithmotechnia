@@ -30,7 +30,7 @@ func FromStructs(stArr any, options ...Option) (*Dataframe, error) {
 
 	stArrVal := reflect.ValueOf(stArr)
 	if stArrVal.Len() == 0 {
-		return New([]vector.Vector{}), nil
+		return New([]vector.Vector{}, conf.dfOptions...), nil
 	}
 
 	data, types, order := getDataAndTypes(stArrVal, stArrVal.Len(), conf)
@@ -38,7 +38,7 @@ func FromStructs(stArr any, options ...Option) (*Dataframe, error) {
 		return New([]vector.Vector{}, conf.dfOptions...), nil
 	}
 
-	df := New(dataToVectors(data, types, order))
+	df := New(dataToVectors(data, types, order), conf.dfOptions...)
 
 	return df, nil
 }
