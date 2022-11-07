@@ -2,20 +2,21 @@ package dataframe
 
 import (
 	"errors"
-	"fmt"
 	"logarithmotechnia/vector"
 	"reflect"
-	"strings"
 	"time"
 )
 
-const optionStructHeaderMap = "skipFirstLine"
+const optionStructHeaderMap = "structHeaderMap"
+const optionStructDataframeOptions = "structDataframeOptions"
 
 type confStruct struct {
 	headerMap map[string]string
+	dfOptions []vector.Option
 }
 
-func FromStructs(stArr any, option ...Option) (*Dataframe, error) {
+func FromStructs(stArr any, options ...Option) (*Dataframe, error) {
+	conf := createStructConf(options...)
 	stArrType := reflect.TypeOf(stArr)
 
 	if stArrType.Kind() != reflect.Slice && stArrType.Kind() != reflect.Array &&
@@ -30,12 +31,30 @@ func FromStructs(stArr any, option ...Option) (*Dataframe, error) {
 
 	data, types, order := getDataAndTypes(stArrVal, stArrVal.Len())
 	if len(order) == 0 {
-		return New([]vector.Vector{}), nil
+		return New([]vector.Vector{}, conf.dfOptions...), nil
 	}
 
 	df := New(dataToVectors(data, types, order))
 
 	return df, nil
+}
+
+func createStructConf(options ...Option) confStruct {
+	conf := confStruct{
+		headerMap: map[string]string{},
+		dfOptions: []vector.Option{},
+	}
+
+	for _, option := range options {
+		switch option.name {
+		case optionStructHeaderMap:
+			conf.headerMap = option.val.(map[string]string)
+		case optionStructDataframeOptions:
+			conf.dfOptions = option.val.([]vector.Option)
+		}
+	}
+
+	return conf
 }
 
 func getDataAndTypes(stArrVal reflect.Value, length int) (map[string][]any, map[string]string, []string) {
@@ -112,27 +131,16 @@ func getFieldType(fVal reflect.Value) string {
 	return t
 }
 
-func examiner(t reflect.Type, depth int) {
-	fmt.Println(strings.Repeat("\t", depth), "Type is", t.Name(), "and kind is", t.Kind())
-	switch t.Kind() {
-	case reflect.Array, reflect.Chan, reflect.Map, reflect.Ptr, reflect.Slice:
-		fmt.Println(strings.Repeat("\t", depth+1), "Contained type:")
-		examiner(t.Elem(), depth+1)
-	case reflect.Struct:
-		for i := 0; i < t.NumField(); i++ {
-			f := t.Field(i)
-			fmt.Println(strings.Repeat("\t", depth+1), "Field", i+1, "name is", f.Name, "type is", f.Type.Name(), "and kind is", f.Type.Kind())
-			if f.Tag != "" {
-				fmt.Println(strings.Repeat("\t", depth+2), "Tag is", f.Tag)
-				fmt.Println(strings.Repeat("\t", depth+2), "tag1 is", f.Tag.Get("tag1"), "tag2 is", f.Tag.Get("tag2"))
-			}
-		}
-	}
-}
-
 func StructOptionHeaderMap(headerMap map[string]string) Option {
 	return Option{
 		name: optionStructHeaderMap,
 		val:  headerMap,
+	}
+}
+
+func StructOptionDataFrameOptions(options ...vector.Option) Option {
+	return Option{
+		name: optionStructDataframeOptions,
+		val:  options,
 	}
 }

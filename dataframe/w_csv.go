@@ -12,6 +12,7 @@ import (
 
 const optionCSVSkipFirstLine = "csvSkipFirstLine"
 const optionCSVSeparator = "csvSeparator"
+const optionCSVDataframeOptions = "csvDataframeOptions"
 
 type confCSV struct {
 	colTypes      []string
@@ -170,5 +171,12 @@ func CSVOptionSeparator(separator rune) Option {
 	return Option{
 		name: optionCSVSeparator,
 		val:  separator,
+	}
+}
+
+func CSVOptionDataframeOptions(options ...vector.Option) Option {
+	return Option{
+		name: optionCSVDataframeOptions,
+		val:  options,
 	}
 }
