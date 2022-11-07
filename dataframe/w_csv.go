@@ -10,22 +10,24 @@ import (
 	"strconv"
 )
 
-const optionCSVSkipFirstLine = "skipFirstLine"
-const optionCSVSeparator = "separator"
+const optionCSVSkipFirstLine = "csvSkipFirstLine"
+const optionCSVSeparator = "csvSeparator"
+const optionCSVDataframeOptions = "csvDataframeOptions"
 
 type confCSV struct {
 	colTypes      []string
 	colNames      []string
 	skipFirstLine bool
 	separator     rune
+	dfOptions     []vector.Option
 }
 
-type OptionCSV struct {
+type Option struct {
 	name string
 	val  any
 }
 
-func FromCSVFile(filename string, options ...OptionCSV) (*Dataframe, error) {
+func FromCSVFile(filename string, options ...Option) (*Dataframe, error) {
 	file, err := os.Open(filename)
 	if err != nil {
 		return nil, err
@@ -39,7 +41,7 @@ func FromCSVFile(filename string, options ...OptionCSV) (*Dataframe, error) {
 	return df, err
 }
 
-func FromCSV(reader io.Reader, options ...OptionCSV) (*Dataframe, error) {
+func FromCSV(reader io.Reader, options ...Option) (*Dataframe, error) {
 	conf := combineCSVConfig(options...)
 
 	r := csv.NewReader(reader)
@@ -85,17 +87,19 @@ func FromCSV(reader io.Reader, options ...OptionCSV) (*Dataframe, error) {
 	}
 	vecs = convertVectors(vecs, types)
 
-	df := New(vecs, vector.OptionColumnNames(conf.colNames))
+	dfOptions := append(conf.dfOptions, vector.OptionColumnNames(conf.colNames))
+	df := New(vecs, dfOptions...)
 
 	return df, nil
 }
 
-func combineCSVConfig(options ...OptionCSV) confCSV {
+func combineCSVConfig(options ...Option) confCSV {
 	conf := confCSV{
 		colTypes:      []string{},
 		colNames:      []string{},
 		skipFirstLine: true,
 		separator:     ',',
+		dfOptions:     []vector.Option{},
 	}
 
 	for _, option := range options {
@@ -104,6 +108,8 @@ func combineCSVConfig(options ...OptionCSV) confCSV {
 			conf.skipFirstLine = option.val.(bool)
 		case optionCSVSeparator:
 			conf.separator = option.val.(rune)
+		case optionCSVDataframeOptions:
+			conf.dfOptions = option.val.([]vector.Option)
 		}
 	}
 
@@ -159,16 +165,30 @@ func convertVectors(vecs []vector.Vector, types []string) []vector.Vector {
 	return vecs
 }
 
-func CSVOptionSkipFirstLine(skip bool) OptionCSV {
-	return OptionCSV{
+func CSVOptionSkipFirstLine(skip bool) Option {
+	return Option{
 		name: optionCSVSkipFirstLine,
 		val:  skip,
 	}
 }
 
-func CSVOptionSeparator(separator rune) OptionCSV {
-	return OptionCSV{
+func CSVOptionSeparator(separator rune) Option {
+	return Option{
 		name: optionCSVSeparator,
 		val:  separator,
+	}
+}
+
+func CSVOptionDataframeOptions(options ...vector.Option) Option {
+	return Option{
+		name: optionCSVDataframeOptions,
+		val:  options,
+	}
+}
+
+func CSVOptionDataFrameOptions(options ...vector.Option) Option {
+	return Option{
+		name: optionCSVDataframeOptions,
+		val:  options,
 	}
 }
