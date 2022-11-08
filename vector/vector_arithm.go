@@ -1,5 +1,12 @@
 package vector
 
+type Arithmetics interface {
+	Add(...Vector) Vector
+	Sub(...Vector) Vector
+	Mul(...Vector) Vector
+	Div(...Vector) Vector
+}
+
 type Adder interface {
 	Add(Payload) Payload
 }
