@@ -70,15 +70,11 @@ type Vector interface {
 	Even() []bool
 	Nth(int) []bool
 
-	Add(...Vector) Vector
-	Sub(...Vector) Vector
-	Mul(...Vector) Vector
-	Div(...Vector) Vector
-
 	Options() []Option
 	SetOption(string, any) bool
 
-	Sum() Vector
+	Arithmetics
+	Statistics
 }
 
 type Payload interface {

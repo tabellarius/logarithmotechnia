@@ -1,0 +1,19 @@
+package vector
+
+func (p *integerPayload) Sum() Payload {
+	sum, na := genSum(p.data, p.na)
+
+	return IntegerPayload([]int{sum}, []bool{na}, p.Options()...)
+}
+
+func (p *integerPayload) Max() Payload {
+	max, na := genMax(p.data, p.na)
+
+	return IntegerPayload([]int{max}, []bool{na}, p.Options()...)
+}
+
+func (p *integerPayload) Min() Payload {
+	min, na := genMin(p.data, p.na)
+
+	return IntegerPayload([]int{min}, []bool{na}, p.Options()...)
+}
