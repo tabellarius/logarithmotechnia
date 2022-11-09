@@ -213,7 +213,7 @@ func dataframeFromVectors(vectors []vector.Vector, options ...vector.Option) *Da
 		if v.Len() < maxLen {
 			vectors[i] = v.Append(vector.NA(maxLen - v.Len()))
 		} else {
-			vectors[i] = v
+			vectors[i] = v.Clone()
 		}
 	}
 

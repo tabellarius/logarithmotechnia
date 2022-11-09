@@ -211,7 +211,10 @@ func (v *vector) Payload() Payload {
 }
 
 func (v *vector) Clone() Vector {
-	return New(v.payload, v.Options()...)
+	vec := New(v.payload, v.Options()...)
+	vec.(*vector).groupIndex = v.groupIndex
+
+	return vec
 }
 
 func (v *vector) ByIndices(indices []int) Vector {
