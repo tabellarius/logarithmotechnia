@@ -28,7 +28,7 @@ func (v *vector) Sum() Vector {
 	return NA(1)
 }
 
-type Maxer interface {
+type Maxxer interface {
 	Max() Payload
 }
 
@@ -43,14 +43,14 @@ func (v *vector) Max() Vector {
 		return Combine(outValues...)
 	}
 
-	if summer, ok := v.payload.(Maxer); ok {
+	if summer, ok := v.payload.(Maxxer); ok {
 		return New(summer.Max(), v.Options()...)
 	}
 
 	return NA(1)
 }
 
-type Miner interface {
+type Minner interface {
 	Min() Payload
 }
 
@@ -65,7 +65,7 @@ func (v *vector) Min() Vector {
 		return Combine(outValues...)
 	}
 
-	if summer, ok := v.payload.(Miner); ok {
+	if summer, ok := v.payload.(Minner); ok {
 		return New(summer.Min(), v.Options()...)
 	}
 
