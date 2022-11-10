@@ -9,15 +9,15 @@ func (df *Dataframe) Mutate(columns []Column, options ...vector.Option) *Datafra
 
 	afterColumnIndex := df.colNum
 
-	if conf.HasOption(vector.KeyOptionAfterColumn) {
-		pos := df.Names().Find(conf.Value(vector.KeyOptionAfterColumn))
+	if conf.HasOption(KeyOptionAfterColumn) {
+		pos := df.Names().Find(conf.Value(KeyOptionAfterColumn))
 		if pos > 0 {
 			afterColumnIndex = pos
 		}
 	}
 
-	if conf.HasOption(vector.KeyOptionBeforeColumn) {
-		pos := df.Names().Find(conf.Value(vector.KeyOptionBeforeColumn))
+	if conf.HasOption(KeyOptionBeforeColumn) {
+		pos := df.Names().Find(conf.Value(KeyOptionBeforeColumn))
 		if pos > 0 {
 			afterColumnIndex = pos - 1
 		}
@@ -46,5 +46,5 @@ func (df *Dataframe) Mutate(columns []Column, options ...vector.Option) *Datafra
 		newColumns = append(newColumns, columnMap[name])
 	}
 
-	return New(newColumns, vector.OptionColumnNames(newNames))
+	return New(newColumns, OptionColumnNames(newNames))
 }

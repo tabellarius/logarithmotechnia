@@ -41,7 +41,7 @@ func bindTwoDataframesByColumns(src, app *Dataframe) *Dataframe {
 	}
 
 	options := src.Options()
-	options = append(options, vector.OptionColumnNames(columnNames))
+	options = append(options, OptionColumnNames(columnNames))
 
 	return New(columns, options...)
 }
@@ -81,7 +81,7 @@ func bindTwoDataFramesByRows(src, app *Dataframe) *Dataframe {
 	}
 
 	options := src.Options()
-	options = append(options, vector.OptionColumnNames(columnNames))
+	options = append(options, OptionColumnNames(columnNames))
 
 	return New(columns, options...)
 }

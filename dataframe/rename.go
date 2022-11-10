@@ -1,9 +1,5 @@
 package dataframe
 
-import (
-	"logarithmotechnia/vector"
-)
-
 type Rename struct {
 	from string
 	to   string
@@ -23,5 +19,5 @@ func (df *Dataframe) Rename(renames ...Rename) *Dataframe {
 			names[i] = columnName
 		}
 	}
-	return New(df.columns, vector.OptionColumnNames(names))
+	return New(df.columns, OptionColumnNames(names))
 }

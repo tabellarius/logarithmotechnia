@@ -22,12 +22,7 @@ type confCSV struct {
 	dfOptions     []vector.Option
 }
 
-type Option struct {
-	name string
-	val  any
-}
-
-func FromCSVFile(filename string, options ...Option) (*Dataframe, error) {
+func FromCSVFile(filename string, options ...ConfOption) (*Dataframe, error) {
 	file, err := os.Open(filename)
 	if err != nil {
 		return nil, err
@@ -41,7 +36,7 @@ func FromCSVFile(filename string, options ...Option) (*Dataframe, error) {
 	return df, err
 }
 
-func FromCSV(reader io.Reader, options ...Option) (*Dataframe, error) {
+func FromCSV(reader io.Reader, options ...ConfOption) (*Dataframe, error) {
 	conf := combineCSVConfig(options...)
 
 	r := csv.NewReader(reader)
@@ -87,13 +82,13 @@ func FromCSV(reader io.Reader, options ...Option) (*Dataframe, error) {
 	}
 	vecs = convertVectors(vecs, types)
 
-	dfOptions := append(conf.dfOptions, vector.OptionColumnNames(conf.colNames))
+	dfOptions := append(conf.dfOptions, OptionColumnNames(conf.colNames))
 	df := New(vecs, dfOptions...)
 
 	return df, nil
 }
 
-func combineCSVConfig(options ...Option) confCSV {
+func combineCSVConfig(options ...ConfOption) confCSV {
 	conf := confCSV{
 		colTypes:      []string{},
 		colNames:      []string{},
@@ -103,13 +98,13 @@ func combineCSVConfig(options ...Option) confCSV {
 	}
 
 	for _, option := range options {
-		switch option.name {
+		switch option.Key() {
 		case optionCSVSkipFirstLine:
-			conf.skipFirstLine = option.val.(bool)
+			conf.skipFirstLine = option.Value().(bool)
 		case optionCSVSeparator:
-			conf.separator = option.val.(rune)
+			conf.separator = option.Value().(rune)
 		case optionCSVDataframeOptions:
-			conf.dfOptions = option.val.([]vector.Option)
+			conf.dfOptions = option.Value().([]vector.Option)
 		}
 	}
 
@@ -165,30 +160,18 @@ func convertVectors(vecs []vector.Vector, types []string) []vector.Vector {
 	return vecs
 }
 
-func CSVOptionSkipFirstLine(skip bool) Option {
-	return Option{
-		name: optionCSVSkipFirstLine,
-		val:  skip,
-	}
+func CSVOptionSkipFirstLine(skip bool) ConfOption {
+	return ConfOption{optionCSVSkipFirstLine, skip}
 }
 
-func CSVOptionSeparator(separator rune) Option {
-	return Option{
-		name: optionCSVSeparator,
-		val:  separator,
-	}
+func CSVOptionSeparator(separator rune) ConfOption {
+	return ConfOption{optionCSVSeparator, separator}
 }
 
-func CSVOptionDataframeOptions(options ...vector.Option) Option {
-	return Option{
-		name: optionCSVDataframeOptions,
-		val:  options,
-	}
+func CSVOptionDataframeOptions(options ...vector.Option) ConfOption {
+	return ConfOption{optionCSVDataframeOptions, options}
 }
 
-func CSVOptionDataFrameOptions(options ...vector.Option) Option {
-	return Option{
-		name: optionCSVDataframeOptions,
-		val:  options,
-	}
+func CSVOptionDataFrameOptions(options ...vector.Option) ConfOption {
+	return ConfOption{optionCSVDataframeOptions, options}
 }

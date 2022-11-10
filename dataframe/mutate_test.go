@@ -42,7 +42,7 @@ func TestDataframe_Mutate(t *testing.T) {
 			name:    "after column",
 			df:      df,
 			columns: mutateColumns,
-			options: []vector.Option{vector.OptionAfterColumn("name")},
+			options: []vector.Option{OptionAfterColumn("name")},
 			expected: New([]Column{
 				{"name", vector.StringWithNA([]string{"Jim", "Lucius", "Alice", "Marcus", "Leticia"}, nil)},
 				{"city", vector.StringWithNA([]string{"London", "Rome", "Paris", "New York", "Tokyo"}, nil)},
@@ -55,7 +55,7 @@ func TestDataframe_Mutate(t *testing.T) {
 			name:    "before column",
 			df:      df,
 			columns: mutateColumns,
-			options: []vector.Option{vector.OptionBeforeColumn("salary")},
+			options: []vector.Option{OptionBeforeColumn("salary")},
 			expected: New([]Column{
 				{"name", vector.StringWithNA([]string{"Jim", "Lucius", "Alice", "Marcus", "Leticia"}, nil)},
 				{"city", vector.StringWithNA([]string{"London", "Rome", "Paris", "New York", "Tokyo"}, nil)},
@@ -68,7 +68,7 @@ func TestDataframe_Mutate(t *testing.T) {
 			name:    "before first column",
 			df:      df,
 			columns: mutateColumns,
-			options: []vector.Option{vector.OptionBeforeColumn("name")},
+			options: []vector.Option{OptionBeforeColumn("name")},
 			expected: New([]Column{
 				{"city", vector.StringWithNA([]string{"London", "Rome", "Paris", "New York", "Tokyo"}, nil)},
 				{"missions", vector.IntegerWithNA([]int{10, 27, 4, 6, 8}, nil)},
@@ -81,7 +81,7 @@ func TestDataframe_Mutate(t *testing.T) {
 			name:    "after non-existant column",
 			df:      df,
 			columns: mutateColumns,
-			options: []vector.Option{vector.OptionAfterColumn("pods")},
+			options: []vector.Option{OptionAfterColumn("pods")},
 			expected: New([]Column{
 				{"name", vector.StringWithNA([]string{"Jim", "Lucius", "Alice", "Marcus", "Leticia"}, nil)},
 				{"salary", vector.IntegerWithNA([]int{100000, 120000, 80000, 70000, 90000}, nil)},
@@ -94,7 +94,7 @@ func TestDataframe_Mutate(t *testing.T) {
 			name:    "before non-existant column",
 			df:      df,
 			columns: mutateColumns,
-			options: []vector.Option{vector.OptionBeforeColumn("pods")},
+			options: []vector.Option{OptionBeforeColumn("pods")},
 			expected: New([]Column{
 				{"name", vector.StringWithNA([]string{"Jim", "Lucius", "Alice", "Marcus", "Leticia"}, nil)},
 				{"salary", vector.IntegerWithNA([]int{100000, 120000, 80000, 70000, 90000}, nil)},

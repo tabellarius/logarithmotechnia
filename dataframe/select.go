@@ -50,7 +50,7 @@ func (df *Dataframe) Select(selectors ...any) *Dataframe {
 		vectors = append(vectors, df.columns[columnMap[name]])
 	}
 
-	return New(vectors, vector.OptionColumnNames(colNames))
+	return New(vectors, OptionColumnNames(colNames))
 }
 
 func (df *Dataframe) selectByName(colNames []string, name string) []string {

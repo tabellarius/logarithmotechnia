@@ -54,7 +54,7 @@ func TestDataframe_Relocate(t *testing.T) {
 		{
 			name:      "string + []string + after column",
 			selectors: []any{"salary", []string{"name", "gender"}},
-			options:   []any{vector.OptionAfterColumn("active")},
+			options:   []any{OptionAfterColumn("active")},
 			columns: []vector.Vector{
 				vector.IntegerWithNA([]int{31, 3, 24, 41, 33}, nil),
 				vector.BooleanWithNA([]bool{true, true, true, false, true}, nil),
@@ -67,7 +67,7 @@ func TestDataframe_Relocate(t *testing.T) {
 		{
 			name:      "string + []string + before column",
 			selectors: []any{"salary", []string{"name", "gender"}},
-			options:   []any{vector.OptionBeforeColumn("active")},
+			options:   []any{OptionBeforeColumn("active")},
 			columns: []vector.Vector{
 				vector.IntegerWithNA([]int{31, 3, 24, 41, 33}, nil),
 				vector.IntegerWithNA([]int{110000, 0, 50000, 120000, 80000}, nil),

@@ -101,7 +101,7 @@ func TestNew(t *testing.T) {
 		t.Run(data.name, func(t *testing.T) {
 			var df *Dataframe
 			if data.columnNames != nil {
-				df = New(data.columns, vector.OptionColumnNames(data.columnNames))
+				df = New(data.columns, OptionColumnNames(data.columnNames))
 			} else {
 				df = New(data.columns)
 			}
@@ -209,7 +209,7 @@ func TestDataframe_Ci(t *testing.T) {
 		vector.IntegerWithNA([]int{1, 2, 3, 4, 5}, nil),
 		vector.StringWithNA([]string{"1", "2", "3"}, nil),
 		vector.BooleanWithNA([]bool{true, true}, nil),
-	}, vector.OptionColumnNames([]string{"int", "string", "bool"}))
+	}, OptionColumnNames([]string{"int", "string", "bool"}))
 
 	testData := []struct {
 		index  int
@@ -239,7 +239,7 @@ func TestDataframe_Cn(t *testing.T) {
 		vector.IntegerWithNA([]int{1, 2, 3, 4, 5}, nil),
 		vector.StringWithNA([]string{"1", "2", "3"}, nil),
 		vector.BooleanWithNA([]bool{true, true}, nil),
-	}, vector.OptionColumnNames([]string{"int", "string", "bool"}))
+	}, OptionColumnNames([]string{"int", "string", "bool"}))
 
 	testData := []struct {
 		name   string
@@ -268,7 +268,7 @@ func TestDataframe_C(t *testing.T) {
 		vector.IntegerWithNA([]int{1, 2, 3}, nil),
 		vector.StringWithNA([]string{"1", "2", "3"}, nil),
 		vector.BooleanWithNA([]bool{true, false, true}, nil),
-	}, vector.OptionColumnNames([]string{"int", "string", "bool"}))
+	}, OptionColumnNames([]string{"int", "string", "bool"}))
 
 	testData := []struct {
 		selector any
@@ -305,7 +305,7 @@ func TestDataframe_NamesAsStrings(t *testing.T) {
 				vector.IntegerWithNA([]int{1, 2, 3}, nil),
 				vector.StringWithNA([]string{"1", "2", "3"}, nil),
 				vector.BooleanWithNA([]bool{true, false, true}, nil),
-			}, vector.OptionColumnNames([]string{"int", "string", "bool"})),
+			}, OptionColumnNames([]string{"int", "string", "bool"})),
 			columnNames: []string{"int", "string", "bool"},
 		},
 	}
@@ -339,7 +339,7 @@ func TestDataframe_IsEmpty(t *testing.T) {
 				vector.IntegerWithNA([]int{1, 2, 3}, nil),
 				vector.StringWithNA([]string{"1", "2", "3"}, nil),
 				vector.BooleanWithNA([]bool{true, false, true}, nil),
-			}, vector.OptionColumnNames([]string{"int", "string", "bool"})),
+			}, OptionColumnNames([]string{"int", "string", "bool"})),
 			isEmpty: false,
 		},
 	}
@@ -373,7 +373,7 @@ func TestDataframe_Clone(t *testing.T) {
 				vector.IntegerWithNA([]int{1, 2, 3}, nil),
 				vector.StringWithNA([]string{"1", "2", "3"}, nil),
 				vector.BooleanWithNA([]bool{true, false, true}, nil),
-			}, vector.OptionColumnNames([]string{"int", "string", "bool"})),
+			}, OptionColumnNames([]string{"int", "string", "bool"})),
 			isEmpty: false,
 		},
 	}
@@ -417,7 +417,7 @@ func TestDataframe_HasColumn(t *testing.T) {
 		vector.IntegerWithNA([]int{1, 2, 3}, nil),
 		vector.StringWithNA([]string{"1", "2", "3"}, nil),
 		vector.BooleanWithNA([]bool{true, false, true}, nil),
-	}, vector.OptionColumnNames([]string{"int", "string", "bool"}))
+	}, OptionColumnNames([]string{"int", "string", "bool"}))
 
 	testData := []struct {
 		name      string
@@ -458,7 +458,7 @@ func TestDataframe_IsValidColumnIndex(t *testing.T) {
 		vector.IntegerWithNA([]int{1, 2, 3}, nil),
 		vector.StringWithNA([]string{"1", "2", "3"}, nil),
 		vector.BooleanWithNA([]bool{true, false, true}, nil),
-	}, vector.OptionColumnNames([]string{"int", "string", "bool"}))
+	}, OptionColumnNames([]string{"int", "string", "bool"}))
 
 	testData := []struct {
 		name  string
@@ -489,7 +489,7 @@ func TestDataframe_Pick(t *testing.T) {
 		vector.IntegerWithNA([]int{1, 2, 3}, nil),
 		vector.StringWithNA([]string{"1", "2", "3"}, nil),
 		vector.BooleanWithNA([]bool{true, false, true}, nil),
-	}, vector.OptionColumnNames([]string{"int", "string", "bool"}))
+	}, OptionColumnNames([]string{"int", "string", "bool"}))
 
 	testData := []struct {
 		index  int
@@ -526,7 +526,7 @@ func TestDataframe_Traverse(t *testing.T) {
 		vector.IntegerWithNA([]int{1, 2, 3}, nil),
 		vector.StringWithNA([]string{"1", "2", "3"}, nil),
 		vector.BooleanWithNA([]bool{true, false, true}, nil),
-	}, vector.OptionColumnNames([]string{"int", "string", "bool"}))
+	}, OptionColumnNames([]string{"int", "string", "bool"}))
 
 	fMapDf := map[int]map[string]any{}
 	trF := func(idx int, val map[string]any) {

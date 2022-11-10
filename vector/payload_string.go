@@ -467,19 +467,23 @@ func (p *stringPayload) Coalesce(payload Payload) Payload {
 }
 
 func (p *stringPayload) Options() []Option {
-	return []Option{}
+	return []Option{
+		ConfOption{KeyOptionStringToBooleanConverter, p.StringToBooleanConverter},
+		ConfOption{KeyOptionTimeFormat, p.timeFormat},
+	}
 }
 
 func (p *stringPayload) SetOption(name string, val any) bool {
-	if name == KeyOptionStringToBooleanConverter {
+	switch name {
+	case KeyOptionStringToBooleanConverter:
 		p.StringToBooleanConverter = val.(StringToBooleanConverter)
-	}
-
-	if name == KeyOptionTimeFormat {
+	case KeyOptionTimeFormat:
 		p.timeFormat = val.(string)
+	default:
+		return false
 	}
 
-	return false
+	return true
 }
 
 func StringPayload(data []string, na []bool, options ...Option) Payload {
