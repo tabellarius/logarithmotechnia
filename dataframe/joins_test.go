@@ -50,7 +50,7 @@ func TestDataframe_InnerJoin(t *testing.T) {
 	}{
 		{
 			name:        "employee ✕ department",
-			joined:      employee.InnerJoin(department, vector.OptionJoinBy("DepType")).Arrange("Name", "Title"),
+			joined:      employee.InnerJoin(department, OptionJoinBy("DepType")).Arrange("Name", "Title"),
 			columnNames: []string{"Name", "DepType", "Salary", "Group", "DepID", "Title", "Group_1"},
 			outColumns: []vector.Vector{
 				vector.String([]string{
@@ -80,7 +80,7 @@ func TestDataframe_InnerJoin(t *testing.T) {
 		},
 		{
 			name:        "department ✕ employee",
-			joined:      department.InnerJoin(employee, vector.OptionJoinBy("DepType")).Arrange("Title", "Name"),
+			joined:      department.InnerJoin(employee, OptionJoinBy("DepType")).Arrange("Title", "Name"),
 			columnNames: []string{"DepID", "Title", "DepType", "Group", "Name", "Salary", "Group_1"},
 			outColumns: []vector.Vector{
 				vector.Integer([]int{
@@ -110,7 +110,7 @@ func TestDataframe_InnerJoin(t *testing.T) {
 		},
 		{
 			name:        "employee ✕ department by group",
-			joined:      employee.InnerJoin(department, vector.OptionJoinBy("Group", "DepType")).Arrange("Name", "Title"),
+			joined:      employee.InnerJoin(department, OptionJoinBy("Group", "DepType")).Arrange("Name", "Title"),
 			columnNames: []string{"Name", "DepType", "Salary", "Group", "DepID", "Title"},
 			outColumns: []vector.Vector{
 				vector.String([]string{
@@ -135,7 +135,7 @@ func TestDataframe_InnerJoin(t *testing.T) {
 		},
 		{
 			name:        "department ✕ employee by group",
-			joined:      department.InnerJoin(employee, vector.OptionJoinBy("Group", "DepType")).Arrange("Title", "Name"),
+			joined:      department.InnerJoin(employee, OptionJoinBy("Group", "DepType")).Arrange("Title", "Name"),
 			columnNames: []string{"DepID", "Title", "DepType", "Group", "Name", "Salary"},
 			outColumns: []vector.Vector{
 				vector.Integer([]int{
@@ -186,7 +186,7 @@ func TestDataframe_LeftJoin(t *testing.T) {
 	}{
 		{
 			name:        "employee ✕ department",
-			joined:      employee.LeftJoin(department, vector.OptionJoinBy("DepType")).Arrange("Name", "Title"),
+			joined:      employee.LeftJoin(department, OptionJoinBy("DepType")).Arrange("Name", "Title"),
 			columnNames: []string{"Name", "DepType", "Salary", "Group", "DepID", "Title", "Group_1"},
 			outColumns: []vector.Vector{
 				vector.String([]string{
@@ -218,7 +218,7 @@ func TestDataframe_LeftJoin(t *testing.T) {
 		},
 		{
 			name:        "department ✕ employee",
-			joined:      department.LeftJoin(employee, vector.OptionJoinBy("DepType")).Arrange("Title", "Name"),
+			joined:      department.LeftJoin(employee, OptionJoinBy("DepType")).Arrange("Title", "Name"),
 			columnNames: []string{"DepID", "Title", "DepType", "Group", "Name", "Salary", "Group_1"},
 			outColumns: []vector.Vector{
 				vector.Integer([]int{
@@ -249,7 +249,7 @@ func TestDataframe_LeftJoin(t *testing.T) {
 		},
 		{
 			name:        "employee ✕ department by group",
-			joined:      employee.LeftJoin(department, vector.OptionJoinBy("Group", "DepType")).Arrange("Name", "Title"),
+			joined:      employee.LeftJoin(department, OptionJoinBy("Group", "DepType")).Arrange("Name", "Title"),
 			columnNames: []string{"Name", "DepType", "Salary", "Group", "DepID", "Title"},
 			outColumns: []vector.Vector{
 				vector.String([]string{
@@ -275,7 +275,7 @@ func TestDataframe_LeftJoin(t *testing.T) {
 		},
 		{
 			name:        "department ✕ employee by group",
-			joined:      department.LeftJoin(employee, vector.OptionJoinBy("Group", "DepType")).Arrange("Title", "Name"),
+			joined:      department.LeftJoin(employee, OptionJoinBy("Group", "DepType")).Arrange("Title", "Name"),
 			columnNames: []string{"DepID", "Title", "DepType", "Group", "Name", "Salary"},
 			outColumns: []vector.Vector{
 				vector.Integer([]int{
@@ -326,7 +326,7 @@ func TestDataframe_RightJoin(t *testing.T) {
 	}{
 		{
 			name:        "employee ✕ department",
-			joined:      employee.RightJoin(department, vector.OptionJoinBy("DepType")).Arrange("Name", "Title"),
+			joined:      employee.RightJoin(department, OptionJoinBy("DepType")).Arrange("Name", "Title"),
 			columnNames: []string{"Name", "DepType", "Salary", "Group", "DepID", "Title", "Group_1"},
 			outColumns: []vector.Vector{
 				vector.StringWithNA([]string{
@@ -357,7 +357,7 @@ func TestDataframe_RightJoin(t *testing.T) {
 		},
 		{
 			name:        "department ✕ employee",
-			joined:      department.RightJoin(employee, vector.OptionJoinBy("DepType")).Arrange("Title", "Name"),
+			joined:      department.RightJoin(employee, OptionJoinBy("DepType")).Arrange("Title", "Name"),
 			columnNames: []string{"DepID", "Title", "DepType", "Group", "Name", "Salary", "Group_1"},
 			outColumns: []vector.Vector{
 				vector.IntegerWithNA([]int{
@@ -389,7 +389,7 @@ func TestDataframe_RightJoin(t *testing.T) {
 		},
 		{
 			name:        "employee ✕ department by group",
-			joined:      employee.RightJoin(department, vector.OptionJoinBy("Group", "DepType")).Arrange("Name", "Title"),
+			joined:      employee.RightJoin(department, OptionJoinBy("Group", "DepType")).Arrange("Name", "Title"),
 			columnNames: []string{"Name", "DepType", "Salary", "Group", "DepID", "Title"},
 			outColumns: []vector.Vector{
 				vector.StringWithNA([]string{
@@ -414,7 +414,7 @@ func TestDataframe_RightJoin(t *testing.T) {
 		},
 		{
 			name:        "department ✕ employee by group",
-			joined:      department.RightJoin(employee, vector.OptionJoinBy("Group", "DepType")).Arrange("Title", "Name"),
+			joined:      department.RightJoin(employee, OptionJoinBy("Group", "DepType")).Arrange("Title", "Name"),
 			columnNames: []string{"DepID", "Title", "DepType", "Group", "Name", "Salary"},
 			outColumns: []vector.Vector{
 				vector.IntegerWithNA([]int{
@@ -467,7 +467,7 @@ func TestDataframe_FullJoin(t *testing.T) {
 	}{
 		{
 			name:        "employee ✕ department",
-			joined:      employee.FullJoin(department, vector.OptionJoinBy("DepType")).Arrange("Name", "Title"),
+			joined:      employee.FullJoin(department, OptionJoinBy("DepType")).Arrange("Name", "Title"),
 			columnNames: []string{"Name", "DepType", "Salary", "Group", "DepID", "Title", "Group_1"},
 			outColumns: []vector.Vector{
 				vector.StringWithNA([]string{
@@ -506,7 +506,7 @@ func TestDataframe_FullJoin(t *testing.T) {
 		},
 		{
 			name:        "department ✕ employee",
-			joined:      department.FullJoin(employee, vector.OptionJoinBy("DepType")).Arrange("Title", "Name"),
+			joined:      department.FullJoin(employee, OptionJoinBy("DepType")).Arrange("Title", "Name"),
 			columnNames: []string{"DepID", "Title", "DepType", "Group", "Name", "Salary", "Group_1"},
 			outColumns: []vector.Vector{
 				vector.IntegerWithNA([]int{
@@ -545,7 +545,7 @@ func TestDataframe_FullJoin(t *testing.T) {
 		},
 		{
 			name:        "employee ✕ department by group",
-			joined:      employee.FullJoin(department, vector.OptionJoinBy("Group", "DepType")).Arrange("Name", "Title"),
+			joined:      employee.FullJoin(department, OptionJoinBy("Group", "DepType")).Arrange("Name", "Title"),
 			columnNames: []string{"Name", "DepType", "Salary", "Group", "DepID", "Title"},
 			outColumns: []vector.Vector{
 				vector.StringWithNA([]string{
@@ -573,7 +573,7 @@ func TestDataframe_FullJoin(t *testing.T) {
 		},
 		{
 			name:        "department ✕ employee by group",
-			joined:      department.FullJoin(employee, vector.OptionJoinBy("Group", "DepType")).Arrange("Title", "Name"),
+			joined:      department.FullJoin(employee, OptionJoinBy("Group", "DepType")).Arrange("Title", "Name"),
 			columnNames: []string{"DepID", "Title", "DepType", "Group", "Name", "Salary"},
 			outColumns: []vector.Vector{
 				vector.IntegerWithNA([]int{
@@ -627,7 +627,7 @@ func TestDataframe_SemiJoin(t *testing.T) {
 	}{
 		{
 			name:        "employee ✕ department",
-			joined:      employee.SemiJoin(department, vector.OptionJoinBy("DepType")).Arrange("Name", "Title"),
+			joined:      employee.SemiJoin(department, OptionJoinBy("DepType")).Arrange("Name", "Title"),
 			columnNames: []string{"Name", "DepType", "Salary", "Group"},
 			outColumns: []vector.Vector{
 				vector.String([]string{
@@ -646,7 +646,7 @@ func TestDataframe_SemiJoin(t *testing.T) {
 		},
 		{
 			name:        "department ✕ employee",
-			joined:      department.SemiJoin(employee, vector.OptionJoinBy("DepType")).Arrange("Title", "Name"),
+			joined:      department.SemiJoin(employee, OptionJoinBy("DepType")).Arrange("Title", "Name"),
 			columnNames: []string{"DepID", "Title", "DepType", "Group"},
 			outColumns: []vector.Vector{
 				vector.Integer([]int{
@@ -665,7 +665,7 @@ func TestDataframe_SemiJoin(t *testing.T) {
 		},
 		{
 			name:        "employee ✕ department by group",
-			joined:      employee.SemiJoin(department, vector.OptionJoinBy("Group", "DepType")).Arrange("Name", "Title"),
+			joined:      employee.SemiJoin(department, OptionJoinBy("Group", "DepType")).Arrange("Name", "Title"),
 			columnNames: []string{"Name", "DepType", "Salary", "Group"},
 			outColumns: []vector.Vector{
 				vector.String([]string{
@@ -684,7 +684,7 @@ func TestDataframe_SemiJoin(t *testing.T) {
 		},
 		{
 			name:        "department ✕ employee by group",
-			joined:      department.SemiJoin(employee, vector.OptionJoinBy("Group", "DepType")).Arrange("Title", "Name"),
+			joined:      department.SemiJoin(employee, OptionJoinBy("Group", "DepType")).Arrange("Title", "Name"),
 			columnNames: []string{"DepID", "Title", "DepType", "Group"},
 			outColumns: []vector.Vector{
 				vector.Integer([]int{
@@ -729,7 +729,7 @@ func TestDataframe_AntiJoin(t *testing.T) {
 	}{
 		{
 			name:        "employee ✕ department",
-			joined:      employee.AntiJoin(department, vector.OptionJoinBy("DepType")).Arrange("Name", "Title"),
+			joined:      employee.AntiJoin(department, OptionJoinBy("DepType")).Arrange("Name", "Title"),
 			columnNames: []string{"Name", "DepType", "Salary", "Group"},
 			outColumns: []vector.Vector{
 				vector.String([]string{
@@ -748,7 +748,7 @@ func TestDataframe_AntiJoin(t *testing.T) {
 		},
 		{
 			name:        "department ✕ employee",
-			joined:      department.AntiJoin(employee, vector.OptionJoinBy("DepType")).Arrange("Title", "Name"),
+			joined:      department.AntiJoin(employee, OptionJoinBy("DepType")).Arrange("Title", "Name"),
 			columnNames: []string{"DepID", "Title", "DepType", "Group"},
 			outColumns: []vector.Vector{
 				vector.Integer([]int{
@@ -767,7 +767,7 @@ func TestDataframe_AntiJoin(t *testing.T) {
 		},
 		{
 			name:        "employee ✕ department by group",
-			joined:      employee.AntiJoin(department, vector.OptionJoinBy("Group", "DepType")).Arrange("Name", "Title"),
+			joined:      employee.AntiJoin(department, OptionJoinBy("Group", "DepType")).Arrange("Name", "Title"),
 			columnNames: []string{"Name", "DepType", "Salary", "Group"},
 			outColumns: []vector.Vector{
 				vector.String([]string{
@@ -786,7 +786,7 @@ func TestDataframe_AntiJoin(t *testing.T) {
 		},
 		{
 			name:        "department ✕ employee by group",
-			joined:      department.AntiJoin(employee, vector.OptionJoinBy("Group", "DepType")).Arrange("Title", "Name"),
+			joined:      department.AntiJoin(employee, OptionJoinBy("Group", "DepType")).Arrange("Title", "Name"),
 			columnNames: []string{"DepID", "Title", "DepType", "Group"},
 			outColumns: []vector.Vector{
 				vector.Integer([]int{

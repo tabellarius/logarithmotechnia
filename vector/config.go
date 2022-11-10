@@ -7,12 +7,6 @@ const KeyOptionStringToBooleanConverter = "string_boolean_converter"
 const KeyOptionAnyPrinterFunc = "any_printer_func"
 const KeyOptionAnyConvertors = "any_convertors"
 const KeyOptionAnyCallbacks = "any_callbacks"
-const KeyOptionBeforeColumn = "before_column"
-const KeyOptionAfterColumn = "after_column"
-const KeyOptionColumnNames = "column_names"
-const KeyOptionArrangeReverse = "arrange_reverse"
-const KeyOptionArrangeReverseColumns = "arrange_reverse_columns"
-const KeyOptionJoinBy = "join_by_columns"
 const KeyOptionGroupIndex = "group_index"
 const KeyOptionVectorName = "vector_name"
 
@@ -97,30 +91,6 @@ func OptionAnyConvertors(convertors AnyConvertors) Option {
 
 func OptionAnyCallbacks(callbacks AnyCallbacks) Option {
 	return ConfOption{KeyOptionAnyCallbacks, callbacks}
-}
-
-func OptionBeforeColumn(name string) Option {
-	return ConfOption{KeyOptionBeforeColumn, name}
-}
-
-func OptionAfterColumn(name string) Option {
-	return ConfOption{KeyOptionAfterColumn, name}
-}
-
-func OptionColumnNames(names []string) Option {
-	return ConfOption{KeyOptionColumnNames, names}
-}
-
-func OptionArrangeReverse(reverse bool) Option {
-	return ConfOption{KeyOptionArrangeReverse, reverse}
-}
-
-func OptionArrangeReverseColumns(columns ...string) Option {
-	return ConfOption{KeyOptionArrangeReverseColumns, columns}
-}
-
-func OptionJoinBy(by ...string) Option {
-	return ConfOption{KeyOptionJoinBy, by}
 }
 
 func OptionGroupIndex(index GroupIndex) Option {

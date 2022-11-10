@@ -19,7 +19,7 @@ type confStruct struct {
 	skipColumns []string
 }
 
-func FromStructs(stArr any, options ...Option) (*Dataframe, error) {
+func FromStructs(stArr any, options ...ConfOption) (*Dataframe, error) {
 	conf := createStructConf(options...)
 	stArrType := reflect.TypeOf(stArr)
 
@@ -43,7 +43,7 @@ func FromStructs(stArr any, options ...Option) (*Dataframe, error) {
 	return df, nil
 }
 
-func createStructConf(options ...Option) confStruct {
+func createStructConf(options ...ConfOption) confStruct {
 	conf := confStruct{
 		headerMap:   map[string]string{},
 		dfOptions:   []vector.Option{},
@@ -51,13 +51,13 @@ func createStructConf(options ...Option) confStruct {
 	}
 
 	for _, option := range options {
-		switch option.name {
+		switch option.Key() {
 		case optionStructHeaderMap:
-			conf.headerMap = option.val.(map[string]string)
+			conf.headerMap = option.Value().(map[string]string)
 		case optionStructDataframeOptions:
-			conf.dfOptions = option.val.([]vector.Option)
+			conf.dfOptions = option.Value().([]vector.Option)
 		case optionStructSkipFields:
-			conf.skipColumns = option.val.([]string)
+			conf.skipColumns = option.Value().([]string)
 		}
 	}
 
@@ -156,23 +156,14 @@ func getFieldType(fVal reflect.Value) string {
 	return t
 }
 
-func StructOptionHeaderMap(headerMap map[string]string) Option {
-	return Option{
-		name: optionStructHeaderMap,
-		val:  headerMap,
-	}
+func StructOptionHeaderMap(headerMap map[string]string) ConfOption {
+	return ConfOption{optionStructHeaderMap, headerMap}
 }
 
-func StructOptionDataFrameOptions(options ...vector.Option) Option {
-	return Option{
-		name: optionStructDataframeOptions,
-		val:  options,
-	}
+func StructOptionDataFrameOptions(options ...vector.Option) ConfOption {
+	return ConfOption{optionStructDataframeOptions, options}
 }
 
-func StructOptionSkipFields(fields ...string) Option {
-	return Option{
-		name: optionStructSkipFields,
-		val:  fields,
-	}
+func StructOptionSkipFields(fields ...string) ConfOption {
+	return ConfOption{optionStructSkipFields, fields}
 }

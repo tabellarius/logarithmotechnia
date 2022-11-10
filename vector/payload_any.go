@@ -447,26 +447,26 @@ func (p *anyPayload) adjustToBiggerSize(size int) Payload {
 }
 
 func (p *anyPayload) Options() []Option {
-	return []Option{}
+	return []Option{
+		ConfOption{KeyOptionAnyPrinterFunc, p.printer},
+		ConfOption{KeyOptionAnyConvertors, p.convertors},
+		ConfOption{KeyOptionAnyCallbacks, p.fn},
+	}
 }
 
 func (p *anyPayload) SetOption(name string, val any) bool {
-	if name == KeyOptionAnyPrinterFunc {
+	switch name {
+	case KeyOptionAnyPrinterFunc:
 		p.printer = val.(AnyPrinterFunc)
-		return true
-	}
-
-	if name == KeyOptionAnyConvertors {
+	case KeyOptionAnyConvertors:
 		p.convertors = val.(AnyConvertors)
-		return true
-	}
-
-	if name == KeyOptionAnyCallbacks {
+	case KeyOptionAnyCallbacks:
 		p.fn = val.(AnyCallbacks)
-		return true
+	default:
+		return false
 	}
 
-	return false
+	return true
 }
 
 func AnyPayload(data []any, na []bool, options ...Option) Payload {

@@ -40,7 +40,7 @@ func TestDataframe_Arrange(t *testing.T) {
 		},
 		{
 			name: "one arrangeBy reverse column",
-			df:   df.Arrange("salary", vector.OptionArrangeReverseColumns("salary")),
+			df:   df.Arrange("salary", OptionArrangeReverseColumns("salary")),
 			expectedColumns: []vector.Vector{
 				vector.BooleanWithNA([]bool{true, false, false, true, true, true, true, true, false, true, true, false, false, false, false}, nil),
 				vector.IntegerWithNA([]int{2, 2, 2, 2, 1, 1, 3, 1, 3, 3, 3, 1, 3, 2, 1}, nil),
@@ -49,7 +49,7 @@ func TestDataframe_Arrange(t *testing.T) {
 		},
 		{
 			name: "one arrangeBy with false reverse",
-			df:   df.Arrange("salary", vector.OptionArrangeReverse(false)),
+			df:   df.Arrange("salary", OptionArrangeReverse(false)),
 			expectedColumns: []vector.Vector{
 				vector.BooleanWithNA([]bool{false, false, false, false, true, true, false, true, true, true, true, true, false, false, true}, nil),
 				vector.IntegerWithNA([]int{1, 2, 3, 1, 3, 3, 3, 1, 3, 1, 1, 2, 2, 2, 2}, nil),
@@ -58,7 +58,7 @@ func TestDataframe_Arrange(t *testing.T) {
 		},
 		{
 			name: "one arrangeBy with reverse",
-			df:   df.Arrange("salary", vector.OptionArrangeReverse(true)),
+			df:   df.Arrange("salary", OptionArrangeReverse(true)),
 			expectedColumns: []vector.Vector{
 				vector.BooleanWithNA([]bool{true, false, false, true, true, true, true, true, false, true, true, false, false, false, false}, nil),
 				vector.IntegerWithNA([]int{2, 2, 2, 2, 1, 1, 3, 1, 3, 3, 3, 1, 3, 2, 1}, nil),
@@ -85,7 +85,7 @@ func TestDataframe_Arrange(t *testing.T) {
 		},
 		{
 			name: "two arrangeBy with false reverse",
-			df:   df.Arrange("type", "salary", vector.OptionArrangeReverse(false)),
+			df:   df.Arrange("type", "salary", OptionArrangeReverse(false)),
 			expectedColumns: []vector.Vector{
 				vector.BooleanWithNA([]bool{false, false, true, true, true, false, true, false, false, true, false, true, true, false, true}, nil),
 				vector.IntegerWithNA([]int{1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3}, nil),
@@ -103,7 +103,7 @@ func TestDataframe_Arrange(t *testing.T) {
 		},
 		{
 			name: "three arrangeBy with reverse",
-			df:   df.Arrange("activity", "type", "salary", vector.OptionArrangeReverse(true)),
+			df:   df.Arrange("activity", "type", "salary", OptionArrangeReverse(true)),
 			expectedColumns: []vector.Vector{
 				vector.BooleanWithNA([]bool{true, true, true, true, true, true, true, true, false, false, false, false, false, false, false}, nil),
 				vector.IntegerWithNA([]int{3, 3, 3, 2, 2, 1, 1, 1, 3, 3, 2, 2, 2, 1, 1}, nil),
@@ -112,7 +112,7 @@ func TestDataframe_Arrange(t *testing.T) {
 		},
 		{
 			name: "three arrangeBy with one column reversed",
-			df:   df.Arrange("activity", "type", "salary", vector.OptionArrangeReverseColumns("salary")),
+			df:   df.Arrange("activity", "type", "salary", OptionArrangeReverseColumns("salary")),
 			expectedColumns: []vector.Vector{
 				vector.BooleanWithNA([]bool{false, false, false, false, false, false, false, true, true, true, true, true, true, true, true}, nil),
 				vector.IntegerWithNA([]int{1, 1, 2, 2, 2, 3, 3, 1, 1, 1, 2, 2, 3, 3, 3}, nil),
@@ -121,7 +121,7 @@ func TestDataframe_Arrange(t *testing.T) {
 		},
 		{
 			name: "three arrangeBy with two column reversed",
-			df:   df.Arrange("activity", "type", "salary", vector.OptionArrangeReverseColumns("activity", "type")),
+			df:   df.Arrange("activity", "type", "salary", OptionArrangeReverseColumns("activity", "type")),
 			expectedColumns: []vector.Vector{
 				vector.BooleanWithNA([]bool{true, true, true, true, true, true, true, true, false, false, false, false, false, false, false}, nil),
 				vector.IntegerWithNA([]int{1, 1, 1, 2, 2, 3, 3, 3, 1, 1, 2, 2, 2, 3, 3}, nil),
@@ -130,7 +130,7 @@ func TestDataframe_Arrange(t *testing.T) {
 		},
 		{
 			name: "three arrangeBy with three column reversed",
-			df:   df.Arrange("activity", "type", "salary", vector.OptionArrangeReverseColumns("activity", "type", "salary")),
+			df:   df.Arrange("activity", "type", "salary", OptionArrangeReverseColumns("activity", "type", "salary")),
 			expectedColumns: []vector.Vector{
 				vector.BooleanWithNA([]bool{true, true, true, true, true, true, true, true, false, false, false, false, false, false, false}, nil),
 				vector.IntegerWithNA([]int{1, 1, 1, 2, 2, 3, 3, 3, 1, 1, 2, 2, 2, 3, 3}, nil),

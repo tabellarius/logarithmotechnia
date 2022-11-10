@@ -418,17 +418,19 @@ func (p *floatPayload) Coalesce(payload Payload) Payload {
 
 func (p *floatPayload) Options() []Option {
 	return []Option{
-		OptionPrecision(p.printer.Precision),
+		ConfOption{KeyOptionPrecision, p.printer.Precision},
 	}
 }
 
 func (p *floatPayload) SetOption(name string, val any) bool {
-	if name == KeyOptionPrecision {
+	switch name {
+	case KeyOptionPrecision:
 		p.printer.Precision = val.(int)
-		return true
+	default:
+		return false
 	}
 
-	return false
+	return true
 }
 
 func FloatPayload(data []float64, na []bool, options ...Option) Payload {

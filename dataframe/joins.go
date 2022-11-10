@@ -269,8 +269,8 @@ func (df *Dataframe) AntiJoin(with *Dataframe, options ...vector.Option) *Datafr
 func (df *Dataframe) determineColumns(conf vector.Configuration, src *Dataframe) []string {
 	var joinColumns []string
 
-	if conf.HasOption(vector.KeyOptionJoinBy) {
-		columns := conf.Value(vector.KeyOptionJoinBy).([]string)
+	if conf.HasOption(KeyOptionJoinBy) {
+		columns := conf.Value(KeyOptionJoinBy).([]string)
 		for _, column := range columns {
 			if df.Names().Has(column) && src.Names().Has(column) {
 				joinColumns = append(joinColumns, column)

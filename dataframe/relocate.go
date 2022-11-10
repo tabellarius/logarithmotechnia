@@ -48,15 +48,15 @@ func (df *Dataframe) Relocate(arguments ...any) *Dataframe {
 	insertPosition := len(curNames)
 
 	var pos int
-	if conf.HasOption(vector.KeyOptionBeforeColumn) {
-		pos = strPosInSlice(curNames, conf.Value(vector.KeyOptionBeforeColumn).(string))
+	if conf.HasOption(KeyOptionBeforeColumn) {
+		pos = strPosInSlice(curNames, conf.Value(KeyOptionBeforeColumn).(string))
 		if pos != -1 {
 			insertPosition = pos
 		}
 	}
 
-	if conf.HasOption(vector.KeyOptionAfterColumn) {
-		pos = strPosInSlice(curNames, conf.Value(vector.KeyOptionAfterColumn).(string))
+	if conf.HasOption(KeyOptionAfterColumn) {
+		pos = strPosInSlice(curNames, conf.Value(KeyOptionAfterColumn).(string))
 		if pos != -1 {
 			insertPosition = pos + 1
 		}

@@ -155,7 +155,7 @@ func (df *Dataframe) columnIndexByName(name string) int {
 }
 
 func (df *Dataframe) OptionsWithNames() []vector.Option {
-	return append(df.Options(), vector.OptionColumnNames(df.columnNames))
+	return append(df.Options(), OptionColumnNames(df.columnNames))
 }
 
 func (df *Dataframe) Options() []vector.Option {
@@ -195,7 +195,7 @@ func dataframeFromColumns(columns []Column, options ...vector.Option) *Dataframe
 		names = append(names, column.name)
 	}
 
-	options = append(options, vector.OptionColumnNames(names))
+	options = append(options, OptionColumnNames(names))
 
 	return dataframeFromVectors(vectors, options...)
 }
@@ -222,8 +222,8 @@ func dataframeFromVectors(vectors []vector.Vector, options ...vector.Option) *Da
 	conf := vector.MergeOptions(options)
 
 	columnNames := generateColumnNames(colNum)
-	if conf.HasOption(vector.KeyOptionColumnNames) {
-		names := conf.Value(vector.KeyOptionColumnNames).([]string)
+	if conf.HasOption(KeyOptionColumnNames) {
+		names := conf.Value(KeyOptionColumnNames).([]string)
 		names = renameDuplicateColumns(names)
 		if colNum >= len(names) {
 			copy(columnNames, names)

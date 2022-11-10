@@ -21,8 +21,8 @@ func (df *Dataframe) Arrange(args ...any) *Dataframe {
 
 	conf := vector.MergeOptions(options)
 	reverseColumns := []string{}
-	if conf.HasOption(vector.KeyOptionArrangeReverseColumns) {
-		reverseColumns = conf.Value(vector.KeyOptionArrangeReverseColumns).([]string)
+	if conf.HasOption(KeyOptionArrangeReverseColumns) {
+		reverseColumns = conf.Value(KeyOptionArrangeReverseColumns).([]string)
 	}
 	rcVec := vector.StringWithNA(reverseColumns, nil)
 
@@ -49,7 +49,7 @@ func (df *Dataframe) Arrange(args ...any) *Dataframe {
 		indices = df.arrangeByMultiple(arrangeBy, columns[1:], rcVec)
 	}
 
-	if conf.HasOption(vector.KeyOptionArrangeReverse) && conf.Value(vector.KeyOptionArrangeReverse).(bool) {
+	if conf.HasOption(KeyOptionArrangeReverse) && conf.Value(KeyOptionArrangeReverse).(bool) {
 		indices = reverseIndices(indices)
 	}
 

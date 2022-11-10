@@ -237,17 +237,19 @@ func (p *complexPayload) adjustToBiggerSize(size int) Payload {
 
 func (p *complexPayload) Options() []Option {
 	return []Option{
-		OptionPrecision(p.printer.Precision),
+		ConfOption{KeyOptionPrecision, p.printer.Precision},
 	}
 }
 
 func (p *complexPayload) SetOption(name string, val any) bool {
-	if name == KeyOptionPrecision {
+	switch name {
+	case KeyOptionPrecision:
 		p.printer.Precision = val.(int)
-		return true
+	default:
+		return false
 	}
 
-	return false
+	return true
 }
 
 func (p *complexPayload) Groups() ([][]int, []any) {
