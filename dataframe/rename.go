@@ -5,10 +5,30 @@ type Rename struct {
 	to   string
 }
 
-func (df *Dataframe) Rename(renames ...Rename) *Dataframe {
+func (df *Dataframe) Rename(renames ...any) *Dataframe {
 	renamesMap := map[string]string{}
 	for _, rename := range renames {
-		renamesMap[rename.from] = rename.to
+		switch rename.(type) {
+		case Rename:
+			renamesMap[rename.(Rename).from] = rename.(Rename).to
+		case []Rename:
+			arrRename := rename.([]Rename)
+			for i := 0; i < len(arrRename); i++ {
+				renamesMap[arrRename[i].from] = arrRename[i].to
+			}
+		case []string:
+			strRename := rename.([]string)
+			if len(strRename) == 2 {
+				renamesMap[strRename[0]] = strRename[1]
+			}
+		case [][]string:
+			strArrRename := rename.([][]string)
+			for i := 0; i < len(strArrRename); i++ {
+				if len(strArrRename[i]) == 2 {
+					renamesMap[strArrRename[i][0]] = strArrRename[i][1]
+				}
+			}
+		}
 	}
 
 	names := make([]string, df.colNum)
