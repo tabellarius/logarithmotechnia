@@ -12,13 +12,13 @@ func TestDataframe_Rename(t *testing.T) {
 
 	testData := []struct {
 		name        string
-		renames     []Rename
+		renames     []any
 		columnNames []string
 		columns     []vector.Vector
 	}{
 		{
-			name:        "normal",
-			renames:     []Rename{{"name", "nickname"}},
+			name:        "Rename",
+			renames:     []any{Rename{"name", "nickname"}},
 			columnNames: []string{"nickname", "age", "gender"},
 			columns: []vector.Vector{
 				vector.StringWithNA([]string{"Jim", "SPARC-001", "Anna", "Lucius", "Maria"}, nil),
@@ -27,9 +27,39 @@ func TestDataframe_Rename(t *testing.T) {
 			},
 		},
 		{
-			name:        "normal",
-			renames:     []Rename{{"name", "nickname"}, {"age", "nickname"}},
+			name:        "two Renames",
+			renames:     []any{Rename{"name", "nickname"}, Rename{"age", "nickname"}},
 			columnNames: []string{"nickname", "nickname_1", "gender"},
+			columns: []vector.Vector{
+				vector.StringWithNA([]string{"Jim", "SPARC-001", "Anna", "Lucius", "Maria"}, nil),
+				vector.IntegerWithNA([]int{31, 3, 24, 41, 33}, nil),
+				vector.StringWithNA([]string{"m", "", "f", "m", "f"}, []bool{false, true, false, false, false}),
+			},
+		},
+		{
+			name:        "[]string",
+			renames:     []any{[]string{"name", "nickname"}},
+			columnNames: []string{"nickname", "age", "gender"},
+			columns: []vector.Vector{
+				vector.StringWithNA([]string{"Jim", "SPARC-001", "Anna", "Lucius", "Maria"}, nil),
+				vector.IntegerWithNA([]int{31, 3, 24, 41, 33}, nil),
+				vector.StringWithNA([]string{"m", "", "f", "m", "f"}, []bool{false, true, false, false, false}),
+			},
+		},
+		{
+			name:        "array of []string",
+			renames:     []any{[][]string{{"name", "nickname"}, {"age", "nickname"}}},
+			columnNames: []string{"nickname", "nickname_1", "gender"},
+			columns: []vector.Vector{
+				vector.StringWithNA([]string{"Jim", "SPARC-001", "Anna", "Lucius", "Maria"}, nil),
+				vector.IntegerWithNA([]int{31, 3, 24, 41, 33}, nil),
+				vector.StringWithNA([]string{"m", "", "f", "m", "f"}, []bool{false, true, false, false, false}),
+			},
+		},
+		{
+			name:        "mixed",
+			renames:     []any{[][]string{{"name", "Name"}, {"age", "Age"}}, Rename{"gender", "Gender"}},
+			columnNames: []string{"Name", "Age", "Gender"},
 			columns: []vector.Vector{
 				vector.StringWithNA([]string{"Jim", "SPARC-001", "Anna", "Lucius", "Maria"}, nil),
 				vector.IntegerWithNA([]int{31, 3, 24, 41, 33}, nil),
