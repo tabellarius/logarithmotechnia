@@ -141,6 +141,17 @@ func (df *Dataframe) String() string {
 	return str
 }
 
+func (df *Dataframe) ToMap() map[string][]any {
+	dataMap := map[string][]any{}
+
+	for _, columnName := range df.columnNames {
+		data, _ := df.Cn(columnName).Anies()
+		dataMap[columnName] = data
+	}
+
+	return dataMap
+}
+
 func (df *Dataframe) columnIndexByName(name string) int {
 	index := 1
 

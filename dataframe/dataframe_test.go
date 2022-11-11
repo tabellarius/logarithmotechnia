@@ -558,3 +558,37 @@ func TestDataframe_Traverse(t *testing.T) {
 		t.Error(fmt.Sprintf("arrMapDf %v is not equal to %v", arrMapDf, refArrMapDf))
 	}
 }
+
+func TestDataframe_ToMaps(t *testing.T) {
+	testData := []struct {
+		name      string
+		dataframe *Dataframe
+		dataMap   map[string][]any
+	}{
+		{
+			name: "normal",
+			dataframe: New([]vector.Vector{
+				vector.IntegerWithNA([]int{1, 2, 3}, nil),
+				vector.StringWithNA([]string{"1", "2", "3"}, []bool{true, false, true}),
+				vector.BooleanWithNA([]bool{true, false, true}, nil),
+			}, OptionColumnNames([]string{"int", "string", "bool"})),
+			dataMap: map[string][]any{"int": {1, 2, 3}, "string": {nil, "2", nil}, "bool": {true, false, true}},
+		},
+		{
+			name:      "empty",
+			dataframe: New([]vector.Vector{}),
+			dataMap:   map[string][]any{},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			dataMap := data.dataframe.ToMap()
+
+			if !reflect.DeepEqual(dataMap, data.dataMap) {
+				t.Error(fmt.Sprintf("Data map (%v) is not equal to expected (%v)",
+					dataMap, data.dataMap))
+			}
+		})
+	}
+}
