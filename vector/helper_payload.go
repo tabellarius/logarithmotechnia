@@ -264,16 +264,15 @@ func applyTo[T any](indices []int, inData []T, inNA []bool, applier any, naDef T
 	var data []T = nil
 	var na []bool = nil
 
-	if applyFunc, ok := applier.(func(int, T, bool) (T, bool)); ok {
-		data, na = applyToByFunc(indices, inData, inNA, applyFunc, naDef)
-	}
-
-	if applyFunc, ok := applier.(func(T, bool) (T, bool)); ok {
-		data, na = applyToByCompactFunc(indices, inData, inNA, applyFunc, naDef)
-	}
-
-	if applyFunc, ok := applier.(func(T) T); ok {
-		data, na = applyToByBriefFunc(indices, inData, inNA, applyFunc)
+	switch applier.(type) {
+	case func(int, T, bool) (T, bool):
+		data, na = applyToByFunc(indices, inData, inNA, applier.(func(int, T, bool) (T, bool)), naDef)
+	case func(T, bool) (T, bool):
+		data, na = applyToByCompactFunc(indices, inData, inNA, applier.(func(T, bool) (T, bool)), naDef)
+	case func(T) T:
+		data, na = applyToByBriefFunc(indices, inData, inNA, applier.(func(T) T))
+	case T:
+		data, na = applyToByValue(indices, inData, inNA, applier.(T))
 	}
 
 	return data, na
@@ -320,6 +319,24 @@ func applyToByCompactFunc[T any](indices []int, inData []T, inNA []bool,
 		}
 		data[idx] = dataVal
 		na[idx] = naVal
+	}
+
+	return data, na
+}
+
+func applyToByValue[T any](indices []int, inData []T, inNA []bool, val T) ([]T, []bool) {
+	data := make([]T, len(inData))
+	na := make([]bool, len(inData))
+
+	copy(data, inData)
+	copy(na, inNA)
+
+	for _, idx := range indices {
+		idx = idx - 1
+		if inNA[idx] {
+			continue
+		}
+		data[idx] = val
 	}
 
 	return data, na

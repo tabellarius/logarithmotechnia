@@ -1129,12 +1129,6 @@ func TestAnyPayload_ApplyTo(t *testing.T) {
 			naOut:       []bool{false, false, false, true, false},
 			isNAPayload: false,
 		},
-		{
-			name:        "incorrect applier",
-			indices:     []int{1, 2, 5},
-			applier:     func(int, int, bool) bool { return true },
-			isNAPayload: true,
-		},
 	}
 
 	for _, data := range testData {
