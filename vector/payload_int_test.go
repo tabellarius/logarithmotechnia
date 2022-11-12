@@ -1283,6 +1283,14 @@ func TestIntegerPayload_ApplyTo(t *testing.T) {
 			isNAPayload: false,
 		},
 		{
+			name:        "value",
+			indices:     []int{1, 2, 5},
+			applier:     100,
+			dataOut:     []int{100, 0, 3, 0, 100},
+			naOut:       []bool{false, true, false, true, false},
+			isNAPayload: false,
+		},
+		{
 			name:        "incorrect applier",
 			indices:     []int{1, 2, 5},
 			applier:     func(int, int, bool) bool { return true },
