@@ -11,7 +11,7 @@ func TestDataframe_Filter(t *testing.T) {
 		vector.IntegerWithNA([]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, nil),
 		vector.StringWithNA([]string{"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"}, nil),
 		vector.BooleanWithNA([]bool{true, false, true, false, true, false, true, false, true, false}, nil),
-	})
+	}, OptionColumnNames([]string{"int", "string", "bool"}))
 
 	testData := []struct {
 		name      string
@@ -39,6 +39,32 @@ func TestDataframe_Filter(t *testing.T) {
 		{
 			name:     "boolean odd",
 			selector: []bool{true, false},
+			dfColumns: []vector.Vector{
+				vector.IntegerWithNA([]int{1, 3, 5, 7, 9}, nil),
+				vector.StringWithNA([]string{"1", "3", "5", "7", "9"}, nil),
+				vector.BooleanWithNA([]bool{true, true, true, true, true}, nil),
+			},
+		},
+		{
+			name: "function",
+			selector: func(i int, row map[string]any) bool {
+				if i <= 5 && row["bool"].(bool) {
+					return true
+				}
+
+				return false
+			},
+			dfColumns: []vector.Vector{
+				vector.IntegerWithNA([]int{1, 3, 5}, nil),
+				vector.StringWithNA([]string{"1", "3", "5"}, nil),
+				vector.BooleanWithNA([]bool{true, true, true}, nil),
+			},
+		},
+		{
+			name: "compact function",
+			selector: func(row map[string]any) bool {
+				return row["bool"].(bool)
+			},
 			dfColumns: []vector.Vector{
 				vector.IntegerWithNA([]int{1, 3, 5, 7, 9}, nil),
 				vector.StringWithNA([]string{"1", "3", "5", "7", "9"}, nil),
