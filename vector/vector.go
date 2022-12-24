@@ -547,7 +547,7 @@ func (v *vector) IsEmpty() bool {
 }
 
 func (v *vector) String() string {
-	str := "["
+	str := "[(" + v.Type() + ")]"
 
 	if v.length > 0 {
 		str += v.strForElem(1)
