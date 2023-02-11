@@ -9,7 +9,7 @@ import (
 )
 
 func TestFromCSVFile(t *testing.T) {
-	df, _ := FromCSVFile("/home/noir/projects/logarithmotechnia/test_data/persons.csv",
+	df, _ := FromCSVFile("./test_data/persons.csv",
 		CSVOptionSeparator(';'),
 		CSVOptionSkipFirstLine(true))
 

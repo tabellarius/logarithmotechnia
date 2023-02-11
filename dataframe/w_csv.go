@@ -171,7 +171,3 @@ func CSVOptionSeparator(separator rune) ConfOption {
 func CSVOptionDataframeOptions(options ...vector.Option) ConfOption {
 	return ConfOption{optionCSVDataframeOptions, options}
 }
-
-func CSVOptionDataFrameOptions(options ...vector.Option) ConfOption {
-	return ConfOption{optionCSVDataframeOptions, options}
-}
