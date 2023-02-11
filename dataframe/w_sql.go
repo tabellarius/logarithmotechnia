@@ -93,6 +93,8 @@ func ReadSQLRows(rows *sql.Rows, conf confSQL) (*Dataframe, error) {
 				vec = transformer(vec)
 			}
 			vectors[i] = vec
+		case SQLNone:
+			fallthrough
 		case SQLString:
 			switch columnTypes[i].DatabaseTypeName() {
 			case SQLTypeDateTime:
@@ -121,7 +123,8 @@ func ReadSQLRows(rows *sql.Rows, conf confSQL) (*Dataframe, error) {
 		}
 	}
 
-	df := New(vectors)
+	options := append(conf.dfOptions, OptionColumnNames(columnNames))
+	df := New(vectors, options...)
 
 	return df, nil
 }
@@ -142,7 +145,7 @@ func DefaultTransformers() map[string]transformerFunc {
 type SQLColumnType int
 
 const (
-	_ SQLColumnType = iota
+	SQLNone SQLColumnType = iota
 	SQLBoolean
 	SQLFloat
 	SQLInteger
