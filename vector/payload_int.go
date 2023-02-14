@@ -6,8 +6,6 @@ import (
 	"strconv"
 )
 
-const maxIntPrint = 15
-
 // integerPayload is a structure, subsisting Integer vectors
 type integerPayload struct {
 	length int

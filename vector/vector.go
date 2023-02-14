@@ -5,6 +5,8 @@ import (
 	"time"
 )
 
+const maxPrintElements = 15
+
 // Vector is an interface for a different vector types. This structure is similar to R-vectors: it starts from 1,
 // allows for an extensive indexing, supports IsNA-values and named variables
 type Vector interface {
@@ -179,12 +181,17 @@ type Coalescer interface {
 	Coalesce(Payload) Payload
 }
 
+type vectorOptions struct {
+	maxPrintElements int
+}
+
 // vector holds data and functions shared by all vectors
 type vector struct {
 	name       string
 	length     int
 	payload    Payload
 	groupIndex GroupIndex
+	options    vectorOptions
 }
 
 func (v *vector) Name() string {
@@ -554,7 +561,7 @@ func (v *vector) String() string {
 	}
 	if v.length > 1 {
 		for i := 2; i <= v.length; i++ {
-			if i <= maxIntPrint {
+			if i <= maxPrintElements {
 				str += ", " + v.strForElem(i)
 			} else {
 				str += ", ..."
@@ -893,6 +900,9 @@ func New(payload Payload, options ...Option) Vector {
 	vec := vector{
 		length:  payload.Len(),
 		payload: payload,
+		options: vectorOptions{
+			maxPrintElements: maxPrintElements,
+		},
 	}
 
 	for _, option := range options {
@@ -902,6 +912,10 @@ func New(payload Payload, options ...Option) Vector {
 
 		if option.Key() == KeyOptionVectorName {
 			vec.name = option.Value().(string)
+		}
+
+		if option.Key() == KeyOptionMaxPrintElements {
+			vec.options.maxPrintElements = option.Value().(int)
 		}
 	}
 
