@@ -592,3 +592,20 @@ func TestDataframe_ToMaps(t *testing.T) {
 		})
 	}
 }
+
+func TestDataframe_String(t *testing.T) {
+	df := New([]vector.Vector{
+		vector.IntegerWithNA([]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, nil),
+		vector.StringWithNA([]string{"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"}, nil),
+		vector.BooleanWithNA([]bool{true, false, true, false, true, false, true, false, true, false}, nil),
+	}, OptionColumnNames([]string{"id", "str_id", "is_present"}), OptionVectorOptions([]vector.Option{
+		vector.OptionMaxPrintElements(5),
+	}))
+
+	vecStr := "id: [(integer)]1, 2, 3, 4, 5, ...]\nstr_id: [(string)]\"1\", \"2\", \"3\", \"4\", \"5\", ...]\n" +
+		"is_present: [(boolean)]true, false, true, false, true, ...]\n"
+
+	if df.String() != vecStr {
+		t.Error("Dataframe String() failed")
+	}
+}

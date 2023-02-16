@@ -1,11 +1,14 @@
 package dataframe
 
+import "logarithmotechnia/vector"
+
 const KeyOptionBeforeColumn = "before_column"
 const KeyOptionAfterColumn = "after_column"
 const KeyOptionColumnNames = "column_names"
 const KeyOptionArrangeReverse = "arrange_reverse"
 const KeyOptionArrangeReverseColumns = "arrange_reverse_columns"
 const KeyOptionJoinBy = "join_by_columns"
+const KeyOptionVectorOptions = "vector_options"
 
 type Option interface {
 	Key() string
@@ -47,4 +50,8 @@ func OptionArrangeReverseColumns(columns ...string) Option {
 
 func OptionJoinBy(by ...string) Option {
 	return ConfOption{KeyOptionJoinBy, by}
+}
+
+func OptionVectorOptions(options []vector.Option) Option {
+	return ConfOption{KeyOptionVectorOptions, options}
 }

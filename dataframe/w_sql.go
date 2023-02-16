@@ -132,11 +132,11 @@ func ReadSQLRows(rows *sql.Rows, conf confSQL) (*Dataframe, error) {
 func DefaultTransformers() map[string]transformerFunc {
 	return map[string]func(vector.Vector) vector.Vector{
 		"DATETIME": func(vec vector.Vector) vector.Vector {
-			vec.SetOption(vector.KeyOptionTimeFormat, "2006-01-02 15:04:05")
+			vec.SetOption(vector.OptionTimeFormat("2006-01-02 15:04:05"))
 			return vec.AsTime()
 		},
 		"DATE": func(vec vector.Vector) vector.Vector {
-			vec.SetOption(vector.KeyOptionTimeFormat, "2006-01-02")
+			vec.SetOption(vector.OptionTimeFormat("2006-01-02"))
 			return vec.AsTime()
 		},
 	}
