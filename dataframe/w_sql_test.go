@@ -45,3 +45,40 @@ func TestFromSQL(t *testing.T) {
 			df.columns, expectedColumns))
 	}
 }
+
+func TestSQLOptions(t *testing.T) {
+	testData := []struct {
+		name      string
+		result    Option
+		reference Option
+	}{
+		{
+			name:   "SQLOptionDataframeOptions",
+			result: SQLOptionDataframeOptions(OptionColumnNames([]string{"id", "price"})),
+			reference: ConfOption{optionSQLDataframeOptions,
+				[]vector.Option{OptionColumnNames([]string{"id", "price"})}},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			if !reflect.DeepEqual(data.result, data.reference) {
+				t.Error(fmt.Sprintf("Resulting conf option (%v) does not match reference (%v)",
+					data.result, data.reference))
+			}
+		})
+	}
+}
+
+func TestSQLOptionTransformers(t *testing.T) {
+	transformerFn := func(vec vector.Vector) vector.Vector {
+		return vec
+	}
+	option := SQLOptionTransformers(map[string]transformerFunc{"stubFn": transformerFn})
+	val := option.Value().(map[string]transformerFunc)
+
+	if option.Key() != optionSQLDataframeTransformers ||
+		reflect.ValueOf(val["stubFn"]).Pointer() != reflect.ValueOf(transformerFn).Pointer() {
+		t.Error("SQLOptionTransformers() failed")
+	}
+}
