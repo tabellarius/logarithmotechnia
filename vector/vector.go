@@ -5,6 +5,8 @@ import (
 	"time"
 )
 
+const maxPrintElements = 15
+
 // Vector is an interface for a different vector types. This structure is similar to R-vectors: it starts from 1,
 // allows for an extensive indexing, supports IsNA-values and named variables
 type Vector interface {
@@ -71,7 +73,7 @@ type Vector interface {
 	Nth(int) []bool
 
 	Options() []Option
-	SetOption(string, any) bool
+	SetOption(Option) bool
 
 	Arithmetics
 	Statistics
@@ -179,12 +181,17 @@ type Coalescer interface {
 	Coalesce(Payload) Payload
 }
 
+type vectorOptions struct {
+	maxPrintElements int
+}
+
 // vector holds data and functions shared by all vectors
 type vector struct {
 	name       string
 	length     int
 	payload    Payload
 	groupIndex GroupIndex
+	options    vectorOptions
 }
 
 func (v *vector) Name() string {
@@ -554,7 +561,7 @@ func (v *vector) String() string {
 	}
 	if v.length > 1 {
 		for i := 2; i <= v.length; i++ {
-			if i <= maxIntPrint {
+			if i <= v.options.maxPrintElements {
 				str += ", " + v.strForElem(i)
 			} else {
 				str += ", ..."
@@ -883,8 +890,20 @@ func (v *vector) Options() []Option {
 	}
 }
 
-func (v *vector) SetOption(name string, val any) bool {
-	return v.payload.SetOption(name, val)
+func (v *vector) SetOption(option Option) bool {
+	if option.Key() == KeyOptionVectorName {
+		v.name = option.Value().(string)
+
+		return true
+	}
+
+	if option.Key() == KeyOptionMaxPrintElements {
+		v.options.maxPrintElements = option.Value().(int)
+
+		return true
+	}
+
+	return v.payload.SetOption(option.Key(), option.Value())
 }
 
 // New creates a vector part of the future vector. This function is used by public functions which create
@@ -893,6 +912,9 @@ func New(payload Payload, options ...Option) Vector {
 	vec := vector{
 		length:  payload.Len(),
 		payload: payload,
+		options: vectorOptions{
+			maxPrintElements: maxPrintElements,
+		},
 	}
 
 	for _, option := range options {
@@ -900,9 +922,7 @@ func New(payload Payload, options ...Option) Vector {
 			continue
 		}
 
-		if option.Key() == KeyOptionVectorName {
-			vec.name = option.Value().(string)
-		}
+		vec.SetOption(option)
 	}
 
 	return &vec

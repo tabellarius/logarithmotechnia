@@ -9,6 +9,7 @@ const KeyOptionAnyConvertors = "any_convertors"
 const KeyOptionAnyCallbacks = "any_callbacks"
 const KeyOptionGroupIndex = "group_index"
 const KeyOptionVectorName = "vector_name"
+const KeyOptionMaxPrintElements = "max_print_elements"
 
 // deprecated
 type Config struct {
@@ -99,4 +100,8 @@ func OptionGroupIndex(index GroupIndex) Option {
 
 func OptionVectorName(name string) Option {
 	return ConfOption{KeyOptionVectorName, name}
+}
+
+func OptionMaxPrintElements(maxPrintEleements int) Option {
+	return ConfOption{KeyOptionMaxPrintElements, maxPrintEleements}
 }

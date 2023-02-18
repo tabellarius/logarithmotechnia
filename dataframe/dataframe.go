@@ -243,8 +243,18 @@ func dataframeFromVectors(vectors []vector.Vector, options ...vector.Option) *Da
 		}
 	}
 
+	vectorOptions := []vector.Option{}
+	if conf.HasOption(KeyOptionVectorOptions) {
+		vectorOptions = conf.Value(KeyOptionVectorOptions).([]vector.Option)
+	}
+
 	for i, columnName := range columnNames {
 		vectors[i].SetName(columnName)
+		if len(vectorOptions) > 0 {
+			for _, option := range vectorOptions {
+				vectors[i].SetOption(option)
+			}
+		}
 	}
 
 	return &Dataframe{
