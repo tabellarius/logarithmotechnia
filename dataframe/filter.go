@@ -5,6 +5,15 @@ import (
 	"logarithmotechnia/vector"
 )
 
+// Filter filters te dataframe based on the provided filter. Possible filters are:
+//   - an integer slice of indices (starting from 1)
+//   - a boolean slice of same length as length of the dataframe. All rows of the dataframe, which have same indices
+//     as "true" elements of the slice, will be selected. If the slice has more elements than the dataframe, only first
+//     N elements will be used (where N is the length of the dataframe). If the slice has fewer elements than the
+//     dataframe, the slice will be recycled (f.e. []bool{true, false} will select all odd rows of the dataframe.
+//   - a function func(index int, row map[string]any bool which will be called for all rows in the dataframe, but
+//     only those, for which the function will have return true, will be selected.
+//   - a function func(row map[string]any bool - same as previous but without index argument.
 func (df *Dataframe) Filter(filter any) *Dataframe {
 	switch filter.(type) {
 	case []int:

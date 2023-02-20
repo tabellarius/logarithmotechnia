@@ -18,12 +18,13 @@ func TestDataframe_Mutate(t *testing.T) {
 		{"city", vector.StringWithNA([]string{"London", "Rome", "Paris", "New York", "Tokyo"}, nil)},
 		{"missions", vector.IntegerWithNA([]int{10, 27, 4, 6, 8}, nil)},
 	}
+	mutateColumns[0].vector.SetName("town")
 
 	testData := []struct {
 		name     string
 		df       *Dataframe
-		columns  []Column
-		options  []vector.Option
+		columns  any
+		options  []Option
 		expected *Dataframe
 	}{
 		{
@@ -39,10 +40,43 @@ func TestDataframe_Mutate(t *testing.T) {
 			}),
 		},
 		{
+			name:    "simple one",
+			df:      df,
+			columns: mutateColumns[0],
+			expected: New([]Column{
+				{"name", vector.StringWithNA([]string{"Jim", "Lucius", "Alice", "Marcus", "Leticia"}, nil)},
+				{"salary", vector.IntegerWithNA([]int{100000, 120000, 80000, 70000, 90000}, nil)},
+				{"active", vector.BooleanWithNA([]bool{true, false, true, false, true}, nil)},
+				{"city", vector.StringWithNA([]string{"London", "Rome", "Paris", "New York", "Tokyo"}, nil)},
+			}),
+		},
+		{
+			name:    "simple one vector",
+			df:      df,
+			columns: mutateColumns[0].vector,
+			expected: New([]Column{
+				{"name", vector.StringWithNA([]string{"Jim", "Lucius", "Alice", "Marcus", "Leticia"}, nil)},
+				{"salary", vector.IntegerWithNA([]int{100000, 120000, 80000, 70000, 90000}, nil)},
+				{"active", vector.BooleanWithNA([]bool{true, false, true, false, true}, nil)},
+				{"town", vector.StringWithNA([]string{"London", "Rome", "Paris", "New York", "Tokyo"}, nil)},
+			}),
+		},
+		{
+			name:    "simple vector array",
+			df:      df,
+			columns: []vector.Vector{mutateColumns[0].vector, mutateColumns[1].vector},
+			expected: New([]Column{
+				{"name", vector.StringWithNA([]string{"Jim", "Lucius", "Alice", "Marcus", "Leticia"}, nil)},
+				{"salary", vector.IntegerWithNA([]int{100000, 120000, 80000, 70000, 90000}, nil)},
+				{"active", vector.BooleanWithNA([]bool{true, false, true, false, true}, nil)},
+				{"town", vector.StringWithNA([]string{"London", "Rome", "Paris", "New York", "Tokyo"}, nil)},
+			}),
+		},
+		{
 			name:    "after column",
 			df:      df,
 			columns: mutateColumns,
-			options: []vector.Option{OptionAfterColumn("name")},
+			options: []Option{OptionAfterColumn("name")},
 			expected: New([]Column{
 				{"name", vector.StringWithNA([]string{"Jim", "Lucius", "Alice", "Marcus", "Leticia"}, nil)},
 				{"city", vector.StringWithNA([]string{"London", "Rome", "Paris", "New York", "Tokyo"}, nil)},
@@ -55,7 +89,7 @@ func TestDataframe_Mutate(t *testing.T) {
 			name:    "before column",
 			df:      df,
 			columns: mutateColumns,
-			options: []vector.Option{OptionBeforeColumn("salary")},
+			options: []Option{OptionBeforeColumn("salary")},
 			expected: New([]Column{
 				{"name", vector.StringWithNA([]string{"Jim", "Lucius", "Alice", "Marcus", "Leticia"}, nil)},
 				{"city", vector.StringWithNA([]string{"London", "Rome", "Paris", "New York", "Tokyo"}, nil)},
@@ -68,7 +102,7 @@ func TestDataframe_Mutate(t *testing.T) {
 			name:    "before first column",
 			df:      df,
 			columns: mutateColumns,
-			options: []vector.Option{OptionBeforeColumn("name")},
+			options: []Option{OptionBeforeColumn("name")},
 			expected: New([]Column{
 				{"city", vector.StringWithNA([]string{"London", "Rome", "Paris", "New York", "Tokyo"}, nil)},
 				{"missions", vector.IntegerWithNA([]int{10, 27, 4, 6, 8}, nil)},
@@ -81,7 +115,7 @@ func TestDataframe_Mutate(t *testing.T) {
 			name:    "after non-existant column",
 			df:      df,
 			columns: mutateColumns,
-			options: []vector.Option{OptionAfterColumn("pods")},
+			options: []Option{OptionAfterColumn("pods")},
 			expected: New([]Column{
 				{"name", vector.StringWithNA([]string{"Jim", "Lucius", "Alice", "Marcus", "Leticia"}, nil)},
 				{"salary", vector.IntegerWithNA([]int{100000, 120000, 80000, 70000, 90000}, nil)},
@@ -94,7 +128,7 @@ func TestDataframe_Mutate(t *testing.T) {
 			name:    "before non-existant column",
 			df:      df,
 			columns: mutateColumns,
-			options: []vector.Option{OptionBeforeColumn("pods")},
+			options: []Option{OptionBeforeColumn("pods")},
 			expected: New([]Column{
 				{"name", vector.StringWithNA([]string{"Jim", "Lucius", "Alice", "Marcus", "Leticia"}, nil)},
 				{"salary", vector.IntegerWithNA([]int{100000, 120000, 80000, 70000, 90000}, nil)},
@@ -107,7 +141,7 @@ func TestDataframe_Mutate(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			newDf := data.df.Mutate(data.columns, data.options...)
+			newDf := data.df.Mutate(data.columns, data.options)
 
 			if !vector.CompareVectorArrs(newDf.columns, data.expected.columns) {
 				t.Error(fmt.Sprintf("Columns (%v) are not equal to expected (%v)",
@@ -116,7 +150,7 @@ func TestDataframe_Mutate(t *testing.T) {
 
 			if !reflect.DeepEqual(newDf.columnNames, data.expected.columnNames) {
 				t.Error(fmt.Sprintf("Column names (%v) are not equal to expected (%v)",
-					newDf.columns, data.expected.columns))
+					newDf.columnNames, data.expected.columnNames))
 			}
 		})
 	}

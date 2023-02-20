@@ -4,8 +4,40 @@ import (
 	"logarithmotechnia/vector"
 )
 
-func (df *Dataframe) Mutate(columns []Column, options ...vector.Option) *Dataframe {
-	conf := vector.MergeOptions(options)
+// Mutate transforms a dataframe by adding new columns or changing new ones.
+// This function accepts Column, []Column, vector.Vector, []vector.Vector, Option and []Option.
+// Vectors must have a name.
+// Possible options are:
+//   - OptionAfterColumn("name")
+//   - OptionBeforeColumn("name")
+func (df *Dataframe) Mutate(arguments ...any) *Dataframe {
+	columns := []Column{}
+	options := []Option{}
+
+	for _, arg := range arguments {
+		switch val := arg.(type) {
+		case Column:
+			columns = append(columns, val)
+		case []Column:
+			columns = append(columns, val...)
+		case vector.Vector:
+			if val.Name() != "" {
+				columns = append(columns, Column{val.Name(), val})
+			}
+		case []vector.Vector:
+			for _, v := range val {
+				if v.Name() != "" {
+					columns = append(columns, Column{v.Name(), v})
+				}
+			}
+		case Option:
+			options = append(options, val)
+		case []Option:
+			options = append(options, val...)
+		}
+	}
+
+	conf := MergeOptions(options)
 
 	afterColumnIndex := df.colNum
 

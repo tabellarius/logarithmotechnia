@@ -21,18 +21,23 @@ type Dataframe struct {
 	groupIndex        vector.GroupIndex
 }
 
+// RowNum returns number of rows in the dataframe
 func (df *Dataframe) RowNum() int {
 	return df.rowNum
 }
 
+// ColNum returns number of columns in the dataframe
 func (df *Dataframe) ColNum() int {
 	return df.colNum
 }
 
+// Clone clones a dataframe.
+// Data is not copied due to vectors being immutable. A new dataframe gets the same options as the source one.
 func (df *Dataframe) Clone() *Dataframe {
 	return New(df.columns, df.OptionsWithNames()...)
 }
 
+// Cn returns the column (of the vector.Vector type) by column name or nil if there is no such column.
 func (df *Dataframe) Cn(name string) vector.Vector {
 	index := df.columnIndexByName(name)
 
@@ -43,6 +48,18 @@ func (df *Dataframe) Cn(name string) vector.Vector {
 	return nil
 }
 
+// Ci returns a dataframe column (of the vector.Vector type) by column index (starting from 1)
+// or nil if there is no such column.
+func (df *Dataframe) Ci(index int) vector.Vector {
+	if df.IsValidColumnIndex(index) {
+		return df.columns[index-1]
+	}
+
+	return nil
+}
+
+// C returns a dataframe column (of the vector.Vector type) by column index (starting from 1) if an int was passed as
+// a selector or by column name if a string was passed.
 func (df *Dataframe) C(selector any) vector.Vector {
 	if index, ok := selector.(int); ok {
 		return df.Ci(index)
@@ -55,18 +72,12 @@ func (df *Dataframe) C(selector any) vector.Vector {
 	return nil
 }
 
-func (df *Dataframe) Ci(index int) vector.Vector {
-	if df.IsValidColumnIndex(index) {
-		return df.columns[index-1]
-	}
-
-	return nil
-}
-
+// Names returns a vector.Vector with column names.
 func (df *Dataframe) Names() vector.Vector {
 	return df.columnNamesVector
 }
 
+// NamesAsStrings returns string slice with names of the dataframe columns.
 func (df *Dataframe) NamesAsStrings() []string {
 	names := make([]string, df.colNum)
 	copy(names, df.columnNames)
@@ -74,6 +85,8 @@ func (df *Dataframe) NamesAsStrings() []string {
 	return names
 }
 
+// ByIndices receives a slice of indices and returns a new dataframe with indicated elements.
+// Nota bene: first element has index of 1 (one) and not zero.
 func (df *Dataframe) ByIndices(indices []int) *Dataframe {
 	newColumns := make([]vector.Vector, df.colNum)
 
@@ -84,10 +97,17 @@ func (df *Dataframe) ByIndices(indices []int) *Dataframe {
 	return New(newColumns, df.OptionsWithNames()...)
 }
 
+// Columns returns dataframe columnes as an array of vectors.
 func (df *Dataframe) Columns() []vector.Vector {
-	return df.columns
+	columns := make([]vector.Vector, df.colNum)
+	for i, column := range df.columns {
+		columns[i] = column
+	}
+
+	return columns
 }
 
+// Pick returns a dataframe row as a map[name of column]value.
 func (df *Dataframe) Pick(idx int) map[string]any {
 	rowMap := map[string]any{}
 	if idx < 1 || idx > df.rowNum {
@@ -100,6 +120,12 @@ func (df *Dataframe) Pick(idx int) map[string]any {
 
 	return rowMap
 }
+
+// Traverse traverses all the rows and apply a provided functions to every row. No transformation is happening.
+// Two types of a traverse function can be provided:
+//
+//  func fn(index int, row map[string]any) { }
+//  func fn(row map[string]any) { }
 
 func (df *Dataframe) Traverse(traverser any) {
 	if fn, ok := traverser.(func(int, map[string]any)); ok {
@@ -115,10 +141,12 @@ func (df *Dataframe) Traverse(traverser any) {
 	}
 }
 
+// IsEmpty returns true if there is no columns in the dataframe and true if there is at least one column.
 func (df *Dataframe) IsEmpty() bool {
 	return df.colNum == 0
 }
 
+// IsValidColumnIndex returns true if there is a column with a given index in the dataframe and false otherwise.
 func (df *Dataframe) IsValidColumnIndex(index int) bool {
 	if index >= 1 && index <= df.colNum {
 		return true
@@ -127,10 +155,12 @@ func (df *Dataframe) IsValidColumnIndex(index int) bool {
 	return false
 }
 
+// HasColumn returns true if there is a column with a given name in the dataframe and false otherwise.
 func (df *Dataframe) HasColumn(name string) bool {
 	return strPosInSlice(df.columnNames, name) != -1
 }
 
+// String returns a string representation of the dataframe.
 func (df *Dataframe) String() string {
 	var str string
 
@@ -141,6 +171,7 @@ func (df *Dataframe) String() string {
 	return str
 }
 
+// ToMap returns dataframe rows as a map.
 func (df *Dataframe) ToMap() map[string][]any {
 	dataMap := map[string][]any{}
 
@@ -165,10 +196,12 @@ func (df *Dataframe) columnIndexByName(name string) int {
 	return 0
 }
 
+// OptionsWithNames returns dataframe options including columns names.
 func (df *Dataframe) OptionsWithNames() []vector.Option {
 	return append(df.Options(), OptionColumnNames(df.columnNames))
 }
 
+// Options returns dataframe options without column names.
 func (df *Dataframe) Options() []vector.Option {
 	return []vector.Option{}
 }
@@ -183,6 +216,14 @@ func generateColumnNames(length int) []string {
 	return names
 }
 
+// New creates a new dataframe from provided data. Data could an array of vector.Vector or an array of Column.
+// Next parameters are options. If you want to provide columns either use array of Column
+//
+//	New([]Column{...})
+//
+// or provide column names through option
+//
+//	New([]vector.Vector{...}, OptionColumnNames([]string{...}))
 func New(data any, options ...vector.Option) *Dataframe {
 	var df *Dataframe
 	switch data.(type) {
@@ -233,6 +274,12 @@ func dataframeFromVectors(vectors []vector.Vector, options ...vector.Option) *Da
 	conf := vector.MergeOptions(options)
 
 	columnNames := generateColumnNames(colNum)
+	for i, v := range vectors {
+		if v.Name() != "" {
+			columnNames[i] = v.Name()
+		}
+	}
+
 	if conf.HasOption(KeyOptionColumnNames) {
 		names := conf.Value(KeyOptionColumnNames).([]string)
 		names = renameDuplicateColumns(names)
@@ -269,6 +316,12 @@ func dataframeFromVectors(vectors []vector.Vector, options ...vector.Option) *Da
 func renameDuplicateColumns(names []string) []string {
 	if len(names) == 0 {
 		return names
+	}
+
+	for i, name := range names {
+		if name == "" {
+			names[i] = strconv.Itoa(i + 1)
+		}
 	}
 
 	uniqueNames := make([]string, len(names))

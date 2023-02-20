@@ -28,8 +28,32 @@ func TestDataframe_Relocate(t *testing.T) {
 			},
 		},
 		{
+			name:      "string",
+			selectors: []any{1},
+			columns: []vector.Vector{
+				vector.IntegerWithNA([]int{31, 3, 24, 41, 33}, nil),
+				vector.StringWithNA([]string{"m", "", "f", "m", "f"}, []bool{false, true, false, false, false}),
+				vector.IntegerWithNA([]int{110000, 0, 50000, 120000, 80000}, nil),
+				vector.BooleanWithNA([]bool{true, true, true, false, true}, nil),
+				vector.StringWithNA([]string{"damage", "heavy", "support", "damage", "healer"}, nil),
+				vector.StringWithNA([]string{"Jim", "SPARC-001", "Anna", "Lucius", "Maria"}, nil),
+			},
+		},
+		{
 			name:      "[]string",
 			selectors: []any{[]string{"name", "gender"}},
+			columns: []vector.Vector{
+				vector.IntegerWithNA([]int{31, 3, 24, 41, 33}, nil),
+				vector.IntegerWithNA([]int{110000, 0, 50000, 120000, 80000}, nil),
+				vector.BooleanWithNA([]bool{true, true, true, false, true}, nil),
+				vector.StringWithNA([]string{"damage", "heavy", "support", "damage", "healer"}, nil),
+				vector.StringWithNA([]string{"Jim", "SPARC-001", "Anna", "Lucius", "Maria"}, nil),
+				vector.StringWithNA([]string{"m", "", "f", "m", "f"}, []bool{false, true, false, false, false}),
+			},
+		},
+		{
+			name:      "[]string",
+			selectors: []any{[]int{1, 3}},
 			columns: []vector.Vector{
 				vector.IntegerWithNA([]int{31, 3, 24, 41, 33}, nil),
 				vector.IntegerWithNA([]int{110000, 0, 50000, 120000, 80000}, nil),
