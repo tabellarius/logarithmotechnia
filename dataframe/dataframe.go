@@ -197,13 +197,13 @@ func (df *Dataframe) columnIndexByName(name string) int {
 }
 
 // OptionsWithNames returns dataframe options including columns names.
-func (df *Dataframe) OptionsWithNames() []vector.Option {
+func (df *Dataframe) OptionsWithNames() []Option {
 	return append(df.Options(), OptionColumnNames(df.columnNames))
 }
 
 // Options returns dataframe options without column names.
-func (df *Dataframe) Options() []vector.Option {
-	return []vector.Option{}
+func (df *Dataframe) Options() []Option {
+	return []Option{}
 }
 
 func generateColumnNames(length int) []string {
@@ -224,7 +224,7 @@ func generateColumnNames(length int) []string {
 // or provide column names through option
 //
 //	New([]vector.Vector{...}, OptionColumnNames([]string{...}))
-func New(data any, options ...vector.Option) *Dataframe {
+func New(data any, options ...Option) *Dataframe {
 	var df *Dataframe
 	switch data.(type) {
 	case []vector.Vector:
@@ -238,7 +238,7 @@ func New(data any, options ...vector.Option) *Dataframe {
 	return df
 }
 
-func dataframeFromColumns(columns []Column, options ...vector.Option) *Dataframe {
+func dataframeFromColumns(columns []Column, options ...Option) *Dataframe {
 	vectors := []vector.Vector{}
 	names := []string{}
 
@@ -252,7 +252,7 @@ func dataframeFromColumns(columns []Column, options ...vector.Option) *Dataframe
 	return dataframeFromVectors(vectors, options...)
 }
 
-func dataframeFromVectors(vectors []vector.Vector, options ...vector.Option) *Dataframe {
+func dataframeFromVectors(vectors []vector.Vector, options ...Option) *Dataframe {
 	maxLen := 0
 
 	for _, v := range vectors {
@@ -271,7 +271,7 @@ func dataframeFromVectors(vectors []vector.Vector, options ...vector.Option) *Da
 
 	colNum := len(vectors)
 
-	conf := vector.MergeOptions(options)
+	conf := MergeOptions(options)
 
 	columnNames := generateColumnNames(colNum)
 	for i, v := range vectors {

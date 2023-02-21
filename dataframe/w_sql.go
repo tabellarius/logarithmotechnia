@@ -18,20 +18,20 @@ const SQLTypeDate = "DATE"
 type transformerFunc = func(vector.Vector) vector.Vector
 
 type confSQL struct {
-	dfOptions    []vector.Option
+	dfOptions    []Option
 	transformers map[string]transformerFunc
 }
 
 func combineSQLConfig(options ...ConfOption) confSQL {
 	conf := confSQL{
-		dfOptions:    []vector.Option{},
+		dfOptions:    []Option{},
 		transformers: DefaultTransformers(),
 	}
 
 	for _, option := range options {
 		switch option.Key() {
 		case optionSQLDataframeOptions:
-			conf.dfOptions = option.Value().([]vector.Option)
+			conf.dfOptions = option.Value().([]Option)
 		}
 	}
 
@@ -312,7 +312,7 @@ func (c *SQLColumn) Scan(val interface{}) error {
 	return nil
 }
 
-func SQLOptionDataframeOptions(options ...vector.Option) ConfOption {
+func SQLOptionDataframeOptions(options ...Option) ConfOption {
 	return ConfOption{optionSQLDataframeOptions, options}
 }
 

@@ -15,6 +15,15 @@ type FromToColIndices struct {
 	to   int
 }
 
+// Select allows to create a new dataframe by selecting a set of columns from an old one.
+// Possible selectors are:
+//   - a column name
+//   - an array of column names
+//   - an index
+//   - an array of column indices
+//   - a boolean array
+//   - FromToColNames struct
+//   - FromToColIndices struct
 func (df *Dataframe) Select(selectors ...any) *Dataframe {
 	if len(selectors) == 0 {
 		return df.Clone()
