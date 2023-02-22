@@ -266,13 +266,13 @@ func (p *timePayload) IsUnique() []bool {
 
 func (p *timePayload) Options() []Option {
 	return []Option{
-		ConfOption{KeyOptionTimeFormat, p.printer.Format},
+		ConfOption{keyOptionTimeFormat, p.printer.Format},
 	}
 }
 
 func (p *timePayload) SetOption(name string, val any) bool {
 	switch name {
-	case KeyOptionTimeFormat:
+	case keyOptionTimeFormat:
 		p.printer.Format = val.(string)
 	default:
 		return false

@@ -1226,7 +1226,7 @@ func TestAnyPayload_Eq(t *testing.T) {
 	}{
 		{
 			name:    "with callback",
-			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyCallbacks{eq: fnEq})),
+			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyCallbacks{Eq: fnEq})),
 			val:     employee{"John", 1},
 			result:  []bool{true, false, false},
 		},
@@ -1271,7 +1271,7 @@ func TestAnyPayload_Neq(t *testing.T) {
 	}{
 		{
 			name:    "with callback",
-			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyCallbacks{eq: fnEq})),
+			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyCallbacks{Eq: fnEq})),
 			val:     employee{"John", 1},
 			result:  []bool{false, true, true},
 		},
@@ -1317,7 +1317,7 @@ func TestAnyPayload_Gt(t *testing.T) {
 	}{
 		{
 			name:    "with callback",
-			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyCallbacks{lt: fnLt})),
+			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyCallbacks{Lt: fnLt})),
 			val:     employee{1, 40000},
 			result:  []bool{true, false, true},
 		},
@@ -1363,7 +1363,7 @@ func TestAnyPayload_Lt(t *testing.T) {
 	}{
 		{
 			name:    "with callback",
-			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyCallbacks{lt: fnLt})),
+			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyCallbacks{Lt: fnLt})),
 			val:     employee{1, 40000},
 			result:  []bool{false, true, false},
 		},
@@ -1412,7 +1412,7 @@ func TestAnyPayload_Gte(t *testing.T) {
 	}{
 		{
 			name:    "with callback",
-			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyCallbacks{lt: fnLt, eq: fnEq})),
+			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyCallbacks{Lt: fnLt, Eq: fnEq})),
 			val:     employee{1, 30000},
 			result:  []bool{true, true, false},
 		},
@@ -1461,7 +1461,7 @@ func TestAnyPayload_Lte(t *testing.T) {
 	}{
 		{
 			name:    "with callback",
-			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyCallbacks{lt: fnLt, eq: fnEq})),
+			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyCallbacks{Lt: fnLt, Eq: fnEq})),
 			val:     employee{1, 30000},
 			result:  []bool{false, true, true},
 		},
@@ -1506,19 +1506,19 @@ func TestAnyPayload_Find(t *testing.T) {
 	}{
 		{
 			name:    "with callback, found John",
-			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyCallbacks{eq: fnEq})),
+			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyCallbacks{Eq: fnEq})),
 			val:     employee{"John", 1},
 			result:  1,
 		},
 		{
 			name:    "with callback, found Maria",
-			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyCallbacks{eq: fnEq})),
+			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyCallbacks{Eq: fnEq})),
 			val:     employee{"Maria", 2},
 			result:  2,
 		},
 		{
 			name:    "with callback, not found",
-			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyCallbacks{eq: fnEq})),
+			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyCallbacks{Eq: fnEq})),
 			val:     employee{"John", 2},
 			result:  0,
 		},
@@ -1563,19 +1563,19 @@ func TestAnyPayload_FindAll(t *testing.T) {
 	}{
 		{
 			name:    "with callback, found John",
-			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyCallbacks{eq: fnEq})),
+			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyCallbacks{Eq: fnEq})),
 			val:     employee{"John", 1},
 			result:  []int{1, 3},
 		},
 		{
 			name:    "with callback, found Maria",
-			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyCallbacks{eq: fnEq})),
+			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyCallbacks{Eq: fnEq})),
 			val:     employee{"Maria", 2},
 			result:  []int{2},
 		},
 		{
 			name:    "with callback, not found",
-			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyCallbacks{eq: fnEq})),
+			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyCallbacks{Eq: fnEq})),
 			val:     employee{"John", 2},
 			result:  []int{},
 		},
@@ -1620,17 +1620,17 @@ func TestAnyPayload_IsUnique(t *testing.T) {
 	}{
 		{
 			name:    "with callback",
-			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyCallbacks{eq: fnEq})),
+			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyCallbacks{Eq: fnEq})),
 			result:  []bool{true, true, false, true, false, true},
 		},
 		{
 			name:    "with callback, len = 1",
-			payload: AnyPayload([]any{employee{"John", 1}}, nil, OptionAnyCallbacks(AnyCallbacks{eq: fnEq})),
+			payload: AnyPayload([]any{employee{"John", 1}}, nil, OptionAnyCallbacks(AnyCallbacks{Eq: fnEq})),
 			result:  []bool{true},
 		},
 		{
 			name:    "with callback, empty",
-			payload: AnyPayload([]any{}, nil, OptionAnyCallbacks(AnyCallbacks{eq: fnEq})),
+			payload: AnyPayload([]any{}, nil, OptionAnyCallbacks(AnyCallbacks{Eq: fnEq})),
 			result:  []bool{},
 		},
 		{
@@ -1732,7 +1732,7 @@ func TestAnyPayload_SortedIndices(t *testing.T) {
 	}{
 		{
 			name:    "with callbacks",
-			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyCallbacks{eq: fnEq, lt: fnLt})),
+			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyCallbacks{Eq: fnEq, Lt: fnLt})),
 			result:  []int{6, 1, 3, 4, 2, 5},
 		},
 		{
@@ -1781,7 +1781,7 @@ func TestAnyPayload_SortedIndicesWithRanks(t *testing.T) {
 	}{
 		{
 			name:    "with callbacks",
-			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyCallbacks{eq: fnEq, lt: fnLt})),
+			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyCallbacks{Eq: fnEq, Lt: fnLt})),
 			indices: []int{6, 1, 3, 4, 2, 5},
 			ranks:   []int{1, 2, 2, 3, 4, 4},
 		},
@@ -1835,20 +1835,20 @@ func TestAnyPayload_Groups(t *testing.T) {
 	}{
 		{
 			name:    "with string hash callback",
-			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyCallbacks{hashStr: fnHashStr})),
+			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyCallbacks{HashStr: fnHashStr})),
 			groups:  [][]int{{1, 3, 4}, {2, 5}, {6}},
 			values:  []any{employee{"John", 1}, employee{"Maria", 2}, employee{"Isaac", 1}},
 		},
 		{
 			name:    "with int hash callback",
-			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyCallbacks{hashInt: fnHashInt})),
+			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyCallbacks{HashInt: fnHashInt})),
 			groups:  [][]int{{1, 3, 6}, {2, 4, 5}},
 			values:  []any{employee{"John", 1}, employee{"Maria", 2}},
 		},
 		{
 			name: "with int and str hash callbacks",
-			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyCallbacks{hashStr: fnHashStr,
-				hashInt: fnHashInt})),
+			payload: AnyPayload(employeeData, nil, OptionAnyCallbacks(AnyCallbacks{HashStr: fnHashStr,
+				HashInt: fnHashInt})),
 			groups: [][]int{{1, 3, 6}, {2, 4, 5}},
 			values: []any{employee{"John", 1}, employee{"Maria", 2}},
 		},

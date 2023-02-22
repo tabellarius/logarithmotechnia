@@ -402,6 +402,7 @@ func (p *integerPayload) SetOption(string, any) bool {
 	return false
 }
 
+// IntegerPayload creates a payload with integer data.
 func IntegerPayload(data []int, na []bool, _ ...Option) Payload {
 	length := len(data)
 
@@ -446,10 +447,12 @@ func IntegerPayload(data []int, na []bool, _ ...Option) Payload {
 	return payload
 }
 
+// IntegerWithNA creates a vector with IntegerPayload and allows to set NA-values.
 func IntegerWithNA(data []int, na []bool, options ...Option) Vector {
 	return New(IntegerPayload(data, na, options...), options...)
 }
 
+// Integer creates a vector with IntegerPayload.
 func Integer(data []int, options ...Option) Vector {
 	return IntegerWithNA(data, nil, options...)
 }

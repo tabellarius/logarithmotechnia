@@ -4,6 +4,8 @@ import (
 	"sort"
 )
 
+// DefArrangeable can be embedded into a payload for easy implementation of Arrangeable interface to make the payload
+// sortable. It uses DefNAble to support NA-values.
 type DefArrangeable struct {
 	Length int
 	DefNAble

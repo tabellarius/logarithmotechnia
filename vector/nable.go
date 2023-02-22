@@ -1,5 +1,6 @@
 package vector
 
+// NAble is an interface a payload has to satisfy in order to support NA-values.
 type NAble interface {
 	IsNA() []bool
 	NotNA() []bool
@@ -8,6 +9,7 @@ type NAble interface {
 	WithoutNA() []int
 }
 
+// DefNAble is an easy to embed implementation of NAble interface.
 type DefNAble struct {
 	na []bool
 }

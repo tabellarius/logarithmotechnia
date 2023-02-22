@@ -8,8 +8,8 @@ import (
 
 func TestAnyPayload_Max(t *testing.T) {
 	callbacks := AnyCallbacks{
-		lt: func(one, two any) bool { return one.(int) < two.(int) },
-		eq: func(one, two any) bool { return one.(int) == two.(int) },
+		Lt: func(one, two any) bool { return one.(int) < two.(int) },
+		Eq: func(one, two any) bool { return one.(int) == two.(int) },
 	}
 
 	testData := []struct {

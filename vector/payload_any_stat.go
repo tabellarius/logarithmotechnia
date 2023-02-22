@@ -1,7 +1,7 @@
 package vector
 
 func (p *anyPayload) Max() Payload {
-	if p.length == 0 || p.fn.eq == nil || p.fn.lt == nil {
+	if p.length == 0 || p.fn.Eq == nil || p.fn.Lt == nil {
 		return AnyPayload([]any{nil}, []bool{true}, p.Options()...)
 	}
 
@@ -11,7 +11,7 @@ func (p *anyPayload) Max() Payload {
 			return AnyPayload([]any{nil}, []bool{true}, p.Options()...)
 		}
 
-		if p.fn.lt(max, p.data[i]) {
+		if p.fn.Lt(max, p.data[i]) {
 			max = p.data[i]
 		}
 	}
@@ -21,7 +21,7 @@ func (p *anyPayload) Max() Payload {
 }
 
 func (p *anyPayload) Min() Payload {
-	if p.length == 0 || p.fn.eq == nil || p.fn.lt == nil {
+	if p.length == 0 || p.fn.Eq == nil || p.fn.Lt == nil {
 		return AnyPayload([]any{nil}, []bool{true}, p.Options()...)
 	}
 
@@ -31,7 +31,7 @@ func (p *anyPayload) Min() Payload {
 			return AnyPayload([]any{nil}, []bool{true}, p.Options()...)
 		}
 
-		if p.fn.lt(p.data[i], min) {
+		if p.fn.Lt(p.data[i], min) {
 			min = p.data[i]
 		}
 	}

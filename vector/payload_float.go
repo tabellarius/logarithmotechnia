@@ -418,13 +418,13 @@ func (p *floatPayload) Coalesce(payload Payload) Payload {
 
 func (p *floatPayload) Options() []Option {
 	return []Option{
-		ConfOption{KeyOptionPrecision, p.printer.Precision},
+		ConfOption{keyOptionPrecision, p.printer.Precision},
 	}
 }
 
 func (p *floatPayload) SetOption(name string, val any) bool {
 	switch name {
-	case KeyOptionPrecision:
+	case keyOptionPrecision:
 		p.printer.Precision = val.(int)
 	default:
 		return false
@@ -433,6 +433,10 @@ func (p *floatPayload) SetOption(name string, val any) bool {
 	return true
 }
 
+// FloatPayload creates a payload with float data.
+//
+// Available options are:
+//   - OptionPrecision(precision int) - sets precision for printing payload's values.
 func FloatPayload(data []float64, na []bool, options ...Option) Payload {
 	length := len(data)
 	conf := MergeOptions(options)
@@ -485,10 +489,12 @@ func FloatPayload(data []float64, na []bool, options ...Option) Payload {
 	return payload
 }
 
+// FloatWithNA creates a vector with FloatPayload and allows to set NA-values.
 func FloatWithNA(data []float64, na []bool, options ...Option) Vector {
 	return New(FloatPayload(data, na, options...), options...)
 }
 
+// Float creates a vector with FloatPayload.
 func Float(data []float64, options ...Option) Vector {
 	return FloatWithNA(data, nil, options...)
 }

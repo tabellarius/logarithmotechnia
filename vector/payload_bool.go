@@ -348,6 +348,7 @@ func (p *booleanPayload) Coalesce(payload Payload) Payload {
 	return BooleanPayload(dstData, dstNA, p.Options()...)
 }
 
+// BooleanPayload creates a payload with boolean data.
 func BooleanPayload(data []bool, na []bool, _ ...Option) Payload {
 	length := len(data)
 
@@ -392,10 +393,12 @@ func BooleanPayload(data []bool, na []bool, _ ...Option) Payload {
 	return payload
 }
 
+// BooleanWithNA creates a vector with BooleanPayload and allows to set NA-values.
 func BooleanWithNA(data []bool, na []bool, options ...Option) Vector {
 	return New(BooleanPayload(data, na, options...), options...)
 }
 
+// Boolean creates a vector with BooleanPayload.
 func Boolean(data []bool, options ...Option) Vector {
 	return BooleanWithNA(data, nil, options...)
 }

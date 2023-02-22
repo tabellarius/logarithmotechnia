@@ -891,13 +891,13 @@ func (v *vector) Options() []Option {
 }
 
 func (v *vector) SetOption(option Option) bool {
-	if option.Key() == KeyOptionVectorName {
+	if option.Key() == keyOptionVectorName {
 		v.name = option.Value().(string)
 
 		return true
 	}
 
-	if option.Key() == KeyOptionMaxPrintElements {
+	if option.Key() == keyOptionMaxPrintElements {
 		v.options.maxPrintElements = option.Value().(int)
 
 		return true
