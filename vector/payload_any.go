@@ -21,7 +21,7 @@ type AnyConvertors struct {
 }
 
 // AnyCallbacks holds four functions necessary to enable full vector functionality.
-// Eq enables Comparable functionality. Lt enables Ordered and sorting functionality. HashInt or HashStr enables
+// Eq enables Equalable functionality. Lt enables Ordered and sorting functionality. HashInt or HashStr enables
 // grouping and summarizing.
 type AnyCallbacks struct {
 	Eq      func(any, any) bool

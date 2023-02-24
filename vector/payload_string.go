@@ -489,7 +489,9 @@ func (p *stringPayload) SetOption(name string, val any) bool {
 // StringPayload creates a payload with string data.
 //
 // Available options are:
-//   - O
+//   - OptionStringToBooleanConverter(converter StringToBooleanConverter) - sets a converter
+//     from string to boolean values.
+//   - OptionTimeFormat(format string) - sets a time format for conversion to time.
 func StringPayload(data []string, na []bool, options ...Option) Payload {
 	length := len(data)
 	conf := MergeOptions(options)

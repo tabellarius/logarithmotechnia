@@ -8,7 +8,8 @@ import (
 const maxPrintElements = 15
 
 // Vector is an interface for a different vector types. This structure is similar to R-vectors: it starts from 1,
-// allows for an extensive indexing, supports IsNA-values and named variables
+// allows for an extensive indexing and supports IsNA-values. It is not supposed to be implemented by third-parties.
+// Instead the Payload interface should be implemented.
 type Vector interface {
 	Name() string
 	SetName(name string) Vector
@@ -59,7 +60,7 @@ type Vector interface {
 
 	Finder
 	Has(any) bool
-	Comparable
+	Equalable
 	Ordered
 	Arrangeable
 
@@ -79,105 +80,169 @@ type Vector interface {
 	Statistics
 }
 
+// Payload is a minimally required interface which has to be implemented in order to make a new payload type.
 type Payload interface {
+	// Type returns a type of the payload which should be a unique string.
 	Type() string
+	// Len returns length of the payload.
 	Len() int
+	// ByIndices returns a new payload which contains elements from the old one with provided indices.
 	ByIndices(indices []int) Payload
+	// StrForElem return a string representation of the payload's element.
 	StrForElem(idx int) string
+	// Append appends another payload to the current one based on the type of the current one. If it is impossible
+	// to convert an element of another payload, it will be converted to NA-value.
 	Append(payload Payload) Payload
+	// Adjust adjusts the payload to the provided size either by dropping excessive values or by extending
+	// the payload with recycling.
 	Adjust(size int) Payload
+	// Options returns options of the payload.
 	Options() []Option
+	// SetOption sets a payload's option.
 	SetOption(string, any) bool
+	// Pick returns a value of a payload element (using interface{} type).
 	Pick(idx int) any
+	// Data returns all payload elements as an array of values having the interface{} type.
 	Data() []any
 }
 
+// Whichable interface has to be implemented in order to support selection of the payloads elements
+// by other means than using indices (for example by using which-functions).
 type Whichable interface {
+	// SupportsWhicher returns does the payload supports whicher.
 	SupportsWhicher(whicher any) bool
+	// Which returns a boolean array of the payloads size. True usually means that a corresponding element
+	// should be selected. Available whichers depend on a payload's type.
 	Which(whicher any) []bool
 }
 
+// Appliable interface has to be implemented in order to support function (usually) applying to the payload data.
 type Appliable interface {
+	// Apply applies applier to the payload data.
 	Apply(applier any) Payload
 }
 
+// AppliableTo interface has to be implemented in order to support function (usually) applying to a selected
+// set of the payload data.
 type AppliableTo interface {
 	Whichable
+	// ApplyTo applies applier to a selected set of the payload data.
 	ApplyTo(indices []int, applier any) Payload
 }
 
+// Traversable allows the payload to be traversed without directly changing or
 type Traversable interface {
+	// Traverse traverses a payload with a traversers. Available traversers depend on a payload's type.
 	Traverse(traverser any)
 }
 
+// Summarizable allows summarization using analytical functions such as Max(), Min() etc. It takes grouping
+// into account.
 type Summarizable interface {
 	SupportsSummarizer(summarizer any) bool
 	Summarize(summarizer any) Payload
 }
 
+// Intable interface has to be implemented to enable conversion of payload values to integers.
 type Intable interface {
+	// Integers returns an array of integers and a correspondng array of boolean values where true indicates NA-value.
 	Integers() ([]int, []bool)
 }
 
+// Floatable interface has to be implemented to enable conversion of payload values to floats.
 type Floatable interface {
+	// Floats returns an array of floats and a correspondng array of boolean values where true indicates NA-value.
 	Floats() ([]float64, []bool)
 }
 
+// Boolable interface has to be implemented to enable conversion of payload values to booleans.
 type Boolable interface {
+	// Booleans returns an array of booleans and a correspondng array of boolean values where true indicates NA-value.
 	Booleans() ([]bool, []bool)
 }
 
+// Stringable interface has to be implemented to enable conversion of payload values to strings.
 type Stringable interface {
+	// Strings returns an array of strings and a correspondng array of boolean values where true indicates NA-value.
 	Strings() ([]string, []bool)
 }
 
+// Complexable interface has to be implemented to enable conversion of payload values to complexes.
 type Complexable interface {
+	// Complexes returns an array of complexes and a correspondng array of boolean values where true indicates NA-value.
 	Complexes() ([]complex128, []bool)
 }
 
+// Timeable interface has to be implemented to enable conversion of payload values to times.
 type Timeable interface {
+	// Times returns an array of times and a correspondng array of boolean values where true indicates NA-value.
 	Times() ([]time.Time, []bool)
 }
 
+// Anyable interface has to be implemented to enable conversion of payload values to anies.
 type Anyable interface {
+	// Anies returns an array of anies and a correspondng array of boolean values where true indicates NA-value.
 	Anies() ([]any, []bool)
 }
 
-type Configurable interface {
-	Options() []Option
-}
-
+// Finder interface has to be implemented to enable searching in a payload.
 type Finder interface {
+	// Find returns an index of the first element equal to the passed argument or zero if nothing was found.
 	Find(any) int
+	// FindAll returns all indices of elements equal to the passed argument or zero if nothing was found.
 	FindAll(any) []int
 }
 
-type Comparable interface {
+// Equalable interface has to be implemented to enable a payload to return a boolean array indicating
+// which elements are equal or not to a certain value.
+type Equalable interface {
+	// Eq returns a boolean slice where true means a corresponding (by index) element is equal to the passed value.
 	Eq(any) []bool
+	// Neq returns a boolean slice where true means a corresponding (by index) element is not equal
+	// to the passed value.
 	Neq(any) []bool
 }
 
+// Ordered interface has to be implemented to enable a payload to check elements for being greated or lesser than a
+// certain value.
 type Ordered interface {
+	// Gt a boolean slice where true means a corresponding element is greater than the passed value.
 	Gt(any) []bool
+	// Lt a boolean slice where true means a corresponding element is less than the passed value.
 	Lt(any) []bool
+	// Gte a boolean slice where true means a corresponding element is greater or equal than the passed value.
 	Gte(any) []bool
+	// Lte a boolean slice where true means a corresponding element is less or equal than the passed value.
 	Lte(any) []bool
 }
 
+// Arrangeable interface has to be implemented to enable a payload to be sorted.
 type Arrangeable interface {
+	// SortedIndices returns a slice of indices in the order of small-to-big elements.
 	SortedIndices() []int
+	// SortedIndicesWithRanks returns a slice of indices in the order of small-to-big elements and a slice with
+	// according ranks of the payload elements.
 	SortedIndicesWithRanks() ([]int, []int)
 }
 
+// Grouper interface has to be implemented to enable a payload to be groupable.
 type Grouper interface {
+	// Groups returns an array of integer slices, where each slice contains indices for a corresponding group, and
+	// an array of values where each value is a unique one corresponding to indices in the slice array with the same
+	// index in the first returned parameter.
 	Groups() ([][]int, []any)
 }
 
+// IsUniquer interface has to be implemented to enable getting of unique values from a payload.
 type IsUniquer interface {
+	// IsUnique returns a boolean slice where true is given for a first entrance of a certain value in a payload
+	// while false given for all next entrances of the same value.
 	IsUnique() []bool
 }
 
+// Coalescer interface has to be implemented to enable coalescing of a payload.
 type Coalescer interface {
+	// Coalesce coalesces the payload with another payload and returns the resulting payload.
 	Coalesce(Payload) Payload
 }
 
@@ -733,10 +798,10 @@ func (v *vector) Has(needle any) bool {
 	return false
 }
 
-/* Comparable interface */
+/* Equalable interface */
 
 func (v *vector) Eq(val any) []bool {
-	if comparee, ok := v.payload.(Comparable); ok {
+	if comparee, ok := v.payload.(Equalable); ok {
 		return comparee.Eq(val)
 	}
 
@@ -744,7 +809,7 @@ func (v *vector) Eq(val any) []bool {
 }
 
 func (v *vector) Neq(val any) []bool {
-	if comparee, ok := v.payload.(Comparable); ok {
+	if comparee, ok := v.payload.(Equalable); ok {
 		return comparee.Neq(val)
 	}
 
