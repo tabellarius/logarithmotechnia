@@ -62,10 +62,10 @@ func (df *Dataframe) Mutate(arguments ...any) *Dataframe {
 
 	uniqueNewNames := []string{}
 	for _, column := range columns {
-		if _, ok := columnMap[column.name]; !ok {
-			uniqueNewNames = append(uniqueNewNames, column.name)
+		if _, ok := columnMap[column.Name]; !ok {
+			uniqueNewNames = append(uniqueNewNames, column.Name)
 		}
-		columnMap[column.name] = column.vector
+		columnMap[column.Name] = column.Vector
 	}
 
 	newNames := []string{}

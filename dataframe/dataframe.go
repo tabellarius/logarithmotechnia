@@ -7,8 +7,8 @@ import (
 )
 
 type Column struct {
-	name   string
-	vector vector.Vector
+	Name   string
+	Vector vector.Vector
 }
 
 type Dataframe struct {
@@ -164,6 +164,8 @@ func (df *Dataframe) HasColumn(name string) bool {
 func (df *Dataframe) String() string {
 	var str string
 
+	str += fmt.Sprintf("# of columns: %d, # of rows: %d\n\n", df.ColNum(), df.RowNum())
+
 	for i, column := range df.columns {
 		str += fmt.Sprintf("%s: %v\n", df.columnNames[i], column)
 	}
@@ -243,8 +245,8 @@ func dataframeFromColumns(columns []Column, options ...Option) *Dataframe {
 	names := []string{}
 
 	for _, column := range columns {
-		vectors = append(vectors, column.vector)
-		names = append(names, column.name)
+		vectors = append(vectors, column.Vector)
+		names = append(names, column.Name)
 	}
 
 	options = append(options, OptionColumnNames(names))
