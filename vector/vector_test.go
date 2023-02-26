@@ -2023,32 +2023,32 @@ func TestOptions(t *testing.T) {
 		{
 			name:      "OptionPrecision",
 			result:    OptionPrecision(5),
-			reference: ConfOption{KeyOptionPrecision, 5},
+			reference: ConfOption{keyOptionPrecision, 5},
 		},
 		{
 			name:      "OptionFormat",
 			result:    OptionFormat("format"),
-			reference: ConfOption{KeyOptionFormat, "format"},
+			reference: ConfOption{keyOptionFormat, "format"},
 		},
 		{
 			name:      "OptionTimeFormat",
 			result:    OptionTimeFormat("time_format"),
-			reference: ConfOption{KeyOptionTimeFormat, "time_format"},
+			reference: ConfOption{keyOptionTimeFormat, "time_format"},
 		},
 		{
 			name:      "OptionGroupIndex",
 			result:    OptionGroupIndex(GroupIndex{[]int{1, 2}, []int{3, 4}}),
-			reference: ConfOption{KeyOptionGroupIndex, GroupIndex{[]int{1, 2}, []int{3, 4}}},
+			reference: ConfOption{keyOptionGroupIndex, GroupIndex{[]int{1, 2}, []int{3, 4}}},
 		},
 		{
 			name:      "OptionVectorName",
 			result:    OptionVectorName("name"),
-			reference: ConfOption{KeyOptionVectorName, "name"},
+			reference: ConfOption{keyOptionVectorName, "name"},
 		},
 		{
 			name:      "OptionMaxPrintElements",
 			result:    OptionMaxPrintElements(99),
-			reference: ConfOption{KeyOptionMaxPrintElements, 99},
+			reference: ConfOption{keyOptionMaxPrintElements, 99},
 		},
 	}
 
@@ -2068,7 +2068,7 @@ func TestOptionAnyPrinterFunc(t *testing.T) {
 	val := option.Value().(AnyPrinterFunc)
 	reflect.ValueOf(printerFn).Pointer()
 
-	if option.Key() != KeyOptionAnyPrinterFunc ||
+	if option.Key() != keyOptionAnyPrinterFunc ||
 		reflect.ValueOf(printerFn).Pointer() != reflect.ValueOf(val).Pointer() {
 		t.Error("OptionAnyPrinterFunc() failed")
 	}
@@ -2079,7 +2079,7 @@ func TestOptionAnyConvertors(t *testing.T) {
 	option := OptionAnyConvertors(AnyConvertors{Intabler: intablerFn})
 	val := option.Value().(AnyConvertors)
 
-	if option.Key() != KeyOptionAnyConvertors ||
+	if option.Key() != keyOptionAnyConvertors ||
 		reflect.ValueOf(val.Intabler).Pointer() != reflect.ValueOf(intablerFn).Pointer() {
 		t.Error("OptionAnyConvertors() failed")
 	}
@@ -2087,11 +2087,11 @@ func TestOptionAnyConvertors(t *testing.T) {
 
 func TestOptionAnyCallbacks(t *testing.T) {
 	hashIntFn := func(any) int { return 0 }
-	option := OptionAnyCallbacks(AnyCallbacks{hashInt: hashIntFn})
+	option := OptionAnyCallbacks(AnyCallbacks{HashInt: hashIntFn})
 	val := option.Value().(AnyCallbacks)
 
-	if option.Key() != KeyOptionAnyCallbacks ||
-		reflect.ValueOf(val.hashInt).Pointer() != reflect.ValueOf(hashIntFn).Pointer() {
+	if option.Key() != keyOptionAnyCallbacks ||
+		reflect.ValueOf(val.HashInt).Pointer() != reflect.ValueOf(hashIntFn).Pointer() {
 		t.Error("OptionAnyCallbacks() failed")
 	}
 }

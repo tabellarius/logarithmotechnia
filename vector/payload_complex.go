@@ -237,13 +237,13 @@ func (p *complexPayload) adjustToBiggerSize(size int) Payload {
 
 func (p *complexPayload) Options() []Option {
 	return []Option{
-		ConfOption{KeyOptionPrecision, p.printer.Precision},
+		ConfOption{keyOptionPrecision, p.printer.Precision},
 	}
 }
 
 func (p *complexPayload) SetOption(name string, val any) bool {
 	switch name {
-	case KeyOptionPrecision:
+	case keyOptionPrecision:
 		p.printer.Precision = val.(int)
 	default:
 		return false
@@ -358,6 +358,48 @@ func (p *complexPayload) Coalesce(payload Payload) Payload {
 	return ComplexPayload(dstData, dstNA, p.Options()...)
 }
 
+func (p *complexPayload) IsUnique() []bool {
+	booleans := make([]bool, p.length)
+
+	valuesMap := map[complex128]bool{}
+	wasNA := false
+	wasNaN := false
+	wasInf := false
+	for i := 0; i < p.length; i++ {
+		is := false
+
+		if p.na[i] {
+			if !wasNA {
+				is = true
+				wasNA = true
+			}
+		} else if cmplx.IsNaN(p.data[i]) {
+			if !wasNaN {
+				is = true
+				wasNaN = true
+			}
+		} else if cmplx.IsInf(p.data[i]) {
+			if !wasInf {
+				is = true
+				wasInf = true
+			}
+		} else {
+			if _, ok := valuesMap[p.data[i]]; !ok {
+				is = true
+				valuesMap[p.data[i]] = true
+			}
+		}
+
+		booleans[i] = is
+	}
+
+	return booleans
+}
+
+// ComplexPayload creates a payload with complex128 data.
+//
+// Available options are:
+//   - OptionPrecision(precision int) - sets precision for printing payload's values.
 func ComplexPayload(data []complex128, na []bool, options ...Option) Payload {
 	length := len(data)
 	conf := MergeOptions(options)
@@ -398,48 +440,12 @@ func ComplexPayload(data []complex128, na []bool, options ...Option) Payload {
 	return payload
 }
 
-func (p *complexPayload) IsUnique() []bool {
-	booleans := make([]bool, p.length)
-
-	valuesMap := map[complex128]bool{}
-	wasNA := false
-	wasNaN := false
-	wasInf := false
-	for i := 0; i < p.length; i++ {
-		is := false
-
-		if p.na[i] {
-			if !wasNA {
-				is = true
-				wasNA = true
-			}
-		} else if cmplx.IsNaN(p.data[i]) {
-			if !wasNaN {
-				is = true
-				wasNaN = true
-			}
-		} else if cmplx.IsInf(p.data[i]) {
-			if !wasInf {
-				is = true
-				wasInf = true
-			}
-		} else {
-			if _, ok := valuesMap[p.data[i]]; !ok {
-				is = true
-				valuesMap[p.data[i]] = true
-			}
-		}
-
-		booleans[i] = is
-	}
-
-	return booleans
-}
-
+// ComplexWithNA creates a vector with ComplexPayload and allows to set NA-values.
 func ComplexWithNA(data []complex128, na []bool, options ...Option) Vector {
 	return New(ComplexPayload(data, na, options...), options...)
 }
 
+// Complex creates a vector with ComplexPayload.
 func Complex(data []complex128, options ...Option) Vector {
 	return ComplexWithNA(data, nil, options...)
 }

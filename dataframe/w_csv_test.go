@@ -35,3 +35,37 @@ func TestFromCSVFile(t *testing.T) {
 			df.columns, expectedColumns))
 	}
 }
+
+func TestCSVOptions(t *testing.T) {
+	testData := []struct {
+		name      string
+		result    Option
+		reference Option
+	}{
+		{
+			name:      "CSVOptionSkipFirstLine",
+			result:    CSVOptionSkipFirstLine(true),
+			reference: ConfOption{optionCSVSkipFirstLine, true},
+		},
+		{
+			name:      "CSVOptionSeparator",
+			result:    CSVOptionSeparator(';'),
+			reference: ConfOption{optionCSVSeparator, ';'},
+		},
+		{
+			name:   "CSVOptionDataframeOptions",
+			result: CSVOptionDataframeOptions(OptionColumnNames([]string{"id", "price"})),
+			reference: ConfOption{optionCSVDataframeOptions,
+				[]Option{OptionColumnNames([]string{"id", "price"})}},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			if !reflect.DeepEqual(data.result, data.reference) {
+				t.Error(fmt.Sprintf("Resulting conf option (%v) does not match reference (%v)",
+					data.result, data.reference))
+			}
+		})
+	}
+}

@@ -4,6 +4,8 @@ import (
 	"logarithmotechnia/vector"
 )
 
+// BindColumns binds other dataframes to the dataframe as new columns. If number of rows differs the resulting
+// dataframe will have the length of the longest of the all dataframes and missing values will be filled by NA.
 func (df *Dataframe) BindColumns(arguments ...any) *Dataframe {
 	dataframes := []*Dataframe{}
 	for _, arg := range arguments {
@@ -46,6 +48,8 @@ func bindTwoDataframesByColumns(src, app *Dataframe) *Dataframe {
 	return New(columns, options...)
 }
 
+// BindRows adds rows of other dataframes to the dataframe. If a column does not present in the dataframe, it will be
+// added into resulting one. Missing values will be filled with NA.
 func (df *Dataframe) BindRows(arguments ...any) *Dataframe {
 	dataframes := []*Dataframe{}
 	for _, arg := range arguments {

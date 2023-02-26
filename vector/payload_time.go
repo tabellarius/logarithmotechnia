@@ -266,13 +266,13 @@ func (p *timePayload) IsUnique() []bool {
 
 func (p *timePayload) Options() []Option {
 	return []Option{
-		ConfOption{KeyOptionTimeFormat, p.printer.Format},
+		ConfOption{keyOptionTimeFormat, p.printer.Format},
 	}
 }
 
 func (p *timePayload) SetOption(name string, val any) bool {
 	switch name {
-	case KeyOptionTimeFormat:
+	case keyOptionTimeFormat:
 		p.printer.Format = val.(string)
 	default:
 		return false
@@ -281,6 +281,43 @@ func (p *timePayload) SetOption(name string, val any) bool {
 	return true
 }
 
+func (p *timePayload) Coalesce(payload Payload) Payload {
+	if p.length != payload.Len() {
+		payload = payload.Adjust(p.length)
+	}
+
+	var srcData []time.Time
+	var srcNA []bool
+
+	if same, ok := payload.(*timePayload); ok {
+		srcData = same.data
+		srcNA = same.na
+	} else if timeable, ok := payload.(Timeable); ok {
+		srcData, srcNA = timeable.Times()
+	} else {
+		return p
+	}
+
+	dstData := make([]time.Time, p.length)
+	dstNA := make([]bool, p.length)
+
+	for i := 0; i < p.length; i++ {
+		if p.na[i] && !srcNA[i] {
+			dstData[i] = srcData[i]
+			dstNA[i] = false
+		} else {
+			dstData[i] = p.data[i]
+			dstNA[i] = p.na[i]
+		}
+	}
+
+	return TimePayload(dstData, dstNA, p.Options()...)
+}
+
+// TimePayload creates a payload with string data.
+//
+// Available options are:
+//   - OptionTimeFormat(format string) - sets a time format for conversion to string.
 func TimePayload(data []time.Time, na []bool, options ...Option) Payload {
 	length := len(data)
 	conf := MergeOptions(options)
@@ -331,43 +368,12 @@ func TimePayload(data []time.Time, na []bool, options ...Option) Payload {
 	return payload
 }
 
-func (p *timePayload) Coalesce(payload Payload) Payload {
-	if p.length != payload.Len() {
-		payload = payload.Adjust(p.length)
-	}
-
-	var srcData []time.Time
-	var srcNA []bool
-
-	if same, ok := payload.(*timePayload); ok {
-		srcData = same.data
-		srcNA = same.na
-	} else if timeable, ok := payload.(Timeable); ok {
-		srcData, srcNA = timeable.Times()
-	} else {
-		return p
-	}
-
-	dstData := make([]time.Time, p.length)
-	dstNA := make([]bool, p.length)
-
-	for i := 0; i < p.length; i++ {
-		if p.na[i] && !srcNA[i] {
-			dstData[i] = srcData[i]
-			dstNA[i] = false
-		} else {
-			dstData[i] = p.data[i]
-			dstNA[i] = p.na[i]
-		}
-	}
-
-	return TimePayload(dstData, dstNA, p.Options()...)
-}
-
+// TimeWithNA creates a vector with TimePayload and allows to set NA-values.
 func TimeWithNA(data []time.Time, na []bool, options ...Option) Vector {
 	return New(TimePayload(data, na, options...), options...)
 }
 
+// Time creates a vector with TimePayload.
 func Time(data []time.Time, options ...Option) Vector {
 	return TimeWithNA(data, nil, options...)
 }

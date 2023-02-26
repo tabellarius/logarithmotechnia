@@ -19,9 +19,15 @@ type confCSV struct {
 	colNames      []string
 	skipFirstLine bool
 	separator     rune
-	dfOptions     []vector.Option
+	dfOptions     []Option
 }
 
+// FromCSVFile loads data from a CSV-file to a dataframe.
+//
+// Possible options are:
+//   - CSVOptionSkipFirstLine(skip bool) - skip first line.if true.
+//   - CSVOptionSeparator(separator rune) - if you need a separator which differs from default one (",").
+//   - CSVOptionDataframeOptions(options ...vector.Option) - options to pass to the new dataframe.
 func FromCSVFile(filename string, options ...ConfOption) (*Dataframe, error) {
 	file, err := os.Open(filename)
 	if err != nil {
@@ -94,7 +100,7 @@ func combineCSVConfig(options ...ConfOption) confCSV {
 		colNames:      []string{},
 		skipFirstLine: true,
 		separator:     ',',
-		dfOptions:     []vector.Option{},
+		dfOptions:     []Option{},
 	}
 
 	for _, option := range options {
@@ -104,7 +110,7 @@ func combineCSVConfig(options ...ConfOption) confCSV {
 		case optionCSVSeparator:
 			conf.separator = option.Value().(rune)
 		case optionCSVDataframeOptions:
-			conf.dfOptions = option.Value().([]vector.Option)
+			conf.dfOptions = option.Value().([]Option)
 		}
 	}
 
@@ -168,6 +174,6 @@ func CSVOptionSeparator(separator rune) ConfOption {
 	return ConfOption{optionCSVSeparator, separator}
 }
 
-func CSVOptionDataframeOptions(options ...vector.Option) ConfOption {
+func CSVOptionDataframeOptions(options ...Option) ConfOption {
 	return ConfOption{optionCSVDataframeOptions, options}
 }

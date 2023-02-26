@@ -56,7 +56,7 @@ func TestSQLOptions(t *testing.T) {
 			name:   "SQLOptionDataframeOptions",
 			result: SQLOptionDataframeOptions(OptionColumnNames([]string{"id", "price"})),
 			reference: ConfOption{optionSQLDataframeOptions,
-				[]vector.Option{OptionColumnNames([]string{"id", "price"})}},
+				[]Option{OptionColumnNames([]string{"id", "price"})}},
 		},
 	}
 

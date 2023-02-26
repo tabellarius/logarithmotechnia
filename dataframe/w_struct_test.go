@@ -84,3 +84,37 @@ func TestFromStructs(t *testing.T) {
 		t.Error(fmt.Sprintf("Columns %v are not equal to expected (%v)", df.columns, columns))
 	}
 }
+
+func TestStructOptions(t *testing.T) {
+	testData := []struct {
+		name      string
+		result    Option
+		reference Option
+	}{
+		{
+			name:      "StructOptionHeaderMap",
+			result:    StructOptionHeaderMap(map[string]string{"name": "title"}),
+			reference: ConfOption{optionStructHeaderMap, map[string]string{"name": "title"}},
+		},
+		{
+			name:   "StructOptionDataFrameOptions",
+			result: StructOptionDataFrameOptions(OptionColumnNames([]string{"id", "price"})),
+			reference: ConfOption{optionStructDataframeOptions,
+				[]Option{OptionColumnNames([]string{"id", "price"})}},
+		},
+		{
+			name:      "StructOptionSkipFields",
+			result:    StructOptionSkipFields("name", "dep", "salary"),
+			reference: ConfOption{optionStructSkipFields, []string{"name", "dep", "salary"}},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			if !reflect.DeepEqual(data.result, data.reference) {
+				t.Error(fmt.Sprintf("Resulting conf option (%v) does not match reference (%v)",
+					data.result, data.reference))
+			}
+		})
+	}
+}

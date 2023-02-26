@@ -2,6 +2,11 @@ package dataframe
 
 import "logarithmotechnia/vector"
 
+// Summarize allows using aggregation functions on grouped arrays using the columns from this arrays.
+// Example:
+//
+//	groupedDf := df.GroupBy("Category")
+//	aggregatedDf := groupedDf.Summarize(groupedDf.Cn("Price").Sum(), groupedDf.Cn("Capacity").Sum())
 func (df *Dataframe) Summarize(columns ...any) *Dataframe {
 	if !df.IsGrouped() {
 		return df
@@ -29,7 +34,6 @@ func (df *Dataframe) Summarize(columns ...any) *Dataframe {
 				newColumns = append(newColumns, columnCol)
 			}
 		}
-
 	}
 
 	for _, group := range df.GroupedBy() {

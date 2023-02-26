@@ -5,6 +5,11 @@ type Rename struct {
 	to   string
 }
 
+// Rename allows renameing of the dataframe columns.
+// Possible parameters are:
+//   - Rename struct
+//   - []string slice of two elements (from, two)
+//   - array of []string slice of two elements (from, two)
 func (df *Dataframe) Rename(renames ...any) *Dataframe {
 	renamesMap := map[string]string{}
 	for _, rename := range renames {

@@ -15,7 +15,7 @@ const optionStructSkipFields = "structSkipFields"
 
 type confStruct struct {
 	headerMap   map[string]string
-	dfOptions   []vector.Option
+	dfOptions   []Option
 	skipColumns []string
 }
 
@@ -46,7 +46,7 @@ func FromStructs(stArr any, options ...ConfOption) (*Dataframe, error) {
 func createStructConf(options ...ConfOption) confStruct {
 	conf := confStruct{
 		headerMap:   map[string]string{},
-		dfOptions:   []vector.Option{},
+		dfOptions:   []Option{},
 		skipColumns: []string{},
 	}
 
@@ -55,7 +55,7 @@ func createStructConf(options ...ConfOption) confStruct {
 		case optionStructHeaderMap:
 			conf.headerMap = option.Value().(map[string]string)
 		case optionStructDataframeOptions:
-			conf.dfOptions = option.Value().([]vector.Option)
+			conf.dfOptions = option.Value().([]Option)
 		case optionStructSkipFields:
 			conf.skipColumns = option.Value().([]string)
 		}
@@ -160,7 +160,7 @@ func StructOptionHeaderMap(headerMap map[string]string) ConfOption {
 	return ConfOption{optionStructHeaderMap, headerMap}
 }
 
-func StructOptionDataFrameOptions(options ...vector.Option) ConfOption {
+func StructOptionDataFrameOptions(options ...Option) ConfOption {
 	return ConfOption{optionStructDataframeOptions, options}
 }
 

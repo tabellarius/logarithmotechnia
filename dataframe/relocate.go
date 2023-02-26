@@ -4,6 +4,18 @@ import (
 	"logarithmotechnia/vector"
 )
 
+// Relocate re-orders columns.
+// There are two types of arguments: column selectors and options.
+//
+// Possible selectors:
+//   - a column name
+//   - an array of column names
+//   - a column index
+//   - an array of column indices
+//
+// Options:
+//   - OptionBeforeColumn(name string)
+//   - OptionAfterColumn(name string)
 func (df *Dataframe) Relocate(arguments ...any) *Dataframe {
 	selectors := []any{}
 	options := []vector.Option{}
@@ -23,13 +35,23 @@ func (df *Dataframe) Relocate(arguments ...any) *Dataframe {
 	for _, selector := range selectors {
 		names := []string{}
 
-		switch selector.(type) {
+		switch val := selector.(type) {
 		case string:
-			names = append(names, selector.(string))
+			names = append(names, val)
 		case []string:
-			names = append(names, selector.([]string)...)
+			names = append(names, val...)
+		case int:
+			if df.IsValidColumnIndex(val) {
+				names = append(names, df.columnNames[val-1])
+			}
+		case []int:
+			for _, index := range val {
+				if df.IsValidColumnIndex(index) {
+					names = append(names, df.columnNames[index-1])
+				}
+			}
 		case []bool:
-			boolSelector, _ := vector.BooleanWithNA(selector.([]bool), nil).Adjust(df.Names().Len()).Booleans()
+			boolSelector, _ := vector.BooleanWithNA(val, nil).Adjust(df.Names().Len()).Booleans()
 			strings, _ := df.Names().Filter(boolSelector).Strings()
 			names = append(names, strings...)
 		}

@@ -8,6 +8,9 @@ import (
 
 type AnyPrinterFunc = func(any) string
 
+// AnyConvertors holds converter functions which allow to use Integers(), Floats(), Complexes(), Booleans(),
+// Strings() and Times() methods.If a converter function is not provided, the corresponding function will return
+// values as if the payload contains only NA-values.
 type AnyConvertors struct {
 	Intabler     func(idx int, val any, na bool) (int, bool)
 	Floatabler   func(idx int, val any, na bool) (float64, bool)
@@ -17,11 +20,14 @@ type AnyConvertors struct {
 	Timeabler    func(idx int, val any, na bool) (time.Time, bool)
 }
 
+// AnyCallbacks holds four functions necessary to enable full vector functionality.
+// Eq enables Equalable functionality. Lt enables Ordered and sorting functionality. HashInt or HashStr enables
+// grouping and summarizing.
 type AnyCallbacks struct {
-	eq      func(any, any) bool
-	lt      func(any, any) bool
-	hashInt func(any) int
-	hashStr func(any) string
+	Eq      func(any, any) bool
+	Lt      func(any, any) bool
+	HashInt func(any) int
+	HashStr func(any) string
 }
 
 type anyPayload struct {
@@ -57,19 +63,19 @@ func (p *anyPayload) ByIndices(indices []int) Payload {
 }
 
 func (p *anyPayload) Find(needle any) int {
-	if p.fn.eq == nil {
+	if p.fn.Eq == nil {
 		return 0
 	}
 
-	return findFn(needle, p.data, p.na, p.convertComparator, p.fn.eq)
+	return findFn(needle, p.data, p.na, p.convertComparator, p.fn.Eq)
 }
 
 func (p *anyPayload) FindAll(needle any) []int {
-	if p.fn.eq == nil {
+	if p.fn.Eq == nil {
 		return []int{}
 	}
 
-	return findAllFn(needle, p.data, p.na, p.convertComparator, p.fn.eq)
+	return findAllFn(needle, p.data, p.na, p.convertComparator, p.fn.Eq)
 }
 
 func (p *anyPayload) StrForElem(idx int) string {
@@ -125,55 +131,55 @@ func (p *anyPayload) convertComparator(val any) (any, bool) {
 }
 
 func (p *anyPayload) Eq(val any) []bool {
-	if p.fn.eq == nil {
+	if p.fn.Eq == nil {
 		return make([]bool, p.length)
 	}
 
-	return eqFn(val, p.data, p.na, p.convertComparator, p.fn.eq)
+	return eqFn(val, p.data, p.na, p.convertComparator, p.fn.Eq)
 }
 
 func (p *anyPayload) Neq(val any) []bool {
-	if p.fn.eq == nil {
+	if p.fn.Eq == nil {
 		return trueBooleanArr(p.length)
 	}
 
-	return neqFn(val, p.data, p.na, p.convertComparator, p.fn.eq)
+	return neqFn(val, p.data, p.na, p.convertComparator, p.fn.Eq)
 }
 
 func (p *anyPayload) Gt(val any) []bool {
-	if p.fn.lt == nil {
+	if p.fn.Lt == nil {
 		return make([]bool, p.length)
 	}
 
-	return gtFn(val, p.data, p.na, p.convertComparator, p.fn.lt)
+	return gtFn(val, p.data, p.na, p.convertComparator, p.fn.Lt)
 }
 
 func (p *anyPayload) Lt(val any) []bool {
-	if p.fn.lt == nil {
+	if p.fn.Lt == nil {
 		return make([]bool, p.length)
 	}
 
-	return ltFn(val, p.data, p.na, p.convertComparator, p.fn.lt)
+	return ltFn(val, p.data, p.na, p.convertComparator, p.fn.Lt)
 }
 
 func (p *anyPayload) Gte(val any) []bool {
-	if p.fn.eq == nil || p.fn.lt == nil {
+	if p.fn.Eq == nil || p.fn.Lt == nil {
 		return make([]bool, p.length)
 	}
 
-	return gteFn(val, p.data, p.na, p.convertComparator, p.fn.eq, p.fn.lt)
+	return gteFn(val, p.data, p.na, p.convertComparator, p.fn.Eq, p.fn.Lt)
 }
 
 func (p *anyPayload) Lte(val any) []bool {
-	if p.fn.eq == nil || p.fn.lt == nil {
+	if p.fn.Eq == nil || p.fn.Lt == nil {
 		return make([]bool, p.length)
 	}
 
-	return lteFn(val, p.data, p.na, p.convertComparator, p.fn.eq, p.fn.lt)
+	return lteFn(val, p.data, p.na, p.convertComparator, p.fn.Eq, p.fn.Lt)
 }
 
 func (p *anyPayload) IsUnique() []bool {
-	if p.fn.eq == nil || p.length == 0 || p.length == 1 {
+	if p.fn.Eq == nil || p.length == 0 || p.length == 1 {
 		return trueBooleanArr(p.length)
 	}
 
@@ -192,7 +198,7 @@ func (p *anyPayload) IsUnique() []bool {
 	for i := 1; i < p.length; i++ {
 		uniqIdx[i] = i
 		for j := i - 1; j >= 0; j-- {
-			if p.fn.eq(p.data[i], p.data[j]) {
+			if p.fn.Eq(p.data[i], p.data[j]) {
 				uniqIdx[i] = j
 				break
 			}
@@ -210,12 +216,12 @@ func (p *anyPayload) IsUnique() []bool {
 }
 
 func (p *anyPayload) Groups() ([][]int, []any) {
-	if p.fn.hashInt != nil {
-		return groupsForDataWithHash(p.data, p.na, p.fn.hashInt)
+	if p.fn.HashInt != nil {
+		return groupsForDataWithHash(p.data, p.na, p.fn.HashInt)
 	}
 
-	if p.fn.hashStr != nil {
-		return groupsForDataWithHash(p.data, p.na, p.fn.hashStr)
+	if p.fn.HashStr != nil {
+		return groupsForDataWithHash(p.data, p.na, p.fn.HashStr)
 	}
 
 	data := make([]int, p.length)
@@ -448,19 +454,19 @@ func (p *anyPayload) adjustToBiggerSize(size int) Payload {
 
 func (p *anyPayload) Options() []Option {
 	return []Option{
-		ConfOption{KeyOptionAnyPrinterFunc, p.printer},
-		ConfOption{KeyOptionAnyConvertors, p.convertors},
-		ConfOption{KeyOptionAnyCallbacks, p.fn},
+		ConfOption{keyOptionAnyPrinterFunc, p.printer},
+		ConfOption{keyOptionAnyConvertors, p.convertors},
+		ConfOption{keyOptionAnyCallbacks, p.fn},
 	}
 }
 
 func (p *anyPayload) SetOption(name string, val any) bool {
 	switch name {
-	case KeyOptionAnyPrinterFunc:
+	case keyOptionAnyPrinterFunc:
 		p.printer = val.(AnyPrinterFunc)
-	case KeyOptionAnyConvertors:
+	case keyOptionAnyConvertors:
 		p.convertors = val.(AnyConvertors)
-	case KeyOptionAnyCallbacks:
+	case keyOptionAnyCallbacks:
 		p.fn = val.(AnyCallbacks)
 	default:
 		return false
@@ -469,6 +475,12 @@ func (p *anyPayload) SetOption(name string, val any) bool {
 	return true
 }
 
+// AnyPayload creates a payload with any data.
+//
+// Available options are:
+//   - OptionAnyPrinterFunc(fn AnyPrinterFunc) - sets a function used for printing an element value.
+//   - OptionAnyConvertors(convertors AnyConvertors) - sets convertors to integers, floats, strings etc.
+//   - OptionAnyCallbacks(callbacks AnyCallbacks) - sets callbacks to enable full vector functionality.
 func AnyPayload(data []any, na []bool, options ...Option) Payload {
 	length := len(data)
 	conf := MergeOptions(options)
@@ -510,12 +522,12 @@ func AnyPayload(data []any, na []bool, options ...Option) Payload {
 		return i == j
 	}
 
-	if payload.fn.lt != nil && payload.fn.eq != nil {
+	if payload.fn.Lt != nil && payload.fn.Eq != nil {
 		fnLess = func(i, j int) bool {
-			return payload.fn.lt(payload.data[i], payload.data[j])
+			return payload.fn.Lt(payload.data[i], payload.data[j])
 		}
 		fnEqual = func(i, j int) bool {
-			return payload.fn.eq(payload.data[i], payload.data[j])
+			return payload.fn.Eq(payload.data[i], payload.data[j])
 		}
 	}
 
@@ -529,10 +541,12 @@ func AnyPayload(data []any, na []bool, options ...Option) Payload {
 	return payload
 }
 
+// AnyWithNA creates a vector with AnyPayload and allows to set NA-values.
 func AnyWithNA(data []any, na []bool, options ...Option) Vector {
 	return New(AnyPayload(data, na, options...), options...)
 }
 
+// Any creates a vector with AnyPayload.
 func Any(data []any, options ...Option) Vector {
 	return AnyWithNA(data, nil, options...)
 }

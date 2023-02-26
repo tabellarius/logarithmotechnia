@@ -4,16 +4,34 @@ import (
 	"logarithmotechnia/vector"
 )
 
+// Arrange orders the rows of a data frame by the values of selected columns.
+// Possible parameters: a name of a column, an array of column names, an index of a column, an array of column names.
 func (df *Dataframe) Arrange(args ...any) *Dataframe {
-	potentialColumns := []string{}
+	columns := []string{}
 	options := []vector.Option{}
 
 	for _, arg := range args {
-		switch arg.(type) {
+		switch val := arg.(type) {
 		case string:
-			potentialColumns = append(potentialColumns, arg.(string))
+			if df.HasColumn(val) {
+				columns = append(columns, val)
+			}
 		case []string:
-			potentialColumns = append(potentialColumns, arg.([]string)...)
+			for _, colName := range val {
+				if df.HasColumn(colName) {
+					columns = append(columns, colName)
+				}
+			}
+		case int:
+			if df.IsValidColumnIndex(val) {
+				columns = append(columns, df.columnNames[val-1])
+			}
+		case []int:
+			for _, index := range val {
+				if df.IsValidColumnIndex(index) {
+					columns = append(columns, df.columnNames[index-1])
+				}
+			}
 		case vector.Option:
 			options = append(options, arg.(vector.Option))
 		}
@@ -25,13 +43,6 @@ func (df *Dataframe) Arrange(args ...any) *Dataframe {
 		reverseColumns = conf.Value(KeyOptionArrangeReverseColumns).([]string)
 	}
 	rcVec := vector.StringWithNA(reverseColumns, nil)
-
-	columns := []string{}
-	for _, column := range potentialColumns {
-		if df.HasColumn(column) {
-			columns = append(columns, column)
-		}
-	}
 
 	if len(columns) == 0 {
 		return df

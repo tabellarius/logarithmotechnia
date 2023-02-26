@@ -138,8 +138,20 @@ func TestDataframe_GroupBy(t *testing.T) {
 			isGrouped: true,
 		},
 		{
+			name:      "grouped by two indices",
+			df:        df.GroupBy(1, 2),
+			groupedBy: []string{"A", "B"},
+			isGrouped: true,
+		},
+		{
 			name:      "grouped by array",
 			df:        df.GroupBy([]string{"A", "B"}),
+			groupedBy: []string{"A", "B"},
+			isGrouped: true,
+		},
+		{
+			name:      "grouped by array of indices",
+			df:        df.GroupBy([]int{1, 2}),
 			groupedBy: []string{"A", "B"},
 			isGrouped: true,
 		},

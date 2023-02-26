@@ -468,16 +468,16 @@ func (p *stringPayload) Coalesce(payload Payload) Payload {
 
 func (p *stringPayload) Options() []Option {
 	return []Option{
-		ConfOption{KeyOptionStringToBooleanConverter, p.StringToBooleanConverter},
-		ConfOption{KeyOptionTimeFormat, p.timeFormat},
+		ConfOption{keyOptionStringToBooleanConverter, p.StringToBooleanConverter},
+		ConfOption{keyOptionTimeFormat, p.timeFormat},
 	}
 }
 
 func (p *stringPayload) SetOption(name string, val any) bool {
 	switch name {
-	case KeyOptionStringToBooleanConverter:
+	case keyOptionStringToBooleanConverter:
 		p.StringToBooleanConverter = val.(StringToBooleanConverter)
-	case KeyOptionTimeFormat:
+	case keyOptionTimeFormat:
 		p.timeFormat = val.(string)
 	default:
 		return false
@@ -486,6 +486,12 @@ func (p *stringPayload) SetOption(name string, val any) bool {
 	return true
 }
 
+// StringPayload creates a payload with string data.
+//
+// Available options are:
+//   - OptionStringToBooleanConverter(converter StringToBooleanConverter) - sets a converter
+//     from string to boolean values.
+//   - OptionTimeFormat(format string) - sets a time format for conversion to time.
 func StringPayload(data []string, na []bool, options ...Option) Payload {
 	length := len(data)
 	conf := MergeOptions(options)
@@ -537,10 +543,12 @@ func StringPayload(data []string, na []bool, options ...Option) Payload {
 	return payload
 }
 
+// StringWithNA creates a vector with StringPayload and allows to set NA-values.
 func StringWithNA(data []string, na []bool, options ...Option) Vector {
 	return New(StringPayload(data, na, options...), options...)
 }
 
+// String creates a vector with StringPayload.
 func String(data []string, options ...Option) Vector {
 	return StringWithNA(data, nil, options...)
 }

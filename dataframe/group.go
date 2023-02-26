@@ -4,21 +4,37 @@ import (
 	"logarithmotechnia/vector"
 )
 
+// GroupBy transforms the dataframe into a grouped one which later can be used for aggregations.
+//
+// Acceptable selectors are:
+//   - name of a column
+//   - string slice of column names
+//   - index of a column (starting with 1)
+//   - array of column indices
 func (df *Dataframe) GroupBy(selectors ...any) *Dataframe {
-	columns := []string{}
-	for _, selector := range selectors {
-		switch selector.(type) {
-		case string:
-			columns = append(columns, selector.(string))
-		case []string:
-			columns = append(columns, selector.([]string)...)
-		}
-	}
-
 	groupByColumns := []string{}
-	for _, column := range columns {
-		if df.Names().Has(column) {
-			groupByColumns = append(groupByColumns, column)
+	for _, selector := range selectors {
+		switch val := selector.(type) {
+		case string:
+			if df.Names().Has(val) {
+				groupByColumns = append(groupByColumns, val)
+			}
+		case []string:
+			for _, column := range val {
+				if df.Names().Has(column) {
+					groupByColumns = append(groupByColumns, column)
+				}
+			}
+		case int:
+			if df.IsValidColumnIndex(val) {
+				groupByColumns = append(groupByColumns, df.columnNames[val-1])
+			}
+		case []int:
+			for _, index := range val {
+				if df.IsValidColumnIndex(index) {
+					groupByColumns = append(groupByColumns, df.columnNames[index-1])
+				}
+			}
 		}
 	}
 
@@ -77,10 +93,12 @@ func (df *Dataframe) groupByColumn(groupBy string, curGroups [][]int) [][]int {
 	return newIndices
 }
 
+// IsGrouped returns true if the dataframe is grouped.
 func (df *Dataframe) IsGrouped() bool {
 	return len(df.groupedBy) > 0
 }
 
+// GroupedBy returns string slice with the names of columns by which dataframe was grouped.
 func (df *Dataframe) GroupedBy() []string {
 	groupedBy := make([]string, len(df.groupedBy))
 	copy(groupedBy, df.groupedBy)
@@ -88,6 +106,7 @@ func (df *Dataframe) GroupedBy() []string {
 	return groupedBy
 }
 
+// Ungroup returns ungrouped dataframe.
 func (df *Dataframe) Ungroup() *Dataframe {
 	if !df.IsGrouped() {
 		return df

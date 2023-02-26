@@ -7,6 +7,7 @@ import (
 	"strings"
 )
 
+// InnerJoin makes an inner join with another dataframe
 func (df *Dataframe) InnerJoin(with *Dataframe, options ...vector.Option) *Dataframe {
 	conf := vector.MergeOptions(options)
 	columns := df.determineColumns(conf, with)
@@ -49,6 +50,7 @@ func (df *Dataframe) InnerJoin(with *Dataframe, options ...vector.Option) *Dataf
 	return newDf.BindColumns(newWIth)
 }
 
+// LeftJoin makes a left join with another dataframe.
 func (df *Dataframe) LeftJoin(with *Dataframe, options ...vector.Option) *Dataframe {
 	conf := vector.MergeOptions(options)
 	columns := df.determineColumns(conf, with)
@@ -95,6 +97,7 @@ func (df *Dataframe) LeftJoin(with *Dataframe, options ...vector.Option) *Datafr
 	return newDf.BindColumns(newWIth)
 }
 
+// RightJoin makes a right join with another dataframe
 func (df *Dataframe) RightJoin(with *Dataframe, options ...vector.Option) *Dataframe {
 	conf := vector.MergeOptions(options)
 	columns := df.determineColumns(conf, with)
@@ -144,6 +147,7 @@ func (df *Dataframe) RightJoin(with *Dataframe, options ...vector.Option) *Dataf
 	return joinedDf.Select(selectNames)
 }
 
+// FullJoin makes a full join with another dataframe
 func (df *Dataframe) FullJoin(with *Dataframe, options ...vector.Option) *Dataframe {
 	conf := vector.MergeOptions(options)
 	columns := df.determineColumns(conf, with)
@@ -207,6 +211,7 @@ func (df *Dataframe) FullJoin(with *Dataframe, options ...vector.Option) *Datafr
 	return newDf.Mutate(coalesceColumns).BindColumns(newWIth.Select(removeColumns))
 }
 
+// SemiJoin makes a semi-join with another dataframe.
 func (df *Dataframe) SemiJoin(with *Dataframe, options ...vector.Option) *Dataframe {
 	conf := vector.MergeOptions(options)
 	columns := df.determineColumns(conf, with)
@@ -237,6 +242,7 @@ func (df *Dataframe) SemiJoin(with *Dataframe, options ...vector.Option) *Datafr
 	return df.ByIndices(dfIndices)
 }
 
+// AntiJoin makes an anti-join with another dataframe.
 func (df *Dataframe) AntiJoin(with *Dataframe, options ...vector.Option) *Dataframe {
 	conf := vector.MergeOptions(options)
 	columns := df.determineColumns(conf, with)

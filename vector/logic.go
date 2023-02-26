@@ -1,5 +1,7 @@
 package vector
 
+// And applies logical AND operation to all provided boolean slices. Second and next slices are being fitted to
+// the size of the first one.
 func And(booleans ...[]bool) []bool {
 	if len(booleans) == 0 {
 		return []bool{}
@@ -22,6 +24,8 @@ func And(booleans ...[]bool) []bool {
 	return src
 }
 
+// Or applies logical OR operation to all provided boolean slices. Second and next slices are being fitted to
+// the size of the first one.
 func Or(booleans ...[]bool) []bool {
 	if len(booleans) == 0 {
 		return []bool{}
@@ -44,6 +48,8 @@ func Or(booleans ...[]bool) []bool {
 	return src
 }
 
+// Xor applies logical XOR operation to all provided boolean slices. Second and next slices are being fitted to
+// the size of the first one.
 func Xor(booleans ...[]bool) []bool {
 	if len(booleans) == 0 {
 		return []bool{}
@@ -66,6 +72,8 @@ func Xor(booleans ...[]bool) []bool {
 	return src
 }
 
+// Not applies logical NOT operation to all provided boolean slices. Second and next slices are being fitted to
+// the size of the first one.
 func Not(in []bool) []bool {
 	out := make([]bool, len(in))
 

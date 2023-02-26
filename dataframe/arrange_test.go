@@ -39,6 +39,15 @@ func TestDataframe_Arrange(t *testing.T) {
 			},
 		},
 		{
+			name: "one arrangeBy index",
+			df:   df.Arrange(3),
+			expectedColumns: []vector.Vector{
+				vector.BooleanWithNA([]bool{false, false, false, false, true, true, false, true, true, true, true, true, false, false, true}, nil),
+				vector.IntegerWithNA([]int{1, 2, 3, 1, 3, 3, 3, 1, 3, 1, 1, 2, 2, 2, 2}, nil),
+				vector.IntegerWithNA([]int{30, 35, 45, 50, 50, 60, 70, 100, 110, 120, 180, 220, 225, 300, 350}, nil),
+			},
+		},
+		{
 			name: "one arrangeBy reverse column",
 			df:   df.Arrange("salary", OptionArrangeReverseColumns("salary")),
 			expectedColumns: []vector.Vector{
@@ -84,6 +93,15 @@ func TestDataframe_Arrange(t *testing.T) {
 			},
 		},
 		{
+			name: "two arrangeBy array of ints",
+			df:   df.Arrange([]int{2, 3}),
+			expectedColumns: []vector.Vector{
+				vector.BooleanWithNA([]bool{false, false, true, true, true, false, true, false, false, true, false, true, true, false, true}, nil),
+				vector.IntegerWithNA([]int{1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3}, nil),
+				vector.IntegerWithNA([]int{30, 50, 100, 120, 180, 35, 220, 225, 300, 350, 45, 50, 60, 70, 110}, nil),
+			},
+		},
+		{
 			name: "two arrangeBy with false reverse",
 			df:   df.Arrange("type", "salary", OptionArrangeReverse(false)),
 			expectedColumns: []vector.Vector{
@@ -95,6 +113,15 @@ func TestDataframe_Arrange(t *testing.T) {
 		{
 			name: "three arrangeBy",
 			df:   df.Arrange("activity", "type", "salary"),
+			expectedColumns: []vector.Vector{
+				vector.BooleanWithNA([]bool{false, false, false, false, false, false, false, true, true, true, true, true, true, true, true}, nil),
+				vector.IntegerWithNA([]int{1, 1, 2, 2, 2, 3, 3, 1, 1, 1, 2, 2, 3, 3, 3}, nil),
+				vector.IntegerWithNA([]int{30, 50, 35, 225, 300, 45, 70, 100, 120, 180, 220, 350, 50, 60, 110}, nil),
+			},
+		},
+		{
+			name: "three arrangeBy mixed",
+			df:   df.Arrange("activity", "type", 3),
 			expectedColumns: []vector.Vector{
 				vector.BooleanWithNA([]bool{false, false, false, false, false, false, false, true, true, true, true, true, true, true, true}, nil),
 				vector.IntegerWithNA([]int{1, 1, 2, 2, 2, 3, 3, 1, 1, 1, 2, 2, 3, 3, 3}, nil),

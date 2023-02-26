@@ -212,6 +212,7 @@ func (p *naPayload) SetOption(string, any) bool {
 	return false
 }
 
+// NAPayload creates a payload with NA-values.
 func NAPayload(length int, _ ...Option) Payload {
 	if length < 0 {
 		length = 0
@@ -224,6 +225,7 @@ func NAPayload(length int, _ ...Option) Payload {
 	return payload
 }
 
+// NA creates a vector with NAPayload.
 func NA(length int, options ...Option) Vector {
 	return New(NAPayload(length, options...), options...)
 }
