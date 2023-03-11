@@ -215,3 +215,12 @@ There are also similar functions for converting a vector to other type:
 * ```AsAny(options ...Option) Vector```
 
 Another way is to use ```Apply()``` function as shown before.
+
+Renaming columns
+----------------
+To rename a column, use a ```Rename()``` function. There are several ways to pass which column to which value you 
+would like to rename (check function comment). For example:
+
+```go
+renamedIris := iris.Rename([]string{"sepal_width", "s_width"})
+```
