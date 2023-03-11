@@ -303,19 +303,8 @@ func (v *vector) ByIndices(indices []int) Vector {
 	return New(newPayload, v.Options()...)
 }
 
-func (v *vector) normalizeFromTo(from, to int) (int, int) {
-	if to > v.length {
-		to = v.length
-	}
-	if from < 1 {
-		from = 1
-	}
-
-	return from, to
-}
-
 func (v *vector) FromTo(from, to int) Vector {
-	return v.ByIndices(v.filterByFromTo(from, to))
+	return v.ByIndices(util.FromTo(from, to, v.length))
 }
 
 func (v *vector) Filter(whicher any) Vector {
@@ -411,74 +400,6 @@ func (v *vector) applyToAdjustIndicesWhicher(whicher []int) []int {
 
 func (v *vector) filterByBooleans(booleans []bool) []int {
 	return util.ToIndices(v.length, booleans)
-}
-
-func (v *vector) filterByFromTo(from int, to int) []int {
-	/* from and to have different signs */
-	if from*to < 0 {
-		return []int{}
-	}
-
-	var indices []int
-	if from == 0 && to == 0 {
-		indices = []int{}
-	} else if from > 0 && from > to {
-		indices = v.byFromToReverse(to, from)
-	} else if from <= 0 && to <= 0 {
-		from *= -1
-		to *= -1
-		if from > to {
-			from, to = to, from
-		}
-		indices = v.byFromToWithRemove(from, to)
-	} else {
-		indices = v.byFromToRegular(from, to)
-	}
-
-	return indices
-}
-
-func (v *vector) byFromToRegular(from, to int) []int {
-	from, to = v.normalizeFromTo(from, to)
-
-	indices := make([]int, to-from+1)
-	index := 0
-	for idx := from; idx <= to; idx++ {
-		indices[index] = idx
-		index++
-	}
-
-	return indices
-}
-
-func (v *vector) byFromToReverse(from, to int) []int {
-	from, to = v.normalizeFromTo(from, to)
-
-	indices := make([]int, to-from+1)
-	index := 0
-	for idx := to; idx >= from; idx-- {
-		indices[index] = idx
-		index++
-	}
-
-	return indices
-}
-
-func (v *vector) byFromToWithRemove(from, to int) []int {
-	from, to = v.normalizeFromTo(from, to)
-
-	indices := make([]int, from-1+v.length-to)
-	index := 0
-	for idx := 1; idx < from; idx++ {
-		indices[index] = idx
-		index++
-	}
-	for idx := to + 1; idx <= v.length; idx++ {
-		indices[index] = idx
-		index++
-	}
-
-	return indices
 }
 
 func (v *vector) Traverse(traverser any) {

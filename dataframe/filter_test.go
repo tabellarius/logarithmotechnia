@@ -88,3 +88,39 @@ func TestDataframe_Filter(t *testing.T) {
 		})
 	}
 }
+
+func TestDataframe_FromTo(t *testing.T) {
+	df := New([]vector.Vector{
+		vector.IntegerWithNA([]int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, nil),
+		vector.StringWithNA([]string{"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"}, nil),
+		vector.BooleanWithNA([]bool{true, false, true, false, true, false, true, false, true, false}, nil),
+	}, OptionColumnNames([]string{"int", "string", "bool"}))
+
+	testData := []struct {
+		name      string
+		from      int
+		to        int
+		dfColumns []vector.Vector
+	}{
+		{
+			name: "regular",
+			from: 4,
+			to:   8,
+			dfColumns: []vector.Vector{
+				vector.IntegerWithNA([]int{4, 5, 6, 7, 8}, nil),
+				vector.StringWithNA([]string{"4", "5", "6", "7", "8"}, nil),
+				vector.BooleanWithNA([]bool{false, true, false, true, false}, nil),
+			},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			newDf := df.FromTo(data.from, data.to)
+
+			if !vector.CompareVectorArrs(newDf.columns, data.dfColumns) {
+				t.Error(fmt.Sprintf("Columns (%v) are not equal to expected (%v)", newDf.columns, data.dfColumns))
+			}
+		})
+	}
+}

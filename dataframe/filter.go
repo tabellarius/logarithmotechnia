@@ -53,3 +53,7 @@ func (df *Dataframe) filterByCompactFunc(fn func(map[string]any) bool) []bool {
 
 	return booleans
 }
+
+func (df *Dataframe) FromTo(from, to int) *Dataframe {
+	return df.ByIndices(util.FromTo(from, to, df.RowNum()))
+}

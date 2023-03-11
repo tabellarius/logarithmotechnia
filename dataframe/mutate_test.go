@@ -18,7 +18,7 @@ func TestDataframe_Mutate(t *testing.T) {
 		{"city", vector.StringWithNA([]string{"London", "Rome", "Paris", "New York", "Tokyo"}, nil)},
 		{"missions", vector.IntegerWithNA([]int{10, 27, 4, 6, 8}, nil)},
 	}
-	mutateColumns[0].vector.SetName("town")
+	mutateColumns[0].Vector.SetName("town")
 
 	testData := []struct {
 		name     string
@@ -53,7 +53,7 @@ func TestDataframe_Mutate(t *testing.T) {
 		{
 			name:    "simple one vector",
 			df:      df,
-			columns: mutateColumns[0].vector,
+			columns: mutateColumns[0].Vector,
 			expected: New([]Column{
 				{"name", vector.StringWithNA([]string{"Jim", "Lucius", "Alice", "Marcus", "Leticia"}, nil)},
 				{"salary", vector.IntegerWithNA([]int{100000, 120000, 80000, 70000, 90000}, nil)},
@@ -64,7 +64,7 @@ func TestDataframe_Mutate(t *testing.T) {
 		{
 			name:    "simple vector array",
 			df:      df,
-			columns: []vector.Vector{mutateColumns[0].vector, mutateColumns[1].vector},
+			columns: []vector.Vector{mutateColumns[0].Vector, mutateColumns[1].Vector},
 			expected: New([]Column{
 				{"name", vector.StringWithNA([]string{"Jim", "Lucius", "Alice", "Marcus", "Leticia"}, nil)},
 				{"salary", vector.IntegerWithNA([]int{100000, 120000, 80000, 70000, 90000}, nil)},
