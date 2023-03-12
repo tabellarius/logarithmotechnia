@@ -18,14 +18,16 @@ func (v *vector) Sum() Vector {
 			outValues[i] = vectors[i].Sum()
 		}
 
-		return Combine(outValues...)
+		return Combine(outValues...).SetName(v.Name() + "_sum")
 	}
 
+	vec := NA(1)
 	if summer, ok := v.payload.(Summer); ok {
-		return New(summer.Sum(), v.Options()...)
+		vec = New(summer.Sum(), v.Options()...)
 	}
+	vec.SetName(v.Name() + "_sum")
 
-	return NA(1)
+	return vec
 }
 
 type Maxxer interface {
@@ -40,14 +42,16 @@ func (v *vector) Max() Vector {
 			outValues[i] = vectors[i].Max()
 		}
 
-		return Combine(outValues...)
+		return Combine(outValues...).SetName(v.Name() + "_max")
 	}
 
-	if summer, ok := v.payload.(Maxxer); ok {
-		return New(summer.Max(), v.Options()...)
+	vec := NA(1)
+	if maxxer, ok := v.payload.(Maxxer); ok {
+		return New(maxxer.Max(), v.Options()...)
 	}
+	vec.SetName(v.Name() + "_max")
 
-	return NA(1)
+	return vec
 }
 
 type Minner interface {
@@ -62,12 +66,14 @@ func (v *vector) Min() Vector {
 			outValues[i] = vectors[i].Min()
 		}
 
-		return Combine(outValues...)
+		return Combine(outValues...).SetName(v.Name() + "_min")
 	}
 
-	if summer, ok := v.payload.(Minner); ok {
-		return New(summer.Min(), v.Options()...)
+	vec := NA(1)
+	if minner, ok := v.payload.(Minner); ok {
+		vec = New(minner.Min(), v.Options()...)
 	}
+	vec.SetName(v.Name() + "_min")
 
-	return NA(1)
+	return vec
 }
