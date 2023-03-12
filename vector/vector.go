@@ -76,6 +76,8 @@ type Vector interface {
 	Options() []Option
 	SetOption(Option) bool
 
+	StrForElem(int) string
+
 	Arithmetics
 	Statistics
 }
@@ -543,12 +545,12 @@ func (v *vector) String() string {
 	str := "[(" + v.Type() + ")]"
 
 	if v.length > 0 {
-		str += v.strForElem(1)
+		str += v.StrForElem(1)
 	}
 	if v.length > 1 {
 		for i := 2; i <= v.length; i++ {
 			if i <= v.options.maxPrintElements {
-				str += ", " + v.strForElem(i)
+				str += ", " + v.StrForElem(i)
 			} else {
 				str += ", ..."
 				break
@@ -561,7 +563,7 @@ func (v *vector) String() string {
 	return str
 }
 
-func (v *vector) strForElem(idx int) string {
+func (v *vector) StrForElem(idx int) string {
 	str := v.payload.StrForElem(idx)
 
 	return str

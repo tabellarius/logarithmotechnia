@@ -602,7 +602,7 @@ func TestDataframe_String(t *testing.T) {
 		vector.OptionMaxPrintElements(5),
 	}))
 
-	vecStr := "# of columns: 3, # of rows: 10\n\nid: [(integer)]1, 2, 3, 4, 5, ...]\nstr_id: [(string)]\"1\", \"2\", \"3\", \"4\", \"5\", ...]\n" +
+	vecStr := "# of columns: 3, # of rows: 10\n\nid: [(integer)]1, 2, 3, 4, 5, ...]\nstr_id: [(string)]1, 2, 3, 4, 5, ...]\n" +
 		"is_present: [(boolean)]true, false, true, false, true, ...]\n"
 
 	if df.String() != vecStr {

@@ -315,7 +315,7 @@ func (p *stringPayload) StrForElem(idx int) string {
 		return "NA"
 	}
 
-	return "\"" + p.data[idx-1] + "\""
+	return p.data[idx-1]
 }
 
 func (p *stringPayload) Adjust(size int) Payload {
