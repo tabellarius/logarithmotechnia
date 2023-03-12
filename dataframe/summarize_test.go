@@ -37,7 +37,7 @@ func TestDataframe_Summarize(t *testing.T) {
 				vector.IntegerWithNA([]int{0, 0, 0, 280}, []bool{true, true, true, false}),
 				vector.String([]string{"A", "B", "C", "D"}),
 			},
-			columnNames: []string{"A", "B", "D"},
+			columnNames: []string{"A_sum", "B_sum", "D"},
 		},
 		{
 			name:      "columns",
@@ -67,7 +67,7 @@ func TestDataframe_Summarize(t *testing.T) {
 				vector.IntegerWithNA([]int{0, 0, 0, 280}, []bool{true, true, true, false}),
 				vector.String([]string{"A", "B", "C", "D"}),
 			},
-			columnNames: []string{"A", "B", "D"},
+			columnNames: []string{"A_sum", "B_sum", "D"},
 		},
 		{
 			name:      "column array",
