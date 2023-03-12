@@ -224,3 +224,30 @@ would like to rename (check function comment). For example:
 ```go
 renamedIris := iris.Rename([]string{"sepal_width", "s_width"})
 ```
+
+Summarization and analytical functions
+--------------------------------------
+Let's suggest you have a bucketed by "sepal_length" dataframe from the example above, and you want to find out 
+max and min values for "petal_length" for every bucket. It is somewhat cumbersome for now as this is two-step 
+operation. First, we group our bucketed dataframe by necessary columns:
+
+```go
+	grouped := bucketed.GroupBy("bucket")
+```
+Then we summarize it:
+```go
+	stats := grouped.Summarize(
+		grouped.C("petal_length").Min(),
+		grouped.C("petal_length").Max(),
+	)
+	
+    fmt.Println(stats)
+```
+And we get the result:
+```
+# of columns: 3, # of rows: 2
+
+petal_length_min: [(float)]1.200, 1.000]
+petal_length_max: [(float)]6.900, 4.500]
+bucket: [(integer)]2, 1]
+```
