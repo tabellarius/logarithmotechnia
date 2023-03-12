@@ -28,16 +28,16 @@ type confCSV struct {
 //   - CSVOptionSkipFirstLine(skip bool) - skip first line.if true.
 //   - CSVOptionSeparator(separator rune) - if you need a separator which differs from default one (",").
 //   - CSVOptionDataframeOptions(options ...vector.Option) - options to pass to the new dataframe.
-func FromCSVFile(filename string, options ...ConfOption) (*Dataframe, error) {
+func FromCSVFile(filename string, options ...ConfOption) (df *Dataframe, err error) {
 	file, err := os.Open(filename)
 	if err != nil {
 		return nil, err
 	}
 	defer func(file *os.File) {
-		_ = file.Close()
+		err = file.Close()
 	}(file)
 
-	df, err := FromCSV(file, options...)
+	df, err = FromCSV(file, options...)
 
 	return df, err
 }
@@ -164,6 +164,48 @@ func convertVectors(vecs []vector.Vector, types []string) []vector.Vector {
 	}
 
 	return vecs
+}
+
+func (df *Dataframe) ToCSVFile(filename string, options ...Option) (err error) {
+	file, err := os.Create(filename)
+	if err != nil {
+		return err
+	}
+	defer func(file *os.File) {
+		err = file.Close()
+	}(file)
+
+	err = df.ToCSV(file, options...)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (df *Dataframe) ToCSV(writer io.Writer, options ...Option) error {
+	csvWriter := csv.NewWriter(writer)
+
+	for _, option := range options {
+		if option.Key() == optionCSVSeparator {
+			csvWriter.Comma = option.Value().(rune)
+		}
+	}
+
+	record := make([]string, df.ColNum())
+	for row := 1; row <= df.RowNum(); row++ {
+		for col := 0; col < df.ColNum(); col++ {
+			record[col] = df.columns[col].StrForElem(row)
+		}
+		err := csvWriter.Write(record)
+		if err != nil {
+			return err
+		}
+	}
+
+	csvWriter.Flush()
+
+	return nil
 }
 
 func CSVOptionSkipFirstLine(skip bool) ConfOption {
