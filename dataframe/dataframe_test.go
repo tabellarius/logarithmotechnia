@@ -609,33 +609,3 @@ func TestDataframe_String(t *testing.T) {
 		t.Error("Dataframe String() failed")
 	}
 }
-
-func TestDataframe_Documentation(t *testing.T) {
-	iris, err := FromCSVFile("../iris.csv", CSVOptionSkipFirstLine(true))
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	bucketed := iris.Mutate(Column{
-		"bucket",
-		iris.Cn("sepal_length").Apply(
-			func(val float64) int {
-				if val < 5 {
-					return 1
-				}
-
-				return 2
-			},
-		),
-	})
-
-	grouped := bucketed.GroupBy("bucket")
-	stats := grouped.Summarize(
-		grouped.C("petal_length").Min(),
-		grouped.C("petal_length").Max(),
-	)
-
-	fmt.Println(stats)
-
-}
