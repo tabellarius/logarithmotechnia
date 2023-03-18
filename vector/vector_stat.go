@@ -24,6 +24,7 @@ type Statistics interface {
 	Sum() Vector
 	Max() Vector
 	Min() Vector
+	Mean() Vector
 }
 
 type Summer interface {
@@ -73,6 +74,23 @@ func (v *vector) Min() Vector {
 		},
 		func(v *vector) Payload {
 			return v.payload.(Minner).Min()
+		},
+	)
+}
+
+type Meaner interface {
+	Mean() Payload
+}
+
+func (v *vector) Mean() Vector {
+	return invokeGroupFunction(
+		v,
+		func(v *vector) bool {
+			_, ok := v.payload.(Meaner)
+			return ok
+		},
+		func(v *vector) Payload {
+			return v.payload.(Meaner).Mean()
 		},
 	)
 }

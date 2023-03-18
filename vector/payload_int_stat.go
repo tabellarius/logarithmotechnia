@@ -17,3 +17,9 @@ func (p *integerPayload) Min() Payload {
 
 	return IntegerPayload([]int{min}, []bool{na}, p.Options()...)
 }
+
+func (p *integerPayload) Mean() Payload {
+	mean, na := genMean(p.data, p.na)
+
+	return FloatPayload([]float64{mean}, []bool{na})
+}

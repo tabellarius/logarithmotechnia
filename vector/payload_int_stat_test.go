@@ -2,6 +2,8 @@ package vector
 
 import (
 	"fmt"
+	"logarithmotechnia/util"
+	"math"
 	"reflect"
 	"testing"
 )
@@ -115,6 +117,44 @@ func TestIntegerPayload_Min(t *testing.T) {
 			if !reflect.DeepEqual(payload.na, data.sumNA) {
 				t.Error(fmt.Sprintf("Min na (%v) is not equal to expected (%v)",
 					payload.na, data.sumNA))
+			}
+		})
+	}
+}
+
+func TestIntegerPayload_Mean(t *testing.T) {
+	testData := []struct {
+		name    string
+		payload *integerPayload
+		data    []float64
+		na      []bool
+	}{
+		{
+			name:    "without na",
+			payload: IntegerPayload([]int{-10, 10, 4, -20, 26}, nil).(*integerPayload),
+			data:    []float64{2},
+			na:      []bool{false},
+		},
+		{
+			name:    "with na",
+			payload: IntegerPayload([]int{-20, 10, 4, -20, 26}, []bool{false, false, true, false, false}).(*integerPayload),
+			data:    []float64{math.NaN()},
+			na:      []bool{true},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			payload := data.payload.Mean().(*floatPayload)
+
+			if !util.EqualFloatArrays(payload.data, data.data) {
+				t.Error(fmt.Sprintf("Mean data (%v) is not equal to expected (%v)",
+					payload.data, data.data))
+			}
+
+			if !reflect.DeepEqual(payload.na, data.na) {
+				t.Error(fmt.Sprintf("Mean na (%v) is not equal to expected (%v)",
+					payload.na, data.na))
 			}
 		})
 	}
