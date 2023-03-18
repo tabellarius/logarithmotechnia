@@ -1,14 +1,19 @@
 package vector
 
-func invokeGroupFunction(v *vector, checkFn func(*vector) bool, actionFn func(*vector) Payload) Vector {
+func invokeGroupFunction(
+	v *vector,
+	checkFn func(*vector) bool,
+	actionFn func(*vector) Payload,
+	columnPostfix string,
+) Vector {
 	if v.IsGrouped() {
 		vectors := v.GroupVectors()
 		outValues := make([]Vector, len(vectors))
 		for i := 0; i < len(vectors); i++ {
-			outValues[i] = invokeGroupFunction(vectors[i].(*vector), checkFn, actionFn)
+			outValues[i] = invokeGroupFunction(vectors[i].(*vector), checkFn, actionFn, columnPostfix)
 		}
 
-		return Combine(outValues...).SetName(v.Name() + "_sum")
+		return Combine(outValues...).SetName(v.Name() + columnPostfix)
 	}
 
 	vec := NA(1)
@@ -42,6 +47,7 @@ func (v *vector) Sum() Vector {
 		func(v *vector) Payload {
 			return v.payload.(Summer).Sum()
 		},
+		"_sum",
 	)
 }
 
@@ -59,6 +65,7 @@ func (v *vector) Max() Vector {
 		func(v *vector) Payload {
 			return v.payload.(Maxxer).Max()
 		},
+		"_max",
 	)
 }
 
@@ -76,6 +83,7 @@ func (v *vector) Min() Vector {
 		func(v *vector) Payload {
 			return v.payload.(Minner).Min()
 		},
+		"_min",
 	)
 }
 
@@ -93,6 +101,7 @@ func (v *vector) Mean() Vector {
 		func(v *vector) Payload {
 			return v.payload.(Meaner).Mean()
 		},
+		"_mean",
 	)
 }
 
@@ -110,5 +119,6 @@ func (v *vector) Median() Vector {
 		func(v *vector) Payload {
 			return v.payload.(Medianer).Median()
 		},
+		"_median",
 	)
 }
