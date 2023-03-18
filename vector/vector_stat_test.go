@@ -142,12 +142,12 @@ func TestVector_Mean(t *testing.T) {
 			valVec: NA(1),
 		},
 		{
-			name:   "normal grouped minner",
+			name:   "normal grouped meaner",
 			vec:    Integer([]int{10, 2, 10, 12, 0, 10, 4}).GroupByIndices([][]int{{1, 3, 6}, {2, 4, 7}, {5}}),
 			valVec: Float([]float64{10, 6, 0}),
 		},
 		{
-			name:   "normal grouped non-minner",
+			name:   "normal grouped non-meaner",
 			vec:    String([]string{"1", "2", "8", "12", "18"}).GroupByIndices([][]int{{1, 3}, {2, 5}, {4}}),
 			valVec: NA(3),
 		},
@@ -159,6 +159,46 @@ func TestVector_Mean(t *testing.T) {
 
 			if !CompareVectorsForTest(valVec, data.valVec) {
 				t.Error(fmt.Sprintf("Mean vector (%v) does not match expected (%v)",
+					valVec, data.valVec))
+			}
+		})
+	}
+}
+
+func TestVector_Median(t *testing.T) {
+	testData := []struct {
+		name   string
+		vec    Vector
+		valVec Vector
+	}{
+		{
+			name:   "normal medianer",
+			vec:    Integer([]int{-100, 2, 8, 12, 180}),
+			valVec: Integer([]int{8}),
+		},
+		{
+			name:   "normal non-medianer",
+			vec:    String([]string{"10", "2", "8", "12", "18"}),
+			valVec: NA(1),
+		},
+		{
+			name:   "normal grouped medianer",
+			vec:    Float([]float64{10, 2, 10, 12, 0, 10, 4}).GroupByIndices([][]int{{1, 3, 6}, {2, 4, 7}, {5}}),
+			valVec: Float([]float64{10, 4, 0}),
+		},
+		{
+			name:   "normal grouped non-medianer",
+			vec:    String([]string{"1", "2", "8", "12", "18"}).GroupByIndices([][]int{{1, 3}, {2, 5}, {4}}),
+			valVec: NA(3),
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			valVec := data.vec.Median()
+
+			if !CompareVectorsForTest(valVec, data.valVec) {
+				t.Error(fmt.Sprintf("Median vector (%v) does not match expected (%v)",
 					valVec, data.valVec))
 			}
 		})

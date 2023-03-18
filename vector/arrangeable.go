@@ -9,11 +9,19 @@ import (
 type DefArrangeable struct {
 	Length int
 	DefNAble
-	FnLess  func(i, j int) bool
-	FnEqual func(i, j int) bool
+	FnLess      func(i, j int) bool
+	FnEqual     func(i, j int) bool
+	sortedCache []int
 }
 
 func (ar *DefArrangeable) sortedIndices() []int {
+	if ar.sortedCache != nil {
+		cached := make([]int, len(ar.sortedCache))
+		copy(cached, ar.sortedCache)
+
+		return ar.sortedCache
+	}
+
 	indices := indicesArray(ar.Length)
 
 	var fn func(i, j int) bool

@@ -77,3 +77,29 @@ func genMean[T calculable](data []T, na []bool) (float64, bool) {
 
 	return sum / float64(length), false
 }
+
+func genMedian[T constraints.Integer | constraints.Float](
+	data []T,
+	na DefNAble,
+	sorter func() []int,
+) (T, bool) {
+	var median T
+	length := len(data)
+
+	if length == 0 || na.HasNA() {
+		return 0, true
+	}
+
+	if length == 1 {
+		return data[0], false
+	}
+
+	sortedIndices := sorter()
+	if length%2 == 0 {
+		median = (data[sortedIndices[length/2-1]] + data[sortedIndices[length/2]]) / 2
+	} else {
+		median = data[sortedIndices[length/2]]
+	}
+
+	return median, false
+}

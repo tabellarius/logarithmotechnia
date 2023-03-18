@@ -25,6 +25,7 @@ type Statistics interface {
 	Max() Vector
 	Min() Vector
 	Mean() Vector
+	Median() Vector
 }
 
 type Summer interface {
@@ -91,6 +92,23 @@ func (v *vector) Mean() Vector {
 		},
 		func(v *vector) Payload {
 			return v.payload.(Meaner).Mean()
+		},
+	)
+}
+
+type Medianer interface {
+	Median() Payload
+}
+
+func (v *vector) Median() Vector {
+	return invokeGroupFunction(
+		v,
+		func(v *vector) bool {
+			_, ok := v.payload.(Medianer)
+			return ok
+		},
+		func(v *vector) Payload {
+			return v.payload.(Medianer).Median()
 		},
 	)
 }
