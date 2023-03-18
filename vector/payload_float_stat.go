@@ -23,3 +23,9 @@ func (p *floatPayload) Mean() Payload {
 
 	return FloatPayload([]float64{mean}, []bool{na})
 }
+
+func (p *floatPayload) Median() Payload {
+	median, na := genMedian(p.data, p.DefNAble, p.sortedIndices)
+
+	return FloatPayload([]float64{median}, []bool{na})
+}

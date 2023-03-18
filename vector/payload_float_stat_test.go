@@ -159,3 +159,59 @@ func TestFloatPayload_Mean(t *testing.T) {
 		})
 	}
 }
+
+func TestFloatPayload_Median(t *testing.T) {
+	testData := []struct {
+		name    string
+		payload *floatPayload
+		data    []float64
+		na      []bool
+	}{
+		{
+			name:    "without na odd",
+			payload: FloatPayload([]float64{10, 26, 4, -20, 26}, nil).(*floatPayload),
+			data:    []float64{10},
+			na:      []bool{false},
+		},
+		{
+			name:    "without na even",
+			payload: FloatPayload([]float64{10, 26, 4, -20, 26, 16}, nil).(*floatPayload),
+			data:    []float64{13},
+			na:      []bool{false},
+		},
+		{
+			name:    "with na",
+			payload: FloatPayload([]float64{10, 26, 4, -20, 26}, []bool{false, false, true, false, false}).(*floatPayload),
+			data:    []float64{math.NaN()},
+			na:      []bool{true},
+		},
+		{
+			name:    "one element",
+			payload: FloatPayload([]float64{10}, nil).(*floatPayload),
+			data:    []float64{10},
+			na:      []bool{false},
+		},
+		{
+			name:    "zero elements",
+			payload: FloatPayload([]float64{}, nil).(*floatPayload),
+			data:    []float64{math.NaN()},
+			na:      []bool{true},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			payload := data.payload.Median().(*floatPayload)
+
+			if !util.EqualFloatArrays(payload.data, data.data) {
+				t.Error(fmt.Sprintf("Median data (%v) is not equal to expected (%v)",
+					payload.data, data.data))
+			}
+
+			if !reflect.DeepEqual(payload.na, data.na) {
+				t.Error(fmt.Sprintf("Mediann na (%v) is not equal to expected (%v)",
+					payload.na, data.na))
+			}
+		})
+	}
+}
