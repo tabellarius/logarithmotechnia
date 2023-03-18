@@ -54,3 +54,26 @@ func genMax[T constraints.Ordered](data []T, na []bool) (T, bool) {
 
 	return max, false
 }
+
+type calculable interface {
+	constraints.Integer | constraints.Float
+}
+
+func genMean[T calculable](data []T, na []bool) (float64, bool) {
+	var sum float64
+	length := len(data)
+
+	if length == 0 {
+		return 0, false
+	}
+
+	for i := 0; i < length; i++ {
+		if na[i] {
+			return 0, true
+		}
+
+		sum += float64(data[i])
+	}
+
+	return sum / float64(length), false
+}

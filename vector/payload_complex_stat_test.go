@@ -46,3 +46,42 @@ func TestComplexPayload_Sum(t *testing.T) {
 		})
 	}
 }
+
+func TestComplexPayload_Mean(t *testing.T) {
+	testData := []struct {
+		name    string
+		payload *complexPayload
+		data    []complex128
+		na      []bool
+	}{
+		{
+			name:    "without na",
+			payload: ComplexPayload([]complex128{-10 + 10i, 10 - 5i, 4 - 5i, -20 + 20i, 26 - 10i}, nil).(*complexPayload),
+			data:    []complex128{2 + 2i},
+			na:      []bool{false},
+		},
+		{
+			name: "with na",
+			payload: ComplexPayload([]complex128{-20 + 10i, 10 - 5i, 4 + 2i, -20 + 20i, 26 - 26i},
+				[]bool{false, false, true, false, false}).(*complexPayload),
+			data: []complex128{cmplx.NaN()},
+			na:   []bool{true},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			payload := data.payload.Mean().(*complexPayload)
+
+			if !util.EqualComplexArrays(payload.data, data.data) {
+				t.Error(fmt.Sprintf("Sum data (%v) is not equal to expected (%v)",
+					payload.data, data.data))
+			}
+
+			if !reflect.DeepEqual(payload.na, data.na) {
+				t.Error(fmt.Sprintf("Sum data (%v) is not equal to expected (%v)",
+					payload.na, data.na))
+			}
+		})
+	}
+}
