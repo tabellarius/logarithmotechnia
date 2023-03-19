@@ -215,3 +215,253 @@ func TestFloatPayload_Median(t *testing.T) {
 		})
 	}
 }
+
+func TestFloatPayload_Prod(t *testing.T) {
+	testData := []struct {
+		name    string
+		payload *floatPayload
+		data    []float64
+		na      []bool
+	}{
+		{
+			name:    "without na",
+			payload: FloatPayload([]float64{10, 26, 4, -20, 26}, nil).(*floatPayload),
+			data:    []float64{-540800},
+			na:      []bool{false},
+		},
+		{
+			name:    "with na",
+			payload: FloatPayload([]float64{10, 26, 4, -20, 26}, []bool{false, false, true, false, false}).(*floatPayload),
+			data:    []float64{math.NaN()},
+			na:      []bool{true},
+		},
+		{
+			name:    "one element",
+			payload: FloatPayload([]float64{10}, nil).(*floatPayload),
+			data:    []float64{10},
+			na:      []bool{false},
+		},
+		{
+			name:    "zero elements",
+			payload: FloatPayload([]float64{}, nil).(*floatPayload),
+			data:    []float64{0},
+			na:      []bool{false},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			payload := data.payload.Prod().(*floatPayload)
+
+			if !util.EqualFloatArrays(payload.data, data.data) {
+				t.Error(fmt.Sprintf("Prod data (%v) is not equal to expected (%v)",
+					payload.data, data.data))
+			}
+
+			if !reflect.DeepEqual(payload.na, data.na) {
+				t.Error(fmt.Sprintf("Prod na (%v) is not equal to expected (%v)",
+					payload.na, data.na))
+			}
+		})
+	}
+}
+
+func TestFloatPayload_CumSum(t *testing.T) {
+	testData := []struct {
+		name    string
+		payload *floatPayload
+		data    []float64
+		na      []bool
+	}{
+		{
+			name:    "without na",
+			payload: FloatPayload([]float64{10, 26, 4, -20, 26}, nil).(*floatPayload),
+			data:    []float64{10, 36, 40, 20, 46},
+			na:      []bool{false, false, false, false, false},
+		},
+		{
+			name:    "with na",
+			payload: FloatPayload([]float64{10, 26, 4, -20, 26}, []bool{false, false, true, false, false}).(*floatPayload),
+			data:    []float64{10, 36, math.NaN(), math.NaN(), math.NaN()},
+			na:      []bool{false, false, true, true, true},
+		},
+		{
+			name:    "one element",
+			payload: FloatPayload([]float64{10}, nil).(*floatPayload),
+			data:    []float64{10},
+			na:      []bool{false},
+		},
+		{
+			name:    "zero elements",
+			payload: FloatPayload([]float64{}, nil).(*floatPayload),
+			data:    []float64{},
+			na:      []bool{},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			payload := data.payload.CumSum().(*floatPayload)
+
+			if !util.EqualFloatArrays(payload.data, data.data) {
+				t.Error(fmt.Sprintf("CumSum data (%v) is not equal to expected (%v)",
+					payload.data, data.data))
+			}
+
+			if !reflect.DeepEqual(payload.na, data.na) {
+				t.Error(fmt.Sprintf("CumSum na (%v) is not equal to expected (%v)",
+					payload.na, data.na))
+			}
+		})
+	}
+}
+
+func TestFloatPayload_CumProd(t *testing.T) {
+	testData := []struct {
+		name    string
+		payload *floatPayload
+		data    []float64
+		na      []bool
+	}{
+		{
+			name:    "without na",
+			payload: FloatPayload([]float64{10, 26, 4, -20, 26}, nil).(*floatPayload),
+			data:    []float64{10, 260, 1040, -20800, -540800},
+			na:      []bool{false, false, false, false, false},
+		},
+		{
+			name:    "with na",
+			payload: FloatPayload([]float64{10, 26, 4, -20, 26}, []bool{false, false, true, false, false}).(*floatPayload),
+			data:    []float64{10, 260, math.NaN(), math.NaN(), math.NaN()},
+			na:      []bool{false, false, true, true, true},
+		},
+		{
+			name:    "one element",
+			payload: FloatPayload([]float64{10}, nil).(*floatPayload),
+			data:    []float64{10},
+			na:      []bool{false},
+		},
+		{
+			name:    "zero elements",
+			payload: FloatPayload([]float64{}, nil).(*floatPayload),
+			data:    []float64{},
+			na:      []bool{},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			payload := data.payload.CumProd().(*floatPayload)
+
+			if !util.EqualFloatArrays(payload.data, data.data) {
+				t.Error(fmt.Sprintf("CumProd data (%v) is not equal to expected (%v)",
+					payload.data, data.data))
+			}
+
+			if !reflect.DeepEqual(payload.na, data.na) {
+				t.Error(fmt.Sprintf("CumProd na (%v) is not equal to expected (%v)",
+					payload.na, data.na))
+			}
+		})
+	}
+}
+
+func TestFloatPayload_CumMax(t *testing.T) {
+	testData := []struct {
+		name    string
+		payload *floatPayload
+		data    []float64
+		na      []bool
+	}{
+		{
+			name:    "without na",
+			payload: FloatPayload([]float64{10, 26, 4, 35, -2}, nil).(*floatPayload),
+			data:    []float64{10, 26, 26, 35, 35},
+			na:      []bool{false, false, false, false, false},
+		},
+		{
+			name:    "with na",
+			payload: FloatPayload([]float64{10, 26, 4, -20, 26}, []bool{false, false, true, false, false}).(*floatPayload),
+			data:    []float64{10, 26, math.NaN(), math.NaN(), math.NaN()},
+			na:      []bool{false, false, true, true, true},
+		},
+		{
+			name:    "one element",
+			payload: FloatPayload([]float64{10}, nil).(*floatPayload),
+			data:    []float64{10},
+			na:      []bool{false},
+		},
+		{
+			name:    "zero elements",
+			payload: FloatPayload([]float64{}, nil).(*floatPayload),
+			data:    []float64{},
+			na:      []bool{},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			payload := data.payload.CumMax().(*floatPayload)
+
+			if !util.EqualFloatArrays(payload.data, data.data) {
+				t.Error(fmt.Sprintf("CumMax data (%v) is not equal to expected (%v)",
+					payload.data, data.data))
+			}
+
+			if !reflect.DeepEqual(payload.na, data.na) {
+				t.Error(fmt.Sprintf("CumMax na (%v) is not equal to expected (%v)",
+					payload.na, data.na))
+			}
+		})
+	}
+}
+
+func TestFloatPayload_CumMin(t *testing.T) {
+	testData := []struct {
+		name    string
+		payload *floatPayload
+		data    []float64
+		na      []bool
+	}{
+		{
+			name:    "without na",
+			payload: FloatPayload([]float64{10, 26, 4, 35, -2}, nil).(*floatPayload),
+			data:    []float64{10, 10, 4, 4, -2},
+			na:      []bool{false, false, false, false, false},
+		},
+		{
+			name:    "with na",
+			payload: FloatPayload([]float64{10, 26, 4, -20, 26}, []bool{false, false, true, false, false}).(*floatPayload),
+			data:    []float64{10, 10, math.NaN(), math.NaN(), math.NaN()},
+			na:      []bool{false, false, true, true, true},
+		},
+		{
+			name:    "one element",
+			payload: FloatPayload([]float64{10}, nil).(*floatPayload),
+			data:    []float64{10},
+			na:      []bool{false},
+		},
+		{
+			name:    "zero elements",
+			payload: FloatPayload([]float64{}, nil).(*floatPayload),
+			data:    []float64{},
+			na:      []bool{},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			payload := data.payload.CumMin().(*floatPayload)
+
+			if !util.EqualFloatArrays(payload.data, data.data) {
+				t.Error(fmt.Sprintf("CumMin data (%v) is not equal to expected (%v)",
+					payload.data, data.data))
+			}
+
+			if !reflect.DeepEqual(payload.na, data.na) {
+				t.Error(fmt.Sprintf("CumMin na (%v) is not equal to expected (%v)",
+					payload.na, data.na))
+			}
+		})
+	}
+}
