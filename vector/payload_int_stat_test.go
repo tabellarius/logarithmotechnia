@@ -215,3 +215,253 @@ func TestIntegerPayload_Median(t *testing.T) {
 		})
 	}
 }
+
+func TestIntegerPayload_Prod(t *testing.T) {
+	testData := []struct {
+		name    string
+		payload *integerPayload
+		data    []int
+		na      []bool
+	}{
+		{
+			name:    "without na",
+			payload: IntegerPayload([]int{10, 26, 4, -20, 26}, nil).(*integerPayload),
+			data:    []int{-540800},
+			na:      []bool{false},
+		},
+		{
+			name:    "with na",
+			payload: IntegerPayload([]int{10, 26, 4, -20, 26}, []bool{false, false, true, false, false}).(*integerPayload),
+			data:    []int{0},
+			na:      []bool{true},
+		},
+		{
+			name:    "one element",
+			payload: IntegerPayload([]int{10}, nil).(*integerPayload),
+			data:    []int{10},
+			na:      []bool{false},
+		},
+		{
+			name:    "zero elements",
+			payload: IntegerPayload([]int{}, nil).(*integerPayload),
+			data:    []int{0},
+			na:      []bool{false},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			payload := data.payload.Prod().(*integerPayload)
+
+			if !reflect.DeepEqual(payload.data, data.data) {
+				t.Error(fmt.Sprintf("Prod data (%v) is not equal to expected (%v)",
+					payload.data, data.data))
+			}
+
+			if !reflect.DeepEqual(payload.na, data.na) {
+				t.Error(fmt.Sprintf("Prod na (%v) is not equal to expected (%v)",
+					payload.na, data.na))
+			}
+		})
+	}
+}
+
+func TestIntegerPayload_CumSum(t *testing.T) {
+	testData := []struct {
+		name    string
+		payload *integerPayload
+		data    []int
+		na      []bool
+	}{
+		{
+			name:    "without na",
+			payload: IntegerPayload([]int{10, 26, 4, -20, 26}, nil).(*integerPayload),
+			data:    []int{10, 36, 40, 20, 46},
+			na:      []bool{false, false, false, false, false},
+		},
+		{
+			name:    "with na",
+			payload: IntegerPayload([]int{10, 26, 4, -20, 26}, []bool{false, false, true, false, false}).(*integerPayload),
+			data:    []int{10, 36, 0, 0, 0},
+			na:      []bool{false, false, true, true, true},
+		},
+		{
+			name:    "one element",
+			payload: IntegerPayload([]int{10}, nil).(*integerPayload),
+			data:    []int{10},
+			na:      []bool{false},
+		},
+		{
+			name:    "zero elements",
+			payload: IntegerPayload([]int{}, nil).(*integerPayload),
+			data:    []int{},
+			na:      []bool{},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			payload := data.payload.CumSum().(*integerPayload)
+
+			if !reflect.DeepEqual(payload.data, data.data) {
+				t.Error(fmt.Sprintf("CumSum data (%v) is not equal to expected (%v)",
+					payload.data, data.data))
+			}
+
+			if !reflect.DeepEqual(payload.na, data.na) {
+				t.Error(fmt.Sprintf("CumSum na (%v) is not equal to expected (%v)",
+					payload.na, data.na))
+			}
+		})
+	}
+}
+
+func TestIntegerPayload_CumProd(t *testing.T) {
+	testData := []struct {
+		name    string
+		payload *integerPayload
+		data    []int
+		na      []bool
+	}{
+		{
+			name:    "without na",
+			payload: IntegerPayload([]int{10, 26, 4, -20, 26}, nil).(*integerPayload),
+			data:    []int{10, 260, 1040, -20800, -540800},
+			na:      []bool{false, false, false, false, false},
+		},
+		{
+			name:    "with na",
+			payload: IntegerPayload([]int{10, 26, 4, -20, 26}, []bool{false, false, true, false, false}).(*integerPayload),
+			data:    []int{10, 260, 0, 0, 0},
+			na:      []bool{false, false, true, true, true},
+		},
+		{
+			name:    "one element",
+			payload: IntegerPayload([]int{10}, nil).(*integerPayload),
+			data:    []int{10},
+			na:      []bool{false},
+		},
+		{
+			name:    "zero elements",
+			payload: IntegerPayload([]int{}, nil).(*integerPayload),
+			data:    []int{},
+			na:      []bool{},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			payload := data.payload.CumProd().(*integerPayload)
+
+			if !reflect.DeepEqual(payload.data, data.data) {
+				t.Error(fmt.Sprintf("CumProd data (%v) is not equal to expected (%v)",
+					payload.data, data.data))
+			}
+
+			if !reflect.DeepEqual(payload.na, data.na) {
+				t.Error(fmt.Sprintf("CumProd na (%v) is not equal to expected (%v)",
+					payload.na, data.na))
+			}
+		})
+	}
+}
+
+func TestIntegerPayload_CumMax(t *testing.T) {
+	testData := []struct {
+		name    string
+		payload *integerPayload
+		data    []int
+		na      []bool
+	}{
+		{
+			name:    "without na",
+			payload: IntegerPayload([]int{10, 26, 4, 35, -2}, nil).(*integerPayload),
+			data:    []int{10, 26, 26, 35, 35},
+			na:      []bool{false, false, false, false, false},
+		},
+		{
+			name:    "with na",
+			payload: IntegerPayload([]int{10, 26, 4, -20, 26}, []bool{false, false, true, false, false}).(*integerPayload),
+			data:    []int{10, 26, 0, 0, 0},
+			na:      []bool{false, false, true, true, true},
+		},
+		{
+			name:    "one element",
+			payload: IntegerPayload([]int{10}, nil).(*integerPayload),
+			data:    []int{10},
+			na:      []bool{false},
+		},
+		{
+			name:    "zero elements",
+			payload: IntegerPayload([]int{}, nil).(*integerPayload),
+			data:    []int{},
+			na:      []bool{},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			payload := data.payload.CumMax().(*integerPayload)
+
+			if !reflect.DeepEqual(payload.data, data.data) {
+				t.Error(fmt.Sprintf("CumMax data (%v) is not equal to expected (%v)",
+					payload.data, data.data))
+			}
+
+			if !reflect.DeepEqual(payload.na, data.na) {
+				t.Error(fmt.Sprintf("CumMax na (%v) is not equal to expected (%v)",
+					payload.na, data.na))
+			}
+		})
+	}
+}
+
+func TestIntegerPayload_CumMin(t *testing.T) {
+	testData := []struct {
+		name    string
+		payload *integerPayload
+		data    []int
+		na      []bool
+	}{
+		{
+			name:    "without na",
+			payload: IntegerPayload([]int{10, 26, 4, 35, -2}, nil).(*integerPayload),
+			data:    []int{10, 10, 4, 4, -2},
+			na:      []bool{false, false, false, false, false},
+		},
+		{
+			name:    "with na",
+			payload: IntegerPayload([]int{10, 26, 4, -20, 26}, []bool{false, false, true, false, false}).(*integerPayload),
+			data:    []int{10, 10, 0, 0, 0},
+			na:      []bool{false, false, true, true, true},
+		},
+		{
+			name:    "one element",
+			payload: IntegerPayload([]int{10}, nil).(*integerPayload),
+			data:    []int{10},
+			na:      []bool{false},
+		},
+		{
+			name:    "zero elements",
+			payload: IntegerPayload([]int{}, nil).(*integerPayload),
+			data:    []int{},
+			na:      []bool{},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			payload := data.payload.CumMin().(*integerPayload)
+
+			if !reflect.DeepEqual(payload.data, data.data) {
+				t.Error(fmt.Sprintf("CumMin data (%v) is not equal to expected (%v)",
+					payload.data, data.data))
+			}
+
+			if !reflect.DeepEqual(payload.na, data.na) {
+				t.Error(fmt.Sprintf("CumMin na (%v) is not equal to expected (%v)",
+					payload.na, data.na))
+			}
+		})
+	}
+}
