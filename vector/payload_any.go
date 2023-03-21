@@ -63,7 +63,7 @@ func (p *anyPayload) Data() []any {
 
 // ByIndices returns a new payload with the values at the given indices.
 func (p *anyPayload) ByIndices(indices []int) Payload {
-	data, na := byIndices(indices, p.data, p.na, nil)
+	data, na := byIndicesWithNA(indices, p.data, p.na, nil)
 
 	return AnyPayload(data, na, p.Options()...)
 }
@@ -109,13 +109,13 @@ func (p *anyPayload) SupportsWhicher(whicher any) bool {
 // Which returns a boolean slice with the same length as the payload. The value at each index is true if the
 // whicher returns true for the value at the same index.
 func (p *anyPayload) Which(whicher any) []bool {
-	return which(p.data, p.na, whicher)
+	return whichWithNA(p.data, p.na, whicher)
 }
 
 // Apply applies the given applier to each value in the payload. The applier can return a new value and a boolean
 // indicating if the value is NA. As a result, a new payload is returned.
 func (p *anyPayload) Apply(applier any) Payload {
-	return apply(p.data, p.na, applier, p.Options())
+	return applyWithNA(p.data, p.na, applier, p.Options())
 }
 
 // ApplyTo applies the given applier to the values at the given indices.

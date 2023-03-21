@@ -31,7 +31,7 @@ func (p *integerPayload) Data() []any {
 }
 
 func (p *integerPayload) ByIndices(indices []int) Payload {
-	data, na := byIndices(indices, p.data, p.na, 0)
+	data, na := byIndicesWithNA(indices, p.data, p.na, 0)
 
 	return IntegerPayload(data, na, p.Options()...)
 }
@@ -41,11 +41,11 @@ func (p *integerPayload) SupportsWhicher(whicher any) bool {
 }
 
 func (p *integerPayload) Which(whicher any) []bool {
-	return which(p.data, p.na, whicher)
+	return whichWithNA(p.data, p.na, whicher)
 }
 
 func (p *integerPayload) Apply(applier any) Payload {
-	return apply(p.data, p.na, applier, p.Options())
+	return applyWithNA(p.data, p.na, applier, p.Options())
 }
 
 func (p *integerPayload) Traverse(traverser any) {

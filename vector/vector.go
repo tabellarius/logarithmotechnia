@@ -77,6 +77,7 @@ type Vector interface {
 	SetOption(Option) bool
 
 	StrForElem(int) string
+	String() string
 
 	Arithmetics
 	Statistics
@@ -183,8 +184,14 @@ type Timeable interface {
 
 // Anyable interface has to be implemented to enable conversion of payload values to anies.
 type Anyable interface {
-	// Anies returns an array of anies and a correspondng array of boolean values where true indicates NA-value.
+	// Anies returns an array of anies and a corresponding array of boolean values where true indicates NA-value.
 	Anies() ([]any, []bool)
+}
+
+// Vectorable interface has to be implemented to enable conversion of payload values to vectors.
+type Vectorable interface {
+	// Vectors returns an array of vectors
+	Vectors() []Vector
 }
 
 // Finder interface has to be implemented to enable searching in a payload.

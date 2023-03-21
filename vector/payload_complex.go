@@ -34,7 +34,7 @@ func (p *complexPayload) Data() []any {
 }
 
 func (p *complexPayload) ByIndices(indices []int) Payload {
-	data, na := byIndices(indices, p.data, p.na, cmplx.NaN())
+	data, na := byIndicesWithNA(indices, p.data, p.na, cmplx.NaN())
 
 	return ComplexPayload(data, na, p.Options()...)
 }
@@ -44,11 +44,11 @@ func (p *complexPayload) SupportsWhicher(whicher any) bool {
 }
 
 func (p *complexPayload) Which(whicher any) []bool {
-	return which(p.data, p.na, whicher)
+	return whichWithNA(p.data, p.na, whicher)
 }
 
 func (p *complexPayload) Apply(applier any) Payload {
-	return apply(p.data, p.na, applier, p.Options())
+	return applyWithNA(p.data, p.na, applier, p.Options())
 }
 
 func (p *complexPayload) ApplyTo(indices []int, applier any) Payload {
