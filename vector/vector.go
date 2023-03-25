@@ -133,7 +133,7 @@ type AppliableTo interface {
 	ApplyTo(indices []int, applier any) Payload
 }
 
-// Traversable allows the payload to be traversed without directly changing or
+// Traversable allows the payload to be traversed without directly changing or accessing its elements.
 type Traversable interface {
 	// Traverse traverses a payload with a traversers. Available traversers depend on a payload's type.
 	Traverse(traverser any)

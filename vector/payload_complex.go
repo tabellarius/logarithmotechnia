@@ -48,7 +48,7 @@ func (p *complexPayload) Which(whicher any) []bool {
 }
 
 func (p *complexPayload) Apply(applier any) Payload {
-	return applyWithNA(p.data, p.na, applier, p.Options())
+	return apply(p.data, p.na, applier, p.Options())
 }
 
 func (p *complexPayload) ApplyTo(indices []int, applier any) Payload {

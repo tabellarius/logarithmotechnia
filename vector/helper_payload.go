@@ -216,39 +216,39 @@ func selectByBriefFuncWithNA[T any](inData []T, inNA []bool, byFunc func(T) bool
 	return booleans
 }
 
-func applyWithNA[T any](inData []T, inNA []bool, applier any, options []Option) Payload {
-	if data, na, ok := applyTypeWithNA[T, bool](inData, inNA, applier, false); ok {
+func apply[T any](inData []T, inNA []bool, applier any, options []Option) Payload {
+	if data, na, ok := applyType[T, bool](inData, inNA, applier, false); ok {
 		return BooleanPayload(data, na, options...)
 	}
 
-	if data, na, ok := applyTypeWithNA[T, int](inData, inNA, applier, 0); ok {
+	if data, na, ok := applyType[T, int](inData, inNA, applier, 0); ok {
 		return IntegerPayload(data, na, options...)
 	}
 
-	if data, na, ok := applyTypeWithNA[T, float64](inData, inNA, applier, math.NaN()); ok {
+	if data, na, ok := applyType[T, float64](inData, inNA, applier, math.NaN()); ok {
 		return FloatPayload(data, na, options...)
 	}
 
-	if data, na, ok := applyTypeWithNA[T, complex128](inData, inNA, applier, cmplx.NaN()); ok {
+	if data, na, ok := applyType[T, complex128](inData, inNA, applier, cmplx.NaN()); ok {
 		return ComplexPayload(data, na, options...)
 	}
 
-	if data, na, ok := applyTypeWithNA[T, string](inData, inNA, applier, ""); ok {
+	if data, na, ok := applyType[T, string](inData, inNA, applier, ""); ok {
 		return StringPayload(data, na, options...)
 	}
 
-	if data, na, ok := applyTypeWithNA[T, time.Time](inData, inNA, applier, time.Time{}); ok {
+	if data, na, ok := applyType[T, time.Time](inData, inNA, applier, time.Time{}); ok {
 		return TimePayload(data, na, options...)
 	}
 
-	if data, na, ok := applyTypeWithNA[T, any](inData, inNA, applier, nil); ok {
+	if data, na, ok := applyType[T, any](inData, inNA, applier, nil); ok {
 		return AnyPayload(data, na, options...)
 	}
 
 	return NAPayload(len(inData))
 }
 
-func applyTypeWithNA[T, S any](inData []T, inNA []bool, applier any, naDef S) ([]S, []bool, bool) {
+func applyType[T, S any](inData []T, inNA []bool, applier any, naDef S) ([]S, []bool, bool) {
 	if applyFunc, ok := applier.(func(int, T, bool) (S, bool)); ok {
 		data, na := applyByFunc[T, S](inData, inNA, applyFunc, naDef)
 		return data, na, true

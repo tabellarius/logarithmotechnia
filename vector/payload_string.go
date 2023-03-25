@@ -53,7 +53,7 @@ func (p *stringPayload) Which(whicher any) []bool {
 }
 
 func (p *stringPayload) Apply(applier any) Payload {
-	return applyWithNA(p.data, p.na, applier, p.Options())
+	return apply(p.data, p.na, applier, p.Options())
 }
 
 func (p *stringPayload) Traverse(traverser any) {

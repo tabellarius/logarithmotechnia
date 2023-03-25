@@ -45,7 +45,7 @@ func (p *integerPayload) Which(whicher any) []bool {
 }
 
 func (p *integerPayload) Apply(applier any) Payload {
-	return applyWithNA(p.data, p.na, applier, p.Options())
+	return apply(p.data, p.na, applier, p.Options())
 }
 
 func (p *integerPayload) Traverse(traverser any) {

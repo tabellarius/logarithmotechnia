@@ -47,7 +47,7 @@ func (p *timePayload) Which(whicher any) []bool {
 }
 
 func (p *timePayload) Apply(applier any) Payload {
-	return applyWithNA(p.data, p.na, applier, p.Options())
+	return apply(p.data, p.na, applier, p.Options())
 }
 
 func (p *timePayload) ApplyTo(indices []int, applier any) Payload {

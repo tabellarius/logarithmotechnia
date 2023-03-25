@@ -3,6 +3,7 @@ package vector
 type vectorPayload struct {
 	length int
 	data   []Vector
+	DefNAble
 }
 
 func (p *vectorPayload) Type() string {
@@ -99,6 +100,22 @@ func (p *vectorPayload) Vectors() []Vector {
 	return vectors
 }
 
+func (p *vectorPayload) Anies() ([]any, []bool) {
+	if p.length == 0 {
+		return []any{}, []bool{}
+	}
+
+	data := make([]any, p.length)
+	for i := 0; i < p.length; i++ {
+		data[i] = p.data[i]
+	}
+
+	na := make([]bool, p.length)
+	copy(na, p.na)
+
+	return data, na
+}
+
 func (p *vectorPayload) SupportsWhicher(whicher any) bool {
 	return supportsWhicher[Vector](whicher)
 }
@@ -108,13 +125,87 @@ func (p *vectorPayload) Which(whicher any) []bool {
 }
 
 func (p *vectorPayload) Apply(applier any) Payload {
-	return nil
+	return apply(p.data, p.na, applier, p.Options())
 }
 
 func (p *vectorPayload) ApplyTo(indices []int, applier any) Payload {
-	return nil
+	data, _ := applyTo(indices, p.data, p.na, applier, nil)
+
+	if data == nil {
+		return NAPayload(p.length)
+	}
+
+	return VectorPayload(data, p.Options()...)
+}
+
+func (p *vectorPayload) Traverse(traverser any) {
+	traverse(p.data, p.na, traverser)
+}
+
+func (p *vectorPayload) String() string {
+	if p.length == 0 {
+		return "<>"
+	}
+
+	str := "<" + p.data[0].String()
+	for _, v := range p.data[1:] {
+		str += ", " + v.String()
+	}
+	str += ">"
+
+	return str
+}
+
+func (p *vectorPayload) Coalesce(payload Payload) Payload {
+	if p.length != payload.Len() {
+		payload = payload.Adjust(p.length)
+	}
+
+	var srcData []Vector
+
+	if same, ok := payload.(*vectorPayload); ok {
+		srcData = same.data
+	} else if intable, ok := payload.(Vectorable); ok {
+		srcData = intable.Vectors()
+	} else {
+		return p
+	}
+
+	dstData := make([]Vector, p.length)
+
+	for i := 0; i < p.length; i++ {
+		if p.data[i] == nil {
+			dstData[i] = srcData[i]
+		} else {
+			dstData[i] = p.data[i]
+		}
+	}
+
+	return VectorPayload(dstData, p.Options()...)
 }
 
 func VectorPayload(data []Vector, options ...Option) Payload {
-	return nil
+	length := len(data)
+
+	vecNA := make([]bool, length)
+	for i, v := range data {
+		if v == nil {
+			vecNA[i] = true
+		}
+	}
+
+	vecData := make([]Vector, length)
+	copy(vecData, data)
+
+	return &vectorPayload{
+		length: length,
+		data:   vecData,
+		DefNAble: DefNAble{
+			na: vecNA,
+		},
+	}
+}
+
+func VectorVector(data []Vector, options ...Option) Vector {
+	return New(VectorPayload(data, options...), options...)
 }
