@@ -15,7 +15,7 @@ func (p *vectorPayload) Len() int {
 }
 
 func (p *vectorPayload) ByIndices(indices []int) Payload {
-	data := byIndicesWithoutNA(indices, p.data, nil)
+	data, _ := byIndicesWithNA(indices, p.data, p.na, nil)
 
 	return VectorPayload(data, p.Options()...)
 }
