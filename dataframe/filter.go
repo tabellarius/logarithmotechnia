@@ -1,7 +1,7 @@
 package dataframe
 
 import (
-	"logarithmotechnia/util"
+	"logarithmotechnia/internal/util"
 	"logarithmotechnia/vector"
 )
 

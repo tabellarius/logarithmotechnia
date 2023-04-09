@@ -39,7 +39,7 @@ func (p *timePayload) ByIndices(indices []int) Payload {
 }
 
 func (p *timePayload) SupportsWhicher(whicher any) bool {
-	return supportsWhicher[time.Time](whicher)
+	return supportsWhicherWithNA[time.Time](whicher)
 }
 
 func (p *timePayload) Which(whicher any) []bool {

@@ -22,3 +22,12 @@ func ToIndices(vecLength int, booleans []bool) []int {
 
 	return indices
 }
+
+func ArrayFromAnyTo[T any](arr []any) []T {
+	arrT := make([]T, len(arr))
+	for i, a := range arr {
+		arrT[i] = a.(T)
+	}
+
+	return arrT
+}

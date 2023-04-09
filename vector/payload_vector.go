@@ -117,7 +117,7 @@ func (p *vectorPayload) Anies() ([]any, []bool) {
 }
 
 func (p *vectorPayload) SupportsWhicher(whicher any) bool {
-	return supportsWhicher[Vector](whicher)
+	return supportsWhicherWithoutNA[Vector](whicher)
 }
 
 func (p *vectorPayload) Which(whicher any) []bool {

@@ -40,7 +40,7 @@ func (p *complexPayload) ByIndices(indices []int) Payload {
 }
 
 func (p *complexPayload) SupportsWhicher(whicher any) bool {
-	return supportsWhicher[complex128](whicher)
+	return supportsWhicherWithNA[complex128](whicher)
 }
 
 func (p *complexPayload) Which(whicher any) []bool {

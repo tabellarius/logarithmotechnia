@@ -120,12 +120,24 @@ func adjustToBiggerSizeWithoutNA[T any](srcData []T, length int, size int) []T {
 	return data
 }
 
-func supportsWhicher[T any](whicher any) bool {
+func supportsWhicherWithNA[T any](whicher any) bool {
 	if _, ok := whicher.(func(int, T, bool) bool); ok {
 		return true
 	}
 
 	if _, ok := whicher.(func(T, bool) bool); ok {
+		return true
+	}
+
+	if _, ok := whicher.(func(T) bool); ok {
+		return true
+	}
+
+	return false
+}
+
+func supportsWhicherWithoutNA[T any](whicher any) bool {
+	if _, ok := whicher.(func(int, T) bool); ok {
 		return true
 	}
 

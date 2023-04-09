@@ -1,7 +1,7 @@
 package vector
 
 import (
-	"logarithmotechnia/util"
+	util2 "logarithmotechnia/internal/util"
 	"time"
 )
 
@@ -27,7 +27,7 @@ type Vector interface {
 	Apply(applier any) Vector
 	ApplyTo(whicher any, applier any) Vector
 	Traverse(traverser any)
-	Append(vec Vector) Vector
+	Append(vec ...Vector) Vector
 	Adjust(size int) Vector
 	Pick(idx int) any
 	Data() []any
@@ -313,7 +313,7 @@ func (v *vector) ByIndices(indices []int) Vector {
 }
 
 func (v *vector) FromTo(from, to int) Vector {
-	return v.ByIndices(util.FromTo(from, to, v.length))
+	return v.ByIndices(util2.FromTo(from, to, v.length))
 }
 
 func (v *vector) Filter(whicher any) Vector {
@@ -376,7 +376,7 @@ func (v *vector) ApplyTo(whicher any, applier any) Vector {
 	whBool, ok := whicher.([]bool)
 	processed := false
 	if ok {
-		indices = util.ToIndices(v.length, whBool)
+		indices = util2.ToIndices(v.length, whBool)
 		processed = true
 	}
 
@@ -387,7 +387,7 @@ func (v *vector) ApplyTo(whicher any, applier any) Vector {
 	}
 
 	if !processed {
-		indices = util.ToIndices(v.length, v.Which(whicher))
+		indices = util2.ToIndices(v.length, v.Which(whicher))
 	}
 
 	newPayload := payload.ApplyTo(indices, applier)
@@ -408,7 +408,7 @@ func (v *vector) applyToAdjustIndicesWhicher(whicher []int) []int {
 }
 
 func (v *vector) filterByBooleans(booleans []bool) []int {
-	return util.ToIndices(v.length, booleans)
+	return util2.ToIndices(v.length, booleans)
 }
 
 func (v *vector) Traverse(traverser any) {
@@ -417,10 +417,17 @@ func (v *vector) Traverse(traverser any) {
 	}
 }
 
-func (v *vector) Append(vec Vector) Vector {
-	newPayload := v.payload.Append(vec.Payload())
+func (v *vector) Append(vecs ...Vector) Vector {
+	if len(vecs) == 0 {
+		return v
+	}
 
-	return New(newPayload, v.Options()...)
+	payload := v.Payload()
+	for _, vec := range vecs {
+		payload = payload.Append(vec.Payload())
+	}
+
+	return New(payload, v.Options()...)
 }
 
 func (v *vector) Adjust(size int) Vector {

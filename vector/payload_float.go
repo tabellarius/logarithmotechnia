@@ -41,7 +41,7 @@ func (p *floatPayload) ByIndices(indices []int) Payload {
 }
 
 func (p *floatPayload) SupportsWhicher(whicher any) bool {
-	return supportsWhicher[float64](whicher)
+	return supportsWhicherWithNA[float64](whicher)
 }
 
 func (p *floatPayload) Which(whicher any) []bool {

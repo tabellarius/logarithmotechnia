@@ -103,7 +103,7 @@ func (p *anyPayload) StrForElem(idx int) string {
 
 // SupportsWhicher returns true if the payload supports the given whicher.
 func (p *anyPayload) SupportsWhicher(whicher any) bool {
-	return supportsWhicher[any](whicher)
+	return supportsWhicherWithNA[any](whicher)
 }
 
 // Which returns a boolean slice with the same length as the payload. The value at each index is true if the

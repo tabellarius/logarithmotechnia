@@ -2,7 +2,7 @@ package vector
 
 import (
 	"fmt"
-	"logarithmotechnia/util"
+	"logarithmotechnia/internal/util"
 	"math"
 	"math/cmplx"
 	"reflect"
