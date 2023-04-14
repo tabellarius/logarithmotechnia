@@ -543,10 +543,10 @@ func TestVectorPayload_Apply(t *testing.T) {
 	}).(*vectorPayload)
 
 	outVectors := []Vector{
-		String([]string{"int"}),
+		String([]string{"integer"}),
 		String([]string{"string"}),
 		String([]string{""}),
-		String([]string{"int"}),
+		String([]string{"integer"}),
 		String([]string{"string"}),
 	}
 
@@ -555,6 +555,7 @@ func TestVectorPayload_Apply(t *testing.T) {
 		in      *vectorPayload
 		applier any
 		out     []Vector
+		na      bool
 	}{
 		{
 			name: "full",
@@ -567,21 +568,130 @@ func TestVectorPayload_Apply(t *testing.T) {
 				return String([]string{v.Type()})
 			},
 			out: outVectors,
+			na:  false,
+		},
+		{
+			name: "compact",
+			in:   inPayload,
+			applier: func(v Vector) Vector {
+				if v == nil {
+					return String([]string{""})
+				}
+
+				return String([]string{v.Type()})
+			},
+			out: outVectors,
+			na:  false,
+		},
+		{
+			name: "not supported",
+			in:   inPayload,
+			applier: func(v int) Vector {
+				return nil
+			},
+			na: true,
 		},
 	}
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			out := data.in.Apply(data.applier).(*vectorPayload).data
-			if !CompareVectorArrs(out, data.out) {
-				t.Errorf("Apply(%v) is not equal to expected %v", out, data.out)
+			if data.na {
+				out := data.in.Apply(data.applier)
+				if out.Type() != PayloadTypeNA {
+					t.Error("Payload is not NA")
+				}
+
+				if out.Len() != data.in.Len() {
+					t.Errorf("Payload length (%v) is not equal to expected %v", out.Len(), data.in.Len())
+				}
+			} else {
+				out := data.in.Apply(data.applier).(*vectorPayload).data
+				if !CompareVectorArrs(out, data.out) {
+					t.Errorf("Apply(%v) is not equal to expected %v", out, data.out)
+				}
 			}
 		})
 	}
 }
 
 func TestVectorPayload_ApplyTo(t *testing.T) {
+	inPayload := VectorPayload([]Vector{
+		Integer([]int{1, 2, 3, 4, 5}),
+		String([]string{"a", "b", "c"}),
+		Float([]float64{1.1, 2.2, 3.3, 4.4, 5.5}),
+		Integer([]int{6, 7, 8, 9}),
+		String([]string{"d"}),
+	}).(*vectorPayload)
 
+	testData := []struct {
+		name    string
+		in      *vectorPayload
+		indices []int
+		applier any
+		out     []Vector
+	}{
+		{
+			name:    "full",
+			in:      inPayload,
+			indices: []int{1, 3, 5},
+			applier: func(i int, v Vector) Vector {
+				if i == 1 || i == 5 {
+					return nil
+				}
+
+				return v
+			},
+			out: []Vector{
+				nil,
+				String([]string{"a", "b", "c"}),
+				Float([]float64{1.1, 2.2, 3.3, 4.4, 5.5}),
+				Integer([]int{6, 7, 8, 9}),
+				nil,
+			},
+		},
+		{
+			name:    "compact",
+			in:      inPayload,
+			indices: []int{2, 3, 4},
+			applier: func(v Vector) Vector {
+				if v.Type() == PayloadTypeInteger {
+					return nil
+				}
+				return v
+			},
+			out: []Vector{
+				Integer([]int{1, 2, 3, 4, 5}),
+				String([]string{"a", "b", "c"}),
+				Float([]float64{1.1, 2.2, 3.3, 4.4, 5.5}),
+				Integer([]int{6, 7, 8, 9}),
+				nil,
+			},
+		},
+		{
+			name:    "not supported",
+			in:      inPayload,
+			indices: []int{1, 2, 3},
+			applier: func(v int) Vector {
+				return nil
+			},
+			out: []Vector{
+				nil,
+				nil,
+				nil,
+				Integer([]int{6, 7, 8, 9}),
+				String([]string{"d"}),
+			},
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			out := data.in.ApplyTo(data.indices, data.applier).(*vectorPayload).data
+			if !CompareVectorArrs(out, data.out) {
+				t.Errorf("Apply(%v) is not equal to expected %v", out, data.out)
+			}
+		})
+	}
 }
 
 func TestVectorPayload_Traverse(t *testing.T) {

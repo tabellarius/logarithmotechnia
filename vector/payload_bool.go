@@ -43,11 +43,11 @@ func (p *booleanPayload) Which(whicher any) []bool {
 }
 
 func (p *booleanPayload) Apply(applier any) Payload {
-	return apply(p.data, p.na, applier, p.Options())
+	return applyWithNA(p.data, p.na, applier, p.Options())
 }
 
 func (p *booleanPayload) ApplyTo(indices []int, applier any) Payload {
-	data, na := applyTo(indices, p.data, p.na, applier, false)
+	data, na := applyToWithNA(indices, p.data, p.na, applier, false)
 
 	if data == nil {
 		return NAPayload(p.length)

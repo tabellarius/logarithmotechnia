@@ -125,11 +125,11 @@ func (p *vectorPayload) Which(whicher any) []bool {
 }
 
 func (p *vectorPayload) Apply(applier any) Payload {
-	return apply(p.data, p.na, applier, p.Options())
+	return applyWithoutNA(p.data, applier, p.Options())
 }
 
 func (p *vectorPayload) ApplyTo(indices []int, applier any) Payload {
-	data, _ := applyTo(indices, p.data, p.na, applier, nil)
+	data := applyToWithoutNA(indices, p.data, applier)
 
 	if data == nil {
 		return NAPayload(p.length)

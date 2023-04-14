@@ -228,39 +228,39 @@ func selectByBriefFuncWithNA[T any](inData []T, inNA []bool, byFunc func(T) bool
 	return booleans
 }
 
-func apply[T any](inData []T, inNA []bool, applier any, options []Option) Payload {
-	if data, na, ok := applyType[T, bool](inData, inNA, applier, false); ok {
+func applyWithNA[T any](inData []T, inNA []bool, applier any, options []Option) Payload {
+	if data, na, ok := applyTypeWithNA[T, bool](inData, inNA, applier, false); ok {
 		return BooleanPayload(data, na, options...)
 	}
 
-	if data, na, ok := applyType[T, int](inData, inNA, applier, 0); ok {
+	if data, na, ok := applyTypeWithNA[T, int](inData, inNA, applier, 0); ok {
 		return IntegerPayload(data, na, options...)
 	}
 
-	if data, na, ok := applyType[T, float64](inData, inNA, applier, math.NaN()); ok {
+	if data, na, ok := applyTypeWithNA[T, float64](inData, inNA, applier, math.NaN()); ok {
 		return FloatPayload(data, na, options...)
 	}
 
-	if data, na, ok := applyType[T, complex128](inData, inNA, applier, cmplx.NaN()); ok {
+	if data, na, ok := applyTypeWithNA[T, complex128](inData, inNA, applier, cmplx.NaN()); ok {
 		return ComplexPayload(data, na, options...)
 	}
 
-	if data, na, ok := applyType[T, string](inData, inNA, applier, ""); ok {
+	if data, na, ok := applyTypeWithNA[T, string](inData, inNA, applier, ""); ok {
 		return StringPayload(data, na, options...)
 	}
 
-	if data, na, ok := applyType[T, time.Time](inData, inNA, applier, time.Time{}); ok {
+	if data, na, ok := applyTypeWithNA[T, time.Time](inData, inNA, applier, time.Time{}); ok {
 		return TimePayload(data, na, options...)
 	}
 
-	if data, na, ok := applyType[T, any](inData, inNA, applier, nil); ok {
+	if data, na, ok := applyTypeWithNA[T, any](inData, inNA, applier, nil); ok {
 		return AnyPayload(data, na, options...)
 	}
 
 	return NAPayload(len(inData))
 }
 
-func applyType[T, S any](inData []T, inNA []bool, applier any, naDef S) ([]S, []bool, bool) {
+func applyTypeWithNA[T, S any](inData []T, inNA []bool, applier any, naDef S) ([]S, []bool, bool) {
 	if applyFunc, ok := applier.(func(int, T, bool) (S, bool)); ok {
 		data, na := applyByFunc[T, S](inData, inNA, applyFunc, naDef)
 		return data, na, true
@@ -277,6 +277,52 @@ func applyType[T, S any](inData []T, inNA []bool, applier any, naDef S) ([]S, []
 	}
 
 	return nil, nil, false
+}
+
+func applyWithoutNA[T any](inData []T, applier any, options []Option) Payload {
+	if data, ok := applyTypeWithoutNA[T, Vector](inData, applier); ok {
+		return VectorPayload(data, options...)
+	}
+
+	return NAPayload(len(inData))
+}
+
+func applyTypeWithoutNA[T, S any](inData []T, applier any) ([]S, bool) {
+	if applyFunc, ok := applier.(func(int, T) S); ok {
+		data := applyByNoNAFunc[T, S](inData, applyFunc)
+		return data, true
+	}
+
+	if applyFunc, ok := applier.(func(T) S); ok {
+		data := applyByNoNACompactFunc[T, S](inData, applyFunc)
+		return data, true
+	}
+
+	return nil, false
+}
+
+func applyByNoNAFunc[T, S any](inData []T, applyFunc func(int, T) S) []S {
+	length := len(inData)
+
+	data := make([]S, length)
+
+	for i := 0; i < length; i++ {
+		data[i] = applyFunc(i+1, inData[i])
+	}
+
+	return data
+}
+
+func applyByNoNACompactFunc[T, S any](inData []T, applyFunc func(T) S) []S {
+	length := len(inData)
+
+	data := make([]S, length)
+
+	for i := 0; i < length; i++ {
+		data[i] = applyFunc(inData[i])
+	}
+
+	return data
 }
 
 func applyByFunc[T, S any](inData []T, inNA []bool,
@@ -339,25 +385,25 @@ func applyByBriefFunc[T, S any](inData []T, inNA []bool,
 	return data, na
 }
 
-func applyTo[T any](indices []int, inData []T, inNA []bool, applier any, naDef T) ([]T, []bool) {
+func applyToWithNA[T any](indices []int, inData []T, inNA []bool, applier any, naDef T) ([]T, []bool) {
 	var data []T = nil
 	var na []bool = nil
 
 	switch applier.(type) {
 	case func(int, T, bool) (T, bool):
-		data, na = applyToByFunc(indices, inData, inNA, applier.(func(int, T, bool) (T, bool)), naDef)
+		data, na = applyToWithNAByFunc(indices, inData, inNA, applier.(func(int, T, bool) (T, bool)), naDef)
 	case func(T, bool) (T, bool):
-		data, na = applyToByCompactFunc(indices, inData, inNA, applier.(func(T, bool) (T, bool)), naDef)
+		data, na = applyToByWithNACompactFunc(indices, inData, inNA, applier.(func(T, bool) (T, bool)), naDef)
 	case func(T) T:
 		data, na = applyToByBriefFunc(indices, inData, inNA, applier.(func(T) T))
 	case T:
-		data, na = applyToByValue(indices, inData, inNA, applier.(T))
+		data, na = applyToWithNAByValue(indices, inData, inNA, applier.(T))
 	}
 
 	return data, na
 }
 
-func applyToByFunc[T any](indices []int, inData []T, inNA []bool,
+func applyToWithNAByFunc[T any](indices []int, inData []T, inNA []bool,
 	applyFunc func(int, T, bool) (T, bool), naDef T) ([]T, []bool) {
 	length := len(inData)
 
@@ -380,7 +426,7 @@ func applyToByFunc[T any](indices []int, inData []T, inNA []bool,
 	return data, na
 }
 
-func applyToByCompactFunc[T any](indices []int, inData []T, inNA []bool,
+func applyToByWithNACompactFunc[T any](indices []int, inData []T, inNA []bool,
 	applyFunc func(T, bool) (T, bool), naDef T) ([]T, []bool) {
 	length := len(inData)
 
@@ -403,7 +449,7 @@ func applyToByCompactFunc[T any](indices []int, inData []T, inNA []bool,
 	return data, na
 }
 
-func applyToByValue[T any](indices []int, inData []T, inNA []bool, val T) ([]T, []bool) {
+func applyToWithNAByValue[T any](indices []int, inData []T, inNA []bool, val T) ([]T, []bool) {
 	data := make([]T, len(inData))
 	na := make([]bool, len(inData))
 
@@ -412,13 +458,69 @@ func applyToByValue[T any](indices []int, inData []T, inNA []bool, val T) ([]T, 
 
 	for _, idx := range indices {
 		idx = idx - 1
-		if inNA[idx] {
-			continue
-		}
 		data[idx] = val
+		na[idx] = false
 	}
 
 	return data, na
+}
+
+func applyToWithoutNA[T any](indices []int, inData []T, applier any) []T {
+	var data []T = nil
+
+	switch applier.(type) {
+	case func(int, T, bool) (T, bool):
+		data = applyToWithoutNAByFunc(indices, inData, applier.(func(int, T) T))
+	case func(T, bool) (T, bool):
+		data = applyToByWithoutNACompactFunc(indices, inData, applier.(func(T) T))
+	case T:
+		data = applyToWithoutNAByValue(indices, inData, applier.(T))
+	}
+
+	return data
+}
+
+func applyToWithoutNAByFunc[T any](indices []int, inData []T, applyFunc func(int, T) T) []T {
+	length := len(inData)
+	data := make([]T, length)
+	copy(data, inData)
+
+	for _, idx := range indices {
+		idx = idx - 1
+		dataVal := applyFunc(idx+1, inData[idx])
+		data[idx] = dataVal
+	}
+
+	return data
+}
+
+func applyToByWithoutNACompactFunc[T any](indices []int, inData []T, applyFunc func(T) T) []T {
+	length := len(inData)
+	data := make([]T, length)
+	copy(data, inData)
+
+	for _, idx := range indices {
+		idx = idx - 1
+		dataVal := applyFunc(inData[idx])
+		data[idx] = dataVal
+	}
+
+	return data
+}
+
+func applyToWithoutNAByValue[T any](indices []int, inData []T, val T) []T {
+	data := make([]T, len(inData))
+	na := make([]bool, len(inData))
+
+	copy(data, inData)
+
+	for _, idx := range indices {
+		idx = idx - 1
+		data[idx] = val
+		na[idx] = false
+	}
+
+	return data
 }
 
 func traverse[T any](inData []T, inNA []bool, traverser any) {

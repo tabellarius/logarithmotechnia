@@ -115,12 +115,12 @@ func (p *anyPayload) Which(whicher any) []bool {
 // Apply applies the given applier to each value in the payload. The applier can return a new value and a boolean
 // indicating if the value is NA. As a result, a new payload is returned.
 func (p *anyPayload) Apply(applier any) Payload {
-	return apply(p.data, p.na, applier, p.Options())
+	return applyWithNA(p.data, p.na, applier, p.Options())
 }
 
 // ApplyTo applies the given applier to the values at the given indices.
 func (p *anyPayload) ApplyTo(indices []int, applier any) Payload {
-	data, na := applyTo(indices, p.data, p.na, applier, nil)
+	data, na := applyToWithNA(indices, p.data, p.na, applier, nil)
 
 	if data == nil {
 		return NAPayload(p.length)
