@@ -254,7 +254,10 @@ func TestVectorPayload_Adjust(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			CompareVectorArrs(inPayload.(*vectorPayload).data, data.out.(*vectorPayload).data)
+			out := data.in.Adjust(data.size)
+			if !CompareVectorArrs(out.(*vectorPayload).data, data.out.(*vectorPayload).data) {
+				t.Errorf("Adjust (%v) is not equal to expected %v", out, data.out)
+			}
 		})
 	}
 }
@@ -756,10 +759,34 @@ func TestVectorPayload_Traverse(t *testing.T) {
 	}
 }
 
-func TestVectorPayload_String(t *testing.T) {
-
-}
-
 func TestVectorPayload_Coalesce(t *testing.T) {
+	one := VectorPayload([]Vector{
+		Integer([]int{1, 2, 3, 4, 5}),
+		nil,
+		Float([]float64{1.1, 2.2, 3.3, 4.4, 5.5}),
+		nil,
+		String([]string{"d"}),
+	}).(*vectorPayload)
 
+	two := VectorPayload([]Vector{
+		nil,
+		String([]string{"a", "b", "c"}),
+		Float([]float64{1.1, 2.2, 3.3, 4.4, 5.5}),
+		String([]string{"d"}),
+		Integer([]int{6, 7, 8, 9}),
+	}).(*vectorPayload)
+
+	out := one.Coalesce(two).(*vectorPayload)
+
+	expected := []Vector{
+		Integer([]int{1, 2, 3, 4, 5}),
+		String([]string{"a", "b", "c"}),
+		Float([]float64{1.1, 2.2, 3.3, 4.4, 5.5}),
+		String([]string{"d"}),
+		String([]string{"d"}),
+	}
+
+	if !CompareVectorArrs(out.data, expected) {
+		t.Errorf("Coalesce(%v) is not equal to expected %v", out.data, expected)
+	}
 }
