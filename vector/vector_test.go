@@ -2,7 +2,7 @@ package vector
 
 import (
 	"fmt"
-	"logarithmotechnia/util"
+	"logarithmotechnia/internal/util"
 	"math"
 	"math/cmplx"
 	"reflect"
@@ -1222,31 +1222,41 @@ func TestVector_Append(t *testing.T) {
 
 	testData := []struct {
 		name    string
-		vec     Vector
+		vecs    []Vector
 		outData []int
 		outNA   []bool
 	}{
 		{
 			name:    "boolean",
-			vec:     BooleanWithNA([]bool{true, true}, []bool{true, false}),
+			vecs:    []Vector{BooleanWithNA([]bool{true, true}, []bool{true, false})},
 			outData: []int{1, 2, 3, 0, 1},
 			outNA:   []bool{false, false, false, true, false},
 		},
 		{
 			name:    "integer",
-			vec:     IntegerWithNA([]int{4, 5}, []bool{true, false}),
+			vecs:    []Vector{IntegerWithNA([]int{4, 5}, []bool{true, false})},
 			outData: []int{1, 2, 3, 0, 5},
 			outNA:   []bool{false, false, false, true, false},
 		},
 		{
+			name: "several integers",
+			vecs: []Vector{
+				IntegerWithNA([]int{4, 5}, []bool{true, false}),
+				Integer([]int{6, 7}),
+				IntegerWithNA([]int{8, 9, 10}, []bool{true, true, false}),
+			},
+			outData: []int{1, 2, 3, 0, 5, 6, 7, 0, 0, 10},
+			outNA:   []bool{false, false, false, true, false, false, false, true, true, false},
+		},
+		{
 			name:    "empty",
-			vec:     IntegerWithNA([]int{}, []bool{}),
+			vecs:    []Vector{IntegerWithNA([]int{}, []bool{})},
 			outData: []int{1, 2, 3},
 			outNA:   []bool{false, false, false},
 		},
 		{
 			name:    "na",
-			vec:     NA(2),
+			vecs:    []Vector{NA(2)},
 			outData: []int{1, 2, 3, 0, 0},
 			outNA:   []bool{false, false, false, true, true},
 		},
@@ -1254,12 +1264,17 @@ func TestVector_Append(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			outVector := vec.Append(data.vec).(*vector)
+			outVector := vec.Append(data.vecs...).(*vector)
 			outPayload := outVector.payload.(*integerPayload)
 
-			if outVector.Len() != vec.Len()+data.vec.Len() {
+			length := vec.Len()
+			for _, v := range data.vecs {
+				length += v.Len()
+			}
+
+			if outVector.Len() != length {
 				t.Error(fmt.Sprintf("Output length (%d) does not match expected (%d)",
-					outVector.Len(), vec.Len()+data.vec.Len()))
+					outVector.Len(), length))
 			}
 			if !reflect.DeepEqual(data.outData, outPayload.data) {
 				t.Error(fmt.Sprintf("Output data (%v) does not match expected (%v)",

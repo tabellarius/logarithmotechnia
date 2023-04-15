@@ -33,25 +33,25 @@ func (p *timePayload) Data() []any {
 }
 
 func (p *timePayload) ByIndices(indices []int) Payload {
-	data, na := byIndices(indices, p.data, p.na, time.Time{})
+	data, na := byIndicesWithNA(indices, p.data, p.na, time.Time{})
 
 	return TimePayload(data, na, p.Options()...)
 }
 
 func (p *timePayload) SupportsWhicher(whicher any) bool {
-	return supportsWhicher[time.Time](whicher)
+	return supportsWhicherWithNA[time.Time](whicher)
 }
 
 func (p *timePayload) Which(whicher any) []bool {
-	return which(p.data, p.na, whicher)
+	return whichWithNA(p.data, p.na, whicher)
 }
 
 func (p *timePayload) Apply(applier any) Payload {
-	return apply(p.data, p.na, applier, p.Options())
+	return applyWithNA(p.data, p.na, applier, p.Options())
 }
 
 func (p *timePayload) ApplyTo(indices []int, applier any) Payload {
-	data, na := applyTo(indices, p.data, p.na, applier, time.Time{})
+	data, na := applyToWithNA(indices, p.data, p.na, applier, time.Time{})
 
 	if data == nil {
 		return NAPayload(p.length)
@@ -61,7 +61,7 @@ func (p *timePayload) ApplyTo(indices []int, applier any) Payload {
 }
 
 func (p *timePayload) Traverse(traverser any) {
-	traverse(p.data, p.na, traverser)
+	traverseWithNA(p.data, p.na, traverser)
 }
 
 func (p *timePayload) SupportsSummarizer(summarizer any) bool {

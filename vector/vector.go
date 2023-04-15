@@ -1,7 +1,7 @@
 package vector
 
 import (
-	"logarithmotechnia/util"
+	util2 "logarithmotechnia/internal/util"
 	"time"
 )
 
@@ -27,7 +27,7 @@ type Vector interface {
 	Apply(applier any) Vector
 	ApplyTo(whicher any, applier any) Vector
 	Traverse(traverser any)
-	Append(vec Vector) Vector
+	Append(vec ...Vector) Vector
 	Adjust(size int) Vector
 	Pick(idx int) any
 	Data() []any
@@ -77,6 +77,7 @@ type Vector interface {
 	SetOption(Option) bool
 
 	StrForElem(int) string
+	String() string
 
 	Arithmetics
 	Statistics
@@ -132,7 +133,7 @@ type AppliableTo interface {
 	ApplyTo(indices []int, applier any) Payload
 }
 
-// Traversable allows the payload to be traversed without directly changing or
+// Traversable allows the payload to be traversed without directly changing or accessing its elements.
 type Traversable interface {
 	// Traverse traverses a payload with a traversers. Available traversers depend on a payload's type.
 	Traverse(traverser any)
@@ -183,8 +184,14 @@ type Timeable interface {
 
 // Anyable interface has to be implemented to enable conversion of payload values to anies.
 type Anyable interface {
-	// Anies returns an array of anies and a correspondng array of boolean values where true indicates NA-value.
+	// Anies returns an array of anies and a corresponding array of boolean values where true indicates NA-value.
 	Anies() ([]any, []bool)
+}
+
+// Vectorable interface has to be implemented to enable conversion of payload values to vectors.
+type Vectorable interface {
+	// Vectors returns an array of vectors
+	Vectors() []Vector
 }
 
 // Finder interface has to be implemented to enable searching in a payload.
@@ -306,7 +313,7 @@ func (v *vector) ByIndices(indices []int) Vector {
 }
 
 func (v *vector) FromTo(from, to int) Vector {
-	return v.ByIndices(util.FromTo(from, to, v.length))
+	return v.ByIndices(util2.FromTo(from, to, v.length))
 }
 
 func (v *vector) Filter(whicher any) Vector {
@@ -369,7 +376,7 @@ func (v *vector) ApplyTo(whicher any, applier any) Vector {
 	whBool, ok := whicher.([]bool)
 	processed := false
 	if ok {
-		indices = util.ToIndices(v.length, whBool)
+		indices = util2.ToIndices(v.length, whBool)
 		processed = true
 	}
 
@@ -380,7 +387,7 @@ func (v *vector) ApplyTo(whicher any, applier any) Vector {
 	}
 
 	if !processed {
-		indices = util.ToIndices(v.length, v.Which(whicher))
+		indices = util2.ToIndices(v.length, v.Which(whicher))
 	}
 
 	newPayload := payload.ApplyTo(indices, applier)
@@ -401,7 +408,7 @@ func (v *vector) applyToAdjustIndicesWhicher(whicher []int) []int {
 }
 
 func (v *vector) filterByBooleans(booleans []bool) []int {
-	return util.ToIndices(v.length, booleans)
+	return util2.ToIndices(v.length, booleans)
 }
 
 func (v *vector) Traverse(traverser any) {
@@ -410,10 +417,17 @@ func (v *vector) Traverse(traverser any) {
 	}
 }
 
-func (v *vector) Append(vec Vector) Vector {
-	newPayload := v.payload.Append(vec.Payload())
+func (v *vector) Append(vecs ...Vector) Vector {
+	if len(vecs) == 0 {
+		return v
+	}
 
-	return New(newPayload, v.Options()...)
+	payload := v.Payload()
+	for _, vec := range vecs {
+		payload = payload.Append(vec.Payload())
+	}
+
+	return New(payload, v.Options()...)
 }
 
 func (v *vector) Adjust(size int) Vector {
@@ -542,7 +556,7 @@ func (v *vector) IsEmpty() bool {
 }
 
 func (v *vector) String() string {
-	str := "[(" + v.Type() + ")]"
+	str := "[(" + v.Type() + ")"
 
 	if v.length > 0 {
 		str += v.StrForElem(1)

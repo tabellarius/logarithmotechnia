@@ -34,25 +34,25 @@ func (p *complexPayload) Data() []any {
 }
 
 func (p *complexPayload) ByIndices(indices []int) Payload {
-	data, na := byIndices(indices, p.data, p.na, cmplx.NaN())
+	data, na := byIndicesWithNA(indices, p.data, p.na, cmplx.NaN())
 
 	return ComplexPayload(data, na, p.Options()...)
 }
 
 func (p *complexPayload) SupportsWhicher(whicher any) bool {
-	return supportsWhicher[complex128](whicher)
+	return supportsWhicherWithNA[complex128](whicher)
 }
 
 func (p *complexPayload) Which(whicher any) []bool {
-	return which(p.data, p.na, whicher)
+	return whichWithNA(p.data, p.na, whicher)
 }
 
 func (p *complexPayload) Apply(applier any) Payload {
-	return apply(p.data, p.na, applier, p.Options())
+	return applyWithNA(p.data, p.na, applier, p.Options())
 }
 
 func (p *complexPayload) ApplyTo(indices []int, applier any) Payload {
-	data, na := applyTo(indices, p.data, p.na, applier, cmplx.NaN())
+	data, na := applyToWithNA(indices, p.data, p.na, applier, cmplx.NaN())
 
 	if data == nil {
 		return NAPayload(p.length)
@@ -62,7 +62,7 @@ func (p *complexPayload) ApplyTo(indices []int, applier any) Payload {
 }
 
 func (p *complexPayload) Traverse(traverser any) {
-	traverse(p.data, p.na, traverser)
+	traverseWithNA(p.data, p.na, traverser)
 }
 
 func (p *complexPayload) SupportsSummarizer(summarizer any) bool {
@@ -299,25 +299,25 @@ func (p *complexPayload) Neq(val any) []bool {
 func (p *complexPayload) convertComparator(val any) (complex128, bool) {
 	var v complex128
 	ok := true
-	switch val.(type) {
+	switch value := val.(type) {
 	case complex128:
-		v = val.(complex128)
+		v = value
 	case complex64:
-		v = complex128(val.(complex64))
+		v = complex128(value)
 	case float64:
-		v = complex(val.(float64), 0)
+		v = complex(value, 0)
 	case float32:
-		v = complex(float64(val.(float32)), 0)
+		v = complex(float64(value), 0)
 	case int:
-		v = complex(float64(val.(int)), 0)
+		v = complex(float64(value), 0)
 	case int64:
-		v = complex(float64(val.(int64)), 0)
+		v = complex(float64(value), 0)
 	case int32:
-		v = complex(float64(val.(int32)), 0)
+		v = complex(float64(value), 0)
 	case uint64:
-		v = complex(float64(val.(uint64)), 0)
+		v = complex(float64(value), 0)
 	case uint32:
-		v = complex(float64(val.(uint32)), 0)
+		v = complex(float64(value), 0)
 	default:
 		ok = false
 	}

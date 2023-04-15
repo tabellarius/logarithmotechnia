@@ -9,11 +9,11 @@ import (
 func (df *Dataframe) BindColumns(arguments ...any) *Dataframe {
 	dataframes := []*Dataframe{}
 	for _, arg := range arguments {
-		switch arg.(type) {
+		switch argument := arg.(type) {
 		case *Dataframe:
-			dataframes = append(dataframes, arg.(*Dataframe))
+			dataframes = append(dataframes, argument)
 		case []*Dataframe:
-			dataframes = append(dataframes, arg.([]*Dataframe)...)
+			dataframes = append(dataframes, argument...)
 		}
 	}
 
@@ -53,11 +53,11 @@ func bindTwoDataframesByColumns(src, app *Dataframe) *Dataframe {
 func (df *Dataframe) BindRows(arguments ...any) *Dataframe {
 	dataframes := []*Dataframe{}
 	for _, arg := range arguments {
-		switch arg.(type) {
+		switch argument := arg.(type) {
 		case *Dataframe:
-			dataframes = append(dataframes, arg.(*Dataframe))
+			dataframes = append(dataframes, argument)
 		case []*Dataframe:
-			dataframes = append(dataframes, arg.([]*Dataframe)...)
+			dataframes = append(dataframes, argument...)
 		}
 	}
 

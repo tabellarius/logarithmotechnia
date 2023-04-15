@@ -31,29 +31,29 @@ func (p *integerPayload) Data() []any {
 }
 
 func (p *integerPayload) ByIndices(indices []int) Payload {
-	data, na := byIndices(indices, p.data, p.na, 0)
+	data, na := byIndicesWithNA(indices, p.data, p.na, 0)
 
 	return IntegerPayload(data, na, p.Options()...)
 }
 
 func (p *integerPayload) SupportsWhicher(whicher any) bool {
-	return supportsWhicher[int](whicher)
+	return supportsWhicherWithNA[int](whicher)
 }
 
 func (p *integerPayload) Which(whicher any) []bool {
-	return which(p.data, p.na, whicher)
+	return whichWithNA(p.data, p.na, whicher)
 }
 
 func (p *integerPayload) Apply(applier any) Payload {
-	return apply(p.data, p.na, applier, p.Options())
+	return applyWithNA(p.data, p.na, applier, p.Options())
 }
 
 func (p *integerPayload) Traverse(traverser any) {
-	traverse(p.data, p.na, traverser)
+	traverseWithNA(p.data, p.na, traverser)
 }
 
 func (p *integerPayload) ApplyTo(indices []int, applier any) Payload {
-	data, na := applyTo(indices, p.data, p.na, applier, 0)
+	data, na := applyToWithNA(indices, p.data, p.na, applier, 0)
 
 	if data == nil {
 		return NAPayload(p.length)
@@ -287,42 +287,42 @@ func (p *integerPayload) Lte(val any) []bool {
 func (p *integerPayload) convertComparator(val any) (int, bool) {
 	var v int
 	ok := true
-	switch val.(type) {
+	switch value := val.(type) {
 	case int:
-		v = val.(int)
+		v = value
 	case int64:
-		v = int(val.(int64))
+		v = int(value)
 	case int32:
-		v = int(val.(int32))
+		v = int(value)
 	case uint64:
-		v = int(val.(uint64))
+		v = int(value)
 	case uint32:
-		v = int(val.(uint32))
+		v = int(value)
 	case complex128:
-		ip := imag(val.(complex128))
-		rp, fp := math.Modf(real(val.(complex128)))
+		ip := imag(value)
+		rp, fp := math.Modf(real(value))
 		if ip == 0 && fp == 0 {
 			v = int(rp)
 		} else {
 			ok = false
 		}
 	case complex64:
-		ip := imag(val.(complex64))
-		rp, fp := math.Modf(float64(real(val.(complex64))))
+		ip := imag(value)
+		rp, fp := math.Modf(float64(real(value)))
 		if ip == 0 && fp == 0 {
 			v = int(rp)
 		} else {
 			ok = false
 		}
 	case float64:
-		rp, fp := math.Modf(val.(float64))
+		rp, fp := math.Modf(value)
 		if fp == 0 {
 			v = int(rp)
 		} else {
 			ok = false
 		}
 	case float32:
-		rp, fp := math.Modf(float64(val.(float32)))
+		rp, fp := math.Modf(float64(value))
 		if fp == 0 {
 			v = int(rp)
 		} else {

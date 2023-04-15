@@ -39,29 +39,29 @@ func (p *stringPayload) Data() []any {
 }
 
 func (p *stringPayload) ByIndices(indices []int) Payload {
-	data, na := byIndices(indices, p.data, p.na, "")
+	data, na := byIndicesWithNA(indices, p.data, p.na, "")
 
 	return StringPayload(data, na, p.Options()...)
 }
 
 func (p *stringPayload) SupportsWhicher(whicher any) bool {
-	return supportsWhicher[string](whicher)
+	return supportsWhicherWithNA[string](whicher)
 }
 
 func (p *stringPayload) Which(whicher any) []bool {
-	return which(p.data, p.na, whicher)
+	return whichWithNA(p.data, p.na, whicher)
 }
 
 func (p *stringPayload) Apply(applier any) Payload {
-	return apply(p.data, p.na, applier, p.Options())
+	return applyWithNA(p.data, p.na, applier, p.Options())
 }
 
 func (p *stringPayload) Traverse(traverser any) {
-	traverse(p.data, p.na, traverser)
+	traverseWithNA(p.data, p.na, traverser)
 }
 
 func (p *stringPayload) ApplyTo(indices []int, applier any) Payload {
-	data, na := applyTo(indices, p.data, p.na, applier, "")
+	data, na := applyToWithNA(indices, p.data, p.na, applier, "")
 
 	if data == nil {
 		return NAPayload(p.length)

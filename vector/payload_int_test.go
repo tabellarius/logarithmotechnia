@@ -2,7 +2,7 @@ package vector
 
 import (
 	"fmt"
-	"logarithmotechnia/util"
+	"logarithmotechnia/internal/util"
 	"math"
 	"math/cmplx"
 	"reflect"
@@ -1286,8 +1286,8 @@ func TestIntegerPayload_ApplyTo(t *testing.T) {
 			name:        "value",
 			indices:     []int{1, 2, 5},
 			applier:     100,
-			dataOut:     []int{100, 0, 3, 0, 100},
-			naOut:       []bool{false, true, false, true, false},
+			dataOut:     []int{100, 100, 3, 0, 100},
+			naOut:       []bool{false, false, false, true, false},
 			isNAPayload: false,
 		},
 		{
