@@ -15,19 +15,17 @@ import (
 //     only those, for which the function will have return true, will be selected.
 //   - a function func(row map[string]any bool - same as previous but without index argument.
 func (df *Dataframe) Filter(filter any) *Dataframe {
-	switch filter.(type) {
+	switch f := filter.(type) {
 	case []int:
-		return df.ByIndices(filter.([]int))
+		return df.ByIndices(f)
 	case []bool:
-		indices := util.ToIndices(df.rowNum, filter.([]bool))
+		indices := util.ToIndices(df.rowNum, f)
 		return df.ByIndices(indices)
 	case func(int, map[string]any) bool:
-		fn := filter.(func(int, map[string]any) bool)
-		indices := util.ToIndices(df.rowNum, df.filterByFunc(fn))
+		indices := util.ToIndices(df.rowNum, df.filterByFunc(f))
 		return df.ByIndices(indices)
 	case func(map[string]any) bool:
-		fn := filter.(func(map[string]any) bool)
-		indices := util.ToIndices(df.rowNum, df.filterByCompactFunc(fn))
+		indices := util.ToIndices(df.rowNum, df.filterByCompactFunc(f))
 		return df.ByIndices(indices)
 	}
 

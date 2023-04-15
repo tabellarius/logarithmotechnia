@@ -13,24 +13,21 @@ type Rename struct {
 func (df *Dataframe) Rename(renames ...any) *Dataframe {
 	renamesMap := map[string]string{}
 	for _, rename := range renames {
-		switch rename.(type) {
+		switch r := rename.(type) {
 		case Rename:
-			renamesMap[rename.(Rename).from] = rename.(Rename).to
+			renamesMap[r.from] = r.to
 		case []Rename:
-			arrRename := rename.([]Rename)
-			for i := 0; i < len(arrRename); i++ {
-				renamesMap[arrRename[i].from] = arrRename[i].to
+			for i := 0; i < len(r); i++ {
+				renamesMap[r[i].from] = r[i].to
 			}
 		case []string:
-			strRename := rename.([]string)
-			if len(strRename) == 2 {
-				renamesMap[strRename[0]] = strRename[1]
+			if len(r) == 2 {
+				renamesMap[r[0]] = r[1]
 			}
 		case [][]string:
-			strArrRename := rename.([][]string)
-			for i := 0; i < len(strArrRename); i++ {
-				if len(strArrRename[i]) == 2 {
-					renamesMap[strArrRename[i][0]] = strArrRename[i][1]
+			for i := 0; i < len(r); i++ {
+				if len(r[i]) == 2 {
+					renamesMap[r[i][0]] = r[i][1]
 				}
 			}
 		}

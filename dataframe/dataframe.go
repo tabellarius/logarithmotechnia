@@ -228,11 +228,11 @@ func generateColumnNames(length int) []string {
 //	New([]vector.Vector{...}, OptionColumnNames([]string{...}))
 func New(data any, options ...Option) *Dataframe {
 	var df *Dataframe
-	switch data.(type) {
+	switch datum := data.(type) {
 	case []vector.Vector:
-		df = dataframeFromVectors(data.([]vector.Vector), options...)
+		df = dataframeFromVectors(datum, options...)
 	case []Column:
-		df = dataframeFromColumns(data.([]Column), options...)
+		df = dataframeFromColumns(datum, options...)
 	default:
 		df = dataframeFromVectors([]vector.Vector{})
 	}

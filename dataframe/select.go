@@ -31,21 +31,21 @@ func (df *Dataframe) Select(selectors ...any) *Dataframe {
 
 	colNames := make([]string, 0)
 	for _, selector := range selectors {
-		switch selector.(type) {
+		switch s := selector.(type) {
 		case string:
-			colNames = df.selectByName(colNames, selector.(string))
+			colNames = df.selectByName(colNames, s)
 		case []string:
-			colNames = df.selectByNames(colNames, selector.([]string))
+			colNames = df.selectByNames(colNames, s)
 		case int:
-			colNames = df.selectByIndex(colNames, selector.(int))
+			colNames = df.selectByIndex(colNames, s)
 		case []int:
-			colNames = df.selectByIndices(colNames, selector.([]int))
+			colNames = df.selectByIndices(colNames, s)
 		case []bool:
-			colNames = df.selectByBooleans(colNames, selector.([]bool))
+			colNames = df.selectByBooleans(colNames, s)
 		case FromToColNames:
-			colNames = df.selectByFromToColNames(colNames, selector.(FromToColNames))
+			colNames = df.selectByFromToColNames(colNames, s)
 		case FromToColIndices:
-			colNames = df.selectByFromToColIndices(colNames, selector.(FromToColIndices))
+			colNames = df.selectByFromToColIndices(colNames, s)
 		}
 	}
 

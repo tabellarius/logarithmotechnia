@@ -21,11 +21,11 @@ func (df *Dataframe) Relocate(arguments ...any) *Dataframe {
 	options := []vector.Option{}
 
 	for _, argument := range arguments {
-		switch argument.(type) {
+		switch arg := argument.(type) {
 		case vector.Option:
-			options = append(options, argument.(vector.Option))
+			options = append(options, arg)
 		default:
-			selectors = append(selectors, argument)
+			selectors = append(selectors, arg)
 		}
 	}
 

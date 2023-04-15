@@ -14,23 +14,23 @@ func (df *Dataframe) Summarize(columns ...any) *Dataframe {
 
 	newColumns := []Column{}
 	for _, column := range columns {
-		switch column.(type) {
+		switch c := column.(type) {
 		case vector.Vector:
 			newColumns = append(newColumns, Column{
-				Name:   column.(vector.Vector).Name(),
-				Vector: column.(vector.Vector),
+				Name:   c.Name(),
+				Vector: c,
 			})
 		case []vector.Vector:
-			for _, columnVec := range column.([]vector.Vector) {
+			for _, columnVec := range c {
 				newColumns = append(newColumns, Column{
 					Name:   columnVec.Name(),
 					Vector: columnVec,
 				})
 			}
 		case Column:
-			newColumns = append(newColumns, column.(Column))
+			newColumns = append(newColumns, c)
 		case []Column:
-			for _, columnCol := range column.([]Column) {
+			for _, columnCol := range c {
 				newColumns = append(newColumns, columnCol)
 			}
 		}

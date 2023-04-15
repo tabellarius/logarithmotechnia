@@ -131,7 +131,7 @@ func (p *anyPayload) ApplyTo(indices []int, applier any) Payload {
 
 // Traverse traverses the payload with the given traverser.
 func (p *anyPayload) Traverse(traverser any) {
-	traverse(p.data, p.na, traverser)
+	traverseWithNA(p.data, p.na, traverser)
 }
 
 // SupportsSummarizer returns true if the payload supports the given summarizer.

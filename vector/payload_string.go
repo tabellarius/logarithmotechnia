@@ -57,7 +57,7 @@ func (p *stringPayload) Apply(applier any) Payload {
 }
 
 func (p *stringPayload) Traverse(traverser any) {
-	traverse(p.data, p.na, traverser)
+	traverseWithNA(p.data, p.na, traverser)
 }
 
 func (p *stringPayload) ApplyTo(indices []int, applier any) Payload {

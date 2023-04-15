@@ -61,7 +61,7 @@ func (p *timePayload) ApplyTo(indices []int, applier any) Payload {
 }
 
 func (p *timePayload) Traverse(traverser any) {
-	traverse(p.data, p.na, traverser)
+	traverseWithNA(p.data, p.na, traverser)
 }
 
 func (p *timePayload) SupportsSummarizer(summarizer any) bool {

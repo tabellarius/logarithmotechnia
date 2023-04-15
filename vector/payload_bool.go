@@ -57,7 +57,7 @@ func (p *booleanPayload) ApplyTo(indices []int, applier any) Payload {
 }
 
 func (p *booleanPayload) Traverse(traverser any) {
-	traverse(p.data, p.na, traverser)
+	traverseWithNA(p.data, p.na, traverser)
 }
 
 func (p *booleanPayload) SupportsSummarizer(summarizer any) bool {

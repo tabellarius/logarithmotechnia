@@ -58,7 +58,7 @@ func byIndicesWithoutNA[T any](indices []int, srcData []T, naDef T) []T {
 		if idx == 0 {
 			data[i] = naDef
 		} else {
-			data = append(data, srcData[idx-1])
+			data[i] = srcData[idx-1]
 		}
 	}
 
@@ -389,15 +389,15 @@ func applyToWithNA[T any](indices []int, inData []T, inNA []bool, applier any, n
 	var data []T = nil
 	var na []bool = nil
 
-	switch applier.(type) {
+	switch fn := applier.(type) {
 	case func(int, T, bool) (T, bool):
-		data, na = applyToWithNAByFunc(indices, inData, inNA, applier.(func(int, T, bool) (T, bool)), naDef)
+		data, na = applyToWithNAByFunc(indices, inData, inNA, fn, naDef)
 	case func(T, bool) (T, bool):
-		data, na = applyToByWithNACompactFunc(indices, inData, inNA, applier.(func(T, bool) (T, bool)), naDef)
+		data, na = applyToByWithNACompactFunc(indices, inData, inNA, fn, naDef)
 	case func(T) T:
-		data, na = applyToByBriefFunc(indices, inData, inNA, applier.(func(T) T))
+		data, na = applyToByBriefFunc(indices, inData, inNA, fn)
 	case T:
-		data, na = applyToWithNAByValue(indices, inData, inNA, applier.(T))
+		data, na = applyToWithNAByValue(indices, inData, inNA, fn)
 	}
 
 	return data, na
@@ -468,13 +468,13 @@ func applyToWithNAByValue[T any](indices []int, inData []T, inNA []bool, val T) 
 func applyToWithoutNA[T any](indices []int, inData []T, applier any) []T {
 	var data []T = nil
 
-	switch applier.(type) {
-	case func(int, T, bool) (T, bool):
-		data = applyToWithoutNAByFunc(indices, inData, applier.(func(int, T) T))
-	case func(T, bool) (T, bool):
-		data = applyToByWithoutNACompactFunc(indices, inData, applier.(func(T) T))
+	switch fn := applier.(type) {
+	case func(int, T) T:
+		data = applyToWithoutNAByFunc(indices, inData, fn)
+	case func(T) T:
+		data = applyToByWithoutNACompactFunc(indices, inData, fn)
 	case T:
-		data = applyToWithoutNAByValue(indices, inData, applier.(T))
+		data = applyToWithoutNAByValue(indices, inData, fn)
 	}
 
 	return data
@@ -523,7 +523,7 @@ func applyToWithoutNAByValue[T any](indices []int, inData []T, val T) []T {
 	return data
 }
 
-func traverse[T any](inData []T, inNA []bool, traverser any) {
+func traverseWithNA[T any](inData []T, inNA []bool, traverser any) {
 	length := len(inData)
 
 	if fn, ok := traverser.(func(int, T, bool)); ok {
@@ -543,6 +543,21 @@ func traverse[T any](inData []T, inNA []bool, traverser any) {
 			if !inNA[i] {
 				fn(inData[i])
 			}
+		}
+	}
+}
+
+func traverseWithoutNA[T any](inData []T, traverser any) {
+	length := len(inData)
+
+	switch fn := traverser.(type) {
+	case func(int, T):
+		for i := 0; i < length; i++ {
+			fn(i, inData[i])
+		}
+	case func(T):
+		for i := 0; i < length; i++ {
+			fn(inData[i])
 		}
 	}
 }

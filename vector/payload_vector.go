@@ -15,7 +15,7 @@ func (p *vectorPayload) Len() int {
 }
 
 func (p *vectorPayload) ByIndices(indices []int) Payload {
-	data, _ := byIndicesWithNA(indices, p.data, p.na, nil)
+	data := byIndicesWithoutNA(indices, p.data, nil)
 
 	return VectorPayload(data, p.Options()...)
 }
@@ -139,7 +139,7 @@ func (p *vectorPayload) ApplyTo(indices []int, applier any) Payload {
 }
 
 func (p *vectorPayload) Traverse(traverser any) {
-	traverse(p.data, p.na, traverser)
+	traverseWithoutNA(p.data, traverser)
 }
 
 func (p *vectorPayload) String() string {
@@ -184,7 +184,7 @@ func (p *vectorPayload) Coalesce(payload Payload) Payload {
 	return VectorPayload(dstData, p.Options()...)
 }
 
-func VectorPayload(data []Vector, options ...Option) Payload {
+func VectorPayload(data []Vector, _ ...Option) Payload {
 	length := len(data)
 
 	vecNA := make([]bool, length)
