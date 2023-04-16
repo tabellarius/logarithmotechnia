@@ -217,6 +217,23 @@ func Conj(v vector.Vector) vector.Vector {
 	return v.Apply(fn)
 }
 
+func CopySign(v vector.Vector, x float64) vector.Vector {
+	var fn any
+
+	switch v.Type() {
+	case vector.PayloadTypeFloat:
+		fn = func(val float64, na bool) (float64, bool) {
+			return math.Copysign(val, x), na
+		}
+	case vector.PayloadTypeInteger:
+		fn = func(val int, na bool) (float64, bool) {
+			return math.Copysign(float64(val), x), na
+		}
+	}
+
+	return v.Apply(fn)
+}
+
 func Cos(v vector.Vector) vector.Vector {
 	var fn any
 

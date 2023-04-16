@@ -484,6 +484,45 @@ func TestConj(t *testing.T) {
 	}
 }
 
+func TestCopySign(t *testing.T) {
+	testData := []struct {
+		name string
+		in   vector.Vector
+		out  vector.Vector
+	}{
+		{
+			name: "float",
+			in:   vector.FloatWithNA([]float64{1.1, 2.2, math.NaN(), 4.4, 5.5}, []bool{false, false, true, false, false}),
+			out: vector.FloatWithNA(
+				[]float64{-1.1, -2.2, math.NaN(), -4.4, -5.5},
+				[]bool{false, false, true, false, false},
+			),
+		},
+		{
+			name: "int",
+			in:   vector.IntegerWithNA([]int{1, 2, 0, 4, 5}, []bool{false, false, true, false, false}),
+			out: vector.FloatWithNA(
+				[]float64{-1.0, -2.0, math.NaN(), -4.0, -5.0},
+				[]bool{false, false, true, false, false},
+			),
+		},
+		{
+			name: "invalid",
+			in:   vector.String([]string{"1", "2", "3", "4", "5"}),
+			out:  vector.NA(5),
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			out := CopySign(data.in, -1)
+			if !vector.CompareVectorsForTest(out, data.out) {
+				t.Errorf("CopySign(%v, -1) = %v, want %v", data.in, out, data.out)
+			}
+		})
+	}
+}
+
 func TestCos(t *testing.T) {
 	testData := []struct {
 		name string
