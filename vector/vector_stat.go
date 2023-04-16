@@ -31,6 +31,16 @@ func invokeFunction(
 	actionFn func(*vector) Payload,
 	columnPostfix string,
 ) Vector {
+	if v.IsGrouped() {
+		vectors := v.GroupVectors()
+		outValues := make([]Vector, len(vectors))
+		for i := 0; i < len(vectors); i++ {
+			outValues[i] = invokeFunction(vectors[i].(*vector), checkFn, actionFn, columnPostfix)
+		}
+
+		return VectorVector(outValues).SetName(v.Name() + columnPostfix)
+	}
+
 	vec := NA(v.length)
 	if checkFn(v) {
 		vec = New(actionFn(v), v.Options()...)
