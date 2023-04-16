@@ -87,6 +87,10 @@ func CompareVectorsForTest(one, two Vector) bool {
 		p1 := vec1.payload.(*timePayload)
 		p2 := vec2.payload.(*timePayload)
 		ok = reflect.DeepEqual(p1.data, p2.data) && reflect.DeepEqual(p1.na, p2.na)
+	case *vectorPayload:
+		p1 := vec1.payload.(*vectorPayload)
+		p2 := vec2.payload.(*vectorPayload)
+		ok = CompareVectorArrs(p1.data, p2.data)
 	default:
 		ok = false
 	}

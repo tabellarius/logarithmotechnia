@@ -264,12 +264,12 @@ func TestVector_CumSum(t *testing.T) {
 		{
 			name:   "normal grouped cumsumer",
 			vec:    Float([]float64{10, 2, 10, 12, 0, 10, 4}).GroupByIndices([][]int{{1, 3, 6}, {2, 4, 7}, {5}}),
-			valVec: Float([]float64{10, 12, 22, 34, 34, 44, 48}),
+			valVec: VectorVector([]Vector{Float([]float64{10, 20, 30}), Float([]float64{2, 14, 18}), Float([]float64{0})}),
 		},
 		{
 			name:   "normal grouped non-cumsumer",
 			vec:    String([]string{"1", "2", "8", "12", "18"}).GroupByIndices([][]int{{1, 3}, {2, 5}, {4}}),
-			valVec: NA(5),
+			valVec: VectorVector([]Vector{NA(2), NA(2), NA(1)}),
 		},
 	}
 
@@ -292,24 +292,24 @@ func TestVector_CumProd(t *testing.T) {
 		valVec Vector
 	}{
 		{
-			name:   "normal cumsumer",
+			name:   "normal cumproder",
 			vec:    Integer([]int{-100, 2, 8, 12, 180}),
 			valVec: Integer([]int{-100, -200, -1600, -19200, -3456000}),
 		},
 		{
-			name:   "normal non-cumsumer",
+			name:   "normal non-cumproder",
 			vec:    String([]string{"10", "2", "8", "12", "18"}),
 			valVec: NA(5),
 		},
 		{
-			name:   "normal grouped cumsumer",
+			name:   "normal grouped cumproder",
 			vec:    Float([]float64{10, 2, 10, 12, 0, 10, 4}).GroupByIndices([][]int{{1, 3, 6}, {2, 4, 7}, {5}}),
-			valVec: Float([]float64{10, 20, 200, 2400, 0, 0, 0}),
+			valVec: VectorVector([]Vector{Float([]float64{10, 100, 1000}), Float([]float64{2, 24, 96}), Float([]float64{0})}),
 		},
 		{
-			name:   "normal grouped non-cumsumer",
+			name:   "normal grouped non-cumproder",
 			vec:    String([]string{"1", "2", "8", "12", "18"}).GroupByIndices([][]int{{1, 3}, {2, 5}, {4}}),
-			valVec: NA(5),
+			valVec: VectorVector([]Vector{NA(2), NA(2), NA(1)}),
 		},
 	}
 
@@ -332,24 +332,24 @@ func TestVector_CumMax(t *testing.T) {
 		valVec Vector
 	}{
 		{
-			name:   "normal cumsumer",
+			name:   "normal cummaxer",
 			vec:    Integer([]int{-100, 2, 8, 4, 180}),
 			valVec: Integer([]int{-100, 2, 8, 8, 180}),
 		},
 		{
-			name:   "normal non-cumsumer",
+			name:   "normal non-cummaxer",
 			vec:    String([]string{"10", "2", "8", "12", "18"}),
 			valVec: NA(5),
 		},
 		{
-			name:   "normal grouped cumsumer",
+			name:   "normal grouped cummaxer",
 			vec:    Float([]float64{10, 2, 10, 12, 0, 10, 4}).GroupByIndices([][]int{{1, 3, 6}, {2, 4, 7}, {5}}),
-			valVec: Float([]float64{10, 10, 10, 12, 12, 12, 12}),
+			valVec: VectorVector([]Vector{Float([]float64{10, 10, 10}), Float([]float64{2, 12, 12}), Float([]float64{0})}),
 		},
 		{
-			name:   "normal grouped non-cumsumer",
+			name:   "normal grouped non-cummaxer",
 			vec:    String([]string{"1", "2", "8", "12", "18"}).GroupByIndices([][]int{{1, 3}, {2, 5}, {4}}),
-			valVec: NA(5),
+			valVec: VectorVector([]Vector{NA(2), NA(2), NA(1)}),
 		},
 	}
 
@@ -372,24 +372,24 @@ func TestVector_CumMin(t *testing.T) {
 		valVec Vector
 	}{
 		{
-			name:   "normal cumsumer",
+			name:   "normal cumminer",
 			vec:    Integer([]int{8, 2, 4, -10, 180}),
 			valVec: Integer([]int{8, 2, 2, -10, -10}),
 		},
 		{
-			name:   "normal non-cumsumer",
+			name:   "normal non-cumminer",
 			vec:    String([]string{"10", "2", "8", "12", "18"}),
 			valVec: NA(5),
 		},
 		{
-			name:   "normal grouped cumsumer",
+			name:   "normal grouped cumminer",
 			vec:    Float([]float64{10, 2, 100, 1, 0, 4, 4}).GroupByIndices([][]int{{1, 3, 6}, {2, 4, 7}, {5}}),
-			valVec: Float([]float64{10, 2, 2, 1, 0, 0, 0}),
+			valVec: VectorVector([]Vector{Float([]float64{10, 10, 4}), Float([]float64{2, 1, 1}), Float([]float64{0})}),
 		},
 		{
-			name:   "normal grouped non-cumsumer",
+			name:   "normal grouped non-cumminer",
 			vec:    String([]string{"1", "2", "8", "12", "18"}).GroupByIndices([][]int{{1, 3}, {2, 5}, {4}}),
-			valVec: NA(5),
+			valVec: VectorVector([]Vector{NA(2), NA(2), NA(1)}),
 		},
 	}
 
