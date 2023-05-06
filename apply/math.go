@@ -476,6 +476,99 @@ func Imag(v vector.Vector) vector.Vector {
 	return v.Apply(fn)
 }
 
+func IsInf(v vector.Vector) vector.Vector {
+	var fn any
+
+	switch v.Type() {
+	case vector.PayloadTypeInteger:
+		fn = func(val int, na bool) (bool, bool) {
+			return false, na
+		}
+	case vector.PayloadTypeFloat:
+		fn = func(val float64, na bool) (bool, bool) {
+			return math.IsInf(val, 0), na
+		}
+	case vector.PayloadTypeComplex:
+		fn = func(val complex128, na bool) (bool, bool) {
+			return cmplx.IsInf(val), na
+		}
+	}
+
+	return v.Apply(fn)
+}
+
+func IsNaN(v vector.Vector) vector.Vector {
+	var fn any
+
+	switch v.Type() {
+	case vector.PayloadTypeInteger:
+		fn = func(val int, na bool) (bool, bool) {
+			return false, na
+		}
+	case vector.PayloadTypeFloat:
+		fn = func(val float64, na bool) (bool, bool) {
+			return math.IsNaN(val), na
+		}
+	case vector.PayloadTypeComplex:
+		fn = func(val complex128, na bool) (bool, bool) {
+			return cmplx.IsNaN(val), na
+		}
+	}
+
+	return v.Apply(fn)
+}
+
+func J0(v vector.Vector) vector.Vector {
+	var fn any
+
+	switch v.Type() {
+	case vector.PayloadTypeInteger:
+		fn = func(val int, na bool) (float64, bool) {
+			return math.J0(float64(val)), na
+		}
+	case vector.PayloadTypeFloat:
+		fn = func(val float64, na bool) (float64, bool) {
+			return math.J0(val), na
+		}
+	}
+
+	return v.Apply(fn)
+}
+
+func J1(v vector.Vector) vector.Vector {
+	var fn any
+
+	switch v.Type() {
+	case vector.PayloadTypeInteger:
+		fn = func(val int, na bool) (float64, bool) {
+			return math.J1(float64(val)), na
+		}
+	case vector.PayloadTypeFloat:
+		fn = func(val float64, na bool) (float64, bool) {
+			return math.J1(val), na
+		}
+	}
+
+	return v.Apply(fn)
+}
+
+func Jn(v vector.Vector, n int) vector.Vector {
+	var fn any
+
+	switch v.Type() {
+	case vector.PayloadTypeInteger:
+		fn = func(val int, na bool) (float64, bool) {
+			return math.Jn(n, float64(val)), na
+		}
+	case vector.PayloadTypeFloat:
+		fn = func(val float64, na bool) (float64, bool) {
+			return math.Jn(n, val), na
+		}
+	}
+
+	return v.Apply(fn)
+}
+
 func Log(v vector.Vector) vector.Vector {
 	var fn any
 
@@ -491,6 +584,274 @@ func Log(v vector.Vector) vector.Vector {
 	case vector.PayloadTypeComplex:
 		fn = func(val complex128, na bool) (complex128, bool) {
 			return cmplx.Log(val), na
+		}
+	}
+
+	return v.Apply(fn)
+}
+
+func Log10(v vector.Vector) vector.Vector {
+	var fn any
+
+	switch v.Type() {
+	case vector.PayloadTypeFloat:
+		fn = func(val float64, na bool) (float64, bool) {
+			return math.Log10(val), na
+		}
+	case vector.PayloadTypeInteger:
+		fn = func(val int, na bool) (float64, bool) {
+			return math.Log10(float64(val)), na
+		}
+	case vector.PayloadTypeComplex:
+		fn = func(val complex128, na bool) (complex128, bool) {
+			return cmplx.Log10(val), na
+		}
+	}
+
+	return v.Apply(fn)
+}
+
+func Log2(v vector.Vector) vector.Vector {
+	var fn any
+
+	switch v.Type() {
+	case vector.PayloadTypeFloat:
+		fn = func(val float64, na bool) (float64, bool) {
+			return math.Log2(val), na
+		}
+	case vector.PayloadTypeInteger:
+		fn = func(val int, na bool) (float64, bool) {
+			return math.Log2(float64(val)), na
+		}
+	}
+
+	return v.Apply(fn)
+}
+
+func Phase(v vector.Vector) vector.Vector {
+	var fn any
+
+	switch v.Type() {
+	case vector.PayloadTypeComplex:
+		fn = func(val complex128, na bool) (float64, bool) {
+			return cmplx.Phase(val), na
+		}
+	}
+
+	return v.Apply(fn)
+}
+
+func Pow(v vector.Vector, p float64) vector.Vector {
+	var fn any
+
+	switch v.Type() {
+	case vector.PayloadTypeFloat:
+		fn = func(val float64, na bool) (float64, bool) {
+			return math.Pow(val, p), na
+		}
+	case vector.PayloadTypeInteger:
+		fn = func(val int, na bool) (float64, bool) {
+			return math.Pow(float64(val), p), na
+		}
+	case vector.PayloadTypeComplex:
+		fn = func(val complex128, na bool) (complex128, bool) {
+			return cmplx.Pow(val, complex(p, 0)), na
+		}
+	}
+
+	return v.Apply(fn)
+}
+
+func Round(v vector.Vector) vector.Vector {
+	var fn any
+
+	switch v.Type() {
+	case vector.PayloadTypeFloat:
+		fn = func(val float64, na bool) (int, bool) {
+			if na {
+				return 0, true
+			}
+
+			if math.IsInf(val, 0) {
+				return 0, true
+			}
+
+			return int(math.Round(val)), na
+		}
+	case vector.PayloadTypeInteger:
+		fn = func(val int, na bool) (int, bool) {
+			if na {
+				return 0, true
+			}
+
+			return val, na
+		}
+	}
+
+	return v.Apply(fn)
+}
+
+func RoundToEven(v vector.Vector) vector.Vector {
+	var fn any
+
+	switch v.Type() {
+	case vector.PayloadTypeFloat:
+		fn = func(val float64, na bool) (int, bool) {
+			if na {
+				return 0, true
+			}
+
+			if math.IsInf(val, 0) {
+				return 0, true
+			}
+
+			return int(math.RoundToEven(val)), na
+		}
+	case vector.PayloadTypeInteger:
+		fn = func(val int, na bool) (int, bool) {
+			if na {
+				return 0, true
+			}
+
+			return val, na
+		}
+	}
+
+	return v.Apply(fn)
+}
+
+func Signbit(v vector.Vector) vector.Vector {
+	var fn any
+
+	switch v.Type() {
+	case vector.PayloadTypeFloat:
+		fn = func(val float64, na bool) (bool, bool) {
+			return math.Signbit(val), na
+		}
+	case vector.PayloadTypeInteger:
+		fn = func(val int, na bool) (bool, bool) {
+			return val < 0, na
+		}
+	}
+
+	return v.Apply(fn)
+}
+
+func Sin(v vector.Vector) vector.Vector {
+	var fn any
+
+	switch v.Type() {
+	case vector.PayloadTypeFloat:
+		fn = func(val float64, na bool) (float64, bool) {
+			return math.Sin(val), na
+		}
+	case vector.PayloadTypeInteger:
+		fn = func(val int, na bool) (float64, bool) {
+			return math.Sin(float64(val)), na
+		}
+	case vector.PayloadTypeComplex:
+		fn = func(val complex128, na bool) (complex128, bool) {
+			return cmplx.Sin(val), na
+		}
+	}
+
+	return v.Apply(fn)
+}
+
+func Sinh(v vector.Vector) vector.Vector {
+	var fn any
+
+	switch v.Type() {
+	case vector.PayloadTypeFloat:
+		fn = func(val float64, na bool) (float64, bool) {
+			return math.Sinh(val), na
+		}
+	case vector.PayloadTypeInteger:
+		fn = func(val int, na bool) (float64, bool) {
+			return math.Sinh(float64(val)), na
+		}
+	case vector.PayloadTypeComplex:
+		fn = func(val complex128, na bool) (complex128, bool) {
+			return cmplx.Sinh(val), na
+		}
+	}
+
+	return v.Apply(fn)
+}
+
+func Sqrt(v vector.Vector) vector.Vector {
+	var fn any
+
+	switch v.Type() {
+	case vector.PayloadTypeFloat:
+		fn = func(val float64, na bool) (float64, bool) {
+			if na {
+				return val, true
+			}
+
+			if val < 0 {
+				return math.NaN(), true
+			}
+
+			return math.Sqrt(val), na
+		}
+	case vector.PayloadTypeInteger:
+		fn = func(val int, na bool) (float64, bool) {
+			if na {
+				return 0, true
+			}
+
+			if val < 0 {
+				return 0, true
+			}
+
+			return math.Sqrt(float64(val)), na
+		}
+	case vector.PayloadTypeComplex:
+		fn = func(val complex128, na bool) (complex128, bool) {
+			return cmplx.Sqrt(val), na
+		}
+	}
+
+	return v.Apply(fn)
+}
+
+func Tan(v vector.Vector) vector.Vector {
+	var fn any
+
+	switch v.Type() {
+	case vector.PayloadTypeFloat:
+		fn = func(val float64, na bool) (float64, bool) {
+			return math.Tan(val), na
+		}
+	case vector.PayloadTypeInteger:
+		fn = func(val int, na bool) (float64, bool) {
+			return math.Tan(float64(val)), na
+		}
+	case vector.PayloadTypeComplex:
+		fn = func(val complex128, na bool) (complex128, bool) {
+			return cmplx.Tan(val), na
+		}
+	}
+
+	return v.Apply(fn)
+}
+
+func Tanh(v vector.Vector) vector.Vector {
+	var fn any
+
+	switch v.Type() {
+	case vector.PayloadTypeFloat:
+		fn = func(val float64, na bool) (float64, bool) {
+			return math.Tanh(val), na
+		}
+	case vector.PayloadTypeInteger:
+		fn = func(val int, na bool) (float64, bool) {
+			return math.Tanh(float64(val)), na
+		}
+	case vector.PayloadTypeComplex:
+		fn = func(val complex128, na bool) (complex128, bool) {
+			return cmplx.Tanh(val), na
 		}
 	}
 

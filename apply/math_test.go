@@ -1125,3 +1125,721 @@ func TestLog(t *testing.T) {
 		})
 	}
 }
+
+func TestLog10(t *testing.T) {
+	testData := []struct {
+		name string
+		in   vector.Vector
+		out  vector.Vector
+	}{
+		{
+			name: "complex",
+			in:   vector.ComplexWithNA([]complex128{1 + 1i, 2 + 2i, cmplx.NaN(), 4 + 4i, 5 + 5i}, []bool{false, false, true, false, false}),
+			out: vector.ComplexWithNA(
+				[]complex128{cmplx.Log10(1 + 1i), cmplx.Log10(2 + 2i), cmplx.NaN(), cmplx.Log10(4 + 4i), cmplx.Log10(5 + 5i)},
+				[]bool{false, false, true, false, false},
+			),
+		},
+		{
+			name: "float",
+			in:   vector.FloatWithNA([]float64{1.1, 2.2, math.NaN(), 4.4, 5.5}, []bool{false, false, true, false, false}),
+			out: vector.FloatWithNA(
+				[]float64{math.Log10(1.1), math.Log10(2.2), math.NaN(), math.Log10(4.4), math.Log10(5.5)},
+				[]bool{false, false, true, false, false},
+			),
+		},
+		{
+			name: "int",
+			in:   vector.IntegerWithNA([]int{1, 2, 0, 4, 5}, []bool{false, false, true, false, false}),
+			out: vector.FloatWithNA(
+				[]float64{math.Log10(1.0), math.Log10(2.0), math.NaN(), math.Log10(4.0), math.Log10(5.0)},
+				[]bool{false, false, true, false, false},
+			),
+		},
+		{
+			name: "invalid",
+			in:   vector.String([]string{"1", "2", "3", "4", "5"}),
+			out:  vector.NA(5),
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			out := Log10(data.in)
+			if !vector.CompareVectorsForTest(out, data.out) {
+				t.Errorf("Log10(%v) = %v, want %v", data.in, out, data.out)
+			}
+		})
+	}
+}
+
+func TestIsInf(t *testing.T) {
+	testData := []struct {
+		name string
+		in   vector.Vector
+		out  vector.Vector
+	}{
+		{
+			name: "complex",
+			in:   vector.Complex([]complex128{1 + 1i, 2 + 2i, cmplx.Inf(), 4 + 4i, 5 + 5i}),
+			out:  vector.Boolean([]bool{false, false, true, false, false}),
+		},
+		{
+			name: "float",
+			in:   vector.Float([]float64{1.1, 2.2, math.Inf(1), 4.4, 5.5}),
+			out:  vector.Boolean([]bool{false, false, true, false, false}),
+		},
+		{
+			name: "int",
+			in:   vector.Integer([]int{1, 2, 0, 4, 5}),
+			out:  vector.Boolean([]bool{false, false, false, false, false}),
+		},
+		{
+			name: "invalid",
+			in:   vector.String([]string{"1", "2", "3", "4", "5"}),
+			out:  vector.NA(5),
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			out := IsInf(data.in)
+			if !vector.CompareVectorsForTest(out, data.out) {
+				t.Errorf("IsInf(%v) = %v, want %v", data.in, out, data.out)
+			}
+		})
+	}
+}
+
+func TestIsNaN(t *testing.T) {
+	testData := []struct {
+		name string
+		in   vector.Vector
+		out  vector.Vector
+	}{
+		{
+			name: "complex",
+			in:   vector.Complex([]complex128{1 + 1i, 2 + 2i, cmplx.NaN(), 4 + 4i, 5 + 5i}),
+			out:  vector.Boolean([]bool{false, false, true, false, false}),
+		},
+		{
+			name: "float",
+			in:   vector.Float([]float64{1.1, 2.2, math.NaN(), 4.4, 5.5}),
+			out:  vector.Boolean([]bool{false, false, true, false, false}),
+		},
+		{
+			name: "int",
+			in:   vector.Integer([]int{1, 2, 0, 4, 5}),
+			out:  vector.Boolean([]bool{false, false, false, false, false}),
+		},
+		{
+			name: "invalid",
+			in:   vector.String([]string{"1", "2", "3", "4", "5"}),
+			out:  vector.NA(5),
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			out := IsNaN(data.in)
+			if !vector.CompareVectorsForTest(out, data.out) {
+				t.Errorf("IsNaN(%v) = %v, want %v", data.in, out, data.out)
+			}
+		})
+	}
+}
+
+func TestJ0(t *testing.T) {
+	testData := []struct {
+		name string
+		in   vector.Vector
+		out  vector.Vector
+	}{
+		{
+			name: "float",
+			in:   vector.FloatWithNA([]float64{1.1, 2.2, math.NaN(), 4.4, 5.5}, []bool{false, false, true, false, false}),
+			out: vector.FloatWithNA(
+				[]float64{math.J0(1.1), math.J0(2.2), math.NaN(), math.J0(4.4), math.J0(5.5)},
+				[]bool{false, false, true, false, false},
+			),
+		},
+		{
+			name: "int",
+			in:   vector.IntegerWithNA([]int{1, 2, 0, 4, 5}, []bool{false, false, true, false, false}),
+			out: vector.FloatWithNA(
+				[]float64{math.J0(1.0), math.J0(2.0), math.NaN(), math.J0(4.0), math.J0(5.0)},
+				[]bool{false, false, true, false, false},
+			),
+		},
+		{
+			name: "invalid",
+			in:   vector.String([]string{"1", "2", "3", "4", "5"}),
+			out:  vector.NA(5),
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			out := J0(data.in)
+			if !vector.CompareVectorsForTest(out, data.out) {
+				t.Errorf("J0(%v) = %v, want %v", data.in, out, data.out)
+			}
+		})
+	}
+}
+
+func TestJ1(t *testing.T) {
+	testData := []struct {
+		name string
+		in   vector.Vector
+		out  vector.Vector
+	}{
+		{
+			name: "float",
+			in:   vector.FloatWithNA([]float64{1.1, 2.2, math.NaN(), 4.4, 5.5}, []bool{false, false, true, false, false}),
+			out: vector.FloatWithNA(
+				[]float64{math.J1(1.1), math.J1(2.2), math.NaN(), math.J1(4.4), math.J1(5.5)},
+				[]bool{false, false, true, false, false},
+			),
+		},
+		{
+			name: "int",
+			in:   vector.IntegerWithNA([]int{1, 2, 0, 4, 5}, []bool{false, false, true, false, false}),
+			out: vector.FloatWithNA(
+				[]float64{math.J1(1.0), math.J1(2.0), math.NaN(), math.J1(4.0), math.J1(5.0)},
+				[]bool{false, false, true, false, false},
+			),
+		},
+		{
+			name: "invalid",
+			in:   vector.String([]string{"1", "2", "3", "4", "5"}),
+			out:  vector.NA(5),
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			out := J1(data.in)
+			if !vector.CompareVectorsForTest(out, data.out) {
+				t.Errorf("J1(%v) = %v, want %v", data.in, out, data.out)
+			}
+		})
+	}
+}
+
+func TestJn(t *testing.T) {
+	testData := []struct {
+		name string
+		in   vector.Vector
+		n    int
+		out  vector.Vector
+	}{
+		{
+			name: "float",
+			in:   vector.FloatWithNA([]float64{1.1, 2.2, math.NaN(), 4.4, 5.5}, []bool{false, false, true, false, false}),
+			n:    2,
+			out: vector.FloatWithNA(
+				[]float64{math.Jn(2, 1.1), math.Jn(2, 2.2), math.NaN(), math.Jn(2, 4.4), math.Jn(2, 5.5)},
+				[]bool{false, false, true, false, false},
+			),
+		},
+		{
+			name: "int",
+			in:   vector.IntegerWithNA([]int{1, 2, 0, 4, 5}, []bool{false, false, true, false, false}),
+			n:    2,
+			out: vector.FloatWithNA(
+				[]float64{math.Jn(2, 1.0), math.Jn(2, 2.0), math.NaN(), math.Jn(2, 4.0), math.Jn(2, 5.0)},
+				[]bool{false, false, true, false, false},
+			),
+		},
+		{
+			name: "invalid",
+			in:   vector.String([]string{"1", "2", "3", "4", "5"}),
+			n:    2,
+			out:  vector.NA(5),
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			out := Jn(data.in, data.n)
+			if !vector.CompareVectorsForTest(out, data.out) {
+				t.Errorf("J1(%v) = %v, want %v", data.in, out, data.out)
+			}
+		})
+	}
+}
+
+func TestLog2(t *testing.T) {
+	testData := []struct {
+		name string
+		in   vector.Vector
+		out  vector.Vector
+	}{
+		{
+			name: "float",
+			in:   vector.FloatWithNA([]float64{1.1, 2.2, math.NaN(), 4.4, 5.5}, []bool{false, false, true, false, false}),
+			out: vector.FloatWithNA(
+				[]float64{math.Log2(1.1), math.Log2(2.2), math.NaN(), math.Log2(4.4), math.Log2(5.5)},
+				[]bool{false, false, true, false, false},
+			),
+		},
+		{
+			name: "int",
+			in:   vector.IntegerWithNA([]int{1, 2, 0, 4, 5}, []bool{false, false, true, false, false}),
+			out: vector.FloatWithNA(
+				[]float64{math.Log2(1.0), math.Log2(2.0), math.NaN(), math.Log2(4.0), math.Log2(5.0)},
+				[]bool{false, false, true, false, false},
+			),
+		},
+		{
+			name: "invalid",
+			in:   vector.String([]string{"1", "2", "3", "4", "5"}),
+			out:  vector.NA(5),
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			out := Log2(data.in)
+			if !vector.CompareVectorsForTest(out, data.out) {
+				t.Errorf("Log2(%v) = %v, want %v", data.in, out, data.out)
+			}
+		})
+	}
+}
+
+func TestPhase(t *testing.T) {
+	testData := []struct {
+		name string
+		in   vector.Vector
+		out  vector.Vector
+	}{
+		{
+			name: "complex",
+			in:   vector.ComplexWithNA([]complex128{1 + 1i, 2 + 2i, cmplx.NaN(), 4 + 4i, 5 + 5i}, []bool{false, false, true, false, false}),
+			out: vector.FloatWithNA(
+				[]float64{cmplx.Phase(1 + 1i), cmplx.Phase(2 + 2i), math.NaN(), cmplx.Phase(4 + 4i), cmplx.Phase(5 + 5i)},
+				[]bool{false, false, true, false, false},
+			),
+		},
+		{
+			name: "invalid",
+			in:   vector.String([]string{"1", "2", "3", "4", "5"}),
+			out:  vector.NA(5),
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			out := Phase(data.in)
+			if !vector.CompareVectorsForTest(out, data.out) {
+				t.Errorf("Phase(%v) = %v, want %v", data.in, out, data.out)
+			}
+		})
+	}
+}
+
+func TestPow(t *testing.T) {
+	testData := []struct {
+		name string
+		in   vector.Vector
+		pow  float64
+		out  vector.Vector
+	}{
+		{
+			name: "float",
+			in:   vector.FloatWithNA([]float64{1.1, 2.2, math.NaN(), 4.4, 5.5}, []bool{false, false, true, false, false}),
+			pow:  2,
+			out: vector.FloatWithNA(
+				[]float64{math.Pow(1.1, 2), math.Pow(2.2, 2), math.NaN(), math.Pow(4.4, 2), math.Pow(5.5, 2)},
+				[]bool{false, false, true, false, false},
+			),
+		},
+		{
+			name: "int",
+			in:   vector.IntegerWithNA([]int{1, 2, 0, 4, 5}, []bool{false, false, true, false, false}),
+			pow:  2,
+			out: vector.FloatWithNA(
+				[]float64{math.Pow(1.0, 2), math.Pow(2.0, 2), math.NaN(), math.Pow(4.0, 2), math.Pow(5.0, 2)},
+				[]bool{false, false, true, false, false},
+			),
+		},
+		{
+			name: "complex",
+			in:   vector.ComplexWithNA([]complex128{1 + 1i, 2 + 2i, cmplx.NaN(), 4 + 4i, 5 + 5i}, []bool{false, false, true, false, false}),
+			pow:  2,
+			out: vector.ComplexWithNA(
+				[]complex128{cmplx.Pow(1+1i, 2), cmplx.Pow(2+2i, 2), cmplx.NaN(), cmplx.Pow(4+4i, 2), cmplx.Pow(5+5i, 2)},
+				[]bool{false, false, true, false, false},
+			),
+		},
+		{
+			name: "invalid",
+			in:   vector.String([]string{"1", "2", "3", "4", "5"}),
+			pow:  2,
+			out:  vector.NA(5),
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			out := Pow(data.in, data.pow)
+			if !vector.CompareVectorsForTest(out, data.out) {
+				t.Errorf("Pow(%v, %v) = %v, want %v", data.in, data.pow, out, data.out)
+			}
+		})
+	}
+}
+
+func TestRound(t *testing.T) {
+	testData := []struct {
+		name string
+		in   vector.Vector
+		out  vector.Vector
+	}{
+		{
+			name: "float",
+			in:   vector.FloatWithNA([]float64{1.1, 2.2, math.NaN(), 4.4, 5.5}, []bool{false, false, true, false, false}),
+			out: vector.IntegerWithNA(
+				[]int{int(math.Round(1.1)), int(math.Round(2.2)), int(math.NaN()), int(math.Round(4.4)), int(math.Round(5.5))},
+				[]bool{false, false, true, false, false},
+			),
+		},
+		{
+			name: "int",
+			in:   vector.IntegerWithNA([]int{1, 2, 0, 4, 5}, []bool{false, false, true, false, false}),
+			out: vector.IntegerWithNA(
+				[]int{1, 2, 0, 4, 5},
+				[]bool{false, false, true, false, false},
+			),
+		},
+		{
+			name: "invalid",
+			in:   vector.String([]string{"1", "2", "3", "4", "5"}),
+			out:  vector.NA(5),
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			out := Round(data.in)
+			if !vector.CompareVectorsForTest(out, data.out) {
+				t.Errorf("Round(%v) = %v, want %v", data.in, out, data.out)
+			}
+		})
+	}
+}
+
+func TestRoundToEven(t *testing.T) {
+	testData := []struct {
+		name string
+		in   vector.Vector
+		out  vector.Vector
+	}{
+		{
+			name: "float",
+			in:   vector.FloatWithNA([]float64{1.1, 2.2, math.NaN(), 4.4, 5.5}, []bool{false, false, true, false, false}),
+			out: vector.IntegerWithNA(
+				[]int{int(math.RoundToEven(1.1)), int(math.RoundToEven(2.2)), int(math.NaN()), int(math.RoundToEven(4.4)), int(math.RoundToEven(5.5))},
+				[]bool{false, false, true, false, false},
+			),
+		},
+		{
+			name: "int",
+			in:   vector.IntegerWithNA([]int{1, 2, 0, 4, 5}, []bool{false, false, true, false, false}),
+			out: vector.IntegerWithNA(
+				[]int{1, 2, 0, 4, 5},
+				[]bool{false, false, true, false, false},
+			),
+		},
+		{
+			name: "invalid",
+			in:   vector.String([]string{"1", "2", "3", "4", "5"}),
+			out:  vector.NA(5),
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			out := RoundToEven(data.in)
+			if !vector.CompareVectorsForTest(out, data.out) {
+				t.Errorf("RoundToEven(%v) = %v, want %v", data.in, out, data.out)
+			}
+		})
+	}
+}
+
+func TestSignbit(t *testing.T) {
+	testData := []struct {
+		name string
+		in   vector.Vector
+		out  vector.Vector
+	}{
+		{
+			name: "float",
+			in:   vector.FloatWithNA([]float64{1.1, -2.2, math.NaN(), -4.4, 5.5}, []bool{false, false, true, false, false}),
+			out: vector.BooleanWithNA(
+				[]bool{false, true, false, true, false},
+				[]bool{false, false, true, false, false},
+			),
+		},
+		{
+			name: "int",
+			in:   vector.IntegerWithNA([]int{1, -2, 0, -4, 5}, []bool{false, false, true, false, false}),
+			out: vector.BooleanWithNA(
+				[]bool{false, true, false, true, false},
+				[]bool{false, false, true, false, false},
+			),
+		},
+		{
+			name: "invalid",
+			in:   vector.String([]string{"1", "2", "3", "4", "5"}),
+			out:  vector.NA(5),
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			out := Signbit(data.in)
+			if !vector.CompareVectorsForTest(out, data.out) {
+				t.Errorf("Signbit(%v) = %v, want %v", data.in, out, data.out)
+			}
+		})
+	}
+}
+
+func TestSin(t *testing.T) {
+	testData := []struct {
+		name string
+		in   vector.Vector
+		out  vector.Vector
+	}{
+		{
+			name: "float",
+			in:   vector.FloatWithNA([]float64{0, 1, math.NaN(), 3, 4}, []bool{false, false, true, false, false}),
+			out: vector.FloatWithNA(
+				[]float64{0, math.Sin(1), math.NaN(), math.Sin(3), math.Sin(4)},
+				[]bool{false, false, true, false, false},
+			),
+		},
+		{
+			name: "int",
+			in:   vector.IntegerWithNA([]int{0, 1, 2, 3, 4}, []bool{false, false, true, false, false}),
+			out: vector.FloatWithNA(
+				[]float64{0, math.Sin(1), math.NaN(), math.Sin(3), math.Sin(4)},
+				[]bool{false, false, true, false, false},
+			),
+		},
+		{
+			name: "complex",
+			in:   vector.ComplexWithNA([]complex128{0, 1, 2, 3, 4}, []bool{false, false, true, false, false}),
+			out: vector.ComplexWithNA(
+				[]complex128{0, complex(math.Sin(1), 0), complex(math.NaN(), 0), complex(math.Sin(3), 0), complex(math.Sin(4), 0)},
+				[]bool{false, false, true, false, false},
+			),
+		},
+		{
+			name: "invalid",
+			in:   vector.String([]string{"0", "1", "2", "3", "4"}),
+			out:  vector.NA(5),
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			out := Sin(data.in)
+			if !vector.CompareVectorsForTest(out, data.out) {
+				t.Errorf("Sin(%v) = %v, want %v", data.in, out, data.out)
+			}
+		})
+	}
+}
+
+func TestSinh(t *testing.T) {
+	testData := []struct {
+		name string
+		in   vector.Vector
+		out  vector.Vector
+	}{
+		{
+			name: "float",
+			in:   vector.FloatWithNA([]float64{0, 1, math.NaN(), 3, 4}, []bool{false, false, true, false, false}),
+			out: vector.FloatWithNA(
+				[]float64{0, math.Sinh(1), math.NaN(), math.Sinh(3), math.Sinh(4)},
+				[]bool{false, false, true, false, false},
+			),
+		},
+		{
+			name: "int",
+			in:   vector.IntegerWithNA([]int{0, 1, 2, 3, 4}, []bool{false, false, true, false, false}),
+			out: vector.FloatWithNA(
+				[]float64{0, math.Sinh(1), math.NaN(), math.Sinh(3), math.Sinh(4)},
+				[]bool{false, false, true, false, false},
+			),
+		},
+		{
+			name: "complex",
+			in:   vector.ComplexWithNA([]complex128{0, 1, 2, 3, 4}, []bool{false, false, true, false, false}),
+			out: vector.ComplexWithNA(
+				[]complex128{0, complex(math.Sinh(1), 0), complex(math.NaN(), 0), complex(math.Sinh(3), 0), complex(math.Sinh(4), 0)},
+				[]bool{false, false, true, false, false},
+			),
+		},
+		{
+			name: "invalid",
+			in:   vector.String([]string{"0", "1", "2", "3", "4"}),
+			out:  vector.NA(5),
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			out := Sinh(data.in)
+			if !vector.CompareVectorsForTest(out, data.out) {
+				t.Errorf("Sinh(%v) = %v, want %v", data.in, out, data.out)
+			}
+		})
+	}
+}
+
+func TestSqrt(t *testing.T) {
+	testData := []struct {
+		name string
+		in   vector.Vector
+		out  vector.Vector
+	}{
+		{
+			name: "float",
+			in:   vector.FloatWithNA([]float64{0, 1, math.NaN(), 3, 4}, []bool{false, false, true, false, false}),
+			out: vector.FloatWithNA(
+				[]float64{0, math.Sqrt(1), math.NaN(), math.Sqrt(3), math.Sqrt(4)},
+				[]bool{false, false, true, false, false},
+			),
+		},
+		{
+			name: "int",
+			in:   vector.IntegerWithNA([]int{0, 1, 2, 3, 4}, []bool{false, false, true, false, false}),
+			out: vector.FloatWithNA(
+				[]float64{0, math.Sqrt(1), math.NaN(), math.Sqrt(3), math.Sqrt(4)},
+				[]bool{false, false, true, false, false},
+			),
+		},
+		{
+			name: "complex",
+			in:   vector.ComplexWithNA([]complex128{0, 1, 2, 3, 4}, []bool{false, false, true, false, false}),
+			out: vector.ComplexWithNA(
+				[]complex128{0, complex(math.Sqrt(1), 0), complex(math.NaN(), 0), complex(math.Sqrt(3), 0), complex(math.Sqrt(4), 0)},
+				[]bool{false, false, true, false, false},
+			),
+		},
+		{
+			name: "invalid",
+			in:   vector.String([]string{"0", "1", "2", "3", "4"}),
+			out:  vector.NA(5),
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			out := Sqrt(data.in)
+			if !vector.CompareVectorsForTest(out, data.out) {
+				t.Errorf("Sqrt(%v) = %v, want %v", data.in, out, data.out)
+			}
+		})
+	}
+}
+
+func TestTan(t *testing.T) {
+	testData := []struct {
+		name string
+		in   vector.Vector
+		out  vector.Vector
+	}{
+		{
+			name: "float",
+			in:   vector.FloatWithNA([]float64{0, 1, math.NaN(), 3, 4}, []bool{false, false, true, false, false}),
+			out: vector.FloatWithNA(
+				[]float64{0, math.Tan(1), math.NaN(), math.Tan(3), math.Tan(4)},
+				[]bool{false, false, true, false, false},
+			),
+		},
+		{
+			name: "int",
+			in:   vector.IntegerWithNA([]int{0, 1, 2, 3, 4}, []bool{false, false, true, false, false}),
+			out: vector.FloatWithNA(
+				[]float64{0, math.Tan(1), math.NaN(), math.Tan(3), math.Tan(4)},
+				[]bool{false, false, true, false, false},
+			),
+		},
+		{
+			name: "complex",
+			in:   vector.ComplexWithNA([]complex128{0, 1, 2, 3, 4}, []bool{false, false, true, false, false}),
+			out: vector.ComplexWithNA(
+				[]complex128{0, complex(math.Tan(1), 0), complex(math.NaN(), 0), complex(math.Tan(3), 0), complex(math.Tan(4), 0)},
+				[]bool{false, false, true, false, false},
+			),
+		},
+		{
+			name: "invalid",
+			in:   vector.String([]string{"0", "1", "2", "3", "4"}),
+			out:  vector.NA(5),
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			out := Tan(data.in)
+			if !vector.CompareVectorsForTest(out, data.out) {
+				t.Errorf("Tan(%v) = %v, want %v", data.in, out, data.out)
+			}
+		})
+	}
+}
+
+func TestTanh(t *testing.T) {
+	testData := []struct {
+		name string
+		in   vector.Vector
+		out  vector.Vector
+	}{
+		{
+			name: "float",
+			in:   vector.FloatWithNA([]float64{0, 1, math.NaN(), 3, 4}, []bool{false, false, true, false, false}),
+			out: vector.FloatWithNA(
+				[]float64{0, math.Tanh(1), math.NaN(), math.Tanh(3), math.Tanh(4)},
+				[]bool{false, false, true, false, false},
+			),
+		},
+		{
+			name: "int",
+			in:   vector.IntegerWithNA([]int{0, 1, 2, 3, 4}, []bool{false, false, true, false, false}),
+			out: vector.FloatWithNA(
+				[]float64{0, math.Tanh(1), math.NaN(), math.Tanh(3), math.Tanh(4)},
+				[]bool{false, false, true, false, false},
+			),
+		},
+		{
+			name: "complex",
+			in:   vector.ComplexWithNA([]complex128{0, 1, cmplx.NaN(), 3, 4}, []bool{false, false, true, false, false}),
+			out: vector.ComplexWithNA(
+				[]complex128{cmplx.Tanh(0), cmplx.Tanh(1), cmplx.NaN(), cmplx.Tanh(3), cmplx.Tanh(4)},
+				[]bool{false, false, true, false, false},
+			),
+		},
+		{
+			name: "invalid",
+			in:   vector.String([]string{"0", "1", "2", "3", "4"}),
+			out:  vector.NA(5),
+		},
+	}
+
+	for _, data := range testData {
+		t.Run(data.name, func(t *testing.T) {
+			out := Tanh(data.in)
+			if !vector.CompareVectorsForTest(out, data.out) {
+				t.Errorf("Tanh(%v) = %v, want %v", data.in, out, data.out)
+			}
+		})
+	}
+}
