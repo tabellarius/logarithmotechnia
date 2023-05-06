@@ -253,6 +253,15 @@ func applyWithNA[T any](inData []T, inNA []bool, applier any, options []Option) 
 		return TimePayload(data, na, options...)
 	}
 
+	if data, na, ok := applyTypeWithNA[T, Vector](inData, inNA, applier, nil); ok {
+		for i, isNA := range na {
+			if isNA {
+				data[i] = nil
+			}
+		}
+		return VectorPayload(data, options...)
+	}
+
 	if data, na, ok := applyTypeWithNA[T, any](inData, inNA, applier, nil); ok {
 		return AnyPayload(data, na, options...)
 	}

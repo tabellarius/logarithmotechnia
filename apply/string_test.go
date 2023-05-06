@@ -539,8 +539,8 @@ func TestLastIndexAny(t *testing.T) {
 		{
 			name:  "int",
 			in:    vector.IntegerWithNA([]int{11, 112, 0, 211, 2}, []bool{false, false, true, false, false}),
-			param: "11",
-			out:   vector.IntegerWithNA([]int{0, 0, -1, 1, -1}, []bool{false, false, true, false, false}),
+			param: "12",
+			out:   vector.IntegerWithNA([]int{1, 2, -1, 2, 0}, []bool{false, false, true, false, false}),
 		},
 	}
 
