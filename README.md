@@ -6,7 +6,7 @@ Main advantages are decent data organization; full support of NA-values; good ex
 
 Dataframes and vectors (series in Pandas) are immutable.
 
-Supported types are: Integer, Float, Complex, String, Boolean, Time and Any.
+Supported types are: Integer, Float, Complex, String, Boolean, Time, Any and Vector (each element of which is a vector).
 
 Loading from CSV
 ----------------
