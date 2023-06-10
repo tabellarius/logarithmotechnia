@@ -38,9 +38,9 @@ func TestAbs(t *testing.T) {
 			),
 		},
 		{
-			name: "invalid",
+			name: "string",
 			in:   vector.String([]string{"1", "2", "3", "4", "5"}),
-			out:  vector.NA(5),
+			out:  vector.Float([]float64{math.Abs(1), math.Abs(2), math.Abs(3), math.Abs(4), math.Abs(5)}),
 		},
 	}
 
@@ -85,9 +85,9 @@ func TestAcos(t *testing.T) {
 			),
 		},
 		{
-			name: "invalid",
+			name: "string",
 			in:   vector.String([]string{"1", "2", "3", "4", "5"}),
-			out:  vector.NA(5),
+			out:  vector.Float([]float64{math.Acos(1), math.Acos(2), math.Acos(3), math.Acos(4), math.Acos(5)}),
 		},
 	}
 
@@ -132,9 +132,9 @@ func TestAcosh(t *testing.T) {
 			),
 		},
 		{
-			name: "invalid",
+			name: "string",
 			in:   vector.String([]string{"1", "2", "3", "4", "5"}),
-			out:  vector.NA(5),
+			out:  vector.Float([]float64{math.Acosh(1), math.Acosh(2), math.Acosh(3), math.Acosh(4), math.Acosh(5)}),
 		},
 	}
 
@@ -179,9 +179,9 @@ func TestAsin(t *testing.T) {
 			),
 		},
 		{
-			name: "invalid",
+			name: "string",
 			in:   vector.String([]string{"1", "2", "3", "4", "5"}),
-			out:  vector.NA(5),
+			out:  vector.Float([]float64{math.Asin(1), math.Asin(2), math.Asin(3), math.Asin(4), math.Asin(5)}),
 		},
 	}
 
@@ -226,9 +226,9 @@ func TestAsinh(t *testing.T) {
 			),
 		},
 		{
-			name: "invalid",
+			name: "string",
 			in:   vector.String([]string{"1", "2", "3", "4", "5"}),
-			out:  vector.NA(5),
+			out:  vector.Float([]float64{math.Asinh(1), math.Asinh(2), math.Asinh(3), math.Asinh(4), math.Asinh(5)}),
 		},
 	}
 
@@ -273,9 +273,9 @@ func TestAtan(t *testing.T) {
 			),
 		},
 		{
-			name: "invalid",
+			name: "string",
 			in:   vector.String([]string{"1", "2", "3", "4", "5"}),
-			out:  vector.NA(5),
+			out:  vector.Float([]float64{math.Atan(1), math.Atan(2), math.Atan(3), math.Atan(4), math.Atan(5)}),
 		},
 	}
 
@@ -312,9 +312,9 @@ func TestAtan2(t *testing.T) {
 			),
 		},
 		{
-			name: "invalid",
+			name: "string",
 			in:   vector.String([]string{"1", "2", "3", "4", "5"}),
-			out:  vector.NA(5),
+			out:  vector.Float([]float64{math.Atan2(1, 0), math.Atan2(2, 0), math.Atan2(3, 0), math.Atan2(4, 0), math.Atan2(5, 0)}),
 		},
 	}
 
@@ -359,9 +359,9 @@ func TestAtanh(t *testing.T) {
 			),
 		},
 		{
-			name: "invalid",
+			name: "string",
 			in:   vector.String([]string{"1", "2", "3", "4", "5"}),
-			out:  vector.NA(5),
+			out:  vector.Float([]float64{math.Atanh(1), math.Atanh(2), math.Atanh(3), math.Atanh(4), math.Atanh(5)}),
 		},
 	}
 
@@ -398,9 +398,9 @@ func TestCbrt(t *testing.T) {
 			),
 		},
 		{
-			name: "invalid",
+			name: "string",
 			in:   vector.String([]string{"1", "2", "3", "4", "5"}),
-			out:  vector.NA(5),
+			out:  vector.Float([]float64{math.Cbrt(1), math.Cbrt(2), math.Cbrt(3), math.Cbrt(4), math.Cbrt(5)}),
 		},
 	}
 
@@ -437,9 +437,9 @@ func TestCeil(t *testing.T) {
 			),
 		},
 		{
-			name: "invalid",
+			name: "string",
 			in:   vector.String([]string{"1", "2", "3", "4", "5"}),
-			out:  vector.NA(5),
+			out:  vector.Float([]float64{1, 2, 3, 4, 5}),
 		},
 	}
 
@@ -468,9 +468,9 @@ func TestConj(t *testing.T) {
 			),
 		},
 		{
-			name: "invalid",
+			name: "string",
 			in:   vector.String([]string{"1", "2", "3", "4", "5"}),
-			out:  vector.NA(5),
+			out:  vector.Complex([]complex128{cmplx.Conj(1), cmplx.Conj(2), cmplx.Conj(3), cmplx.Conj(4), cmplx.Conj(5)}),
 		},
 	}
 
@@ -507,9 +507,9 @@ func TestCopySign(t *testing.T) {
 			),
 		},
 		{
-			name: "invalid",
+			name: "string",
 			in:   vector.String([]string{"1", "2", "3", "4", "5"}),
-			out:  vector.NA(5),
+			out:  vector.Float([]float64{-1, -2, -3, -4, -5}),
 		},
 	}
 
@@ -554,9 +554,9 @@ func TestCos(t *testing.T) {
 			),
 		},
 		{
-			name: "invalid",
+			name: "string",
 			in:   vector.String([]string{"1", "2", "3", "4", "5"}),
-			out:  vector.NA(5),
+			out:  vector.Float([]float64{math.Cos(1), math.Cos(2), math.Cos(3), math.Cos(4), math.Cos(5)}),
 		},
 	}
 
@@ -601,9 +601,9 @@ func TestCosh(t *testing.T) {
 			),
 		},
 		{
-			name: "invalid",
+			name: "string",
 			in:   vector.String([]string{"1", "2", "3", "4", "5"}),
-			out:  vector.NA(5),
+			out:  vector.Float([]float64{math.Cosh(1), math.Cosh(2), math.Cosh(3), math.Cosh(4), math.Cosh(5)}),
 		},
 	}
 
@@ -632,9 +632,9 @@ func TestCot(t *testing.T) {
 			),
 		},
 		{
-			name: "invalid",
+			name: "string",
 			in:   vector.String([]string{"1", "2", "3", "4", "5"}),
-			out:  vector.NA(5),
+			out:  vector.Complex([]complex128{cmplx.Cot(1), cmplx.Cot(2), cmplx.Cot(3), cmplx.Cot(4), cmplx.Cot(5)}),
 		},
 	}
 
@@ -673,9 +673,9 @@ func TestDim(t *testing.T) {
 			),
 		},
 		{
-			name: "invalid",
+			name: "string",
 			in:   vector.String([]string{"1", "2", "3", "4", "5"}),
-			out:  vector.NA(5),
+			out:  vector.Float([]float64{math.Dim(1, 2), math.Dim(2, 2), math.Dim(3, 2), math.Dim(4, 2), math.Dim(5, 2)}),
 		},
 	}
 
@@ -712,9 +712,9 @@ func TestErf(t *testing.T) {
 			),
 		},
 		{
-			name: "invalid",
+			name: "string",
 			in:   vector.String([]string{"1", "2", "3", "4", "5"}),
-			out:  vector.NA(5),
+			out:  vector.Float([]float64{math.Erf(1), math.Erf(2), math.Erf(3), math.Erf(4), math.Erf(5)}),
 		},
 	}
 
@@ -751,9 +751,9 @@ func TestErfc(t *testing.T) {
 			),
 		},
 		{
-			name: "invalid",
+			name: "string",
 			in:   vector.String([]string{"1", "2", "3", "4", "5"}),
-			out:  vector.NA(5),
+			out:  vector.Float([]float64{math.Erfc(1), math.Erfc(2), math.Erfc(3), math.Erfc(4), math.Erfc(5)}),
 		},
 	}
 
@@ -790,9 +790,9 @@ func TestErfcinv(t *testing.T) {
 			),
 		},
 		{
-			name: "invalid",
+			name: "string",
 			in:   vector.String([]string{"1", "2", "3", "4", "5"}),
-			out:  vector.NA(5),
+			out:  vector.Float([]float64{math.Erfcinv(1), math.Erfcinv(2), math.Erfcinv(3), math.Erfcinv(4), math.Erfcinv(5)}),
 		},
 	}
 
@@ -829,9 +829,9 @@ func TestErfinv(t *testing.T) {
 			),
 		},
 		{
-			name: "invalid",
+			name: "string",
 			in:   vector.String([]string{"1", "2", "3", "4", "5"}),
-			out:  vector.NA(5),
+			out:  vector.Float([]float64{math.Erfinv(1), math.Erfinv(2), math.Erfinv(3), math.Erfinv(4), math.Erfinv(5)}),
 		},
 	}
 
@@ -876,9 +876,9 @@ func TestExp(t *testing.T) {
 			),
 		},
 		{
-			name: "invalid",
+			name: "string",
 			in:   vector.String([]string{"1", "2", "3", "4", "5"}),
-			out:  vector.NA(5),
+			out:  vector.Float([]float64{math.Exp(1), math.Exp(2), math.Exp(3), math.Exp(4), math.Exp(5)}),
 		},
 	}
 
@@ -915,9 +915,9 @@ func TestExp2(t *testing.T) {
 			),
 		},
 		{
-			name: "invalid",
+			name: "string",
 			in:   vector.String([]string{"1", "2", "3", "4", "5"}),
-			out:  vector.NA(5),
+			out:  vector.Float([]float64{math.Exp2(1), math.Exp2(2), math.Exp2(3), math.Exp2(4), math.Exp2(5)}),
 		},
 	}
 
@@ -954,9 +954,9 @@ func TestExp10(t *testing.T) {
 			),
 		},
 		{
-			name: "invalid",
+			name: "string",
 			in:   vector.String([]string{"1", "2", "3", "4", "5"}),
-			out:  vector.NA(5),
+			out:  vector.Float([]float64{math.Pow(10, 1), math.Pow(10, 2), math.Pow(10, 3), math.Pow(10, 4), math.Pow(10, 5)}),
 		},
 	}
 
@@ -993,9 +993,9 @@ func TestFloor(t *testing.T) {
 			),
 		},
 		{
-			name: "invalid",
+			name: "string",
 			in:   vector.String([]string{"1", "2", "3", "4", "5"}),
-			out:  vector.NA(5),
+			out:  vector.Float([]float64{1, 2, 3, 4, 5}),
 		},
 	}
 
@@ -1032,9 +1032,9 @@ func TestGamma(t *testing.T) {
 			),
 		},
 		{
-			name: "invalid",
+			name: "string",
 			in:   vector.String([]string{"1", "2", "3", "4", "5"}),
-			out:  vector.NA(5),
+			out:  vector.Float([]float64{math.Gamma(1), math.Gamma(2), math.Gamma(3), math.Gamma(4), math.Gamma(5)}),
 		},
 	}
 
@@ -1063,9 +1063,9 @@ func TestImag(t *testing.T) {
 			),
 		},
 		{
-			name: "invalid",
+			name: "string",
 			in:   vector.String([]string{"1", "2", "3", "4", "5"}),
-			out:  vector.NA(5),
+			out:  vector.Float([]float64{0, 0, 0, 0, 0}),
 		},
 	}
 
@@ -1110,9 +1110,9 @@ func TestLog(t *testing.T) {
 			),
 		},
 		{
-			name: "invalid",
+			name: "string",
 			in:   vector.String([]string{"1", "2", "3", "4", "5"}),
-			out:  vector.NA(5),
+			out:  vector.Float([]float64{math.Log(1), math.Log(2), math.Log(3), math.Log(4), math.Log(5)}),
 		},
 	}
 
@@ -1157,9 +1157,9 @@ func TestLog10(t *testing.T) {
 			),
 		},
 		{
-			name: "invalid",
+			name: "string",
 			in:   vector.String([]string{"1", "2", "3", "4", "5"}),
-			out:  vector.NA(5),
+			out:  vector.Float([]float64{math.Log10(1), math.Log10(2), math.Log10(3), math.Log10(4), math.Log10(5)}),
 		},
 	}
 
@@ -1195,9 +1195,9 @@ func TestIsInf(t *testing.T) {
 			out:  vector.Boolean([]bool{false, false, false, false, false}),
 		},
 		{
-			name: "invalid",
+			name: "string",
 			in:   vector.String([]string{"1", "2", "3", "4", "5"}),
-			out:  vector.NA(5),
+			out:  vector.Boolean([]bool{false, false, false, false, false}),
 		},
 	}
 
@@ -1233,9 +1233,9 @@ func TestIsNaN(t *testing.T) {
 			out:  vector.Boolean([]bool{false, false, false, false, false}),
 		},
 		{
-			name: "invalid",
+			name: "string",
 			in:   vector.String([]string{"1", "2", "3", "4", "5"}),
-			out:  vector.NA(5),
+			out:  vector.Boolean([]bool{false, false, false, false, false}),
 		},
 	}
 
@@ -1272,9 +1272,9 @@ func TestJ0(t *testing.T) {
 			),
 		},
 		{
-			name: "invalid",
+			name: "string",
 			in:   vector.String([]string{"1", "2", "3", "4", "5"}),
-			out:  vector.NA(5),
+			out:  vector.Float([]float64{math.J0(1.0), math.J0(2.0), math.J0(3.0), math.J0(4.0), math.J0(5.0)}),
 		},
 	}
 
@@ -1311,9 +1311,9 @@ func TestJ1(t *testing.T) {
 			),
 		},
 		{
-			name: "invalid",
+			name: "string",
 			in:   vector.String([]string{"1", "2", "3", "4", "5"}),
-			out:  vector.NA(5),
+			out:  vector.Float([]float64{math.J1(1.0), math.J1(2.0), math.J1(3.0), math.J1(4.0), math.J1(5.0)}),
 		},
 	}
 
@@ -1353,10 +1353,10 @@ func TestJn(t *testing.T) {
 			),
 		},
 		{
-			name: "invalid",
+			name: "string",
 			in:   vector.String([]string{"1", "2", "3", "4", "5"}),
 			n:    2,
-			out:  vector.NA(5),
+			out:  vector.Float([]float64{math.Jn(2, 1.0), math.Jn(2, 2.0), math.Jn(2, 3.0), math.Jn(2, 4.0), math.Jn(2, 5.0)}),
 		},
 	}
 
@@ -1393,9 +1393,9 @@ func TestLog2(t *testing.T) {
 			),
 		},
 		{
-			name: "invalid",
+			name: "string",
 			in:   vector.String([]string{"1", "2", "3", "4", "5"}),
-			out:  vector.NA(5),
+			out:  vector.Float([]float64{math.Log2(1.0), math.Log2(2.0), math.Log2(3.0), math.Log2(4.0), math.Log2(5.0)}),
 		},
 	}
 
@@ -1424,9 +1424,9 @@ func TestPhase(t *testing.T) {
 			),
 		},
 		{
-			name: "invalid",
+			name: "string",
 			in:   vector.String([]string{"1", "2", "3", "4", "5"}),
-			out:  vector.NA(5),
+			out:  vector.Float([]float64{cmplx.Phase(1 + 0i), cmplx.Phase(2 + 0i), cmplx.Phase(3 + 0i), cmplx.Phase(4 + 0i), cmplx.Phase(5 + 0i)}),
 		},
 	}
 
@@ -1475,10 +1475,10 @@ func TestPow(t *testing.T) {
 			),
 		},
 		{
-			name: "invalid",
+			name: "string",
 			in:   vector.String([]string{"1", "2", "3", "4", "5"}),
 			pow:  2,
-			out:  vector.NA(5),
+			out:  vector.Float([]float64{math.Pow(1.0, 2), math.Pow(2.0, 2), math.Pow(3.0, 2), math.Pow(4.0, 2), math.Pow(5.0, 2)}),
 		},
 	}
 
@@ -1515,9 +1515,9 @@ func TestRound(t *testing.T) {
 			),
 		},
 		{
-			name: "invalid",
+			name: "string",
 			in:   vector.String([]string{"1", "2", "3", "4", "5"}),
-			out:  vector.NA(5),
+			out:  vector.Integer([]int{1, 2, 3, 4, 5}),
 		},
 	}
 
@@ -1554,9 +1554,9 @@ func TestRoundToEven(t *testing.T) {
 			),
 		},
 		{
-			name: "invalid",
+			name: "string",
 			in:   vector.String([]string{"1", "2", "3", "4", "5"}),
-			out:  vector.NA(5),
+			out:  vector.Integer([]int{1, 2, 3, 4, 5}),
 		},
 	}
 
@@ -1593,9 +1593,9 @@ func TestSignbit(t *testing.T) {
 			),
 		},
 		{
-			name: "invalid",
-			in:   vector.String([]string{"1", "2", "3", "4", "5"}),
-			out:  vector.NA(5),
+			name: "string",
+			in:   vector.String([]string{"1", "-2", "3", "-4", "5"}),
+			out:  vector.Boolean([]bool{false, true, false, true, false}),
 		},
 	}
 
@@ -1640,9 +1640,9 @@ func TestSin(t *testing.T) {
 			),
 		},
 		{
-			name: "invalid",
+			name: "string",
 			in:   vector.String([]string{"0", "1", "2", "3", "4"}),
-			out:  vector.NA(5),
+			out:  vector.Float([]float64{0, math.Sin(1), math.Sin(2), math.Sin(3), math.Sin(4)}),
 		},
 	}
 
@@ -1687,9 +1687,9 @@ func TestSinh(t *testing.T) {
 			),
 		},
 		{
-			name: "invalid",
+			name: "string",
 			in:   vector.String([]string{"0", "1", "2", "3", "4"}),
-			out:  vector.NA(5),
+			out:  vector.Float([]float64{0, math.Sinh(1), math.Sinh(2), math.Sinh(3), math.Sinh(4)}),
 		},
 	}
 
@@ -1734,9 +1734,9 @@ func TestSqrt(t *testing.T) {
 			),
 		},
 		{
-			name: "invalid",
+			name: "string",
 			in:   vector.String([]string{"0", "1", "2", "3", "4"}),
-			out:  vector.NA(5),
+			out:  vector.Float([]float64{0, math.Sqrt(1), math.Sqrt(2), math.Sqrt(3), math.Sqrt(4)}),
 		},
 	}
 
@@ -1781,9 +1781,9 @@ func TestTan(t *testing.T) {
 			),
 		},
 		{
-			name: "invalid",
+			name: "string",
 			in:   vector.String([]string{"0", "1", "2", "3", "4"}),
-			out:  vector.NA(5),
+			out:  vector.Float([]float64{0, math.Tan(1), math.Tan(2), math.Tan(3), math.Tan(4)}),
 		},
 	}
 
@@ -1828,9 +1828,9 @@ func TestTanh(t *testing.T) {
 			),
 		},
 		{
-			name: "invalid",
+			name: "string",
 			in:   vector.String([]string{"0", "1", "2", "3", "4"}),
-			out:  vector.NA(5),
+			out:  vector.Float([]float64{0, math.Tanh(1), math.Tanh(2), math.Tanh(3), math.Tanh(4)}),
 		},
 	}
 
