@@ -6,6 +6,10 @@ import (
 	"unicode"
 )
 
+// Compare returns a vector of integers representing the result of comparing
+// each element of the input vector to the given string. The result will be
+// -1 if the element is less than the string, 0 if the element is equal to the
+// string, and 1 if the element is greater than the string.
 func Compare(v vector.Vector, s string) vector.Vector {
 	vec := v
 	if v.Type() != vector.PayloadTypeString {
@@ -21,6 +25,8 @@ func Compare(v vector.Vector, s string) vector.Vector {
 	})
 }
 
+// Contains returns a vector of booleans representing whether each element of
+// the input vector contains the given string.
 func Contains(v vector.Vector, s string) vector.Vector {
 	vec := v
 	if v.Type() != vector.PayloadTypeString {
@@ -36,6 +42,8 @@ func Contains(v vector.Vector, s string) vector.Vector {
 	})
 }
 
+// ContainsAny returns a vector of booleans representing whether each element
+// of the input vector contains any of the given characters.
 func ContainsAny(v vector.Vector, chars string) vector.Vector {
 	vec := v
 	if v.Type() != vector.PayloadTypeString {
@@ -51,6 +59,8 @@ func ContainsAny(v vector.Vector, chars string) vector.Vector {
 	})
 }
 
+// ContainsRune returns a vector of booleans representing whether each element
+// of the input vector contains the given rune.
 func ContainsRune(v vector.Vector, r rune) vector.Vector {
 	vec := v
 	if v.Type() != vector.PayloadTypeString {
@@ -66,6 +76,8 @@ func ContainsRune(v vector.Vector, r rune) vector.Vector {
 	})
 }
 
+// Count returns a vector of integers representing the number of non-overlapping
+// instances of the given substring in each element of the input vector.
 func Count(v vector.Vector, substr string) vector.Vector {
 	vec := v
 	if v.Type() != vector.PayloadTypeString {
@@ -81,6 +93,8 @@ func Count(v vector.Vector, substr string) vector.Vector {
 	})
 }
 
+// EqualFold returns a vector of booleans representing whether each element of
+// the input vector is equal to the given string, ignoring case.
 func EqualFold(v vector.Vector, t string) vector.Vector {
 	vec := v
 	if v.Type() != vector.PayloadTypeString {
@@ -96,6 +110,8 @@ func EqualFold(v vector.Vector, t string) vector.Vector {
 	})
 }
 
+// Fields returns a vector of vectors of strings representing the words in each
+// element of the input vector.
 func Fields(v vector.Vector) vector.Vector {
 	vec := v
 	if v.Type() != vector.PayloadTypeString {
@@ -111,6 +127,8 @@ func Fields(v vector.Vector) vector.Vector {
 	})
 }
 
+// FieldsFunc returns a vector of vectors of strings representing the words in
+// each element of the input vector, as split by the given function.
 func FieldsFunc(v vector.Vector, f func(rune) bool) vector.Vector {
 	vec := v
 	if v.Type() != vector.PayloadTypeString {
@@ -126,6 +144,8 @@ func FieldsFunc(v vector.Vector, f func(rune) bool) vector.Vector {
 	})
 }
 
+// HasPrefix returns a vector of booleans representing whether each element of
+// the input vector has the given prefix.
 func HasPrefix(v vector.Vector, prefix string) vector.Vector {
 	vec := v
 	if v.Type() != vector.PayloadTypeString {
@@ -141,6 +161,8 @@ func HasPrefix(v vector.Vector, prefix string) vector.Vector {
 	})
 }
 
+// HasSuffix returns a vector of booleans representing whether each element of
+// the input vector has the given suffix.
 func HasSuffix(v vector.Vector, suffix string) vector.Vector {
 	vec := v
 	if v.Type() != vector.PayloadTypeString {
@@ -156,6 +178,8 @@ func HasSuffix(v vector.Vector, suffix string) vector.Vector {
 	})
 }
 
+// Index returns a vector of integers representing the index of the first
+// instance of the given substring in each element of the input vector.
 func Index(v vector.Vector, substr string) vector.Vector {
 	vec := v
 	if v.Type() != vector.PayloadTypeString {
@@ -171,6 +195,8 @@ func Index(v vector.Vector, substr string) vector.Vector {
 	})
 }
 
+// IndexAny returns a vector of integers representing the index of the first
+// instance of any of the given characters in each element of the input vector.
 func IndexAny(v vector.Vector, chars string) vector.Vector {
 	vec := v
 	if v.Type() != vector.PayloadTypeString {
@@ -186,6 +212,8 @@ func IndexAny(v vector.Vector, chars string) vector.Vector {
 	})
 }
 
+// IndexByte returns a vector of integers representing the index of the first
+// instance of the given byte in each element of the input vector.
 func IndexByte(v vector.Vector, c byte) vector.Vector {
 	vec := v
 	if v.Type() != vector.PayloadTypeString {
@@ -201,6 +229,8 @@ func IndexByte(v vector.Vector, c byte) vector.Vector {
 	})
 }
 
+// IndexRune returns a vector of integers representing the index of the first
+// instance of the given rune in each element of the input vector.
 func IndexRune(v vector.Vector, r rune) vector.Vector {
 	vec := v
 	if v.Type() != vector.PayloadTypeString {
@@ -216,6 +246,8 @@ func IndexRune(v vector.Vector, r rune) vector.Vector {
 	})
 }
 
+// LastIndex returns a vector of integers representing the index of the last
+// instance of the given substring in each element of the input vector.
 func LastIndex(v vector.Vector, substr string) vector.Vector {
 	vec := v
 	if v.Type() != vector.PayloadTypeString {
@@ -231,6 +263,8 @@ func LastIndex(v vector.Vector, substr string) vector.Vector {
 	})
 }
 
+// LastIndexAny returns a vector of integers representing the index of the last
+// instance of any of the given characters in each element of the input vector.
 func LastIndexAny(v vector.Vector, chars string) vector.Vector {
 	vec := v
 	if v.Type() != vector.PayloadTypeString {
@@ -246,6 +280,8 @@ func LastIndexAny(v vector.Vector, chars string) vector.Vector {
 	})
 }
 
+// LastIndexByte returns a vector of integers representing the index of the last
+// instance of the given byte in each element of the input vector.
 func LastIndexByte(v vector.Vector, c byte) vector.Vector {
 	vec := v
 	if v.Type() != vector.PayloadTypeString {
@@ -261,6 +297,8 @@ func LastIndexByte(v vector.Vector, c byte) vector.Vector {
 	})
 }
 
+// LastIndexFunc returns a vector of integers representing the index of the last
+// instance of the given rune in each element of the input vector.
 func LastIndexFunc(v vector.Vector, f func(rune) bool) vector.Vector {
 	vec := v
 	if v.Type() != vector.PayloadTypeString {
@@ -276,6 +314,8 @@ func LastIndexFunc(v vector.Vector, f func(rune) bool) vector.Vector {
 	})
 }
 
+// Repeat returns a vector of strings representing the input vector repeated
+// count times.
 func Repeat(v vector.Vector, count int) vector.Vector {
 	vec := v
 	if v.Type() != vector.PayloadTypeString {
@@ -291,6 +331,8 @@ func Repeat(v vector.Vector, count int) vector.Vector {
 	})
 }
 
+// Replace returns a vector of strings representing the input vector with the
+// first n non-overlapping instances of old replaced by new.
 func Replace(v vector.Vector, old, new string, n int) vector.Vector {
 	vec := v
 	if v.Type() != vector.PayloadTypeString {
@@ -306,6 +348,8 @@ func Replace(v vector.Vector, old, new string, n int) vector.Vector {
 	})
 }
 
+// ReplaceAll returns a vector of strings representing the input vector with all
+// non-overlapping instances of old replaced by new.
 func ReplaceAll(v vector.Vector, old, new string) vector.Vector {
 	vec := v
 	if v.Type() != vector.PayloadTypeString {
@@ -321,6 +365,8 @@ func ReplaceAll(v vector.Vector, old, new string) vector.Vector {
 	})
 }
 
+// Split returns a vector of vectors representing the input vector split into
+// substrings separated by the given separator.
 func Split(v vector.Vector, sep string) vector.Vector {
 	vec := v
 	if v.Type() != vector.PayloadTypeString {
@@ -336,6 +382,9 @@ func Split(v vector.Vector, sep string) vector.Vector {
 	})
 }
 
+// SplitAfter returns a vector of vectors representing the input vector split
+// into substrings separated by the given separator, with the separator included
+// in each substring.
 func SplitAfter(v vector.Vector, sep string) vector.Vector {
 	vec := v
 	if v.Type() != vector.PayloadTypeString {
@@ -351,6 +400,9 @@ func SplitAfter(v vector.Vector, sep string) vector.Vector {
 	})
 }
 
+// SplitAfterN returns a vector of vectors representing the input vector split
+// into substrings separated by the given separator, with the separator included
+// in each substring, with the input vector split at most n times.
 func SplitAfterN(v vector.Vector, sep string, n int) vector.Vector {
 	vec := v
 	if v.Type() != vector.PayloadTypeString {
@@ -366,6 +418,9 @@ func SplitAfterN(v vector.Vector, sep string, n int) vector.Vector {
 	})
 }
 
+// SplitN returns a vector of vectors representing the input vector split into
+// substrings separated by the given separator, with the input vector split at
+// most n times.
 func SplitN(v vector.Vector, sep string, n int) vector.Vector {
 	vec := v
 	if v.Type() != vector.PayloadTypeString {
@@ -381,6 +436,8 @@ func SplitN(v vector.Vector, sep string, n int) vector.Vector {
 	})
 }
 
+// ToLower returns a vector of strings representing the input vector with all
+// Unicode letters mapped to their lower case.
 func ToLower(v vector.Vector) vector.Vector {
 	vec := v
 	if v.Type() != vector.PayloadTypeString {
@@ -396,6 +453,9 @@ func ToLower(v vector.Vector) vector.Vector {
 	})
 }
 
+// ToLowerSpecial returns a vector of strings representing the input vector with
+// all Unicode letters mapped to their lower case, giving priority to the
+// special casing rules.
 func ToLowerSpecial(v vector.Vector, c unicode.SpecialCase) vector.Vector {
 	vec := v
 	if v.Type() != vector.PayloadTypeString {
@@ -411,6 +471,8 @@ func ToLowerSpecial(v vector.Vector, c unicode.SpecialCase) vector.Vector {
 	})
 }
 
+// ToTitle returns a vector of strings representing the input vector with all
+// Unicode letters mapped to their title case.
 func ToTitle(v vector.Vector) vector.Vector {
 	vec := v
 	if v.Type() != vector.PayloadTypeString {
@@ -426,6 +488,9 @@ func ToTitle(v vector.Vector) vector.Vector {
 	})
 }
 
+// ToTitleSpecial returns a vector of strings representing the input vector with
+// all Unicode letters mapped to their title case, giving priority to the
+// special casing rules.
 func ToTitleSpecial(v vector.Vector, c unicode.SpecialCase) vector.Vector {
 	vec := v
 	if v.Type() != vector.PayloadTypeString {
@@ -441,6 +506,8 @@ func ToTitleSpecial(v vector.Vector, c unicode.SpecialCase) vector.Vector {
 	})
 }
 
+// ToUpper returns a vector of strings representing the input vector with all
+// Unicode letters mapped to their upper case.
 func ToUpper(v vector.Vector) vector.Vector {
 	vec := v
 	if v.Type() != vector.PayloadTypeString {
@@ -456,6 +523,9 @@ func ToUpper(v vector.Vector) vector.Vector {
 	})
 }
 
+// ToUpperSpecial returns a vector of strings representing the input vector with
+// all Unicode letters mapped to their upper case, giving priority to the
+// special casing rules.
 func ToUpperSpecial(v vector.Vector, c unicode.SpecialCase) vector.Vector {
 	vec := v
 	if v.Type() != vector.PayloadTypeString {
@@ -471,6 +541,8 @@ func ToUpperSpecial(v vector.Vector, c unicode.SpecialCase) vector.Vector {
 	})
 }
 
+// Trim returns a vector of strings representing the input vector with all
+// leading and trailing Unicode code points contained in cutset removed.
 func Trim(v vector.Vector, cutset string) vector.Vector {
 	vec := v
 	if v.Type() != vector.PayloadTypeString {
@@ -486,6 +558,9 @@ func Trim(v vector.Vector, cutset string) vector.Vector {
 	})
 }
 
+// TrimFunc returns a vector of strings representing the input vector with all
+// leading and trailing Unicode code points, for which the function returns true,
+// removed.
 func TrimFunc(v vector.Vector, f func(rune) bool) vector.Vector {
 	vec := v
 	if v.Type() != vector.PayloadTypeString {
@@ -501,6 +576,8 @@ func TrimFunc(v vector.Vector, f func(rune) bool) vector.Vector {
 	})
 }
 
+// TrimLeft returns a vector of strings representing the input vector with all
+// leading Unicode code points contained in cutset removed.
 func TrimLeft(v vector.Vector, cutset string) vector.Vector {
 	vec := v
 	if v.Type() != vector.PayloadTypeString {
@@ -515,6 +592,8 @@ func TrimLeft(v vector.Vector, cutset string) vector.Vector {
 	})
 }
 
+// TrimLeftFunc returns a vector of strings representing the input vector with all
+// leading Unicode code points, for which the function returns true, removed.
 func TrimLeftFunc(v vector.Vector, f func(rune) bool) vector.Vector {
 	vec := v
 	if v.Type() != vector.PayloadTypeString {
@@ -529,6 +608,8 @@ func TrimLeftFunc(v vector.Vector, f func(rune) bool) vector.Vector {
 	})
 }
 
+// TrimPrefix returns a vector of strings representing the input vector with all
+// leading instances of prefix removed.
 func TrimPrefix(v vector.Vector, prefix string) vector.Vector {
 	vec := v
 	if v.Type() != vector.PayloadTypeString {
@@ -543,6 +624,8 @@ func TrimPrefix(v vector.Vector, prefix string) vector.Vector {
 	})
 }
 
+// TrimRight returns a vector of strings representing the input vector with all
+// trailing Unicode code points contained in cutset removed.
 func TrimRight(v vector.Vector, cutset string) vector.Vector {
 	vec := v
 	if v.Type() != vector.PayloadTypeString {
@@ -557,6 +640,8 @@ func TrimRight(v vector.Vector, cutset string) vector.Vector {
 	})
 }
 
+// TrimRightFunc returns a vector of strings representing the input vector with all
+// trailing Unicode code points, for which the function returns true, removed.
 func TrimRightFunc(v vector.Vector, f func(rune) bool) vector.Vector {
 	vec := v
 	if v.Type() != vector.PayloadTypeString {
@@ -571,6 +656,8 @@ func TrimRightFunc(v vector.Vector, f func(rune) bool) vector.Vector {
 	})
 }
 
+// TrimSpace returns a vector of strings representing the input vector with all
+// leading and trailing white space removed, as defined by Unicode.
 func TrimSpace(v vector.Vector) vector.Vector {
 	vec := v
 	if v.Type() != vector.PayloadTypeString {
@@ -584,6 +671,8 @@ func TrimSpace(v vector.Vector) vector.Vector {
 	})
 }
 
+// TrimSuffix returns a vector of strings representing the input vector with all
+// trailing instances of suffix removed.
 func TrimSuffix(v vector.Vector, suffix string) vector.Vector {
 	vec := v
 	if v.Type() != vector.PayloadTypeString {

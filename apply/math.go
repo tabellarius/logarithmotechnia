@@ -6,6 +6,7 @@ import (
 	"math/cmplx"
 )
 
+// Abs returns the absolute value of each element in the vector.
 func Abs(v vector.Vector) vector.Vector {
 	var fn any
 
@@ -30,6 +31,7 @@ func Abs(v vector.Vector) vector.Vector {
 	return v.Apply(fn)
 }
 
+// Acos returns the arccosine of each element in the vector.
 func Acos(v vector.Vector) vector.Vector {
 	var fn any
 
@@ -54,6 +56,7 @@ func Acos(v vector.Vector) vector.Vector {
 	return v.Apply(fn)
 }
 
+// Acosh returns the hyperbolic arccosine of each element in the vector.
 func Acosh(v vector.Vector) vector.Vector {
 	var fn any
 
@@ -78,6 +81,7 @@ func Acosh(v vector.Vector) vector.Vector {
 	return v.Apply(fn)
 }
 
+// Asin returns the arcsine of each element in the vector.
 func Asin(v vector.Vector) vector.Vector {
 	var fn any
 
@@ -102,6 +106,7 @@ func Asin(v vector.Vector) vector.Vector {
 	return v.Apply(fn)
 }
 
+// Asinh returns the hyperbolic arcsine of each element in the vector.
 func Asinh(v vector.Vector) vector.Vector {
 	var fn any
 
@@ -126,6 +131,7 @@ func Asinh(v vector.Vector) vector.Vector {
 	return v.Apply(fn)
 }
 
+// Atan returns the arctangent of each element in the vector.
 func Atan(v vector.Vector) vector.Vector {
 	var fn any
 
@@ -150,6 +156,7 @@ func Atan(v vector.Vector) vector.Vector {
 	return v.Apply(fn)
 }
 
+// Atanh returns the hyperbolic arctangent of each element in the vector.
 func Atanh(v vector.Vector) vector.Vector {
 	var fn any
 
@@ -174,6 +181,7 @@ func Atanh(v vector.Vector) vector.Vector {
 	return v.Apply(fn)
 }
 
+// Atan2 returns the arctangent of each element in the vector.
 func Atan2(v vector.Vector, x float64) vector.Vector {
 	var fn any
 
@@ -194,6 +202,7 @@ func Atan2(v vector.Vector, x float64) vector.Vector {
 	return v.Apply(fn)
 }
 
+// Cbrt returns the cube root of each element in the vector.
 func Cbrt(v vector.Vector) vector.Vector {
 	var fn any
 
@@ -214,6 +223,7 @@ func Cbrt(v vector.Vector) vector.Vector {
 	return v.Apply(fn)
 }
 
+// Ceil returns the ceiling of each element in the vector.
 func Ceil(v vector.Vector) vector.Vector {
 	var fn any
 
@@ -234,6 +244,7 @@ func Ceil(v vector.Vector) vector.Vector {
 	return v.Apply(fn)
 }
 
+// Conj returns the complex conjugate of each element in the vector.
 func Conj(v vector.Vector) vector.Vector {
 	var fn any
 
@@ -250,6 +261,7 @@ func Conj(v vector.Vector) vector.Vector {
 	return v.Apply(fn)
 }
 
+// CopySign returns a vector with the magnitude of v and the sign of x.
 func CopySign(v vector.Vector, x float64) vector.Vector {
 	var fn any
 
@@ -270,6 +282,7 @@ func CopySign(v vector.Vector, x float64) vector.Vector {
 	return v.Apply(fn)
 }
 
+// Cos returns the cosine of each element in the vector.
 func Cos(v vector.Vector) vector.Vector {
 	var fn any
 
@@ -294,6 +307,7 @@ func Cos(v vector.Vector) vector.Vector {
 	return v.Apply(fn)
 }
 
+// Cosh returns the hyperbolic cosine of each element in the vector.
 func Cosh(v vector.Vector) vector.Vector {
 	var fn any
 
@@ -318,6 +332,7 @@ func Cosh(v vector.Vector) vector.Vector {
 	return v.Apply(fn)
 }
 
+// Cot returns the cotangent of each element in the vector.
 func Cot(v vector.Vector) vector.Vector {
 	var fn any
 
@@ -334,6 +349,7 @@ func Cot(v vector.Vector) vector.Vector {
 	return v.Apply(fn)
 }
 
+// Dim returns a vector with the maximum of x-y or 0
 func Dim(v vector.Vector, x float64) vector.Vector {
 	var fn any
 
@@ -354,6 +370,7 @@ func Dim(v vector.Vector, x float64) vector.Vector {
 	return v.Apply(fn)
 }
 
+// Erf returns the error function of each element in the vector.
 func Erf(v vector.Vector) vector.Vector {
 	var fn any
 
@@ -374,6 +391,7 @@ func Erf(v vector.Vector) vector.Vector {
 	return v.Apply(fn)
 }
 
+// Erfc returns the complementary error function of each element in the vector.
 func Erfc(v vector.Vector) vector.Vector {
 	var fn any
 
@@ -394,6 +412,7 @@ func Erfc(v vector.Vector) vector.Vector {
 	return v.Apply(fn)
 }
 
+// Erfcinv returns the inverse of the complementary error function of each element in the vector.
 func Erfcinv(v vector.Vector) vector.Vector {
 	var fn any
 
@@ -414,6 +433,7 @@ func Erfcinv(v vector.Vector) vector.Vector {
 	return v.Apply(fn)
 }
 
+// Erfinv returns the inverse of the error function of each element in the vector.
 func Erfinv(v vector.Vector) vector.Vector {
 	var fn any
 
@@ -434,6 +454,7 @@ func Erfinv(v vector.Vector) vector.Vector {
 	return v.Apply(fn)
 }
 
+// Exp returns the exponential of each element in the vector.
 func Exp(v vector.Vector) vector.Vector {
 	var fn any
 
@@ -458,6 +479,7 @@ func Exp(v vector.Vector) vector.Vector {
 	return v.Apply(fn)
 }
 
+// Exp2 returns the base-2 exponential of each element in the vector.
 func Exp2(v vector.Vector) vector.Vector {
 	var fn any
 
@@ -478,6 +500,7 @@ func Exp2(v vector.Vector) vector.Vector {
 	return v.Apply(fn)
 }
 
+// Exp2 returns the base-10 exponential of each element in the vector.
 func Exp10(v vector.Vector) vector.Vector {
 	var fn any
 
@@ -498,6 +521,7 @@ func Exp10(v vector.Vector) vector.Vector {
 	return v.Apply(fn)
 }
 
+// Floor returns the greatest integer value less than or equal to each element in the vector.
 func Floor(v vector.Vector) vector.Vector {
 	var fn any
 
@@ -518,6 +542,7 @@ func Floor(v vector.Vector) vector.Vector {
 	return v.Apply(fn)
 }
 
+// Gamma returns the gamma function of each element in the vector.
 func Gamma(v vector.Vector) vector.Vector {
 	var fn any
 
@@ -538,6 +563,7 @@ func Gamma(v vector.Vector) vector.Vector {
 	return v.Apply(fn)
 }
 
+// Imag returns the imaginary part of each element in the vector.
 func Imag(v vector.Vector) vector.Vector {
 	var fn any
 
@@ -554,6 +580,7 @@ func Imag(v vector.Vector) vector.Vector {
 	return v.Apply(fn)
 }
 
+// IsInf returns whether each element in the vector is positive or negative infinity in boolean vector format.
 func IsInf(v vector.Vector) vector.Vector {
 	var fn any
 
@@ -578,6 +605,7 @@ func IsInf(v vector.Vector) vector.Vector {
 	return v.Apply(fn)
 }
 
+// IsNaN returns whether each element in the vector is NaN in boolean vector format.
 func IsNaN(v vector.Vector) vector.Vector {
 	var fn any
 
@@ -602,6 +630,7 @@ func IsNaN(v vector.Vector) vector.Vector {
 	return v.Apply(fn)
 }
 
+// J0 returns the Bessel function of the first kind of order 0 of each element in the vector.
 func J0(v vector.Vector) vector.Vector {
 	var fn any
 
@@ -622,6 +651,7 @@ func J0(v vector.Vector) vector.Vector {
 	return v.Apply(fn)
 }
 
+// J1 returns the Bessel function of the first kind of order 1 of each element in the vector.
 func J1(v vector.Vector) vector.Vector {
 	var fn any
 
@@ -642,6 +672,7 @@ func J1(v vector.Vector) vector.Vector {
 	return v.Apply(fn)
 }
 
+// Jn returns the Bessel function of the first kind of order n of each element in the vector.
 func Jn(v vector.Vector, n int) vector.Vector {
 	var fn any
 
@@ -662,6 +693,7 @@ func Jn(v vector.Vector, n int) vector.Vector {
 	return v.Apply(fn)
 }
 
+// Log returns the natural logarithm of each element in the vector.
 func Log(v vector.Vector) vector.Vector {
 	var fn any
 
@@ -686,6 +718,7 @@ func Log(v vector.Vector) vector.Vector {
 	return v.Apply(fn)
 }
 
+// Log10 returns the base-10 logarithm of each element in the vector.
 func Log10(v vector.Vector) vector.Vector {
 	var fn any
 
@@ -710,6 +743,7 @@ func Log10(v vector.Vector) vector.Vector {
 	return v.Apply(fn)
 }
 
+// Log2 returns the base-2 logarithm of each element in the vector.
 func Log2(v vector.Vector) vector.Vector {
 	var fn any
 
@@ -730,6 +764,7 @@ func Log2(v vector.Vector) vector.Vector {
 	return v.Apply(fn)
 }
 
+// Phase returns the phase (also known as the argument) of each element in the vector.
 func Phase(v vector.Vector) vector.Vector {
 	var fn any
 
@@ -746,6 +781,7 @@ func Phase(v vector.Vector) vector.Vector {
 	return v.Apply(fn)
 }
 
+// Pow returns the element-wise power of the vector.
 func Pow(v vector.Vector, p float64) vector.Vector {
 	var fn any
 
@@ -770,6 +806,7 @@ func Pow(v vector.Vector, p float64) vector.Vector {
 	return v.Apply(fn)
 }
 
+// Round returns the nearest integer, rounding half away from zero.
 func Round(v vector.Vector) vector.Vector {
 	var fn any
 
@@ -802,6 +839,7 @@ func Round(v vector.Vector) vector.Vector {
 	return v.Apply(fn)
 }
 
+// RoundToEven returns the nearest integer, rounding ties to even.
 func RoundToEven(v vector.Vector) vector.Vector {
 	var fn any
 
@@ -834,6 +872,7 @@ func RoundToEven(v vector.Vector) vector.Vector {
 	return v.Apply(fn)
 }
 
+// Signbit returns whether the sign bit is set for each element in the vector.
 func Signbit(v vector.Vector) vector.Vector {
 	var fn any
 
@@ -854,6 +893,7 @@ func Signbit(v vector.Vector) vector.Vector {
 	return v.Apply(fn)
 }
 
+// Sin returns the sine of each element in the vector.
 func Sin(v vector.Vector) vector.Vector {
 	var fn any
 
@@ -878,6 +918,7 @@ func Sin(v vector.Vector) vector.Vector {
 	return v.Apply(fn)
 }
 
+// Sinh returns the hyperbolic sine of each element in the vector.
 func Sinh(v vector.Vector) vector.Vector {
 	var fn any
 
@@ -902,6 +943,7 @@ func Sinh(v vector.Vector) vector.Vector {
 	return v.Apply(fn)
 }
 
+// Sqrt returns the square root of each element in the vector.
 func Sqrt(v vector.Vector) vector.Vector {
 	var fn any
 
@@ -942,6 +984,7 @@ func Sqrt(v vector.Vector) vector.Vector {
 	return v.Apply(fn)
 }
 
+// Tan returns the tangent of each element in the vector.
 func Tan(v vector.Vector) vector.Vector {
 	var fn any
 
@@ -966,6 +1009,7 @@ func Tan(v vector.Vector) vector.Vector {
 	return v.Apply(fn)
 }
 
+// Tanh returns the hyperbolic tangent of each element in the vector.
 func Tanh(v vector.Vector) vector.Vector {
 	var fn any
 

@@ -6,6 +6,8 @@ import (
 	"math/cmplx"
 )
 
+// IsInf returns a boolean slice indicating whether the corresponding element
+// of the input vector is infinite.
 func IsInf(v vector.Vector) []bool {
 	var fn any
 
@@ -25,6 +27,8 @@ func IsInf(v vector.Vector) []bool {
 	return v.Which(fn)
 }
 
+// IsNaN returns a boolean slice indicating whether the corresponding element
+// of the input vector is NaN.
 func IsNaN(v vector.Vector) []bool {
 	var fn any
 
@@ -44,6 +48,8 @@ func IsNaN(v vector.Vector) []bool {
 	return v.Which(fn)
 }
 
+// Signbit returns a boolean slice indicating whether the corresponding element
+// of the input vector is negative.
 func Signbit(v vector.Vector) []bool {
 	var fn any
 

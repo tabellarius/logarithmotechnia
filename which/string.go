@@ -5,6 +5,8 @@ import (
 	"strings"
 )
 
+// Contains returns a boolean slice indicating whether the corresponding element
+// of the input vector contains the given substring.
 func Contains(v vector.Vector, s string) []bool {
 	vec := v
 	if v.Type() != vector.PayloadTypeString {
@@ -16,6 +18,8 @@ func Contains(v vector.Vector, s string) []bool {
 	})
 }
 
+// ContainsAny returns a boolean slice indicating whether the corresponding element
+// of the input vector contains any of the given characters.
 func ContainsAny(v vector.Vector, s string) []bool {
 	vec := v
 	if v.Type() != vector.PayloadTypeString {
@@ -27,6 +31,8 @@ func ContainsAny(v vector.Vector, s string) []bool {
 	})
 }
 
+// ContainsRune returns a boolean slice indicating whether the corresponding element
+// of the input vector contains the given rune.
 func ContainsRune(v vector.Vector, r rune) []bool {
 	vec := v
 	if v.Type() != vector.PayloadTypeString {
@@ -38,6 +44,8 @@ func ContainsRune(v vector.Vector, r rune) []bool {
 	})
 }
 
+// HasPrefix returns a boolean slice indicating whether the corresponding element
+// of the input vector has the given prefix.
 func HasPrefix(v vector.Vector, prefix string) []bool {
 	vec := v
 	if v.Type() != vector.PayloadTypeString {
@@ -49,6 +57,8 @@ func HasPrefix(v vector.Vector, prefix string) []bool {
 	})
 }
 
+// HasSuffix returns a boolean slice indicating whether the corresponding element
+// of the input vector has the given suffix.
 func HasSuffix(v vector.Vector, suffix string) []bool {
 	vec := v
 	if v.Type() != vector.PayloadTypeString {
@@ -60,6 +70,8 @@ func HasSuffix(v vector.Vector, suffix string) []bool {
 	})
 }
 
+// EqualFold returns a boolean slice indicating whether the corresponding element
+// of the input vector is equal to the given string, ignoring case.
 func EqualFold(v vector.Vector, t string) []bool {
 	vec := v
 	if v.Type() != vector.PayloadTypeString {
