@@ -27,9 +27,9 @@ func TestVector_Add(t *testing.T) {
 			payload.data, outData))
 	}
 
-	if !reflect.DeepEqual(payload.na, outNA) {
-		t.Error(fmt.Sprintf("payload.na (%v) do not match outNA (%v)",
-			payload.na, outNA))
+	if !reflect.DeepEqual(payload.NA, outNA) {
+		t.Error(fmt.Sprintf("payload.NA (%v) do not match outNA (%v)",
+			payload.NA, outNA))
 	}
 }
 
@@ -53,9 +53,9 @@ func TestVector_Sub(t *testing.T) {
 			payload.data, outData))
 	}
 
-	if !reflect.DeepEqual(payload.na, outNA) {
-		t.Error(fmt.Sprintf("payload.na (%v) do not match outNA (%v)",
-			payload.na, outNA))
+	if !reflect.DeepEqual(payload.NA, outNA) {
+		t.Error(fmt.Sprintf("payload.NA (%v) do not match outNA (%v)",
+			payload.NA, outNA))
 	}
 }
 
@@ -79,9 +79,9 @@ func TestVector_Mul(t *testing.T) {
 			payload.data, outData))
 	}
 
-	if !reflect.DeepEqual(payload.na, outNA) {
-		t.Error(fmt.Sprintf("payload.na (%v) do not match outNA (%v)",
-			payload.na, outNA))
+	if !reflect.DeepEqual(payload.NA, outNA) {
+		t.Error(fmt.Sprintf("payload.NA (%v) do not match outNA (%v)",
+			payload.NA, outNA))
 	}
 }
 
@@ -105,8 +105,8 @@ func TestVector_Div(t *testing.T) {
 			payload.data, outData))
 	}
 
-	if !reflect.DeepEqual(payload.na, outNA) {
-		t.Error(fmt.Sprintf("payload.na (%v) do not match outNA (%v)",
-			payload.na, outNA))
+	if !reflect.DeepEqual(payload.NA, outNA) {
+		t.Error(fmt.Sprintf("payload.NA (%v) do not match outNA (%v)",
+			payload.NA, outNA))
 	}
 }

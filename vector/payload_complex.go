@@ -1,6 +1,7 @@
 package vector
 
 import (
+	"logarithmotechnia/embed"
 	"math"
 	"math/cmplx"
 	"strconv"
@@ -14,7 +15,7 @@ type complexPayload struct {
 	length  int
 	data    []complex128
 	printer ComplexPrinter
-	DefNAble
+	embed.DefNAble
 }
 
 func (p *complexPayload) Type() string {
@@ -26,15 +27,15 @@ func (p *complexPayload) Len() int {
 }
 
 func (p *complexPayload) Pick(idx int) any {
-	return pickValueWithNA(idx, p.data, p.na, p.length)
+	return pickValueWithNA(idx, p.data, p.NA, p.length)
 }
 
 func (p *complexPayload) Data() []any {
-	return dataWithNAToInterfaceArray(p.data, p.na)
+	return dataWithNAToInterfaceArray(p.data, p.NA)
 }
 
 func (p *complexPayload) ByIndices(indices []int) Payload {
-	data, na := byIndicesWithNA(indices, p.data, p.na, cmplx.NaN())
+	data, na := byIndicesWithNA(indices, p.data, p.NA, cmplx.NaN())
 
 	return ComplexPayload(data, na, p.Options()...)
 }
@@ -44,15 +45,15 @@ func (p *complexPayload) SupportsWhicher(whicher any) bool {
 }
 
 func (p *complexPayload) Which(whicher any) []bool {
-	return whichWithNA(p.data, p.na, whicher)
+	return whichWithNA(p.data, p.NA, whicher)
 }
 
 func (p *complexPayload) Apply(applier any) Payload {
-	return applyWithNA(p.data, p.na, applier, p.Options())
+	return applyWithNA(p.data, p.NA, applier, p.Options())
 }
 
 func (p *complexPayload) ApplyTo(indices []int, applier any) Payload {
-	data, na := applyToWithNA(indices, p.data, p.na, applier, cmplx.NaN())
+	data, na := applyToWithNA(indices, p.data, p.NA, applier, cmplx.NaN())
 
 	if data == nil {
 		return NAPayload(p.length)
@@ -62,7 +63,7 @@ func (p *complexPayload) ApplyTo(indices []int, applier any) Payload {
 }
 
 func (p *complexPayload) Traverse(traverser any) {
-	traverseWithNA(p.data, p.na, traverser)
+	traverseWithNA(p.data, p.NA, traverser)
 }
 
 func (p *complexPayload) SupportsSummarizer(summarizer any) bool {
@@ -70,7 +71,7 @@ func (p *complexPayload) SupportsSummarizer(summarizer any) bool {
 }
 
 func (p *complexPayload) Summarize(summarizer any) Payload {
-	val, na := summarize(p.data, p.na, summarizer, 0+0i, cmplx.NaN())
+	val, na := summarize(p.data, p.NA, summarizer, 0+0i, cmplx.NaN())
 
 	return ComplexPayload([]complex128{val}, []bool{na}, p.Options()...)
 }
@@ -82,7 +83,7 @@ func (p *complexPayload) Integers() ([]int, []bool) {
 
 	data := make([]int, p.length)
 	for i := 0; i < p.length; i++ {
-		if p.na[i] {
+		if p.NA[i] {
 			data[i] = 0
 		} else {
 			data[i] = int(real(p.data[i]))
@@ -90,7 +91,7 @@ func (p *complexPayload) Integers() ([]int, []bool) {
 	}
 
 	na := make([]bool, p.Len())
-	copy(na, p.na)
+	copy(na, p.NA)
 
 	return data, na
 }
@@ -103,7 +104,7 @@ func (p *complexPayload) Floats() ([]float64, []bool) {
 	data := make([]float64, p.length)
 
 	for i := 0; i < p.length; i++ {
-		if p.na[i] {
+		if p.NA[i] {
 			data[i] = math.NaN()
 		} else {
 			data[i] = real(p.data[i])
@@ -111,7 +112,7 @@ func (p *complexPayload) Floats() ([]float64, []bool) {
 	}
 
 	na := make([]bool, p.Len())
-	copy(na, p.na)
+	copy(na, p.NA)
 
 	return data, na
 }
@@ -125,7 +126,7 @@ func (p *complexPayload) Complexes() ([]complex128, []bool) {
 	copy(data, p.data)
 
 	na := make([]bool, p.Len())
-	copy(na, p.na)
+	copy(na, p.NA)
 
 	return data, na
 }
@@ -138,7 +139,7 @@ func (p *complexPayload) Booleans() ([]bool, []bool) {
 	data := make([]bool, p.length)
 
 	for i := 0; i < p.length; i++ {
-		if p.na[i] {
+		if p.NA[i] {
 			data[i] = false
 		} else {
 			data[i] = p.data[i] != 0
@@ -146,7 +147,7 @@ func (p *complexPayload) Booleans() ([]bool, []bool) {
 	}
 
 	na := make([]bool, p.length)
-	copy(na, p.na)
+	copy(na, p.NA)
 
 	return data, na
 }
@@ -163,7 +164,7 @@ func (p *complexPayload) Strings() ([]string, []bool) {
 	}
 
 	na := make([]bool, p.Len())
-	copy(na, p.na)
+	copy(na, p.NA)
 
 	return data, na
 }
@@ -175,7 +176,7 @@ func (p *complexPayload) Anies() ([]any, []bool) {
 
 	data := make([]any, p.length)
 	for i := 0; i < p.length; i++ {
-		if p.na[i] {
+		if p.NA[i] {
 			data[i] = nil
 		} else {
 			data[i] = p.data[i]
@@ -183,7 +184,7 @@ func (p *complexPayload) Anies() ([]any, []bool) {
 	}
 
 	na := make([]bool, p.length)
-	copy(na, p.na)
+	copy(na, p.NA)
 
 	return data, na
 }
@@ -205,7 +206,7 @@ func (p *complexPayload) Append(payload Payload) Payload {
 
 	copy(newVals, p.data)
 	copy(newVals[p.length:], vals)
-	copy(newNA, p.na)
+	copy(newNA, p.NA)
 	copy(newNA[p.length:], na)
 
 	return ComplexPayload(newVals, newNA, p.Options()...)
@@ -224,13 +225,13 @@ func (p *complexPayload) Adjust(size int) Payload {
 }
 
 func (p *complexPayload) adjustToLesserSize(size int) Payload {
-	data, na := adjustToLesserSizeWithNA(p.data, p.na, size)
+	data, na := adjustToLesserSizeWithNA(p.data, p.NA, size)
 
 	return ComplexPayload(data, na, p.Options()...)
 }
 
 func (p *complexPayload) adjustToBiggerSize(size int) Payload {
-	data, na := adjustToBiggerSizeWithNA(p.data, p.na, p.length, size)
+	data, na := adjustToBiggerSizeWithNA(p.data, p.NA, p.length, size)
 
 	return ComplexPayload(data, na, p.Options()...)
 }
@@ -253,7 +254,7 @@ func (p *complexPayload) SetOption(name string, val any) bool {
 }
 
 func (p *complexPayload) Groups() ([][]int, []any) {
-	groups, values := groupsForData(p.data, p.na)
+	groups, values := groupsForData(p.data, p.NA)
 
 	return groups, values
 }
@@ -261,7 +262,7 @@ func (p *complexPayload) Groups() ([][]int, []any) {
 func (p *complexPayload) StrForElem(idx int) string {
 	i := idx - 1
 
-	if p.na[i] {
+	if p.NA[i] {
 		return "NA"
 	}
 
@@ -279,21 +280,21 @@ func (p *complexPayload) StrForElem(idx int) string {
 /* Finder interface */
 
 func (p *complexPayload) Find(needle any) int {
-	return find(needle, p.data, p.na, p.convertComparator)
+	return find(needle, p.data, p.NA, p.convertComparator)
 }
 
 func (p *complexPayload) FindAll(needle any) []int {
-	return findAll(needle, p.data, p.na, p.convertComparator)
+	return findAll(needle, p.data, p.NA, p.convertComparator)
 }
 
 /* Ordered interface */
 
 func (p *complexPayload) Eq(val any) []bool {
-	return eq(val, p.data, p.na, p.convertComparator)
+	return eq(val, p.data, p.NA, p.convertComparator)
 }
 
 func (p *complexPayload) Neq(val any) []bool {
-	return neq(val, p.data, p.na, p.convertComparator)
+	return neq(val, p.data, p.NA, p.convertComparator)
 }
 
 func (p *complexPayload) convertComparator(val any) (complex128, bool) {
@@ -335,7 +336,7 @@ func (p *complexPayload) Coalesce(payload Payload) Payload {
 
 	if same, ok := payload.(*complexPayload); ok {
 		srcData = same.data
-		srcNA = same.na
+		srcNA = same.NA
 	} else if complexable, ok := payload.(Complexable); ok {
 		srcData, srcNA = complexable.Complexes()
 	} else {
@@ -346,12 +347,12 @@ func (p *complexPayload) Coalesce(payload Payload) Payload {
 	dstNA := make([]bool, p.length)
 
 	for i := 0; i < p.length; i++ {
-		if p.na[i] && !srcNA[i] {
+		if p.NA[i] && !srcNA[i] {
 			dstData[i] = srcData[i]
 			dstNA[i] = false
 		} else {
 			dstData[i] = p.data[i]
-			dstNA[i] = p.na[i]
+			dstNA[i] = p.NA[i]
 		}
 	}
 
@@ -368,7 +369,7 @@ func (p *complexPayload) IsUnique() []bool {
 	for i := 0; i < p.length; i++ {
 		is := false
 
-		if p.na[i] {
+		if p.NA[i] {
 			if !wasNA {
 				is = true
 				wasNA = true
@@ -431,8 +432,8 @@ func ComplexPayload(data []complex128, na []bool, options ...Option) Payload {
 		length:  length,
 		data:    vecData,
 		printer: printer,
-		DefNAble: DefNAble{
-			na: vecNA,
+		DefNAble: embed.DefNAble{
+			NA: vecNA,
 		},
 	}
 	conf.SetOptions(payload)

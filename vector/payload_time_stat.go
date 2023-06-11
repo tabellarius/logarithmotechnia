@@ -11,7 +11,7 @@ func (p *timePayload) Max() Payload {
 
 	max := p.data[0]
 	for i := 1; i < p.length; i++ {
-		if p.na[i] {
+		if p.NA[i] {
 			return TimePayload([]time.Time{{}}, []bool{true}, p.Options()...)
 		}
 
@@ -30,7 +30,7 @@ func (p *timePayload) Min() Payload {
 
 	min := p.data[0]
 	for i := 1; i < p.length; i++ {
-		if p.na[i] {
+		if p.NA[i] {
 			return TimePayload([]time.Time{{}}, []bool{true}, p.Options()...)
 		}
 

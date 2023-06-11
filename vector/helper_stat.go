@@ -1,6 +1,9 @@
 package vector
 
-import "golang.org/x/exp/constraints"
+import (
+	"golang.org/x/exp/constraints"
+	"logarithmotechnia/embed"
+)
 
 func genSum[T numeric](data []T, na []bool) (T, bool) {
 	var sum T
@@ -84,7 +87,7 @@ func genMean[T calculable](data []T, na []bool) (float64, bool) {
 
 func genMedian[T constraints.Integer | constraints.Float](
 	data []T,
-	na DefNAble,
+	na embed.DefNAble,
 	sorter func() []int,
 ) (T, bool) {
 	var median T

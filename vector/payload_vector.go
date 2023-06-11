@@ -3,7 +3,6 @@ package vector
 type vectorPayload struct {
 	length int
 	data   []Vector
-	DefNAble
 }
 
 func (p *vectorPayload) Type() string {
@@ -111,7 +110,11 @@ func (p *vectorPayload) Anies() ([]any, []bool) {
 	}
 
 	na := make([]bool, p.length)
-	copy(na, p.na)
+	for i, val := range p.data {
+		if val == nil {
+			na[i] = true
+		}
+	}
 
 	return data, na
 }
@@ -200,9 +203,6 @@ func VectorPayload(data []Vector, _ ...Option) Payload {
 	return &vectorPayload{
 		length: length,
 		data:   vecData,
-		DefNAble: DefNAble{
-			na: vecNA,
-		},
 	}
 }
 

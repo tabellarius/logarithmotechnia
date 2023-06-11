@@ -60,33 +60,33 @@ func CompareVectorsForTest(one, two Vector) bool {
 	case *booleanPayload:
 		p1 := vec1.payload.(*booleanPayload)
 		p2 := vec2.payload.(*booleanPayload)
-		ok = reflect.DeepEqual(p1.data, p2.data) && reflect.DeepEqual(p1.na, p2.na)
+		ok = reflect.DeepEqual(p1.data, p2.data) && reflect.DeepEqual(p1.NA, p2.NA)
 	case *integerPayload:
 		p1 := vec1.payload.(*integerPayload)
 		p2 := vec2.payload.(*integerPayload)
-		ok = reflect.DeepEqual(p1.data, p2.data) && reflect.DeepEqual(p1.na, p2.na)
+		ok = reflect.DeepEqual(p1.data, p2.data) && reflect.DeepEqual(p1.NA, p2.NA)
 	case *complexPayload:
 		p1 := vec1.payload.(*complexPayload)
 		p2 := vec2.payload.(*complexPayload)
-		ok = util.EqualComplexArrays(p1.data, p2.data) && reflect.DeepEqual(p1.na, p2.na)
+		ok = util.EqualComplexArrays(p1.data, p2.data) && reflect.DeepEqual(p1.NA, p2.NA)
 	case *floatPayload:
 		p1 := vec1.payload.(*floatPayload)
 		p2 := vec2.payload.(*floatPayload)
-		ok = util.EqualFloatArrays(p1.data, p2.data) && reflect.DeepEqual(p1.na, p2.na)
+		ok = util.EqualFloatArrays(p1.data, p2.data) && reflect.DeepEqual(p1.NA, p2.NA)
 	case *anyPayload:
 		p1 := vec1.payload.(*anyPayload)
 		p2 := vec2.payload.(*anyPayload)
-		ok = reflect.DeepEqual(p1.data, p2.data) && reflect.DeepEqual(p1.na, p2.na)
+		ok = reflect.DeepEqual(p1.data, p2.data) && reflect.DeepEqual(p1.NA, p2.NA)
 	case *naPayload:
 		ok = vec1.length == vec2.length
 	case *stringPayload:
 		p1 := vec1.payload.(*stringPayload)
 		p2 := vec2.payload.(*stringPayload)
-		ok = reflect.DeepEqual(p1.data, p2.data) && reflect.DeepEqual(p1.na, p2.na)
+		ok = reflect.DeepEqual(p1.data, p2.data) && reflect.DeepEqual(p1.NA, p2.NA)
 	case *timePayload:
 		p1 := vec1.payload.(*timePayload)
 		p2 := vec2.payload.(*timePayload)
-		ok = reflect.DeepEqual(p1.data, p2.data) && reflect.DeepEqual(p1.na, p2.na)
+		ok = reflect.DeepEqual(p1.data, p2.data) && reflect.DeepEqual(p1.NA, p2.NA)
 	case *vectorPayload:
 		p1 := vec1.payload.(*vectorPayload)
 		p2 := vec2.payload.(*vectorPayload)

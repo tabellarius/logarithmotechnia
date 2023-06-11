@@ -294,8 +294,8 @@ func TestVector_AsBoolean(t *testing.T) {
 				if !reflect.DeepEqual(payload.data, data.outValues) {
 					t.Error(fmt.Sprintf("Payload data (%v) is not equal to expected (%v)", payload.data, data.outValues))
 				}
-				if !reflect.DeepEqual(payload.na, data.outNA) {
-					t.Error(fmt.Sprintf("Payload NA (%v) is not equal to expected (%v)", payload.na, data.outNA))
+				if !reflect.DeepEqual(payload.NA, data.outNA) {
+					t.Error(fmt.Sprintf("Payload NA (%v) is not equal to expected (%v)", payload.NA, data.outNA))
 				}
 			}
 		})
@@ -341,8 +341,8 @@ func TestVector_AsInteger(t *testing.T) {
 				if !reflect.DeepEqual(payload.data, data.outValues) {
 					t.Error(fmt.Sprintf("Payload data (%v) is not equal to expected (%v)", payload.data, data.outValues))
 				}
-				if !reflect.DeepEqual(payload.na, data.outNA) {
-					t.Error(fmt.Sprintf("Payload NA (%v) is not equal to expected (%v)", payload.na, data.outNA))
+				if !reflect.DeepEqual(payload.NA, data.outNA) {
+					t.Error(fmt.Sprintf("Payload NA (%v) is not equal to expected (%v)", payload.NA, data.outNA))
 				}
 			}
 		})
@@ -388,8 +388,8 @@ func TestVector_AsFloat(t *testing.T) {
 				if !util.EqualFloatArrays(payload.data, data.outValues) {
 					t.Error(fmt.Sprintf("Payload data (%v) is not equal to expected (%v)", payload.data, data.outValues))
 				}
-				if !reflect.DeepEqual(payload.na, data.outNA) {
-					t.Error(fmt.Sprintf("Payload NA (%v) is not equal to expected (%v)", payload.na, data.outNA))
+				if !reflect.DeepEqual(payload.NA, data.outNA) {
+					t.Error(fmt.Sprintf("Payload NA (%v) is not equal to expected (%v)", payload.NA, data.outNA))
 				}
 			}
 		})
@@ -435,8 +435,8 @@ func TestVector_AsComplex(t *testing.T) {
 				if !util.EqualComplexArrays(payload.data, data.outValues) {
 					t.Error(fmt.Sprintf("Payload data (%v) is not equal to expected (%v)", payload.data, data.outValues))
 				}
-				if !reflect.DeepEqual(payload.na, data.outNA) {
-					t.Error(fmt.Sprintf("Payload NA (%v) is not equal to expected (%v)", payload.na, data.outNA))
+				if !reflect.DeepEqual(payload.NA, data.outNA) {
+					t.Error(fmt.Sprintf("Payload NA (%v) is not equal to expected (%v)", payload.NA, data.outNA))
 				}
 			}
 		})
@@ -476,8 +476,8 @@ func TestVector_AsString(t *testing.T) {
 				if !reflect.DeepEqual(payload.data, data.outValues) {
 					t.Error(fmt.Sprintf("Payload data (%v) is not equal to expected (%v)", payload.data, data.outValues))
 				}
-				if !reflect.DeepEqual(payload.na, data.outNA) {
-					t.Error(fmt.Sprintf("Payload NA (%v) is not equal to expected (%v)", payload.na, data.outNA))
+				if !reflect.DeepEqual(payload.NA, data.outNA) {
+					t.Error(fmt.Sprintf("Payload NA (%v) is not equal to expected (%v)", payload.NA, data.outNA))
 				}
 			}
 		})
@@ -517,8 +517,8 @@ func TestVector_AsInterface(t *testing.T) {
 				if !reflect.DeepEqual(payload.data, data.outValues) {
 					t.Error(fmt.Sprintf("Payload data (%v) is not equal to expected (%v)", payload.data, data.outValues))
 				}
-				if !reflect.DeepEqual(payload.na, data.outNA) {
-					t.Error(fmt.Sprintf("Payload NA (%v) is not equal to expected (%v)", payload.na, data.outNA))
+				if !reflect.DeepEqual(payload.NA, data.outNA) {
+					t.Error(fmt.Sprintf("Payload NA (%v) is not equal to expected (%v)", payload.NA, data.outNA))
 				}
 			}
 		})
@@ -565,8 +565,8 @@ func TestVector_AsTime(t *testing.T) {
 				if !reflect.DeepEqual(payload.data, data.outValues) {
 					t.Error(fmt.Sprintf("Payload data (%v) is not equal to expected (%v)", payload.data, data.outValues))
 				}
-				if !reflect.DeepEqual(payload.na, data.outNA) {
-					t.Error(fmt.Sprintf("Payload NA (%v) is not equal to expected (%v)", payload.na, data.outNA))
+				if !reflect.DeepEqual(payload.NA, data.outNA) {
+					t.Error(fmt.Sprintf("Payload NA (%v) is not equal to expected (%v)", payload.NA, data.outNA))
 				}
 			}
 		})
@@ -996,8 +996,8 @@ func TestVector_Clone(t *testing.T) {
 		t.Error("Payload data was not cloned")
 	}
 
-	srcAddrNA := &(vec.payload.(*integerPayload).na[0])
-	newAddrNA := &(newVec.payload.(*integerPayload).na[0])
+	srcAddrNA := &(vec.payload.(*integerPayload).NA[0])
+	newAddrNA := &(newVec.payload.(*integerPayload).NA[0])
 
 	if srcAddrNA != newAddrNA {
 		t.Error("Payload NA data was not cloned")
@@ -1280,9 +1280,9 @@ func TestVector_Append(t *testing.T) {
 				t.Error(fmt.Sprintf("Output data (%v) does not match expected (%v)",
 					outPayload.data, data.outData))
 			}
-			if !reflect.DeepEqual(data.outNA, outPayload.na) {
+			if !reflect.DeepEqual(data.outNA, outPayload.NA) {
 				t.Error(fmt.Sprintf("Output NA (%v) does not match expected (%v)",
-					outPayload.na, data.outNA))
+					outPayload.NA, data.outNA))
 			}
 		})
 	}
@@ -1325,9 +1325,9 @@ func TestVector_Adjust(t *testing.T) {
 				t.Error(fmt.Sprintf("Output data (%v) does not match expected (%v)",
 					outPayload.data, data.outData))
 			}
-			if !reflect.DeepEqual(data.outNA, outPayload.na) {
+			if !reflect.DeepEqual(data.outNA, outPayload.NA) {
 				t.Error(fmt.Sprintf("Output NA (%v) does not match expected (%v)",
-					outPayload.na, data.outNA))
+					outPayload.NA, data.outNA))
 			}
 		})
 	}

@@ -85,13 +85,13 @@ func TestTime(t *testing.T) {
 				}
 
 				if len(data.na) > 0 && len(data.na) == length {
-					if !reflect.DeepEqual(payload.na, data.na) {
+					if !reflect.DeepEqual(payload.NA, data.na) {
 						t.Error(fmt.Sprintf("Payload na (%v) is not equal to correct na (%v)\n",
-							payload.na[1:], data.na))
+							payload.NA[1:], data.na))
 					}
 				} else if len(data.na) == 0 {
-					if !reflect.DeepEqual(payload.na, emptyNA) {
-						t.Error(fmt.Sprintf("len(data.na) == 0 : incorrect payload.na (%v)", payload.na))
+					if !reflect.DeepEqual(payload.NA, emptyNA) {
+						t.Error(fmt.Sprintf("len(data.na) == 0 : incorrect payload.NA (%v)", payload.NA))
 					}
 				} else {
 					t.Error("error")
@@ -297,8 +297,8 @@ func TestTimePayload_ByIndices(t *testing.T) {
 			if !reflect.DeepEqual(payload.data, data.out) {
 				t.Error(fmt.Sprintf("payload.data (%v) is not equal to data.out (%v)", payload.data, data.out))
 			}
-			if !reflect.DeepEqual(payload.na, data.outNA) {
-				t.Error(fmt.Sprintf("payload.na (%v) is not equal to data.out (%v)", payload.na, data.out))
+			if !reflect.DeepEqual(payload.NA, data.outNA) {
+				t.Error(fmt.Sprintf("payload.NA (%v) is not equal to data.out (%v)", payload.NA, data.out))
 			}
 		})
 	}
@@ -457,9 +457,9 @@ func TestTimePayload_Apply(t *testing.T) {
 					t.Error(fmt.Sprintf("Output data (%v) does not match expected (%v)",
 						payloadOut.data, data.dataOut))
 				}
-				if !reflect.DeepEqual(data.naOut, payloadOut.na) {
+				if !reflect.DeepEqual(data.naOut, payloadOut.NA) {
 					t.Error(fmt.Sprintf("Output NA (%v) does not match expected (%v)",
-						payloadOut.na, data.naOut))
+						payloadOut.NA, data.naOut))
 				}
 			} else {
 				_, ok := payload.(*naPayload)
@@ -583,9 +583,9 @@ func TestTimePayload_Summarize(t *testing.T) {
 				t.Error(fmt.Sprintf("Output data (%v) does not match expected (%v)",
 					data.dataOut, payloadOut.data))
 			}
-			if !reflect.DeepEqual(data.naOut, payloadOut.na) {
+			if !reflect.DeepEqual(data.naOut, payloadOut.NA) {
 				t.Error(fmt.Sprintf("Output NA (%v) does not match expected (%v)",
-					data.naOut, payloadOut.na))
+					data.naOut, payloadOut.NA))
 			}
 		})
 	}
@@ -632,9 +632,9 @@ func TestTimePayload_Append(t *testing.T) {
 				t.Error(fmt.Sprintf("Output data (%v) does not match expected (%v)",
 					outPayload.data, data.outData))
 			}
-			if !reflect.DeepEqual(data.outNA, outPayload.na) {
+			if !reflect.DeepEqual(data.outNA, outPayload.NA) {
 				t.Error(fmt.Sprintf("Output NA (%v) does not match expected (%v)",
-					outPayload.na, data.outNA))
+					outPayload.NA, data.outNA))
 			}
 		})
 	}
@@ -650,27 +650,27 @@ func TestTimePayload_Adjust(t *testing.T) {
 		name       string
 		inPayload  *timePayload
 		size       int
-		outPaylout *timePayload
+		outPayload *timePayload
 	}{
 		{
 			inPayload: payload5,
 			name:      "same",
 			size:      5,
-			outPaylout: TimePayload(toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z",
+			outPayload: TimePayload(toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z",
 				"0001-01-01T00:00:00Z", "0001-01-01T00:00:00Z"}), nil).(*timePayload),
 		},
 		{
 			inPayload: payload5,
 			name:      "lesser",
 			size:      3,
-			outPaylout: TimePayload(toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z"}),
+			outPayload: TimePayload(toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "1800-06-10T11:00:00Z"}),
 				nil).(*timePayload),
 		},
 		{
 			inPayload: payload3,
 			name:      "bigger",
 			size:      10,
-			outPaylout: TimePayload(toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "0001-01-01T00:00:00Z",
+			outPayload: TimePayload(toTimeData([]string{"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "0001-01-01T00:00:00Z",
 				"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "0001-01-01T00:00:00Z",
 				"2006-01-02T15:04:05+07:00", "2021-01-01T12:30:00+03:00", "0001-01-01T00:00:00Z",
 				"2006-01-02T15:04:05+07:00"}),
@@ -682,13 +682,13 @@ func TestTimePayload_Adjust(t *testing.T) {
 		t.Run(data.name, func(t *testing.T) {
 			outPayload := data.inPayload.Adjust(data.size).(*timePayload)
 
-			if !reflect.DeepEqual(outPayload.data, data.outPaylout.data) {
+			if !reflect.DeepEqual(outPayload.data, data.outPayload.data) {
 				t.Error(fmt.Sprintf("Output data (%v) does not match expected (%v)",
-					outPayload.data, data.outPaylout.data))
+					outPayload.data, data.outPayload.data))
 			}
-			if !reflect.DeepEqual(outPayload.na, data.outPaylout.na) {
+			if !reflect.DeepEqual(outPayload.NA, data.outPayload.NA) {
 				t.Error(fmt.Sprintf("Output NA (%v) does not match expected (%v)",
-					outPayload.na, data.outPaylout.na))
+					outPayload.NA, data.outPayload.NA))
 			}
 		})
 	}
@@ -1028,9 +1028,9 @@ func TestTimePayload_Coalesce(t *testing.T) {
 					payload.data, data.outData))
 			}
 
-			if !reflect.DeepEqual(payload.na, data.outNA) {
+			if !reflect.DeepEqual(payload.NA, data.outNA) {
 				t.Error(fmt.Sprintf("NA (%v) do not match expected (%v)",
-					payload.na, data.outNA))
+					payload.NA, data.outNA))
 			}
 		})
 	}
@@ -1176,9 +1176,9 @@ func TestTimePayload_ApplyTo(t *testing.T) {
 					t.Error(fmt.Sprintf("Output data (%v) does not match expected (%v)",
 						data.dataOut, payloadOut.data))
 				}
-				if !reflect.DeepEqual(data.naOut, payloadOut.na) {
+				if !reflect.DeepEqual(data.naOut, payloadOut.NA) {
 					t.Error(fmt.Sprintf("Output NA (%v) does not match expected (%v)",
-						data.naOut, payloadOut.na))
+						data.naOut, payloadOut.NA))
 				}
 			} else {
 				_, ok := payload.(*naPayload)

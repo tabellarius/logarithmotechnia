@@ -12,7 +12,7 @@ func (p *complexPayload) Add(p2 Payload) Payload {
 	var opNA []bool
 	if pType, ok := p2.(*complexPayload); ok {
 		opNumbers = pType.data
-		opNA = pType.na
+		opNA = pType.NA
 	} else if complexable, ok := p2.(Complexable); ok {
 		opNumbers, opNA = complexable.Complexes()
 	} else {
@@ -20,7 +20,7 @@ func (p *complexPayload) Add(p2 Payload) Payload {
 	}
 
 	for i := 0; i < p.length; i++ {
-		if p.na[i] || opNA[i] {
+		if p.NA[i] || opNA[i] {
 			na[i] = true
 		} else {
 			numbers[i] = p.data[i] + opNumbers[i]
@@ -42,7 +42,7 @@ func (p *complexPayload) Sub(p2 Payload) Payload {
 	var subNA []bool
 	if pType, ok := p2.(*complexPayload); ok {
 		opNumbers = pType.data
-		subNA = pType.na
+		subNA = pType.NA
 	} else if complexable, ok := p2.(Complexable); ok {
 		opNumbers, subNA = complexable.Complexes()
 	} else {
@@ -50,7 +50,7 @@ func (p *complexPayload) Sub(p2 Payload) Payload {
 	}
 
 	for i := 0; i < p.length; i++ {
-		if p.na[i] || subNA[i] {
+		if p.NA[i] || subNA[i] {
 			na[i] = true
 		} else {
 			numbers[i] = p.data[i] - opNumbers[i]
@@ -72,7 +72,7 @@ func (p *complexPayload) Mul(p2 Payload) Payload {
 	var opNA []bool
 	if pType, ok := p2.(*complexPayload); ok {
 		opNumbers = pType.data
-		opNA = pType.na
+		opNA = pType.NA
 	} else if complexable, ok := p2.(Complexable); ok {
 		opNumbers, opNA = complexable.Complexes()
 	} else {
@@ -80,7 +80,7 @@ func (p *complexPayload) Mul(p2 Payload) Payload {
 	}
 
 	for i := 0; i < p.length; i++ {
-		if p.na[i] || opNA[i] {
+		if p.NA[i] || opNA[i] {
 			na[i] = true
 		} else {
 			numbers[i] = p.data[i] * opNumbers[i]
@@ -102,7 +102,7 @@ func (p *complexPayload) Div(p2 Payload) Payload {
 	var opNA []bool
 	if pType, ok := p2.(*complexPayload); ok {
 		opNumbers = pType.data
-		opNA = pType.na
+		opNA = pType.NA
 	} else if complexable, ok := p2.(Complexable); ok {
 		opNumbers, opNA = complexable.Complexes()
 	} else {
@@ -110,7 +110,7 @@ func (p *complexPayload) Div(p2 Payload) Payload {
 	}
 
 	for i := 0; i < p.length; i++ {
-		if p.na[i] || opNA[i] || opNumbers[i] == 0 {
+		if p.NA[i] || opNA[i] || opNumbers[i] == 0 {
 			na[i] = true
 		} else {
 			numbers[i] = p.data[i] / opNumbers[i]

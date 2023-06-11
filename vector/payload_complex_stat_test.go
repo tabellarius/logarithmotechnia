@@ -39,9 +39,9 @@ func TestComplexPayload_Sum(t *testing.T) {
 					sumPayload.data, data.sumData))
 			}
 
-			if !reflect.DeepEqual(sumPayload.na, data.sumNA) {
+			if !reflect.DeepEqual(sumPayload.NA, data.sumNA) {
 				t.Error(fmt.Sprintf("Sum data (%v) is not equal to expected (%v)",
-					sumPayload.na, data.sumNA))
+					sumPayload.NA, data.sumNA))
 			}
 		})
 	}
@@ -52,20 +52,20 @@ func TestComplexPayload_Mean(t *testing.T) {
 		name    string
 		payload *complexPayload
 		data    []complex128
-		na      []bool
+		NA      []bool
 	}{
 		{
 			name:    "without na",
 			payload: ComplexPayload([]complex128{-10 + 10i, 10 - 5i, 4 - 5i, -20 + 20i, 26 - 10i}, nil).(*complexPayload),
 			data:    []complex128{2 + 2i},
-			na:      []bool{false},
+			NA:      []bool{false},
 		},
 		{
 			name: "with na",
 			payload: ComplexPayload([]complex128{-20 + 10i, 10 - 5i, 4 + 2i, -20 + 20i, 26 - 26i},
 				[]bool{false, false, true, false, false}).(*complexPayload),
 			data: []complex128{cmplx.NaN()},
-			na:   []bool{true},
+			NA:   []bool{true},
 		},
 	}
 
@@ -78,9 +78,9 @@ func TestComplexPayload_Mean(t *testing.T) {
 					payload.data, data.data))
 			}
 
-			if !reflect.DeepEqual(payload.na, data.na) {
+			if !reflect.DeepEqual(payload.NA, data.NA) {
 				t.Error(fmt.Sprintf("Sum data (%v) is not equal to expected (%v)",
-					payload.na, data.na))
+					payload.NA, data.NA))
 			}
 		})
 	}
@@ -91,32 +91,32 @@ func TestComplexPayload_Prod(t *testing.T) {
 		name    string
 		payload *complexPayload
 		data    []complex128
-		na      []bool
+		NA      []bool
 	}{
 		{
 			name:    "without na",
 			payload: ComplexPayload([]complex128{-10 + 10i, 10 - 5i, 4 - 5i, -20 + 20i, 26 - 10i}, nil).(*complexPayload),
 			data:    []complex128{-788000 + 124000i},
-			na:      []bool{false},
+			NA:      []bool{false},
 		},
 		{
 			name: "with na",
 			payload: ComplexPayload([]complex128{-20 + 10i, 10 - 5i, 4 + 2i, -20 + 20i, 26 - 26i},
 				[]bool{false, false, true, false, false}).(*complexPayload),
 			data: []complex128{cmplx.NaN()},
-			na:   []bool{true},
+			NA:   []bool{true},
 		},
 		{
 			name:    "one element",
 			payload: ComplexPayload([]complex128{-10 + 10i}, nil).(*complexPayload),
 			data:    []complex128{-10 + 10i},
-			na:      []bool{false},
+			NA:      []bool{false},
 		},
 		{
 			name:    "zero element",
 			payload: ComplexPayload([]complex128{}, nil).(*complexPayload),
 			data:    []complex128{0},
-			na:      []bool{false},
+			NA:      []bool{false},
 		},
 	}
 
@@ -129,9 +129,9 @@ func TestComplexPayload_Prod(t *testing.T) {
 					payload.data, data.data))
 			}
 
-			if !reflect.DeepEqual(payload.na, data.na) {
+			if !reflect.DeepEqual(payload.NA, data.NA) {
 				t.Error(fmt.Sprintf("Prod data (%v) is not equal to expected (%v)",
-					payload.na, data.na))
+					payload.NA, data.NA))
 			}
 		})
 	}
@@ -180,9 +180,9 @@ func TestComplexPayload_CumSum(t *testing.T) {
 					payload.data, data.data))
 			}
 
-			if !reflect.DeepEqual(payload.na, data.na) {
+			if !reflect.DeepEqual(payload.NA, data.na) {
 				t.Error(fmt.Sprintf("Prod data (%v) is not equal to expected (%v)",
-					payload.na, data.na))
+					payload.NA, data.na))
 			}
 		})
 	}
@@ -231,9 +231,9 @@ func TestComplexPayload_CumProd(t *testing.T) {
 					payload.data, data.data))
 			}
 
-			if !reflect.DeepEqual(payload.na, data.na) {
+			if !reflect.DeepEqual(payload.NA, data.na) {
 				t.Error(fmt.Sprintf("Prod data (%v) is not equal to expected (%v)",
-					payload.na, data.na))
+					payload.NA, data.na))
 			}
 		})
 	}

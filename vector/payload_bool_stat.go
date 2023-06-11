@@ -4,7 +4,7 @@ func (p *booleanPayload) Sum() Payload {
 	sum := 0
 	na := false
 	for i, val := range p.data {
-		if p.na[i] {
+		if p.NA[i] {
 			sum = 0
 			na = true
 			break

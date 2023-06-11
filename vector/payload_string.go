@@ -2,6 +2,7 @@ package vector
 
 import (
 	"golang.org/x/exp/slices"
+	"logarithmotechnia/embed"
 	"math"
 	"math/cmplx"
 	"strconv"
@@ -16,7 +17,7 @@ type StringToBooleanConverter interface {
 type stringPayload struct {
 	length int
 	data   []string
-	DefNAble
+	embed.DefNAble
 	DefArrangeable
 	StringToBooleanConverter
 	timeFormat string
@@ -31,15 +32,15 @@ func (p *stringPayload) Len() int {
 }
 
 func (p *stringPayload) Pick(idx int) any {
-	return pickValueWithNA(idx, p.data, p.na, p.length)
+	return pickValueWithNA(idx, p.data, p.NA, p.length)
 }
 
 func (p *stringPayload) Data() []any {
-	return dataWithNAToInterfaceArray(p.data, p.na)
+	return dataWithNAToInterfaceArray(p.data, p.NA)
 }
 
 func (p *stringPayload) ByIndices(indices []int) Payload {
-	data, na := byIndicesWithNA(indices, p.data, p.na, "")
+	data, na := byIndicesWithNA(indices, p.data, p.NA, "")
 
 	return StringPayload(data, na, p.Options()...)
 }
@@ -49,19 +50,19 @@ func (p *stringPayload) SupportsWhicher(whicher any) bool {
 }
 
 func (p *stringPayload) Which(whicher any) []bool {
-	return whichWithNA(p.data, p.na, whicher)
+	return whichWithNA(p.data, p.NA, whicher)
 }
 
 func (p *stringPayload) Apply(applier any) Payload {
-	return applyWithNA(p.data, p.na, applier, p.Options())
+	return applyWithNA(p.data, p.NA, applier, p.Options())
 }
 
 func (p *stringPayload) Traverse(traverser any) {
-	traverseWithNA(p.data, p.na, traverser)
+	traverseWithNA(p.data, p.NA, traverser)
 }
 
 func (p *stringPayload) ApplyTo(indices []int, applier any) Payload {
-	data, na := applyToWithNA(indices, p.data, p.na, applier, "")
+	data, na := applyToWithNA(indices, p.data, p.NA, applier, "")
 
 	if data == nil {
 		return NAPayload(p.length)
@@ -75,7 +76,7 @@ func (p *stringPayload) SupportsSummarizer(summarizer any) bool {
 }
 
 func (p *stringPayload) Summarize(summarizer any) Payload {
-	val, na := summarize(p.data, p.na, summarizer, "", "")
+	val, na := summarize(p.data, p.NA, summarizer, "", "")
 
 	return StringPayload([]string{val}, []bool{na}, p.Options()...)
 }
@@ -87,7 +88,7 @@ func (p *stringPayload) Anies() ([]any, []bool) {
 
 	data := make([]any, p.length)
 	for i := 0; i < p.length; i++ {
-		if p.na[i] {
+		if p.NA[i] {
 			data[i] = nil
 		} else {
 			data[i] = p.data[i]
@@ -95,7 +96,7 @@ func (p *stringPayload) Anies() ([]any, []bool) {
 	}
 
 	na := make([]bool, p.length)
-	copy(na, p.na)
+	copy(na, p.NA)
 
 	return data, na
 }
@@ -107,10 +108,10 @@ func (p *stringPayload) Integers() ([]int, []bool) {
 
 	data := make([]int, p.length)
 	na := make([]bool, p.Len())
-	copy(na, p.na)
+	copy(na, p.NA)
 
 	for i := 0; i < p.length; i++ {
-		if p.na[i] {
+		if p.NA[i] {
 			data[i] = 0
 		} else {
 			num, err := strconv.Atoi(p.data[i])
@@ -133,10 +134,10 @@ func (p *stringPayload) Floats() ([]float64, []bool) {
 
 	data := make([]float64, p.length)
 	na := make([]bool, p.Len())
-	copy(na, p.na)
+	copy(na, p.NA)
 
 	for i := 0; i < p.length; i++ {
-		if p.na[i] {
+		if p.NA[i] {
 			data[i] = math.NaN()
 		} else {
 			num, err := strconv.ParseFloat(p.data[i], 64)
@@ -159,10 +160,10 @@ func (p *stringPayload) Times() ([]time.Time, []bool) {
 
 	data := make([]time.Time, p.length)
 	na := make([]bool, p.Len())
-	copy(na, p.na)
+	copy(na, p.NA)
 
 	for i := 0; i < p.length; i++ {
-		if p.na[i] {
+		if p.NA[i] {
 			continue
 		}
 		date, err := time.Parse(p.timeFormat, p.data[i])
@@ -183,10 +184,10 @@ func (p *stringPayload) Complexes() ([]complex128, []bool) {
 
 	data := make([]complex128, p.length)
 	na := make([]bool, p.Len())
-	copy(na, p.na)
+	copy(na, p.NA)
 
 	for i := 0; i < p.length; i++ {
-		if p.na[i] {
+		if p.NA[i] {
 			data[i] = cmplx.NaN()
 		} else {
 			num, err := strconv.ParseComplex(p.data[i], 128)
@@ -209,13 +210,13 @@ func (p *stringPayload) Booleans() ([]bool, []bool) {
 
 	data := make([]bool, p.length)
 	na := make([]bool, p.length)
-	copy(na, p.na)
+	copy(na, p.NA)
 
 	trueValues := p.TrueValues()
 	falseValues := p.FalseValues()
 
 	for i := 0; i < p.length; i++ {
-		if p.na[i] {
+		if p.NA[i] {
 			data[i] = false
 		} else {
 			if slices.Contains(trueValues, p.data[i]) {
@@ -241,7 +242,7 @@ func (p *stringPayload) Strings() ([]string, []bool) {
 	copy(data, p.data)
 
 	na := make([]bool, p.Len())
-	copy(na, p.na)
+	copy(na, p.NA)
 
 	return data, na
 }
@@ -263,7 +264,7 @@ func (p *stringPayload) Append(payload Payload) Payload {
 
 	copy(newVals, p.data)
 	copy(newVals[p.length:], vals)
-	copy(newNA, p.na)
+	copy(newNA, p.NA)
 	copy(newNA[p.length:], na)
 
 	return StringPayload(newVals, newNA, p.Options()...)
@@ -271,13 +272,13 @@ func (p *stringPayload) Append(payload Payload) Payload {
 
 func (p *stringPayload) Groups() ([][]int, []any) {
 	groupMap := map[string][]int{}
-	ordered := []string{}
-	na := []int{}
+	var ordered []string
+	var na []int
 
 	for i, val := range p.data {
 		idx := i + 1
 
-		if p.na[i] {
+		if p.NA[i] {
 			na = append(na, idx)
 			continue
 		}
@@ -311,7 +312,7 @@ func (p *stringPayload) Groups() ([][]int, []any) {
 }
 
 func (p *stringPayload) StrForElem(idx int) string {
-	if p.na[idx-1] {
+	if p.NA[idx-1] {
 		return "NA"
 	}
 
@@ -335,7 +336,7 @@ func (p *stringPayload) adjustToLesserSize(size int) Payload {
 	na := make([]bool, size)
 
 	copy(data, p.data)
-	copy(na, p.na)
+	copy(na, p.NA)
 
 	return StringPayload(data, na, p.Options()...)
 }
@@ -351,7 +352,7 @@ func (p *stringPayload) adjustToBiggerSize(size int) Payload {
 
 	for i := 0; i < cycles; i++ {
 		copy(data[i*p.length:], p.data)
-		copy(na[i*p.length:], p.na)
+		copy(na[i*p.length:], p.NA)
 	}
 
 	data = data[:size]
@@ -363,35 +364,35 @@ func (p *stringPayload) adjustToBiggerSize(size int) Payload {
 /* Finder interface */
 
 func (p *stringPayload) Find(needle any) int {
-	return find(needle, p.data, p.na, p.convertComparator)
+	return find(needle, p.data, p.NA, p.convertComparator)
 }
 
 func (p *stringPayload) FindAll(needle any) []int {
-	return findAll(needle, p.data, p.na, p.convertComparator)
+	return findAll(needle, p.data, p.NA, p.convertComparator)
 }
 
 func (p *stringPayload) Eq(val any) []bool {
-	return eq(val, p.data, p.na, p.convertComparator)
+	return eq(val, p.data, p.NA, p.convertComparator)
 }
 
 func (p *stringPayload) Neq(val any) []bool {
-	return neq(val, p.data, p.na, p.convertComparator)
+	return neq(val, p.data, p.NA, p.convertComparator)
 }
 
 func (p *stringPayload) Gt(val any) []bool {
-	return gt(val, p.data, p.na, p.convertComparator)
+	return gt(val, p.data, p.NA, p.convertComparator)
 }
 
 func (p *stringPayload) Lt(val any) []bool {
-	return lt(val, p.data, p.na, p.convertComparator)
+	return lt(val, p.data, p.NA, p.convertComparator)
 }
 
 func (p *stringPayload) Gte(val any) []bool {
-	return gte(val, p.data, p.na, p.convertComparator)
+	return gte(val, p.data, p.NA, p.convertComparator)
 }
 
 func (p *stringPayload) Lte(val any) []bool {
-	return lte(val, p.data, p.na, p.convertComparator)
+	return lte(val, p.data, p.NA, p.convertComparator)
 }
 
 func (p *stringPayload) convertComparator(val any) (string, bool) {
@@ -415,7 +416,7 @@ func (p *stringPayload) IsUnique() []bool {
 	for i := 0; i < p.length; i++ {
 		is := false
 
-		if p.na[i] {
+		if p.NA[i] {
 			if !wasNA {
 				is = true
 				wasNA = true
@@ -443,7 +444,7 @@ func (p *stringPayload) Coalesce(payload Payload) Payload {
 
 	if same, ok := payload.(*stringPayload); ok {
 		srcData = same.data
-		srcNA = same.na
+		srcNA = same.NA
 	} else if stringable, ok := payload.(Stringable); ok {
 		srcData, srcNA = stringable.Strings()
 	} else {
@@ -454,12 +455,12 @@ func (p *stringPayload) Coalesce(payload Payload) Payload {
 	dstNA := make([]bool, p.length)
 
 	for i := 0; i < p.length; i++ {
-		if p.na[i] && !srcNA[i] {
+		if p.NA[i] && !srcNA[i] {
 			dstData[i] = srcData[i]
 			dstNA[i] = false
 		} else {
 			dstData[i] = p.data[i]
-			dstNA[i] = p.na[i]
+			dstNA[i] = p.NA[i]
 		}
 	}
 
@@ -518,8 +519,8 @@ func StringPayload(data []string, na []bool, options ...Option) Payload {
 	payload := &stringPayload{
 		length: length,
 		data:   vecData,
-		DefNAble: DefNAble{
-			na: vecNA,
+		DefNAble: embed.DefNAble{
+			NA: vecNA,
 		},
 		timeFormat: time.RFC3339,
 	}

@@ -47,9 +47,9 @@ func TestAnyPayload_Max(t *testing.T) {
 					payload.data, data.data))
 			}
 
-			if !reflect.DeepEqual(payload.na, data.sumNA) {
+			if !reflect.DeepEqual(payload.NA, data.sumNA) {
 				t.Error(fmt.Sprintf("Max na (%v) is not equal to expected (%v)",
-					payload.na, data.sumNA))
+					payload.NA, data.sumNA))
 			}
 		})
 	}
@@ -96,9 +96,9 @@ func TestAnyPayload_Min(t *testing.T) {
 					payload.data, data.data))
 			}
 
-			if !reflect.DeepEqual(payload.na, data.sumNA) {
+			if !reflect.DeepEqual(payload.NA, data.sumNA) {
 				t.Error(fmt.Sprintf("Min na (%v) is not equal to expected (%v)",
-					payload.na, data.sumNA))
+					payload.NA, data.sumNA))
 			}
 		})
 	}
@@ -149,9 +149,9 @@ func TestAnyPayload_CumMax(t *testing.T) {
 					payload.data, data.data))
 			}
 
-			if !reflect.DeepEqual(payload.na, data.sumNA) {
+			if !reflect.DeepEqual(payload.NA, data.sumNA) {
 				t.Error(fmt.Sprintf("CumMax na (%v) is not equal to expected (%v)",
-					payload.na, data.sumNA))
+					payload.NA, data.sumNA))
 			}
 		})
 	}
@@ -202,9 +202,9 @@ func TestAnyPayload_CumMin(t *testing.T) {
 					payload.data, data.data))
 			}
 
-			if !reflect.DeepEqual(payload.na, data.sumNA) {
+			if !reflect.DeepEqual(payload.NA, data.sumNA) {
 				t.Error(fmt.Sprintf("CumMin na (%v) is not equal to expected (%v)",
-					payload.na, data.sumNA))
+					payload.NA, data.sumNA))
 			}
 		})
 	}

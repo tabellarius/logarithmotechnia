@@ -671,9 +671,9 @@ func TestNaPayload_Coalesce(t *testing.T) {
 					payload.data, data.outData))
 			}
 
-			if !reflect.DeepEqual(payload.na, data.outNA) {
+			if !reflect.DeepEqual(payload.NA, data.outNA) {
 				t.Error(fmt.Sprintf("NA (%v) do not match expected (%v)",
-					payload.na, data.outNA))
+					payload.NA, data.outNA))
 			}
 		})
 	}

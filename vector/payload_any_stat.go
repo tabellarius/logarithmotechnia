@@ -7,7 +7,7 @@ func (p *anyPayload) Max() Payload {
 
 	max := p.data[0]
 	for i := 1; i < p.length; i++ {
-		if p.na[i] {
+		if p.NA[i] {
 			return AnyPayload([]any{nil}, []bool{true}, p.Options()...)
 		}
 
@@ -27,7 +27,7 @@ func (p *anyPayload) Min() Payload {
 
 	min := p.data[0]
 	for i := 1; i < p.length; i++ {
-		if p.na[i] {
+		if p.NA[i] {
 			return AnyPayload([]any{nil}, []bool{true}, p.Options()...)
 		}
 
@@ -57,7 +57,7 @@ func (p *anyPayload) CumMax() Payload {
 			continue
 		}
 
-		if p.na[i] {
+		if p.NA[i] {
 			na[i] = true
 			isNA = true
 			continue
@@ -91,7 +91,7 @@ func (p *anyPayload) CumMin() Payload {
 			continue
 		}
 
-		if p.na[i] {
+		if p.NA[i] {
 			na[i] = true
 			isNA = true
 			continue

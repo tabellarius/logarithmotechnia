@@ -1,6 +1,7 @@
 package vector
 
 import (
+	"logarithmotechnia/embed"
 	"time"
 )
 
@@ -12,7 +13,7 @@ type timePayload struct {
 	length  int
 	data    []time.Time
 	printer TimePrinter
-	DefNAble
+	embed.DefNAble
 	DefArrangeable
 }
 
@@ -25,15 +26,15 @@ func (p *timePayload) Len() int {
 }
 
 func (p *timePayload) Pick(idx int) any {
-	return pickValueWithNA(idx, p.data, p.na, p.length)
+	return pickValueWithNA(idx, p.data, p.NA, p.length)
 }
 
 func (p *timePayload) Data() []any {
-	return dataWithNAToInterfaceArray(p.data, p.na)
+	return dataWithNAToInterfaceArray(p.data, p.NA)
 }
 
 func (p *timePayload) ByIndices(indices []int) Payload {
-	data, na := byIndicesWithNA(indices, p.data, p.na, time.Time{})
+	data, na := byIndicesWithNA(indices, p.data, p.NA, time.Time{})
 
 	return TimePayload(data, na, p.Options()...)
 }
@@ -43,15 +44,15 @@ func (p *timePayload) SupportsWhicher(whicher any) bool {
 }
 
 func (p *timePayload) Which(whicher any) []bool {
-	return whichWithNA(p.data, p.na, whicher)
+	return whichWithNA(p.data, p.NA, whicher)
 }
 
 func (p *timePayload) Apply(applier any) Payload {
-	return applyWithNA(p.data, p.na, applier, p.Options())
+	return applyWithNA(p.data, p.NA, applier, p.Options())
 }
 
 func (p *timePayload) ApplyTo(indices []int, applier any) Payload {
-	data, na := applyToWithNA(indices, p.data, p.na, applier, time.Time{})
+	data, na := applyToWithNA(indices, p.data, p.NA, applier, time.Time{})
 
 	if data == nil {
 		return NAPayload(p.length)
@@ -61,7 +62,7 @@ func (p *timePayload) ApplyTo(indices []int, applier any) Payload {
 }
 
 func (p *timePayload) Traverse(traverser any) {
-	traverseWithNA(p.data, p.na, traverser)
+	traverseWithNA(p.data, p.NA, traverser)
 }
 
 func (p *timePayload) SupportsSummarizer(summarizer any) bool {
@@ -69,7 +70,7 @@ func (p *timePayload) SupportsSummarizer(summarizer any) bool {
 }
 
 func (p *timePayload) Summarize(summarizer any) Payload {
-	val, na := summarize(p.data, p.na, summarizer, time.Time{}, time.Time{})
+	val, na := summarize(p.data, p.NA, summarizer, time.Time{}, time.Time{})
 
 	return TimePayload([]time.Time{val}, []bool{na})
 }
@@ -82,7 +83,7 @@ func (p *timePayload) Strings() ([]string, []bool) {
 	data := make([]string, p.length)
 
 	for i := 0; i < p.length; i++ {
-		if p.na[i] {
+		if p.NA[i] {
 			data[i] = ""
 		} else {
 			data[i] = p.StrForElem(i + 1)
@@ -90,7 +91,7 @@ func (p *timePayload) Strings() ([]string, []bool) {
 	}
 
 	na := make([]bool, p.Len())
-	copy(na, p.na)
+	copy(na, p.NA)
 
 	return data, na
 }
@@ -104,7 +105,7 @@ func (p *timePayload) Times() ([]time.Time, []bool) {
 	copy(data, p.data)
 
 	na := make([]bool, p.Len())
-	copy(na, p.na)
+	copy(na, p.NA)
 
 	return data, na
 }
@@ -116,7 +117,7 @@ func (p *timePayload) Anies() ([]any, []bool) {
 
 	data := make([]any, p.length)
 	for i := 0; i < p.length; i++ {
-		if p.na[i] {
+		if p.NA[i] {
 			data[i] = nil
 		} else {
 			data[i] = p.data[i]
@@ -124,7 +125,7 @@ func (p *timePayload) Anies() ([]any, []bool) {
 	}
 
 	na := make([]bool, p.length)
-	copy(na, p.na)
+	copy(na, p.NA)
 
 	return data, na
 }
@@ -146,7 +147,7 @@ func (p *timePayload) Append(payload Payload) Payload {
 
 	copy(newVals, p.data)
 	copy(newVals[p.length:], vals)
-	copy(newNA, p.na)
+	copy(newNA, p.NA)
 	copy(newNA[p.length:], na)
 
 	return TimePayload(newVals, newNA)
@@ -165,13 +166,13 @@ func (p *timePayload) Adjust(size int) Payload {
 }
 
 func (p *timePayload) adjustToLesserSize(size int) Payload {
-	data, na := adjustToLesserSizeWithNA(p.data, p.na, size)
+	data, na := adjustToLesserSizeWithNA(p.data, p.NA, size)
 
 	return TimePayload(data, na)
 }
 
 func (p *timePayload) adjustToBiggerSize(size int) Payload {
-	data, na := adjustToBiggerSizeWithNA(p.data, p.na, p.length, size)
+	data, na := adjustToBiggerSizeWithNA(p.data, p.NA, p.length, size)
 
 	return TimePayload(data, na)
 }
@@ -183,21 +184,21 @@ func (p *timePayload) StrForElem(idx int) string {
 /* Finder interface */
 
 func (p *timePayload) Find(needle any) int {
-	return findFn(needle, p.data, p.na, p.convertComparator, p.eqFn)
+	return findFn(needle, p.data, p.NA, p.convertComparator, p.eqFn)
 }
 
 func (p *timePayload) FindAll(needle any) []int {
-	return findAllFn(needle, p.data, p.na, p.convertComparator, p.eqFn)
+	return findAllFn(needle, p.data, p.NA, p.convertComparator, p.eqFn)
 }
 
 /* Ordered interface */
 
 func (p *timePayload) Eq(val any) []bool {
-	return eqFn(val, p.data, p.na, p.convertComparator, p.eqFn)
+	return eqFn(val, p.data, p.NA, p.convertComparator, p.eqFn)
 }
 
 func (p *timePayload) Neq(val any) []bool {
-	return neqFn(val, p.data, p.na, p.convertComparator, p.eqFn)
+	return neqFn(val, p.data, p.NA, p.convertComparator, p.eqFn)
 }
 
 func (p *timePayload) convertComparator(val any) (time.Time, bool) {
@@ -211,7 +212,7 @@ func (p *timePayload) eqFn(f, s time.Time) bool {
 }
 
 func (p *timePayload) Gt(val any) []bool {
-	return gtFn(val, p.data, p.na, p.convertComparator, p.ltFn)
+	return gtFn(val, p.data, p.NA, p.convertComparator, p.ltFn)
 }
 
 func (p *timePayload) ltFn(f, s time.Time) bool {
@@ -219,19 +220,19 @@ func (p *timePayload) ltFn(f, s time.Time) bool {
 }
 
 func (p *timePayload) Lt(val any) []bool {
-	return ltFn(val, p.data, p.na, p.convertComparator, p.ltFn)
+	return ltFn(val, p.data, p.NA, p.convertComparator, p.ltFn)
 }
 
 func (p *timePayload) Gte(val any) []bool {
-	return gteFn(val, p.data, p.na, p.convertComparator, p.eqFn, p.ltFn)
+	return gteFn(val, p.data, p.NA, p.convertComparator, p.eqFn, p.ltFn)
 }
 
 func (p *timePayload) Lte(val any) []bool {
-	return lteFn(val, p.data, p.na, p.convertComparator, p.eqFn, p.ltFn)
+	return lteFn(val, p.data, p.NA, p.convertComparator, p.eqFn, p.ltFn)
 }
 
 func (p *timePayload) Groups() ([][]int, []any) {
-	groups, values := groupsForData(p.data, p.na)
+	groups, values := groupsForData(p.data, p.NA)
 
 	return groups, values
 }
@@ -244,7 +245,7 @@ func (p *timePayload) IsUnique() []bool {
 	for i := 0; i < p.length; i++ {
 		is := false
 
-		if p.na[i] {
+		if p.NA[i] {
 			if !wasNA {
 				is = true
 				wasNA = true
@@ -291,7 +292,7 @@ func (p *timePayload) Coalesce(payload Payload) Payload {
 
 	if same, ok := payload.(*timePayload); ok {
 		srcData = same.data
-		srcNA = same.na
+		srcNA = same.NA
 	} else if timeable, ok := payload.(Timeable); ok {
 		srcData, srcNA = timeable.Times()
 	} else {
@@ -302,12 +303,12 @@ func (p *timePayload) Coalesce(payload Payload) Payload {
 	dstNA := make([]bool, p.length)
 
 	for i := 0; i < p.length; i++ {
-		if p.na[i] && !srcNA[i] {
+		if p.NA[i] && !srcNA[i] {
 			dstData[i] = srcData[i]
 			dstNA[i] = false
 		} else {
 			dstData[i] = p.data[i]
-			dstNA[i] = p.na[i]
+			dstNA[i] = p.NA[i]
 		}
 	}
 
@@ -347,8 +348,8 @@ func TimePayload(data []time.Time, na []bool, options ...Option) Payload {
 		length:  length,
 		data:    vecData,
 		printer: printer,
-		DefNAble: DefNAble{
-			na: vecNA,
+		DefNAble: embed.DefNAble{
+			NA: vecNA,
 		},
 	}
 

@@ -1,6 +1,7 @@
 package vector
 
 import (
+	"logarithmotechnia/embed"
 	"math"
 	"math/cmplx"
 	"time"
@@ -36,7 +37,7 @@ type anyPayload struct {
 	printer    AnyPrinterFunc
 	convertors AnyConvertors
 	fn         AnyCallbacks
-	DefNAble
+	embed.DefNAble
 	DefArrangeable
 }
 
@@ -52,18 +53,18 @@ func (p *anyPayload) Len() int {
 
 // Pick returns the value at the given index.
 func (p *anyPayload) Pick(idx int) any {
-	return pickValueWithNA(idx, p.data, p.na, p.length)
+	return pickValueWithNA(idx, p.data, p.NA, p.length)
 }
 
 // Data returns the data as a slice of interface{}. If the payload contains NA-values, they will be represented
 // as nil.
 func (p *anyPayload) Data() []any {
-	return dataWithNAToInterfaceArray(p.data, p.na)
+	return dataWithNAToInterfaceArray(p.data, p.NA)
 }
 
 // ByIndices returns a new payload with the values at the given indices.
 func (p *anyPayload) ByIndices(indices []int) Payload {
-	data, na := byIndicesWithNA(indices, p.data, p.na, nil)
+	data, na := byIndicesWithNA(indices, p.data, p.NA, nil)
 
 	return AnyPayload(data, na, p.Options()...)
 }
@@ -74,7 +75,7 @@ func (p *anyPayload) Find(needle any) int {
 		return 0
 	}
 
-	return findFn(needle, p.data, p.na, p.convertComparator, p.fn.Eq)
+	return findFn(needle, p.data, p.NA, p.convertComparator, p.fn.Eq)
 }
 
 // FindAll returns the indices of all occurrences of the given value. If the value is not found, an empty slice is
@@ -84,13 +85,13 @@ func (p *anyPayload) FindAll(needle any) []int {
 		return []int{}
 	}
 
-	return findAllFn(needle, p.data, p.na, p.convertComparator, p.fn.Eq)
+	return findAllFn(needle, p.data, p.NA, p.convertComparator, p.fn.Eq)
 }
 
 // StrForElem returns the string representation of the value at the given index. If the payload contains NA-values,
 // they will be represented as "NA".
 func (p *anyPayload) StrForElem(idx int) string {
-	if p.na[idx-1] {
+	if p.NA[idx-1] {
 		return "NA"
 	}
 
@@ -109,18 +110,18 @@ func (p *anyPayload) SupportsWhicher(whicher any) bool {
 // Which returns a boolean slice with the same length as the payload. The value at each index is true if the
 // whicher returns true for the value at the same index.
 func (p *anyPayload) Which(whicher any) []bool {
-	return whichWithNA(p.data, p.na, whicher)
+	return whichWithNA(p.data, p.NA, whicher)
 }
 
 // Apply applies the given applier to each value in the payload. The applier can return a new value and a boolean
 // indicating if the value is NA. As a result, a new payload is returned.
 func (p *anyPayload) Apply(applier any) Payload {
-	return applyWithNA(p.data, p.na, applier, p.Options())
+	return applyWithNA(p.data, p.NA, applier, p.Options())
 }
 
 // ApplyTo applies the given applier to the values at the given indices.
 func (p *anyPayload) ApplyTo(indices []int, applier any) Payload {
-	data, na := applyToWithNA(indices, p.data, p.na, applier, nil)
+	data, na := applyToWithNA(indices, p.data, p.NA, applier, nil)
 
 	if data == nil {
 		return NAPayload(p.length)
@@ -131,7 +132,7 @@ func (p *anyPayload) ApplyTo(indices []int, applier any) Payload {
 
 // Traverse traverses the payload with the given traverser.
 func (p *anyPayload) Traverse(traverser any) {
-	traverseWithNA(p.data, p.na, traverser)
+	traverseWithNA(p.data, p.NA, traverser)
 }
 
 // SupportsSummarizer returns true if the payload supports the given summarizer.
@@ -142,7 +143,7 @@ func (p *anyPayload) SupportsSummarizer(summarizer any) bool {
 // Summarize returns a new payload with the result of the summarizer applied to the payload. The new payload will
 // contain only one value.
 func (p *anyPayload) Summarize(summarizer any) Payload {
-	val, na := summarize(p.data, p.na, summarizer, nil, nil)
+	val, na := summarize(p.data, p.NA, summarizer, nil, nil)
 
 	return AnyPayload([]any{val}, []bool{na}, p.Options()...)
 }
@@ -158,7 +159,7 @@ func (p *anyPayload) Eq(val any) []bool {
 		return make([]bool, p.length)
 	}
 
-	return eqFn(val, p.data, p.na, p.convertComparator, p.fn.Eq)
+	return eqFn(val, p.data, p.NA, p.convertComparator, p.fn.Eq)
 }
 
 // Neq returns a boolean slice with the same length as the payload. The value at each index is true if the value at
@@ -168,7 +169,7 @@ func (p *anyPayload) Neq(val any) []bool {
 		return trueBooleanArr(p.length)
 	}
 
-	return neqFn(val, p.data, p.na, p.convertComparator, p.fn.Eq)
+	return neqFn(val, p.data, p.NA, p.convertComparator, p.fn.Eq)
 }
 
 // Gt returns a boolean slice with the same length as the payload. The value at each index is true if the value at
@@ -178,7 +179,7 @@ func (p *anyPayload) Gt(val any) []bool {
 		return make([]bool, p.length)
 	}
 
-	return gtFn(val, p.data, p.na, p.convertComparator, p.fn.Lt)
+	return gtFn(val, p.data, p.NA, p.convertComparator, p.fn.Lt)
 }
 
 // Lt returns a boolean slice with the same length as the payload. The value at each index is true if the value at
@@ -188,7 +189,7 @@ func (p *anyPayload) Lt(val any) []bool {
 		return make([]bool, p.length)
 	}
 
-	return ltFn(val, p.data, p.na, p.convertComparator, p.fn.Lt)
+	return ltFn(val, p.data, p.NA, p.convertComparator, p.fn.Lt)
 }
 
 // Gte returns a boolean slice with the same length as the payload. The value at each index is true if the value at
@@ -198,7 +199,7 @@ func (p *anyPayload) Gte(val any) []bool {
 		return make([]bool, p.length)
 	}
 
-	return gteFn(val, p.data, p.na, p.convertComparator, p.fn.Eq, p.fn.Lt)
+	return gteFn(val, p.data, p.NA, p.convertComparator, p.fn.Eq, p.fn.Lt)
 }
 
 // Lte returns a boolean slice with the same length as the payload. The value at each index is true if the value at
@@ -208,7 +209,7 @@ func (p *anyPayload) Lte(val any) []bool {
 		return make([]bool, p.length)
 	}
 
-	return lteFn(val, p.data, p.na, p.convertComparator, p.fn.Eq, p.fn.Lt)
+	return lteFn(val, p.data, p.NA, p.convertComparator, p.fn.Eq, p.fn.Lt)
 }
 
 // IsUnique returns a boolean slice with the same length as the payload. The value at each index is true if the
@@ -222,7 +223,7 @@ func (p *anyPayload) IsUnique() []bool {
 
 	naIdx := 0
 	for i := 0; i < p.length; i++ {
-		if p.na[i] {
+		if p.NA[i] {
 			if naIdx == 0 {
 				naIdx = i
 			}
@@ -254,11 +255,11 @@ func (p *anyPayload) IsUnique() []bool {
 // HashInt or HashStr callback set.
 func (p *anyPayload) Groups() ([][]int, []any) {
 	if p.fn.HashInt != nil {
-		return groupsForDataWithHash(p.data, p.na, p.fn.HashInt)
+		return groupsForDataWithHash(p.data, p.NA, p.fn.HashInt)
 	}
 
 	if p.fn.HashStr != nil {
-		return groupsForDataWithHash(p.data, p.na, p.fn.HashStr)
+		return groupsForDataWithHash(p.data, p.NA, p.fn.HashStr)
 	}
 
 	data := make([]int, p.length)
@@ -266,7 +267,7 @@ func (p *anyPayload) Groups() ([][]int, []any) {
 		data[i] = i
 	}
 
-	groups, _ := groupsForData(data, p.na)
+	groups, _ := groupsForData(data, p.NA)
 	values := make([]any, p.length)
 	for i := 0; i < p.length; i++ {
 		values[i] = p.data[i]
@@ -287,7 +288,7 @@ func (p *anyPayload) Coalesce(payload Payload) Payload {
 
 	if same, ok := payload.(*anyPayload); ok {
 		srcData = same.data
-		srcNA = same.na
+		srcNA = same.NA
 	} else if intable, ok := payload.(Anyable); ok {
 		srcData, srcNA = intable.Anies()
 	} else {
@@ -298,12 +299,12 @@ func (p *anyPayload) Coalesce(payload Payload) Payload {
 	dstNA := make([]bool, p.length)
 
 	for i := 0; i < p.length; i++ {
-		if p.na[i] && !srcNA[i] {
+		if p.NA[i] && !srcNA[i] {
 			dstData[i] = srcData[i]
 			dstNA[i] = false
 		} else {
 			dstData[i] = p.data[i]
-			dstNA[i] = p.na[i]
+			dstNA[i] = p.NA[i]
 		}
 	}
 
@@ -323,7 +324,7 @@ func (p *anyPayload) Integers() ([]int, []bool) {
 	for i := 0; i < p.length; i++ {
 		val, naVal := 0, true
 		if p.convertors.Intabler != nil {
-			val, naVal = p.convertors.Intabler(i+1, p.data[i], p.na[i])
+			val, naVal = p.convertors.Intabler(i+1, p.data[i], p.NA[i])
 		}
 		data[i] = val
 		na[i] = naVal
@@ -345,7 +346,7 @@ func (p *anyPayload) Floats() ([]float64, []bool) {
 	for i := 0; i < p.length; i++ {
 		val, naVal := math.NaN(), true
 		if p.convertors.Floatabler != nil {
-			val, naVal = p.convertors.Floatabler(i+1, p.data[i], p.na[i])
+			val, naVal = p.convertors.Floatabler(i+1, p.data[i], p.NA[i])
 		}
 		data[i] = val
 		na[i] = naVal
@@ -367,7 +368,7 @@ func (p *anyPayload) Complexes() ([]complex128, []bool) {
 	for i := 0; i < p.length; i++ {
 		val, naVal := cmplx.NaN(), true
 		if p.convertors.Complexabler != nil {
-			val, naVal = p.convertors.Complexabler(i+1, p.data[i], p.na[i])
+			val, naVal = p.convertors.Complexabler(i+1, p.data[i], p.NA[i])
 		}
 		data[i] = val
 		na[i] = naVal
@@ -389,7 +390,7 @@ func (p *anyPayload) Booleans() ([]bool, []bool) {
 	for i := 0; i < p.length; i++ {
 		val, naVal := false, true
 		if p.convertors.Boolabler != nil {
-			val, naVal = p.convertors.Boolabler(i+1, p.data[i], p.na[i])
+			val, naVal = p.convertors.Boolabler(i+1, p.data[i], p.NA[i])
 		}
 		data[i] = val
 		na[i] = naVal
@@ -411,7 +412,7 @@ func (p *anyPayload) Strings() ([]string, []bool) {
 	for i := 0; i < p.length; i++ {
 		val, naVal := "", true
 		if p.convertors.Stringabler != nil {
-			val, naVal = p.convertors.Stringabler(i+1, p.data[i], p.na[i])
+			val, naVal = p.convertors.Stringabler(i+1, p.data[i], p.NA[i])
 		}
 		data[i] = val
 		na[i] = naVal
@@ -433,7 +434,7 @@ func (p *anyPayload) Times() ([]time.Time, []bool) {
 	for i := 0; i < p.length; i++ {
 		val, naVal := time.Time{}, true
 		if p.convertors.Timeabler != nil {
-			val, naVal = p.convertors.Timeabler(i+1, p.data[i], p.na[i])
+			val, naVal = p.convertors.Timeabler(i+1, p.data[i], p.NA[i])
 		}
 		data[i] = val
 		na[i] = naVal
@@ -452,7 +453,7 @@ func (p *anyPayload) Anies() ([]any, []bool) {
 	copy(data, p.data)
 
 	na := make([]bool, p.length)
-	copy(na, p.na)
+	copy(na, p.NA)
 
 	return data, na
 }
@@ -475,7 +476,7 @@ func (p *anyPayload) Append(payload Payload) Payload {
 
 	copy(newVals, p.data)
 	copy(newVals[p.length:], vals)
-	copy(newNA, p.na)
+	copy(newNA, p.NA)
 	copy(newNA[p.length:], na)
 
 	return AnyPayload(newVals, newNA, p.Options()...)
@@ -495,13 +496,13 @@ func (p *anyPayload) Adjust(size int) Payload {
 }
 
 func (p *anyPayload) adjustToLesserSize(size int) Payload {
-	data, na := adjustToLesserSizeWithNA(p.data, p.na, size)
+	data, na := adjustToLesserSizeWithNA(p.data, p.NA, size)
 
 	return AnyPayload(data, na, p.Options()...)
 }
 
 func (p *anyPayload) adjustToBiggerSize(size int) Payload {
-	data, na := adjustToBiggerSizeWithNA(p.data, p.na, p.length, size)
+	data, na := adjustToBiggerSizeWithNA(p.data, p.NA, p.length, size)
 
 	return AnyPayload(data, na, p.Options()...)
 }
@@ -564,8 +565,8 @@ func AnyPayload(data []any, na []bool, options ...Option) Payload {
 		length:  length,
 		data:    vecData,
 		printer: nil,
-		DefNAble: DefNAble{
-			na: vecNA,
+		DefNAble: embed.DefNAble{
+			NA: vecNA,
 		},
 	}
 

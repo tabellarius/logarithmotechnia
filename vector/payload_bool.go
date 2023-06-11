@@ -1,6 +1,7 @@
 package vector
 
 import (
+	"logarithmotechnia/embed"
 	"math"
 	"math/cmplx"
 )
@@ -8,7 +9,7 @@ import (
 type booleanPayload struct {
 	length int
 	data   []bool
-	DefNAble
+	embed.DefNAble
 	DefArrangeable
 }
 
@@ -21,15 +22,15 @@ func (p *booleanPayload) Len() int {
 }
 
 func (p *booleanPayload) Pick(idx int) any {
-	return pickValueWithNA(idx, p.data, p.na, p.length)
+	return pickValueWithNA(idx, p.data, p.NA, p.length)
 }
 
 func (p *booleanPayload) Data() []any {
-	return dataWithNAToInterfaceArray(p.data, p.na)
+	return dataWithNAToInterfaceArray(p.data, p.NA)
 }
 
 func (p *booleanPayload) ByIndices(indices []int) Payload {
-	data, na := byIndicesWithNA(indices, p.data, p.na, false)
+	data, na := byIndicesWithNA(indices, p.data, p.NA, false)
 
 	return BooleanPayload(data, na, p.Options()...)
 }
@@ -39,15 +40,15 @@ func (p *booleanPayload) SupportsWhicher(whicher any) bool {
 }
 
 func (p *booleanPayload) Which(whicher any) []bool {
-	return whichWithNA(p.data, p.na, whicher)
+	return whichWithNA(p.data, p.NA, whicher)
 }
 
 func (p *booleanPayload) Apply(applier any) Payload {
-	return applyWithNA(p.data, p.na, applier, p.Options())
+	return applyWithNA(p.data, p.NA, applier, p.Options())
 }
 
 func (p *booleanPayload) ApplyTo(indices []int, applier any) Payload {
-	data, na := applyToWithNA(indices, p.data, p.na, applier, false)
+	data, na := applyToWithNA(indices, p.data, p.NA, applier, false)
 
 	if data == nil {
 		return NAPayload(p.length)
@@ -57,7 +58,7 @@ func (p *booleanPayload) ApplyTo(indices []int, applier any) Payload {
 }
 
 func (p *booleanPayload) Traverse(traverser any) {
-	traverseWithNA(p.data, p.na, traverser)
+	traverseWithNA(p.data, p.NA, traverser)
 }
 
 func (p *booleanPayload) SupportsSummarizer(summarizer any) bool {
@@ -65,7 +66,7 @@ func (p *booleanPayload) SupportsSummarizer(summarizer any) bool {
 }
 
 func (p *booleanPayload) Summarize(summarizer any) Payload {
-	val, na := summarize(p.data, p.na, summarizer, false, false)
+	val, na := summarize(p.data, p.NA, summarizer, false, false)
 
 	return BooleanPayload([]bool{val}, []bool{na}, p.Options()...)
 }
@@ -77,7 +78,7 @@ func (p *booleanPayload) Integers() ([]int, []bool) {
 
 	data := make([]int, p.length)
 	for i := 0; i < p.length; i++ {
-		if p.na[i] {
+		if p.NA[i] {
 			data[i] = 0
 		} else {
 			if p.data[i] {
@@ -89,7 +90,7 @@ func (p *booleanPayload) Integers() ([]int, []bool) {
 	}
 
 	na := make([]bool, p.Len())
-	copy(na, p.na)
+	copy(na, p.NA)
 
 	return data, na
 }
@@ -102,7 +103,7 @@ func (p *booleanPayload) Floats() ([]float64, []bool) {
 	data := make([]float64, p.length)
 
 	for i := 0; i < p.length; i++ {
-		if p.na[i] {
+		if p.NA[i] {
 			data[i] = math.NaN()
 		} else {
 			if p.data[i] {
@@ -114,7 +115,7 @@ func (p *booleanPayload) Floats() ([]float64, []bool) {
 	}
 
 	na := make([]bool, p.Len())
-	copy(na, p.na)
+	copy(na, p.NA)
 
 	return data, na
 }
@@ -126,7 +127,7 @@ func (p *booleanPayload) Complexes() ([]complex128, []bool) {
 
 	data := make([]complex128, p.length)
 	for i := 0; i < p.length; i++ {
-		if p.na[i] {
+		if p.NA[i] {
 			data[i] = cmplx.NaN()
 		} else {
 			if p.data[i] {
@@ -138,7 +139,7 @@ func (p *booleanPayload) Complexes() ([]complex128, []bool) {
 	}
 
 	na := make([]bool, p.Len())
-	copy(na, p.na)
+	copy(na, p.NA)
 
 	return data, na
 }
@@ -152,7 +153,7 @@ func (p *booleanPayload) Booleans() ([]bool, []bool) {
 	copy(data, p.data)
 
 	na := make([]bool, p.length)
-	copy(na, p.na)
+	copy(na, p.NA)
 
 	return data, na
 }
@@ -169,7 +170,7 @@ func (p *booleanPayload) Strings() ([]string, []bool) {
 	}
 
 	na := make([]bool, p.Len())
-	copy(na, p.na)
+	copy(na, p.NA)
 
 	return data, na
 }
@@ -181,7 +182,7 @@ func (p *booleanPayload) Anies() ([]any, []bool) {
 
 	data := make([]any, p.length)
 	for i := 0; i < p.length; i++ {
-		if p.na[i] {
+		if p.NA[i] {
 			data[i] = nil
 		} else {
 			data[i] = p.data[i]
@@ -189,7 +190,7 @@ func (p *booleanPayload) Anies() ([]any, []bool) {
 	}
 
 	na := make([]bool, p.Len())
-	copy(na, p.na)
+	copy(na, p.NA)
 
 	return data, na
 }
@@ -211,7 +212,7 @@ func (p *booleanPayload) Append(payload Payload) Payload {
 
 	copy(newVals, p.data)
 	copy(newVals[p.length:], vals)
-	copy(newNA, p.na)
+	copy(newNA, p.NA)
 	copy(newNA[p.length:], na)
 
 	return BooleanPayload(newVals, newNA)
@@ -230,25 +231,25 @@ func (p *booleanPayload) Adjust(size int) Payload {
 }
 
 func (p *booleanPayload) adjustToLesserSize(size int) Payload {
-	data, na := adjustToLesserSizeWithNA(p.data, p.na, size)
+	data, na := adjustToLesserSizeWithNA(p.data, p.NA, size)
 
 	return BooleanPayload(data, na)
 }
 
 func (p *booleanPayload) adjustToBiggerSize(size int) Payload {
-	data, na := adjustToBiggerSizeWithNA(p.data, p.na, p.length, size)
+	data, na := adjustToBiggerSizeWithNA(p.data, p.NA, p.length, size)
 
 	return BooleanPayload(data, na)
 }
 
 func (p *booleanPayload) Groups() ([][]int, []any) {
-	groups, values := groupsForData(p.data, p.na)
+	groups, values := groupsForData(p.data, p.NA)
 
 	return groups, values
 }
 
 func (p *booleanPayload) StrForElem(idx int) string {
-	if p.na[idx-1] {
+	if p.NA[idx-1] {
 		return "NA"
 	}
 
@@ -260,19 +261,19 @@ func (p *booleanPayload) StrForElem(idx int) string {
 }
 
 func (p *booleanPayload) Find(needle any) int {
-	return find(needle, p.data, p.na, p.convertComparator)
+	return find(needle, p.data, p.NA, p.convertComparator)
 }
 
 func (p *booleanPayload) FindAll(needle any) []int {
-	return findAll(needle, p.data, p.na, p.convertComparator)
+	return findAll(needle, p.data, p.NA, p.convertComparator)
 }
 
 func (p *booleanPayload) Eq(val any) []bool {
-	return eq(val, p.data, p.na, p.convertComparator)
+	return eq(val, p.data, p.NA, p.convertComparator)
 }
 
 func (p *booleanPayload) Neq(val any) []bool {
-	return neq(val, p.data, p.na, p.convertComparator)
+	return neq(val, p.data, p.NA, p.convertComparator)
 }
 
 func (p *booleanPayload) convertComparator(val any) (bool, bool) {
@@ -289,7 +290,7 @@ func (p *booleanPayload) IsUnique() []bool {
 	for i := 0; i < p.length; i++ {
 		is := false
 
-		if p.na[i] {
+		if p.NA[i] {
 			if !wasNA {
 				is = true
 				wasNA = true
@@ -325,7 +326,7 @@ func (p *booleanPayload) Coalesce(payload Payload) Payload {
 
 	if same, ok := payload.(*booleanPayload); ok {
 		srcData = same.data
-		srcNA = same.na
+		srcNA = same.NA
 	} else if boolable, ok := payload.(Boolable); ok {
 		srcData, srcNA = boolable.Booleans()
 	} else {
@@ -336,12 +337,12 @@ func (p *booleanPayload) Coalesce(payload Payload) Payload {
 	dstNA := make([]bool, p.length)
 
 	for i := 0; i < p.length; i++ {
-		if p.na[i] && !srcNA[i] {
+		if p.NA[i] && !srcNA[i] {
 			dstData[i] = srcData[i]
 			dstNA[i] = false
 		} else {
 			dstData[i] = p.data[i]
-			dstNA[i] = p.na[i]
+			dstNA[i] = p.NA[i]
 		}
 	}
 
@@ -374,8 +375,8 @@ func BooleanPayload(data []bool, na []bool, _ ...Option) Payload {
 	payload := &booleanPayload{
 		length: length,
 		data:   vecData,
-		DefNAble: DefNAble{
-			na: vecNA,
+		DefNAble: embed.DefNAble{
+			NA: vecNA,
 		},
 	}
 

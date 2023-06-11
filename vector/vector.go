@@ -104,6 +104,15 @@ type Payload interface {
 	Data() []any
 }
 
+// NAble is an interface a payload has to satisfy in order to support NA-values.
+type NAble interface {
+	IsNA() []bool
+	NotNA() []bool
+	HasNA() bool
+	WithNA() []int
+	WithoutNA() []int
+}
+
 // Whichable interface has to be implemented in order to support selection of the payloads elements
 // by other means than using indices (for example by using which-functions).
 type Whichable interface {

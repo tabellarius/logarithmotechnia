@@ -39,9 +39,9 @@ func TestTimePayload_Max(t *testing.T) {
 					payload.data, data.data))
 			}
 
-			if !reflect.DeepEqual(payload.na, data.sumNA) {
+			if !reflect.DeepEqual(payload.NA, data.sumNA) {
 				t.Error(fmt.Sprintf("Max na (%v) is not equal to expected (%v)",
-					payload.na, data.sumNA))
+					payload.NA, data.sumNA))
 			}
 		})
 	}

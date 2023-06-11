@@ -3,13 +3,13 @@ package vector
 import "math/cmplx"
 
 func (p *complexPayload) Sum() Payload {
-	sum, na := genSum(p.data, p.na)
+	sum, na := genSum(p.data, p.NA)
 
 	return ComplexPayload([]complex128{sum}, []bool{na}, p.Options()...)
 }
 
 func (p *complexPayload) Prod() Payload {
-	product, na := genProd(p.data, p.na)
+	product, na := genProd(p.data, p.NA)
 
 	return ComplexPayload([]complex128{product}, []bool{na}, p.Options()...)
 }
@@ -20,7 +20,7 @@ func (p *complexPayload) Mean() Payload {
 
 	if p.length != 0 {
 		for i := 0; i < p.length; i++ {
-			if p.na[i] {
+			if p.NA[i] {
 				mean, na = 0, true
 				goto outOfLoop
 			}
@@ -36,13 +36,13 @@ outOfLoop:
 }
 
 func (p *complexPayload) CumSum() Payload {
-	data, na := genCumSum(p.data, p.na, cmplx.NaN())
+	data, na := genCumSum(p.data, p.NA, cmplx.NaN())
 
 	return ComplexPayload(data, na, p.Options()...)
 }
 
 func (p *complexPayload) CumProd() Payload {
-	data, na := genCumProd(p.data, p.na, cmplx.NaN())
+	data, na := genCumProd(p.data, p.NA, cmplx.NaN())
 
 	return ComplexPayload(data, na, p.Options()...)
 }

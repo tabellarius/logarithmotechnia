@@ -37,9 +37,9 @@ func TestBoolPayload_Sum(t *testing.T) {
 					sumPayload.data, data.sumData))
 			}
 
-			if !reflect.DeepEqual(sumPayload.na, data.sumNA) {
+			if !reflect.DeepEqual(sumPayload.NA, data.sumNA) {
 				t.Error(fmt.Sprintf("Sum data (%v) is not equal to expected (%v)",
-					sumPayload.na, data.sumNA))
+					sumPayload.NA, data.sumNA))
 			}
 		})
 	}

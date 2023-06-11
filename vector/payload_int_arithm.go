@@ -12,7 +12,7 @@ func (p *integerPayload) Add(p2 Payload) Payload {
 	var addNA []bool
 	if pType, ok := p2.(*integerPayload); ok {
 		addIntegers = pType.data
-		addNA = pType.na
+		addNA = pType.NA
 	} else if intable, ok := p2.(Intable); ok {
 		addIntegers, addNA = intable.Integers()
 	} else {
@@ -20,7 +20,7 @@ func (p *integerPayload) Add(p2 Payload) Payload {
 	}
 
 	for i := 0; i < p.length; i++ {
-		if p.na[i] || addNA[i] {
+		if p.NA[i] || addNA[i] {
 			na[i] = true
 		} else {
 			integers[i] = p.data[i] + addIntegers[i]
@@ -42,7 +42,7 @@ func (p *integerPayload) Sub(p2 Payload) Payload {
 	var subNA []bool
 	if pType, ok := p2.(*integerPayload); ok {
 		subIntegers = pType.data
-		subNA = pType.na
+		subNA = pType.NA
 	} else if intable, ok := p2.(Intable); ok {
 		subIntegers, subNA = intable.Integers()
 	} else {
@@ -50,7 +50,7 @@ func (p *integerPayload) Sub(p2 Payload) Payload {
 	}
 
 	for i := 0; i < p.length; i++ {
-		if p.na[i] || subNA[i] {
+		if p.NA[i] || subNA[i] {
 			na[i] = true
 		} else {
 			integers[i] = p.data[i] - subIntegers[i]
@@ -72,7 +72,7 @@ func (p *integerPayload) Mul(p2 Payload) Payload {
 	var mulNA []bool
 	if pType, ok := p2.(*integerPayload); ok {
 		mulIntegers = pType.data
-		mulNA = pType.na
+		mulNA = pType.NA
 	} else if intable, ok := p2.(Intable); ok {
 		mulIntegers, mulNA = intable.Integers()
 	} else {
@@ -80,7 +80,7 @@ func (p *integerPayload) Mul(p2 Payload) Payload {
 	}
 
 	for i := 0; i < p.length; i++ {
-		if p.na[i] || mulNA[i] {
+		if p.NA[i] || mulNA[i] {
 			na[i] = true
 		} else {
 			integers[i] = p.data[i] * mulIntegers[i]
@@ -102,7 +102,7 @@ func (p *integerPayload) Div(p2 Payload) Payload {
 	var divNA []bool
 	if pType, ok := p2.(*integerPayload); ok {
 		divIntegers = pType.data
-		divNA = pType.na
+		divNA = pType.NA
 	} else if intable, ok := p2.(Intable); ok {
 		divIntegers, divNA = intable.Integers()
 	} else {
@@ -110,7 +110,7 @@ func (p *integerPayload) Div(p2 Payload) Payload {
 	}
 
 	for i := 0; i < p.length; i++ {
-		if p.na[i] || divNA[i] || divIntegers[i] == 0 {
+		if p.NA[i] || divNA[i] || divIntegers[i] == 0 {
 			na[i] = true
 		} else {
 			integers[i] = p.data[i] / divIntegers[i]

@@ -1,6 +1,7 @@
 package vector
 
 import (
+	"logarithmotechnia/embed"
 	"math"
 	"math/cmplx"
 	"strconv"
@@ -14,7 +15,7 @@ type floatPayload struct {
 	length  int
 	data    []float64
 	printer FloatPrinter
-	DefNAble
+	embed.DefNAble
 	DefArrangeable
 }
 
@@ -27,15 +28,15 @@ func (p *floatPayload) Len() int {
 }
 
 func (p *floatPayload) Pick(idx int) any {
-	return pickValueWithNA(idx, p.data, p.na, p.length)
+	return pickValueWithNA(idx, p.data, p.NA, p.length)
 }
 
 func (p *floatPayload) Data() []any {
-	return dataWithNAToInterfaceArray(p.data, p.na)
+	return dataWithNAToInterfaceArray(p.data, p.NA)
 }
 
 func (p *floatPayload) ByIndices(indices []int) Payload {
-	data, na := byIndicesWithNA(indices, p.data, p.na, math.NaN())
+	data, na := byIndicesWithNA(indices, p.data, p.NA, math.NaN())
 
 	return FloatPayload(data, na, p.Options()...)
 }
@@ -45,19 +46,19 @@ func (p *floatPayload) SupportsWhicher(whicher any) bool {
 }
 
 func (p *floatPayload) Which(whicher any) []bool {
-	return whichWithNA(p.data, p.na, whicher)
+	return whichWithNA(p.data, p.NA, whicher)
 }
 
 func (p *floatPayload) Apply(applier any) Payload {
-	return applyWithNA(p.data, p.na, applier, p.Options())
+	return applyWithNA(p.data, p.NA, applier, p.Options())
 }
 
 func (p *floatPayload) Traverse(traverser any) {
-	traverseWithNA(p.data, p.na, traverser)
+	traverseWithNA(p.data, p.NA, traverser)
 }
 
 func (p *floatPayload) ApplyTo(indices []int, applier any) Payload {
-	data, na := applyToWithNA(indices, p.data, p.na, applier, math.NaN())
+	data, na := applyToWithNA(indices, p.data, p.NA, applier, math.NaN())
 
 	if data == nil {
 		return NAPayload(p.length)
@@ -71,7 +72,7 @@ func (p *floatPayload) SupportsSummarizer(summarizer any) bool {
 }
 
 func (p *floatPayload) Summarize(summarizer any) Payload {
-	val, na := summarize(p.data, p.na, summarizer, 0.0, math.NaN())
+	val, na := summarize(p.data, p.NA, summarizer, 0.0, math.NaN())
 
 	return FloatPayload([]float64{val}, []bool{na}, p.Options()...)
 }
@@ -83,10 +84,10 @@ func (p *floatPayload) Integers() ([]int, []bool) {
 
 	data := make([]int, p.length)
 	na := make([]bool, p.Len())
-	copy(na, p.na)
+	copy(na, p.NA)
 
 	for i := 0; i < p.length; i++ {
-		if p.na[i] {
+		if p.NA[i] {
 			data[i] = 0
 		} else if math.IsNaN(p.data[i]) || math.IsInf(p.data[i], 1) || math.IsInf(p.data[i], -1) {
 			data[i] = 0
@@ -108,7 +109,7 @@ func (p *floatPayload) Floats() ([]float64, []bool) {
 	copy(data, p.data)
 
 	na := make([]bool, p.Len())
-	copy(na, p.na)
+	copy(na, p.NA)
 
 	return data, na
 }
@@ -120,7 +121,7 @@ func (p *floatPayload) Complexes() ([]complex128, []bool) {
 
 	data := make([]complex128, p.length)
 	for i := 0; i < p.length; i++ {
-		if p.na[i] {
+		if p.NA[i] {
 			data[i] = cmplx.NaN()
 		} else {
 			data[i] = complex(p.data[i], 0)
@@ -128,7 +129,7 @@ func (p *floatPayload) Complexes() ([]complex128, []bool) {
 	}
 
 	na := make([]bool, p.Len())
-	copy(na, p.na)
+	copy(na, p.NA)
 
 	return data, na
 }
@@ -141,7 +142,7 @@ func (p *floatPayload) Booleans() ([]bool, []bool) {
 	data := make([]bool, p.length)
 
 	for i := 0; i < p.length; i++ {
-		if p.na[i] {
+		if p.NA[i] {
 			data[i] = false
 		} else {
 			data[i] = p.data[i] != 0
@@ -149,7 +150,7 @@ func (p *floatPayload) Booleans() ([]bool, []bool) {
 	}
 
 	na := make([]bool, p.length)
-	copy(na, p.na)
+	copy(na, p.NA)
 
 	return data, na
 }
@@ -166,7 +167,7 @@ func (p *floatPayload) Strings() ([]string, []bool) {
 	}
 
 	na := make([]bool, p.Len())
-	copy(na, p.na)
+	copy(na, p.NA)
 
 	return data, na
 }
@@ -178,7 +179,7 @@ func (p *floatPayload) Anies() ([]any, []bool) {
 
 	data := make([]any, p.length)
 	for i := 0; i < p.length; i++ {
-		if p.na[i] {
+		if p.NA[i] {
 			data[i] = nil
 		} else {
 			data[i] = p.data[i]
@@ -186,7 +187,7 @@ func (p *floatPayload) Anies() ([]any, []bool) {
 	}
 
 	na := make([]bool, p.length)
-	copy(na, p.na)
+	copy(na, p.NA)
 
 	return data, na
 }
@@ -194,7 +195,7 @@ func (p *floatPayload) Anies() ([]any, []bool) {
 func (p *floatPayload) StrForElem(idx int) string {
 	i := idx - 1
 
-	if p.na[i] {
+	if p.NA[i] {
 		return "NA"
 	}
 
@@ -230,7 +231,7 @@ func (p *floatPayload) Append(payload Payload) Payload {
 
 	copy(newVals, p.data)
 	copy(newVals[p.length:], vals)
-	copy(newNA, p.na)
+	copy(newNA, p.NA)
 	copy(newNA[p.length:], na)
 
 	return FloatPayload(newVals, newNA, p.Options()...)
@@ -249,13 +250,13 @@ func (p *floatPayload) Adjust(size int) Payload {
 }
 
 func (p *floatPayload) adjustToLesserSize(size int) Payload {
-	data, na := adjustToLesserSizeWithNA(p.data, p.na, size)
+	data, na := adjustToLesserSizeWithNA(p.data, p.NA, size)
 
 	return FloatPayload(data, na, p.Options()...)
 }
 
 func (p *floatPayload) adjustToBiggerSize(size int) Payload {
-	data, na := adjustToBiggerSizeWithNA(p.data, p.na, p.length, size)
+	data, na := adjustToBiggerSizeWithNA(p.data, p.NA, p.length, size)
 
 	return FloatPayload(data, na, p.Options()...)
 }
@@ -263,35 +264,35 @@ func (p *floatPayload) adjustToBiggerSize(size int) Payload {
 /* Finder interface */
 
 func (p *floatPayload) Find(needle any) int {
-	return find(needle, p.data, p.na, p.convertComparator)
+	return find(needle, p.data, p.NA, p.convertComparator)
 }
 
 func (p *floatPayload) FindAll(needle any) []int {
-	return findAll(needle, p.data, p.na, p.convertComparator)
+	return findAll(needle, p.data, p.NA, p.convertComparator)
 }
 
 func (p *floatPayload) Eq(val any) []bool {
-	return eq(val, p.data, p.na, p.convertComparator)
+	return eq(val, p.data, p.NA, p.convertComparator)
 }
 
 func (p *floatPayload) Neq(val any) []bool {
-	return neq(val, p.data, p.na, p.convertComparator)
+	return neq(val, p.data, p.NA, p.convertComparator)
 }
 
 func (p *floatPayload) Gt(val any) []bool {
-	return gt(val, p.data, p.na, p.convertComparator)
+	return gt(val, p.data, p.NA, p.convertComparator)
 }
 
 func (p *floatPayload) Lt(val any) []bool {
-	return lt(val, p.data, p.na, p.convertComparator)
+	return lt(val, p.data, p.NA, p.convertComparator)
 }
 
 func (p *floatPayload) Gte(val any) []bool {
-	return gte(val, p.data, p.na, p.convertComparator)
+	return gte(val, p.data, p.NA, p.convertComparator)
 }
 
 func (p *floatPayload) Lte(val any) []bool {
-	return lte(val, p.data, p.na, p.convertComparator)
+	return lte(val, p.data, p.NA, p.convertComparator)
 }
 
 func (p *floatPayload) convertComparator(val any) (float64, bool) {
@@ -334,7 +335,7 @@ func (p *floatPayload) convertComparator(val any) (float64, bool) {
 }
 
 func (p *floatPayload) Groups() ([][]int, []any) {
-	groups, values := groupsForData(p.data, p.na)
+	groups, values := groupsForData(p.data, p.NA)
 
 	return groups, values
 }
@@ -350,7 +351,7 @@ func (p *floatPayload) IsUnique() []bool {
 	for i := 0; i < p.length; i++ {
 		is := false
 
-		if p.na[i] {
+		if p.NA[i] {
 			if !wasNA {
 				is = true
 				wasNA = true
@@ -393,7 +394,7 @@ func (p *floatPayload) Coalesce(payload Payload) Payload {
 
 	if same, ok := payload.(*floatPayload); ok {
 		srcData = same.data
-		srcNA = same.na
+		srcNA = same.NA
 	} else if floatable, ok := payload.(Floatable); ok {
 		srcData, srcNA = floatable.Floats()
 	} else {
@@ -404,12 +405,12 @@ func (p *floatPayload) Coalesce(payload Payload) Payload {
 	dstNA := make([]bool, p.length)
 
 	for i := 0; i < p.length; i++ {
-		if p.na[i] && !srcNA[i] {
+		if p.NA[i] && !srcNA[i] {
 			dstData[i] = srcData[i]
 			dstNA[i] = false
 		} else {
 			dstData[i] = p.data[i]
-			dstNA[i] = p.na[i]
+			dstNA[i] = p.NA[i]
 		}
 	}
 
@@ -468,8 +469,8 @@ func FloatPayload(data []float64, na []bool, options ...Option) Payload {
 		length:  length,
 		data:    vecData,
 		printer: printer,
-		DefNAble: DefNAble{
-			na: vecNA,
+		DefNAble: embed.DefNAble{
+			NA: vecNA,
 		},
 	}
 

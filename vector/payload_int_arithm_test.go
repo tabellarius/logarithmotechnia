@@ -46,9 +46,9 @@ func TestIntegerPayload_Add(t *testing.T) {
 					payload.data, data.outData))
 			}
 
-			if !reflect.DeepEqual(payload.na, data.outNA) {
+			if !reflect.DeepEqual(payload.NA, data.outNA) {
 				t.Error(fmt.Sprintf("NA (%v) do not match expected (%v)",
-					payload.na, data.outNA))
+					payload.NA, data.outNA))
 			}
 		})
 	}
@@ -94,9 +94,9 @@ func TestIntegerPayload_Sub(t *testing.T) {
 					payload.data, data.outData))
 			}
 
-			if !reflect.DeepEqual(payload.na, data.outNA) {
+			if !reflect.DeepEqual(payload.NA, data.outNA) {
 				t.Error(fmt.Sprintf("NA (%v) do not match expected (%v)",
-					payload.na, data.outNA))
+					payload.NA, data.outNA))
 			}
 		})
 	}
@@ -142,9 +142,9 @@ func TestIntegerPayload_Mul(t *testing.T) {
 					payload.data, data.outData))
 			}
 
-			if !reflect.DeepEqual(payload.na, data.outNA) {
+			if !reflect.DeepEqual(payload.NA, data.outNA) {
 				t.Error(fmt.Sprintf("NA (%v) do not match expected (%v)",
-					payload.na, data.outNA))
+					payload.NA, data.outNA))
 			}
 		})
 	}
@@ -190,9 +190,9 @@ func TestIntegerPayload_Div(t *testing.T) {
 					payload.data, data.outData))
 			}
 
-			if !reflect.DeepEqual(payload.na, data.outNA) {
+			if !reflect.DeepEqual(payload.NA, data.outNA) {
 				t.Error(fmt.Sprintf("NA (%v) do not match expected (%v)",
-					payload.na, data.outNA))
+					payload.NA, data.outNA))
 			}
 		})
 	}
