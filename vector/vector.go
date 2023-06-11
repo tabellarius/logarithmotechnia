@@ -64,14 +64,9 @@ type Vector interface {
 	Ordered
 	Arrangeable
 
-	IsUniquer
 	Unique() Vector
 
 	Coalesce(...Vector) Vector
-
-	Odd() []bool
-	Even() []bool
-	Nth(int) []bool
 
 	Options() []Option
 	SetOption(Option) bool
@@ -820,14 +815,6 @@ func (v *vector) Unique() Vector {
 	return v
 }
 
-func (v *vector) IsUnique() []bool {
-	if uniquer, ok := v.payload.(IsUniquer); ok {
-		return uniquer.IsUnique()
-	}
-
-	return trueBooleanArr(v.length)
-}
-
 func (v *vector) Coalesce(vectors ...Vector) Vector {
 	if len(vectors) == 0 {
 		return v
@@ -848,42 +835,6 @@ func (v *vector) Coalesce(vectors ...Vector) Vector {
 	}
 
 	return New(payload, v.Options()...)
-}
-
-func (v *vector) Even() []bool {
-	booleans := make([]bool, v.length)
-
-	for i := 1; i <= v.length; i++ {
-		if i%2 == 0 {
-			booleans[i-1] = true
-		}
-	}
-
-	return booleans
-}
-
-func (v *vector) Odd() []bool {
-	booleans := make([]bool, v.length)
-
-	for i := 1; i <= v.length; i++ {
-		if i%2 == 1 {
-			booleans[i-1] = true
-		}
-	}
-
-	return booleans
-}
-
-func (v *vector) Nth(nth int) []bool {
-	booleans := make([]bool, v.length)
-
-	for i := 1; i <= v.length; i++ {
-		if i%nth == 0 {
-			booleans[i-1] = true
-		}
-	}
-
-	return booleans
 }
 
 func (v *vector) Options() []Option {
