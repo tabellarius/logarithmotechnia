@@ -33,7 +33,7 @@ func TestDefNAble_IsNA(t *testing.T) {
 
 	for i, data := range testData {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			nable := DefNAble{
+			nable := NAble{
 				NA: data.in,
 			}
 			na := nable.IsNA()
@@ -70,7 +70,7 @@ func TestDefNAble_NotNA(t *testing.T) {
 
 	for i, data := range testData {
 		t.Run(strconv.Itoa(i), func(t *testing.T) {
-			nable := DefNAble{
+			nable := NAble{
 				NA: data.in,
 			}
 			na := nable.NotNA()
@@ -111,7 +111,7 @@ func TestDefNAble_HasNA(t *testing.T) {
 
 	for index, data := range testData {
 		t.Run(fmt.Sprintf("Data %d", index), func(t *testing.T) {
-			nable := DefNAble{
+			nable := NAble{
 				NA: data.na,
 			}
 			if nable.HasNA() != data.expected {
@@ -157,7 +157,7 @@ func TestDefNAble_OnlyNA(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			nable := DefNAble{
+			nable := NAble{
 				NA: data.na,
 			}
 			withNA := nable.WithNA()
@@ -204,7 +204,7 @@ func TestDefNAble_WithoutNA(t *testing.T) {
 
 	for _, data := range testData {
 		t.Run(data.name, func(t *testing.T) {
-			nable := DefNAble{
+			nable := NAble{
 				NA: data.na,
 			}
 			withoutNA := nable.WithoutNA()

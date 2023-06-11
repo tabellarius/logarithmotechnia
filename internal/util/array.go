@@ -1,5 +1,17 @@
 package util
 
+func IndicesArray(size int) []int {
+	indices := make([]int, size)
+
+	index := 0
+	for i := range indices {
+		indices[i] = index
+		index++
+	}
+
+	return indices
+}
+
 func ToIndices(vecLength int, booleans []bool) []int {
 	var indices = make([]int, 0)
 	length := len(booleans)
@@ -30,4 +42,12 @@ func ArrayFromAnyTo[T any](arr []any) []T {
 	}
 
 	return arrT
+}
+
+func IncIndices(indices []int) []int {
+	for i := range indices {
+		indices[i]++
+	}
+
+	return indices
 }

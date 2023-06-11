@@ -1,18 +1,18 @@
 package embed
 
-// DefNAble is an easy to embed implementation of NAble interface.
-type DefNAble struct {
+// NAble is an easy to embed implementation of NAble interface.
+type NAble struct {
 	NA []bool
 }
 
-func (n *DefNAble) IsNA() []bool {
+func (n *NAble) IsNA() []bool {
 	isna := make([]bool, len(n.NA))
 	copy(isna, n.NA)
 
 	return isna
 }
 
-func (n *DefNAble) NotNA() []bool {
+func (n *NAble) NotNA() []bool {
 	notna := make([]bool, len(n.NA))
 
 	for i := 0; i < len(n.NA); i++ {
@@ -22,7 +22,7 @@ func (n *DefNAble) NotNA() []bool {
 	return notna
 }
 
-func (n *DefNAble) HasNA() bool {
+func (n *NAble) HasNA() bool {
 	for i := 0; i < len(n.NA); i++ {
 		if n.NA[i] == true {
 			return true
@@ -32,7 +32,7 @@ func (n *DefNAble) HasNA() bool {
 	return false
 }
 
-func (n *DefNAble) WithNA() []int {
+func (n *NAble) WithNA() []int {
 	naIndices := make([]int, 0)
 
 	for i := 0; i < len(n.NA); i++ {
@@ -44,7 +44,7 @@ func (n *DefNAble) WithNA() []int {
 	return naIndices
 }
 
-func (n *DefNAble) WithoutNA() []int {
+func (n *NAble) WithoutNA() []int {
 	naIndices := make([]int, 0)
 
 	for i := 0; i < len(n.NA); i++ {

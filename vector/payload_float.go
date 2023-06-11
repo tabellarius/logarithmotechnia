@@ -15,8 +15,8 @@ type floatPayload struct {
 	length  int
 	data    []float64
 	printer FloatPrinter
-	embed.DefNAble
-	DefArrangeable
+	embed.NAble
+	embed.Arrangeable
 }
 
 func (p *floatPayload) Type() string {
@@ -469,16 +469,16 @@ func FloatPayload(data []float64, na []bool, options ...Option) Payload {
 		length:  length,
 		data:    vecData,
 		printer: printer,
-		DefNAble: embed.DefNAble{
+		NAble: embed.NAble{
 			NA: vecNA,
 		},
 	}
 
 	conf.SetOptions(payload)
 
-	payload.DefArrangeable = DefArrangeable{
-		Length:   payload.length,
-		DefNAble: payload.DefNAble,
+	payload.Arrangeable = embed.Arrangeable{
+		Length: payload.length,
+		NAble:  payload.NAble,
 		FnLess: func(i, j int) bool {
 			return payload.data[i] < payload.data[j]
 		},

@@ -15,7 +15,7 @@ type complexPayload struct {
 	length  int
 	data    []complex128
 	printer ComplexPrinter
-	embed.DefNAble
+	embed.NAble
 }
 
 func (p *complexPayload) Type() string {
@@ -432,7 +432,7 @@ func ComplexPayload(data []complex128, na []bool, options ...Option) Payload {
 		length:  length,
 		data:    vecData,
 		printer: printer,
-		DefNAble: embed.DefNAble{
+		NAble: embed.NAble{
 			NA: vecNA,
 		},
 	}

@@ -17,8 +17,8 @@ type StringToBooleanConverter interface {
 type stringPayload struct {
 	length int
 	data   []string
-	embed.DefNAble
-	DefArrangeable
+	embed.NAble
+	embed.Arrangeable
 	StringToBooleanConverter
 	timeFormat string
 }
@@ -519,15 +519,15 @@ func StringPayload(data []string, na []bool, options ...Option) Payload {
 	payload := &stringPayload{
 		length: length,
 		data:   vecData,
-		DefNAble: embed.DefNAble{
+		NAble: embed.NAble{
 			NA: vecNA,
 		},
 		timeFormat: time.RFC3339,
 	}
 
-	payload.DefArrangeable = DefArrangeable{
-		Length:   payload.length,
-		DefNAble: payload.DefNAble,
+	payload.Arrangeable = embed.Arrangeable{
+		Length: payload.length,
+		NAble:  payload.NAble,
 		FnLess: func(i, j int) bool {
 			return payload.data[i] < payload.data[j]
 		},

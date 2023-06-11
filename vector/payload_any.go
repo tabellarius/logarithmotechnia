@@ -37,8 +37,8 @@ type anyPayload struct {
 	printer    AnyPrinterFunc
 	convertors AnyConvertors
 	fn         AnyCallbacks
-	embed.DefNAble
-	DefArrangeable
+	embed.NAble
+	embed.Arrangeable
 }
 
 // Type returns the type of the payload.
@@ -565,7 +565,7 @@ func AnyPayload(data []any, na []bool, options ...Option) Payload {
 		length:  length,
 		data:    vecData,
 		printer: nil,
-		DefNAble: embed.DefNAble{
+		NAble: embed.NAble{
 			NA: vecNA,
 		},
 	}
@@ -588,11 +588,11 @@ func AnyPayload(data []any, na []bool, options ...Option) Payload {
 		}
 	}
 
-	payload.DefArrangeable = DefArrangeable{
-		Length:   payload.length,
-		DefNAble: payload.DefNAble,
-		FnLess:   fnLess,
-		FnEqual:  fnEqual,
+	payload.Arrangeable = embed.Arrangeable{
+		Length:  payload.length,
+		NAble:   payload.NAble,
+		FnLess:  fnLess,
+		FnEqual: fnEqual,
 	}
 
 	return payload

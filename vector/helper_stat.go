@@ -87,7 +87,7 @@ func genMean[T calculable](data []T, na []bool) (float64, bool) {
 
 func genMedian[T constraints.Integer | constraints.Float](
 	data []T,
-	na embed.DefNAble,
+	na embed.NAble,
 	sorter func() []int,
 ) (T, bool) {
 	var median T

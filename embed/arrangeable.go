@@ -1,21 +1,21 @@
-package vector
+package embed
 
 import (
-	"logarithmotechnia/embed"
+	"logarithmotechnia/internal/util"
 	"sort"
 )
 
-// DefArrangeable can be embedded into a payload for easy implementation of Arrangeable interface to make the payload
-// sortable. It uses DefNAble to support NA-values.
-type DefArrangeable struct {
+// Arrangeable can be embedded into a payload for easy implementation of Arrangeable interface to make the payload
+// sortable. It uses NAble to support NA-values.
+type Arrangeable struct {
 	Length int
-	embed.DefNAble
+	NAble
 	FnLess      func(i, j int) bool
 	FnEqual     func(i, j int) bool
 	sortedCache []int
 }
 
-func (ar *DefArrangeable) sortedIndices() []int {
+func (ar *Arrangeable) SortedIndicesZeroBased() []int {
 	if ar.sortedCache != nil {
 		cached := make([]int, len(ar.sortedCache))
 		copy(cached, ar.sortedCache)
@@ -23,7 +23,7 @@ func (ar *DefArrangeable) sortedIndices() []int {
 		return ar.sortedCache
 	}
 
-	indices := indicesArray(ar.Length)
+	indices := util.IndicesArray(ar.Length)
 
 	var fn func(i, j int) bool
 	if ar.HasNA() {
@@ -53,12 +53,12 @@ func (ar *DefArrangeable) sortedIndices() []int {
 	return indices
 }
 
-func (ar *DefArrangeable) SortedIndices() []int {
-	return incIndices(ar.sortedIndices())
+func (ar *Arrangeable) SortedIndices() []int {
+	return util.IncIndices(ar.SortedIndicesZeroBased())
 }
 
-func (ar *DefArrangeable) SortedIndicesWithRanks() ([]int, []int) {
-	indices := ar.sortedIndices()
+func (ar *Arrangeable) SortedIndicesWithRanks() ([]int, []int) {
+	indices := ar.SortedIndicesZeroBased()
 
 	if len(indices) == 0 {
 		return indices, []int{}
@@ -83,5 +83,5 @@ func (ar *DefArrangeable) SortedIndicesWithRanks() ([]int, []int) {
 		}
 	}
 
-	return incIndices(indices), ranks
+	return util.IncIndices(indices), ranks
 }

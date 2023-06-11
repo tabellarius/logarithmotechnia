@@ -9,8 +9,8 @@ import (
 type booleanPayload struct {
 	length int
 	data   []bool
-	embed.DefNAble
-	DefArrangeable
+	embed.NAble
+	embed.Arrangeable
 }
 
 func (p *booleanPayload) Type() string {
@@ -375,14 +375,14 @@ func BooleanPayload(data []bool, na []bool, _ ...Option) Payload {
 	payload := &booleanPayload{
 		length: length,
 		data:   vecData,
-		DefNAble: embed.DefNAble{
+		NAble: embed.NAble{
 			NA: vecNA,
 		},
 	}
 
-	payload.DefArrangeable = DefArrangeable{
-		Length:   payload.length,
-		DefNAble: payload.DefNAble,
+	payload.Arrangeable = embed.Arrangeable{
+		Length: payload.length,
+		NAble:  payload.NAble,
 		FnLess: func(i, j int) bool {
 			return !payload.data[i] && payload.data[j]
 		},
