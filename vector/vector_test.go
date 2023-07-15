@@ -3,6 +3,7 @@ package vector
 import (
 	"fmt"
 	"logarithmotechnia/internal/util"
+	"logarithmotechnia/option"
 	"math"
 	"math/cmplx"
 	"reflect"
@@ -1892,8 +1893,8 @@ func TestVector_Coalesce(t *testing.T) {
 func TestOptions(t *testing.T) {
 	testData := []struct {
 		name      string
-		result    Option
-		reference Option
+		result    option.Option
+		reference option.Option
 	}{
 		{
 			name:      "OptionPrecision",

@@ -1,5 +1,7 @@
 package vector
 
+import "logarithmotechnia/option"
+
 const keyOptionPrecision = "precision"
 const keyOptionFormat = "format"
 const keyOptionTimeFormat = "time_format"
@@ -18,11 +20,6 @@ type Config struct {
 	TimePrinter      *TimePrinter
 	InterfacePrinter func(payload any) string
 	Convertors       *AnyConvertors
-}
-
-type Option interface {
-	Key() string
-	Value() any
 }
 
 type ConfOption struct {
@@ -58,54 +55,54 @@ func (conf Configuration) SetOptions(payload Payload) {
 	}
 }
 
-func MergeOptions(options []Option) Configuration {
+func MergeOptions(options []option.Option) Configuration {
 	conf := Configuration{
 		options: map[string]any{},
 	}
 
-	for _, option := range options {
-		conf.options[option.Key()] = option.Value()
+	for _, opt := range options {
+		conf.options[opt.Key()] = opt.Value()
 	}
 
 	return conf
 }
 
-func OptionPrecision(precision int) Option {
+func OptionPrecision(precision int) option.Option {
 	return ConfOption{keyOptionPrecision, precision}
 }
 
-func OptionFormat(format string) Option {
+func OptionFormat(format string) option.Option {
 	return ConfOption{keyOptionFormat, format}
 }
 
-func OptionTimeFormat(format string) Option {
+func OptionTimeFormat(format string) option.Option {
 	return ConfOption{keyOptionTimeFormat, format}
 }
 
-func OptionAnyPrinterFunc(fn AnyPrinterFunc) Option {
+func OptionAnyPrinterFunc(fn AnyPrinterFunc) option.Option {
 	return ConfOption{keyOptionAnyPrinterFunc, fn}
 }
 
-func OptionAnyConvertors(convertors AnyConvertors) Option {
+func OptionAnyConvertors(convertors AnyConvertors) option.Option {
 	return ConfOption{keyOptionAnyConvertors, convertors}
 }
 
-func OptionAnyCallbacks(callbacks AnyCallbacks) Option {
+func OptionAnyCallbacks(callbacks AnyCallbacks) option.Option {
 	return ConfOption{keyOptionAnyCallbacks, callbacks}
 }
 
-func OptionGroupIndex(index GroupIndex) Option {
+func OptionGroupIndex(index GroupIndex) option.Option {
 	return ConfOption{keyOptionGroupIndex, index}
 }
 
-func OptionVectorName(name string) Option {
+func OptionVectorName(name string) option.Option {
 	return ConfOption{keyOptionVectorName, name}
 }
 
-func OptionMaxPrintElements(maxPrintEleements int) Option {
-	return ConfOption{keyOptionMaxPrintElements, maxPrintEleements}
+func OptionMaxPrintElements(maxPrintElements int) option.Option {
+	return ConfOption{keyOptionMaxPrintElements, maxPrintElements}
 }
 
-func OptionStringToBooleanConverter(converter StringToBooleanConverter) Option {
+func OptionStringToBooleanConverter(converter StringToBooleanConverter) option.Option {
 	return ConfOption{keyOptionStringToBooleanConverter, converter}
 }

@@ -1,5 +1,7 @@
 package vector
 
+import "logarithmotechnia/option"
+
 type vectorPayload struct {
 	length int
 	data   []Vector
@@ -14,7 +16,7 @@ func (p *vectorPayload) Len() int {
 }
 
 func (p *vectorPayload) ByIndices(indices []int) Payload {
-	data := byIndicesWithoutNA(indices, p.data, nil)
+	data := ByIndicesWithoutNA(indices, p.data, nil)
 
 	return VectorPayload(data, p.Options()...)
 }
@@ -59,19 +61,19 @@ func (p *vectorPayload) Adjust(size int) Payload {
 }
 
 func (p *vectorPayload) adjustToLesserSize(size int) Payload {
-	data := adjustToLesserSizeWithoutNA(p.data, size)
+	data := AdjustToLesserSizeWithoutNA(p.data, size)
 
 	return VectorPayload(data, p.Options()...)
 }
 
 func (p *vectorPayload) adjustToBiggerSize(size int) Payload {
-	data := adjustToBiggerSizeWithoutNA(p.data, p.length, size)
+	data := AdjustToBiggerSizeWithoutNA(p.data, p.length, size)
 
 	return VectorPayload(data, p.Options()...)
 }
 
-func (p *vectorPayload) Options() []Option {
-	return []Option{}
+func (p *vectorPayload) Options() []option.Option {
+	return []option.Option{}
 }
 
 func (p *vectorPayload) SetOption(string, any) bool {
@@ -124,15 +126,15 @@ func (p *vectorPayload) SupportsWhicher(whicher any) bool {
 }
 
 func (p *vectorPayload) Which(whicher any) []bool {
-	return whichWithoutNA[Vector](p.data, whicher)
+	return WhichWithoutNA[Vector](p.data, whicher)
 }
 
 func (p *vectorPayload) Apply(applier any) Payload {
-	return applyWithoutNA(p.data, applier, p.Options())
+	return ApplyWithoutNA(p.data, applier, p.Options())
 }
 
 func (p *vectorPayload) ApplyTo(indices []int, applier any) Payload {
-	data := applyToWithoutNA(indices, p.data, applier)
+	data := ApplyToWithoutNA(indices, p.data, applier)
 
 	if data == nil {
 		return NAPayload(p.length)
@@ -142,7 +144,7 @@ func (p *vectorPayload) ApplyTo(indices []int, applier any) Payload {
 }
 
 func (p *vectorPayload) Traverse(traverser any) {
-	traverseWithoutNA(p.data, traverser)
+	TraverseWithoutNA(p.data, traverser)
 }
 
 func (p *vectorPayload) String() string {
@@ -187,7 +189,7 @@ func (p *vectorPayload) Coalesce(payload Payload) Payload {
 	return VectorPayload(dstData, p.Options()...)
 }
 
-func VectorPayload(data []Vector, _ ...Option) Payload {
+func VectorPayload(data []Vector, _ ...option.Option) Payload {
 	length := len(data)
 
 	vecNA := make([]bool, length)
@@ -206,6 +208,6 @@ func VectorPayload(data []Vector, _ ...Option) Payload {
 	}
 }
 
-func VectorVector(data []Vector, options ...Option) Vector {
+func VectorVector(data []Vector, options ...option.Option) Vector {
 	return New(VectorPayload(data, options...), options...)
 }

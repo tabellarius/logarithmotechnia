@@ -2,6 +2,7 @@ package vector
 
 import (
 	"logarithmotechnia/embed"
+	"logarithmotechnia/option"
 	"math"
 	"math/cmplx"
 	"time"
@@ -53,18 +54,18 @@ func (p *anyPayload) Len() int {
 
 // Pick returns the value at the given index.
 func (p *anyPayload) Pick(idx int) any {
-	return pickValueWithNA(idx, p.data, p.NA, p.length)
+	return PickValueWithNA(idx, p.data, p.NA, p.length)
 }
 
 // Data returns the data as a slice of interface{}. If the payload contains NA-values, they will be represented
 // as nil.
 func (p *anyPayload) Data() []any {
-	return dataWithNAToInterfaceArray(p.data, p.NA)
+	return DataWithNAToInterfaceArray(p.data, p.NA)
 }
 
 // ByIndices returns a new payload with the values at the given indices.
 func (p *anyPayload) ByIndices(indices []int) Payload {
-	data, na := byIndicesWithNA(indices, p.data, p.NA, nil)
+	data, na := ByIndicesWithNA(indices, p.data, p.NA, nil)
 
 	return AnyPayload(data, na, p.Options()...)
 }
@@ -75,7 +76,7 @@ func (p *anyPayload) Find(needle any) int {
 		return 0
 	}
 
-	return findFn(needle, p.data, p.NA, p.convertComparator, p.fn.Eq)
+	return FindFn(needle, p.data, p.NA, p.convertComparator, p.fn.Eq)
 }
 
 // FindAll returns the indices of all occurrences of the given value. If the value is not found, an empty slice is
@@ -85,7 +86,7 @@ func (p *anyPayload) FindAll(needle any) []int {
 		return []int{}
 	}
 
-	return findAllFn(needle, p.data, p.NA, p.convertComparator, p.fn.Eq)
+	return FindAllFn(needle, p.data, p.NA, p.convertComparator, p.fn.Eq)
 }
 
 // StrForElem returns the string representation of the value at the given index. If the payload contains NA-values,
@@ -104,24 +105,24 @@ func (p *anyPayload) StrForElem(idx int) string {
 
 // SupportsWhicher returns true if the payload supports the given whicher.
 func (p *anyPayload) SupportsWhicher(whicher any) bool {
-	return supportsWhicherWithNA[any](whicher)
+	return SupportsWhicherWithNA[any](whicher)
 }
 
 // Which returns a boolean slice with the same length as the payload. The value at each index is true if the
 // whicher returns true for the value at the same index.
 func (p *anyPayload) Which(whicher any) []bool {
-	return whichWithNA(p.data, p.NA, whicher)
+	return WhichWithNA(p.data, p.NA, whicher)
 }
 
 // Apply applies the given applier to each value in the payload. The applier can return a new value and a boolean
 // indicating if the value is NA. As a result, a new payload is returned.
 func (p *anyPayload) Apply(applier any) Payload {
-	return applyWithNA(p.data, p.NA, applier, p.Options())
+	return ApplyWithNA(p.data, p.NA, applier, p.Options())
 }
 
 // ApplyTo applies the given applier to the values at the given indices.
 func (p *anyPayload) ApplyTo(indices []int, applier any) Payload {
-	data, na := applyToWithNA(indices, p.data, p.NA, applier, nil)
+	data, na := ApplyToWithNA(indices, p.data, p.NA, applier, nil)
 
 	if data == nil {
 		return NAPayload(p.length)
@@ -132,18 +133,18 @@ func (p *anyPayload) ApplyTo(indices []int, applier any) Payload {
 
 // Traverse traverses the payload with the given traverser.
 func (p *anyPayload) Traverse(traverser any) {
-	traverseWithNA(p.data, p.NA, traverser)
+	TraverseWithNA(p.data, p.NA, traverser)
 }
 
 // SupportsSummarizer returns true if the payload supports the given summarizer.
 func (p *anyPayload) SupportsSummarizer(summarizer any) bool {
-	return supportsSummarizer[any](summarizer)
+	return SupportsSummarizer[any](summarizer)
 }
 
 // Summarize returns a new payload with the result of the summarizer applied to the payload. The new payload will
 // contain only one value.
 func (p *anyPayload) Summarize(summarizer any) Payload {
-	val, na := summarize(p.data, p.NA, summarizer, nil, nil)
+	val, na := Summarize(p.data, p.NA, summarizer, nil, nil)
 
 	return AnyPayload([]any{val}, []bool{na}, p.Options()...)
 }
@@ -159,7 +160,7 @@ func (p *anyPayload) Eq(val any) []bool {
 		return make([]bool, p.length)
 	}
 
-	return eqFn(val, p.data, p.NA, p.convertComparator, p.fn.Eq)
+	return EqFn(val, p.data, p.NA, p.convertComparator, p.fn.Eq)
 }
 
 // Neq returns a boolean slice with the same length as the payload. The value at each index is true if the value at
@@ -169,7 +170,7 @@ func (p *anyPayload) Neq(val any) []bool {
 		return trueBooleanArr(p.length)
 	}
 
-	return neqFn(val, p.data, p.NA, p.convertComparator, p.fn.Eq)
+	return NeqFn(val, p.data, p.NA, p.convertComparator, p.fn.Eq)
 }
 
 // Gt returns a boolean slice with the same length as the payload. The value at each index is true if the value at
@@ -179,7 +180,7 @@ func (p *anyPayload) Gt(val any) []bool {
 		return make([]bool, p.length)
 	}
 
-	return gtFn(val, p.data, p.NA, p.convertComparator, p.fn.Lt)
+	return GtFn(val, p.data, p.NA, p.convertComparator, p.fn.Lt)
 }
 
 // Lt returns a boolean slice with the same length as the payload. The value at each index is true if the value at
@@ -189,7 +190,7 @@ func (p *anyPayload) Lt(val any) []bool {
 		return make([]bool, p.length)
 	}
 
-	return ltFn(val, p.data, p.NA, p.convertComparator, p.fn.Lt)
+	return LtFn(val, p.data, p.NA, p.convertComparator, p.fn.Lt)
 }
 
 // Gte returns a boolean slice with the same length as the payload. The value at each index is true if the value at
@@ -199,7 +200,7 @@ func (p *anyPayload) Gte(val any) []bool {
 		return make([]bool, p.length)
 	}
 
-	return gteFn(val, p.data, p.NA, p.convertComparator, p.fn.Eq, p.fn.Lt)
+	return GteFn(val, p.data, p.NA, p.convertComparator, p.fn.Eq, p.fn.Lt)
 }
 
 // Lte returns a boolean slice with the same length as the payload. The value at each index is true if the value at
@@ -209,7 +210,7 @@ func (p *anyPayload) Lte(val any) []bool {
 		return make([]bool, p.length)
 	}
 
-	return lteFn(val, p.data, p.NA, p.convertComparator, p.fn.Eq, p.fn.Lt)
+	return LteFn(val, p.data, p.NA, p.convertComparator, p.fn.Eq, p.fn.Lt)
 }
 
 // IsUnique returns a boolean slice with the same length as the payload. The value at each index is true if the
@@ -255,11 +256,11 @@ func (p *anyPayload) IsUnique() []bool {
 // HashInt or HashStr callback set.
 func (p *anyPayload) Groups() ([][]int, []any) {
 	if p.fn.HashInt != nil {
-		return groupsForDataWithHash(p.data, p.NA, p.fn.HashInt)
+		return GroupsForDataWithHash(p.data, p.NA, p.fn.HashInt)
 	}
 
 	if p.fn.HashStr != nil {
-		return groupsForDataWithHash(p.data, p.NA, p.fn.HashStr)
+		return GroupsForDataWithHash(p.data, p.NA, p.fn.HashStr)
 	}
 
 	data := make([]int, p.length)
@@ -267,7 +268,7 @@ func (p *anyPayload) Groups() ([][]int, []any) {
 		data[i] = i
 	}
 
-	groups, _ := groupsForData(data, p.NA)
+	groups, _ := GroupsForData(data, p.NA)
 	values := make([]any, p.length)
 	for i := 0; i < p.length; i++ {
 		values[i] = p.data[i]
@@ -496,20 +497,20 @@ func (p *anyPayload) Adjust(size int) Payload {
 }
 
 func (p *anyPayload) adjustToLesserSize(size int) Payload {
-	data, na := adjustToLesserSizeWithNA(p.data, p.NA, size)
+	data, na := AdjustToLesserSizeWithNA(p.data, p.NA, size)
 
 	return AnyPayload(data, na, p.Options()...)
 }
 
 func (p *anyPayload) adjustToBiggerSize(size int) Payload {
-	data, na := adjustToBiggerSizeWithNA(p.data, p.NA, p.length, size)
+	data, na := AdjustToBiggerSizeWithNA(p.data, p.NA, p.length, size)
 
 	return AnyPayload(data, na, p.Options()...)
 }
 
 // Options returns the payload's options.
-func (p *anyPayload) Options() []Option {
-	return []Option{
+func (p *anyPayload) Options() []option.Option {
+	return []option.Option{
 		ConfOption{keyOptionAnyPrinterFunc, p.printer},
 		ConfOption{keyOptionAnyConvertors, p.convertors},
 		ConfOption{keyOptionAnyCallbacks, p.fn},
@@ -538,7 +539,7 @@ func (p *anyPayload) SetOption(name string, val any) bool {
 //   - OptionAnyPrinterFunc(fn AnyPrinterFunc) - sets a function used for printing an element value.
 //   - OptionAnyConvertors(convertors AnyConvertors) - sets convertors to integers, floats, strings etc.
 //   - OptionAnyCallbacks(callbacks AnyCallbacks) - sets callbacks to enable full vector functionality.
-func AnyPayload(data []any, na []bool, options ...Option) Payload {
+func AnyPayload(data []any, na []bool, options ...option.Option) Payload {
 	length := len(data)
 	conf := MergeOptions(options)
 
@@ -599,11 +600,11 @@ func AnyPayload(data []any, na []bool, options ...Option) Payload {
 }
 
 // AnyWithNA creates a vector with AnyPayload and allows to set NA-values.
-func AnyWithNA(data []any, na []bool, options ...Option) Vector {
+func AnyWithNA(data []any, na []bool, options ...option.Option) Vector {
 	return New(AnyPayload(data, na, options...), options...)
 }
 
 // Any creates a vector with AnyPayload.
-func Any(data []any, options ...Option) Vector {
+func Any(data []any, options ...option.Option) Vector {
 	return AnyWithNA(data, nil, options...)
 }

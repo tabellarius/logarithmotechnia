@@ -2,6 +2,7 @@ package vector
 
 import (
 	"logarithmotechnia/internal/util"
+	"logarithmotechnia/option"
 	"reflect"
 	"testing"
 )
@@ -266,7 +267,7 @@ func TestVectorPayload_Options(t *testing.T) {
 	testData := []struct {
 		name string
 		in   Payload
-		out  []Option
+		out  []option.Option
 	}{
 		{
 			name: "no options",
@@ -275,7 +276,7 @@ func TestVectorPayload_Options(t *testing.T) {
 				String([]string{"a", "b", "c"}),
 				Float([]float64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}),
 			}),
-			out: []Option{},
+			out: []option.Option{},
 		},
 	}
 

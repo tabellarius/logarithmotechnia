@@ -2,6 +2,7 @@ package vector
 
 import (
 	"logarithmotechnia/embed"
+	"logarithmotechnia/option"
 	"math"
 	"math/cmplx"
 	"strconv"
@@ -24,37 +25,37 @@ func (p *integerPayload) Len() int {
 }
 
 func (p *integerPayload) Pick(idx int) any {
-	return pickValueWithNA(idx, p.data, p.NA, p.length)
+	return PickValueWithNA(idx, p.data, p.NA, p.length)
 }
 
 func (p *integerPayload) Data() []any {
-	return dataWithNAToInterfaceArray(p.data, p.NA)
+	return DataWithNAToInterfaceArray(p.data, p.NA)
 }
 
 func (p *integerPayload) ByIndices(indices []int) Payload {
-	data, na := byIndicesWithNA(indices, p.data, p.NA, 0)
+	data, na := ByIndicesWithNA(indices, p.data, p.NA, 0)
 
 	return IntegerPayload(data, na, p.Options()...)
 }
 
 func (p *integerPayload) SupportsWhicher(whicher any) bool {
-	return supportsWhicherWithNA[int](whicher)
+	return SupportsWhicherWithNA[int](whicher)
 }
 
 func (p *integerPayload) Which(whicher any) []bool {
-	return whichWithNA(p.data, p.NA, whicher)
+	return WhichWithNA(p.data, p.NA, whicher)
 }
 
 func (p *integerPayload) Apply(applier any) Payload {
-	return applyWithNA(p.data, p.NA, applier, p.Options())
+	return ApplyWithNA(p.data, p.NA, applier, p.Options())
 }
 
 func (p *integerPayload) Traverse(traverser any) {
-	traverseWithNA(p.data, p.NA, traverser)
+	TraverseWithNA(p.data, p.NA, traverser)
 }
 
 func (p *integerPayload) ApplyTo(indices []int, applier any) Payload {
-	data, na := applyToWithNA(indices, p.data, p.NA, applier, 0)
+	data, na := ApplyToWithNA(indices, p.data, p.NA, applier, 0)
 
 	if data == nil {
 		return NAPayload(p.length)
@@ -64,11 +65,11 @@ func (p *integerPayload) ApplyTo(indices []int, applier any) Payload {
 }
 
 func (p *integerPayload) SupportsSummarizer(summarizer any) bool {
-	return supportsSummarizer[int](summarizer)
+	return SupportsSummarizer[int](summarizer)
 }
 
 func (p *integerPayload) Summarize(summarizer any) Payload {
-	val, na := summarize(p.data, p.NA, summarizer, 0, 0)
+	val, na := Summarize(p.data, p.NA, summarizer, 0, 0)
 
 	return IntegerPayload([]int{val}, []bool{na}, p.Options()...)
 }
@@ -226,19 +227,19 @@ func (p *integerPayload) Adjust(size int) Payload {
 }
 
 func (p *integerPayload) adjustToLesserSize(size int) Payload {
-	data, na := adjustToLesserSizeWithNA(p.data, p.NA, size)
+	data, na := AdjustToLesserSizeWithNA(p.data, p.NA, size)
 
 	return IntegerPayload(data, na, p.Options()...)
 }
 
 func (p *integerPayload) adjustToBiggerSize(size int) Payload {
-	data, na := adjustToBiggerSizeWithNA(p.data, p.NA, p.length, size)
+	data, na := AdjustToBiggerSizeWithNA(p.data, p.NA, p.length, size)
 
 	return IntegerPayload(data, na, p.Options()...)
 }
 
 func (p *integerPayload) Groups() ([][]int, []any) {
-	groups, values := groupsForData(p.data, p.NA)
+	groups, values := GroupsForData(p.data, p.NA)
 
 	return groups, values
 }
@@ -252,37 +253,37 @@ func (p *integerPayload) StrForElem(idx int) string {
 }
 
 func (p *integerPayload) Find(needle any) int {
-	return find(needle, p.data, p.NA, p.convertComparator)
+	return Find(needle, p.data, p.NA, p.convertComparator)
 }
 
 /* Finder interface */
 
 func (p *integerPayload) FindAll(needle any) []int {
-	return findAll(needle, p.data, p.NA, p.convertComparator)
+	return FindAll(needle, p.data, p.NA, p.convertComparator)
 }
 
 func (p *integerPayload) Eq(val any) []bool {
-	return eq(val, p.data, p.NA, p.convertComparator)
+	return Eq(val, p.data, p.NA, p.convertComparator)
 }
 
 func (p *integerPayload) Neq(val any) []bool {
-	return neq(val, p.data, p.NA, p.convertComparator)
+	return Neq(val, p.data, p.NA, p.convertComparator)
 }
 
 func (p *integerPayload) Gt(val any) []bool {
-	return gt(val, p.data, p.NA, p.convertComparator)
+	return Gt(val, p.data, p.NA, p.convertComparator)
 }
 
 func (p *integerPayload) Lt(val any) []bool {
-	return lt(val, p.data, p.NA, p.convertComparator)
+	return Lt(val, p.data, p.NA, p.convertComparator)
 }
 
 func (p *integerPayload) Gte(val any) []bool {
-	return gte(val, p.data, p.NA, p.convertComparator)
+	return Gte(val, p.data, p.NA, p.convertComparator)
 }
 
 func (p *integerPayload) Lte(val any) []bool {
-	return lte(val, p.data, p.NA, p.convertComparator)
+	return Lte(val, p.data, p.NA, p.convertComparator)
 }
 
 func (p *integerPayload) convertComparator(val any) (int, bool) {
@@ -395,8 +396,8 @@ func (p *integerPayload) Coalesce(payload Payload) Payload {
 	return IntegerPayload(dstData, dstNA, p.Options()...)
 }
 
-func (p *integerPayload) Options() []Option {
-	return []Option{}
+func (p *integerPayload) Options() []option.Option {
+	return []option.Option{}
 }
 
 func (p *integerPayload) SetOption(string, any) bool {
@@ -404,7 +405,7 @@ func (p *integerPayload) SetOption(string, any) bool {
 }
 
 // IntegerPayload creates a payload with integer data.
-func IntegerPayload(data []int, na []bool, _ ...Option) Payload {
+func IntegerPayload(data []int, na []bool, _ ...option.Option) Payload {
 	length := len(data)
 
 	vecNA := make([]bool, length)
@@ -449,11 +450,11 @@ func IntegerPayload(data []int, na []bool, _ ...Option) Payload {
 }
 
 // IntegerWithNA creates a vector with IntegerPayload and allows to set NA-values.
-func IntegerWithNA(data []int, na []bool, options ...Option) Vector {
+func IntegerWithNA(data []int, na []bool, options ...option.Option) Vector {
 	return New(IntegerPayload(data, na, options...), options...)
 }
 
 // Integer creates a vector with IntegerPayload.
-func Integer(data []int, options ...Option) Vector {
+func Integer(data []int, options ...option.Option) Vector {
 	return IntegerWithNA(data, nil, options...)
 }

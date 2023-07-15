@@ -3,6 +3,7 @@ package vector
 import (
 	"golang.org/x/exp/slices"
 	"logarithmotechnia/embed"
+	"logarithmotechnia/option"
 	"math"
 	"math/cmplx"
 	"strconv"
@@ -32,37 +33,37 @@ func (p *stringPayload) Len() int {
 }
 
 func (p *stringPayload) Pick(idx int) any {
-	return pickValueWithNA(idx, p.data, p.NA, p.length)
+	return PickValueWithNA(idx, p.data, p.NA, p.length)
 }
 
 func (p *stringPayload) Data() []any {
-	return dataWithNAToInterfaceArray(p.data, p.NA)
+	return DataWithNAToInterfaceArray(p.data, p.NA)
 }
 
 func (p *stringPayload) ByIndices(indices []int) Payload {
-	data, na := byIndicesWithNA(indices, p.data, p.NA, "")
+	data, na := ByIndicesWithNA(indices, p.data, p.NA, "")
 
 	return StringPayload(data, na, p.Options()...)
 }
 
 func (p *stringPayload) SupportsWhicher(whicher any) bool {
-	return supportsWhicherWithNA[string](whicher)
+	return SupportsWhicherWithNA[string](whicher)
 }
 
 func (p *stringPayload) Which(whicher any) []bool {
-	return whichWithNA(p.data, p.NA, whicher)
+	return WhichWithNA(p.data, p.NA, whicher)
 }
 
 func (p *stringPayload) Apply(applier any) Payload {
-	return applyWithNA(p.data, p.NA, applier, p.Options())
+	return ApplyWithNA(p.data, p.NA, applier, p.Options())
 }
 
 func (p *stringPayload) Traverse(traverser any) {
-	traverseWithNA(p.data, p.NA, traverser)
+	TraverseWithNA(p.data, p.NA, traverser)
 }
 
 func (p *stringPayload) ApplyTo(indices []int, applier any) Payload {
-	data, na := applyToWithNA(indices, p.data, p.NA, applier, "")
+	data, na := ApplyToWithNA(indices, p.data, p.NA, applier, "")
 
 	if data == nil {
 		return NAPayload(p.length)
@@ -72,11 +73,11 @@ func (p *stringPayload) ApplyTo(indices []int, applier any) Payload {
 }
 
 func (p *stringPayload) SupportsSummarizer(summarizer any) bool {
-	return supportsSummarizer[string](summarizer)
+	return SupportsSummarizer[string](summarizer)
 }
 
 func (p *stringPayload) Summarize(summarizer any) Payload {
-	val, na := summarize(p.data, p.NA, summarizer, "", "")
+	val, na := Summarize(p.data, p.NA, summarizer, "", "")
 
 	return StringPayload([]string{val}, []bool{na}, p.Options()...)
 }
@@ -364,35 +365,35 @@ func (p *stringPayload) adjustToBiggerSize(size int) Payload {
 /* Finder interface */
 
 func (p *stringPayload) Find(needle any) int {
-	return find(needle, p.data, p.NA, p.convertComparator)
+	return Find(needle, p.data, p.NA, p.convertComparator)
 }
 
 func (p *stringPayload) FindAll(needle any) []int {
-	return findAll(needle, p.data, p.NA, p.convertComparator)
+	return FindAll(needle, p.data, p.NA, p.convertComparator)
 }
 
 func (p *stringPayload) Eq(val any) []bool {
-	return eq(val, p.data, p.NA, p.convertComparator)
+	return Eq(val, p.data, p.NA, p.convertComparator)
 }
 
 func (p *stringPayload) Neq(val any) []bool {
-	return neq(val, p.data, p.NA, p.convertComparator)
+	return Neq(val, p.data, p.NA, p.convertComparator)
 }
 
 func (p *stringPayload) Gt(val any) []bool {
-	return gt(val, p.data, p.NA, p.convertComparator)
+	return Gt(val, p.data, p.NA, p.convertComparator)
 }
 
 func (p *stringPayload) Lt(val any) []bool {
-	return lt(val, p.data, p.NA, p.convertComparator)
+	return Lt(val, p.data, p.NA, p.convertComparator)
 }
 
 func (p *stringPayload) Gte(val any) []bool {
-	return gte(val, p.data, p.NA, p.convertComparator)
+	return Gte(val, p.data, p.NA, p.convertComparator)
 }
 
 func (p *stringPayload) Lte(val any) []bool {
-	return lte(val, p.data, p.NA, p.convertComparator)
+	return Lte(val, p.data, p.NA, p.convertComparator)
 }
 
 func (p *stringPayload) convertComparator(val any) (string, bool) {
@@ -467,8 +468,8 @@ func (p *stringPayload) Coalesce(payload Payload) Payload {
 	return StringPayload(dstData, dstNA, p.Options()...)
 }
 
-func (p *stringPayload) Options() []Option {
-	return []Option{
+func (p *stringPayload) Options() []option.Option {
+	return []option.Option{
 		ConfOption{keyOptionStringToBooleanConverter, p.StringToBooleanConverter},
 		ConfOption{keyOptionTimeFormat, p.timeFormat},
 	}
@@ -493,7 +494,7 @@ func (p *stringPayload) SetOption(name string, val any) bool {
 //   - OptionStringToBooleanConverter(converter StringToBooleanConverter) - sets a converter
 //     from string to boolean values.
 //   - OptionTimeFormat(format string) - sets a time format for conversion to time.
-func StringPayload(data []string, na []bool, options ...Option) Payload {
+func StringPayload(data []string, na []bool, options ...option.Option) Payload {
 	length := len(data)
 	conf := MergeOptions(options)
 
@@ -545,12 +546,12 @@ func StringPayload(data []string, na []bool, options ...Option) Payload {
 }
 
 // StringWithNA creates a vector with StringPayload and allows to set NA-values.
-func StringWithNA(data []string, na []bool, options ...Option) Vector {
+func StringWithNA(data []string, na []bool, options ...option.Option) Vector {
 	return New(StringPayload(data, na, options...), options...)
 }
 
 // String creates a vector with StringPayload.
-func String(data []string, options ...Option) Vector {
+func String(data []string, options ...option.Option) Vector {
 	return StringWithNA(data, nil, options...)
 }
 

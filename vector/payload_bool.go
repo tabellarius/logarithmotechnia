@@ -2,6 +2,7 @@ package vector
 
 import (
 	"logarithmotechnia/embed"
+	"logarithmotechnia/option"
 	"math"
 	"math/cmplx"
 )
@@ -22,33 +23,33 @@ func (p *booleanPayload) Len() int {
 }
 
 func (p *booleanPayload) Pick(idx int) any {
-	return pickValueWithNA(idx, p.data, p.NA, p.length)
+	return PickValueWithNA(idx, p.data, p.NA, p.length)
 }
 
 func (p *booleanPayload) Data() []any {
-	return dataWithNAToInterfaceArray(p.data, p.NA)
+	return DataWithNAToInterfaceArray(p.data, p.NA)
 }
 
 func (p *booleanPayload) ByIndices(indices []int) Payload {
-	data, na := byIndicesWithNA(indices, p.data, p.NA, false)
+	data, na := ByIndicesWithNA(indices, p.data, p.NA, false)
 
 	return BooleanPayload(data, na, p.Options()...)
 }
 
 func (p *booleanPayload) SupportsWhicher(whicher any) bool {
-	return supportsWhicherWithNA[bool](whicher)
+	return SupportsWhicherWithNA[bool](whicher)
 }
 
 func (p *booleanPayload) Which(whicher any) []bool {
-	return whichWithNA(p.data, p.NA, whicher)
+	return WhichWithNA(p.data, p.NA, whicher)
 }
 
 func (p *booleanPayload) Apply(applier any) Payload {
-	return applyWithNA(p.data, p.NA, applier, p.Options())
+	return ApplyWithNA(p.data, p.NA, applier, p.Options())
 }
 
 func (p *booleanPayload) ApplyTo(indices []int, applier any) Payload {
-	data, na := applyToWithNA(indices, p.data, p.NA, applier, false)
+	data, na := ApplyToWithNA(indices, p.data, p.NA, applier, false)
 
 	if data == nil {
 		return NAPayload(p.length)
@@ -58,15 +59,15 @@ func (p *booleanPayload) ApplyTo(indices []int, applier any) Payload {
 }
 
 func (p *booleanPayload) Traverse(traverser any) {
-	traverseWithNA(p.data, p.NA, traverser)
+	TraverseWithNA(p.data, p.NA, traverser)
 }
 
 func (p *booleanPayload) SupportsSummarizer(summarizer any) bool {
-	return supportsSummarizer[bool](summarizer)
+	return SupportsSummarizer[bool](summarizer)
 }
 
 func (p *booleanPayload) Summarize(summarizer any) Payload {
-	val, na := summarize(p.data, p.NA, summarizer, false, false)
+	val, na := Summarize(p.data, p.NA, summarizer, false, false)
 
 	return BooleanPayload([]bool{val}, []bool{na}, p.Options()...)
 }
@@ -231,19 +232,19 @@ func (p *booleanPayload) Adjust(size int) Payload {
 }
 
 func (p *booleanPayload) adjustToLesserSize(size int) Payload {
-	data, na := adjustToLesserSizeWithNA(p.data, p.NA, size)
+	data, na := AdjustToLesserSizeWithNA(p.data, p.NA, size)
 
 	return BooleanPayload(data, na)
 }
 
 func (p *booleanPayload) adjustToBiggerSize(size int) Payload {
-	data, na := adjustToBiggerSizeWithNA(p.data, p.NA, p.length, size)
+	data, na := AdjustToBiggerSizeWithNA(p.data, p.NA, p.length, size)
 
 	return BooleanPayload(data, na)
 }
 
 func (p *booleanPayload) Groups() ([][]int, []any) {
-	groups, values := groupsForData(p.data, p.NA)
+	groups, values := GroupsForData(p.data, p.NA)
 
 	return groups, values
 }
@@ -261,19 +262,19 @@ func (p *booleanPayload) StrForElem(idx int) string {
 }
 
 func (p *booleanPayload) Find(needle any) int {
-	return find(needle, p.data, p.NA, p.convertComparator)
+	return Find(needle, p.data, p.NA, p.convertComparator)
 }
 
 func (p *booleanPayload) FindAll(needle any) []int {
-	return findAll(needle, p.data, p.NA, p.convertComparator)
+	return FindAll(needle, p.data, p.NA, p.convertComparator)
 }
 
 func (p *booleanPayload) Eq(val any) []bool {
-	return eq(val, p.data, p.NA, p.convertComparator)
+	return Eq(val, p.data, p.NA, p.convertComparator)
 }
 
 func (p *booleanPayload) Neq(val any) []bool {
-	return neq(val, p.data, p.NA, p.convertComparator)
+	return Neq(val, p.data, p.NA, p.convertComparator)
 }
 
 func (p *booleanPayload) convertComparator(val any) (bool, bool) {
@@ -308,8 +309,8 @@ func (p *booleanPayload) IsUnique() []bool {
 	return booleans
 }
 
-func (p *booleanPayload) Options() []Option {
-	return []Option{}
+func (p *booleanPayload) Options() []option.Option {
+	return []option.Option{}
 }
 
 func (p *booleanPayload) SetOption(string, any) bool {
@@ -350,7 +351,7 @@ func (p *booleanPayload) Coalesce(payload Payload) Payload {
 }
 
 // BooleanPayload creates a payload with boolean data.
-func BooleanPayload(data []bool, na []bool, _ ...Option) Payload {
+func BooleanPayload(data []bool, na []bool, _ ...option.Option) Payload {
 	length := len(data)
 
 	vecNA := make([]bool, length)
@@ -395,11 +396,11 @@ func BooleanPayload(data []bool, na []bool, _ ...Option) Payload {
 }
 
 // BooleanWithNA creates a vector with BooleanPayload and allows to set NA-values.
-func BooleanWithNA(data []bool, na []bool, options ...Option) Vector {
+func BooleanWithNA(data []bool, na []bool, options ...option.Option) Vector {
 	return New(BooleanPayload(data, na, options...), options...)
 }
 
 // Boolean creates a vector with BooleanPayload.
-func Boolean(data []bool, options ...Option) Vector {
+func Boolean(data []bool, options ...option.Option) Vector {
 	return BooleanWithNA(data, nil, options...)
 }

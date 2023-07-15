@@ -2,6 +2,7 @@ package vector
 
 import (
 	util2 "logarithmotechnia/internal/util"
+	"logarithmotechnia/option"
 	"time"
 )
 
@@ -9,7 +10,7 @@ const maxPrintElements = 15
 
 // Vector is an interface for a different vector types. This structure is similar to R-vectors: it starts from 1,
 // allows for an extensive indexing and supports IsNA-values. It is not supposed to be implemented by third-parties.
-// Instead the Payload interface should be implemented.
+// Instead, the Payload interface should be implemented.
 type Vector interface {
 	Name() string
 	SetName(name string) Vector
@@ -50,13 +51,13 @@ type Vector interface {
 	Complexable
 	Timeable
 	Anyable
-	AsInteger(options ...Option) Vector
-	AsFloat(options ...Option) Vector
-	AsComplex(options ...Option) Vector
-	AsBoolean(options ...Option) Vector
-	AsString(options ...Option) Vector
-	AsTime(options ...Option) Vector
-	AsAny(options ...Option) Vector
+	AsInteger(options ...option.Option) Vector
+	AsFloat(options ...option.Option) Vector
+	AsComplex(options ...option.Option) Vector
+	AsBoolean(options ...option.Option) Vector
+	AsString(options ...option.Option) Vector
+	AsTime(options ...option.Option) Vector
+	AsAny(options ...option.Option) Vector
 
 	Finder
 	Has(any) bool
@@ -68,8 +69,8 @@ type Vector interface {
 
 	Coalesce(...Vector) Vector
 
-	Options() []Option
-	SetOption(Option) bool
+	Options() []option.Option
+	SetOption(option.Option) bool
 
 	StrForElem(int) string
 	String() string
@@ -95,7 +96,7 @@ type Payload interface {
 	// the payload with recycling.
 	Adjust(size int) Payload
 	// Options returns options of the payload.
-	Options() []Option
+	Options() []option.Option
 	// SetOption sets a payload's option.
 	SetOption(string, any) bool
 	// Pick returns a value of a payload element (using interface{} type).
@@ -152,37 +153,37 @@ type Summarizable interface {
 
 // Intable interface has to be implemented to enable conversion of payload values to integers.
 type Intable interface {
-	// Integers returns an array of integers and a correspondng array of boolean values where true indicates NA-value.
+	// Integers returns an array of integers and a corresponding array of boolean values where true indicates NA-value.
 	Integers() ([]int, []bool)
 }
 
 // Floatable interface has to be implemented to enable conversion of payload values to floats.
 type Floatable interface {
-	// Floats returns an array of floats and a correspondng array of boolean values where true indicates NA-value.
+	// Floats returns an array of floats and a corresponding array of boolean values where true indicates NA-value.
 	Floats() ([]float64, []bool)
 }
 
 // Boolable interface has to be implemented to enable conversion of payload values to booleans.
 type Boolable interface {
-	// Booleans returns an array of booleans and a correspondng array of boolean values where true indicates NA-value.
+	// Booleans returns an array of booleans and a corresponding array of boolean values where true indicates NA-value.
 	Booleans() ([]bool, []bool)
 }
 
 // Stringable interface has to be implemented to enable conversion of payload values to strings.
 type Stringable interface {
-	// Strings returns an array of strings and a correspondng array of boolean values where true indicates NA-value.
+	// Strings returns an array of strings and a corresponding array of boolean values where true indicates NA-value.
 	Strings() ([]string, []bool)
 }
 
 // Complexable interface has to be implemented to enable conversion of payload values to complexes.
 type Complexable interface {
-	// Complexes returns an array of complexes and a correspondng array of boolean values where true indicates NA-value.
+	// Complexes returns an array of complexes and a corresponding array of boolean values where true indicates NA-value.
 	Complexes() ([]complex128, []bool)
 }
 
 // Timeable interface has to be implemented to enable conversion of payload values to times.
 type Timeable interface {
-	// Times returns an array of times and a correspondng array of boolean values where true indicates NA-value.
+	// Times returns an array of times and a corresponding array of boolean values where true indicates NA-value.
 	Times() ([]time.Time, []bool)
 }
 
@@ -216,7 +217,7 @@ type Equalable interface {
 	Neq(any) []bool
 }
 
-// Ordered interface has to be implemented to enable a payload to check elements for being greated or lesser than a
+// Ordered interface has to be implemented to enable a payload to check elements for being greater or lesser than a
 // certain value.
 type Ordered interface {
 	// Gt a boolean slice where true means a corresponding element is greater than the passed value.
@@ -375,7 +376,7 @@ func (v *vector) ApplyTo(whicher any, applier any) Vector {
 		return NA(v.length)
 	}
 
-	indices := []int{}
+	var indices []int
 
 	whBool, ok := whicher.([]bool)
 	processed := false
@@ -485,7 +486,7 @@ func (v *vector) GroupVectors() []Vector {
 }
 
 func (v *vector) GroupFirstElements() []int {
-	indices := []int{}
+	var indices []int
 
 	if v.IsGrouped() {
 		if v.Len() > 0 {
@@ -643,7 +644,7 @@ func (v *vector) Anies() ([]any, []bool) {
 	return NA(v.length).Anies()
 }
 
-func (v *vector) AsInteger(options ...Option) Vector {
+func (v *vector) AsInteger(options ...option.Option) Vector {
 	if payload, ok := v.payload.(Intable); ok {
 		values, na := payload.Integers()
 
@@ -653,7 +654,7 @@ func (v *vector) AsInteger(options ...Option) Vector {
 	return NA(v.length)
 }
 
-func (v *vector) AsFloat(options ...Option) Vector {
+func (v *vector) AsFloat(options ...option.Option) Vector {
 	if payload, ok := v.payload.(Floatable); ok {
 		values, na := payload.Floats()
 
@@ -663,7 +664,7 @@ func (v *vector) AsFloat(options ...Option) Vector {
 	return NA(v.length)
 }
 
-func (v *vector) AsComplex(options ...Option) Vector {
+func (v *vector) AsComplex(options ...option.Option) Vector {
 	if payload, ok := v.payload.(Complexable); ok {
 		values, na := payload.Complexes()
 
@@ -673,7 +674,7 @@ func (v *vector) AsComplex(options ...Option) Vector {
 	return NA(v.length)
 }
 
-func (v *vector) AsBoolean(options ...Option) Vector {
+func (v *vector) AsBoolean(options ...option.Option) Vector {
 	if payload, ok := v.payload.(Boolable); ok {
 		values, na := payload.Booleans()
 
@@ -683,7 +684,7 @@ func (v *vector) AsBoolean(options ...Option) Vector {
 	return NA(v.length)
 }
 
-func (v *vector) AsString(options ...Option) Vector {
+func (v *vector) AsString(options ...option.Option) Vector {
 	if payload, ok := v.payload.(Stringable); ok {
 		values, na := payload.Strings()
 
@@ -693,7 +694,7 @@ func (v *vector) AsString(options ...Option) Vector {
 	return NA(v.length)
 }
 
-func (v *vector) AsTime(options ...Option) Vector {
+func (v *vector) AsTime(options ...option.Option) Vector {
 	if payload, ok := v.payload.(Timeable); ok {
 		values, na := payload.Times()
 
@@ -703,7 +704,7 @@ func (v *vector) AsTime(options ...Option) Vector {
 	return NA(v.length)
 }
 
-func (v *vector) AsAny(options ...Option) Vector {
+func (v *vector) AsAny(options ...option.Option) Vector {
 	if payload, ok := v.payload.(Anyable); ok {
 		values, na := payload.Anies()
 
@@ -846,13 +847,13 @@ func (v *vector) Coalesce(vectors ...Vector) Vector {
 	return New(payload, v.Options()...)
 }
 
-func (v *vector) Options() []Option {
-	return []Option{
+func (v *vector) Options() []option.Option {
+	return []option.Option{
 		OptionVectorName(v.name),
 	}
 }
 
-func (v *vector) SetOption(option Option) bool {
+func (v *vector) SetOption(option option.Option) bool {
 	if option.Key() == keyOptionVectorName {
 		v.name = option.Value().(string)
 
@@ -870,7 +871,7 @@ func (v *vector) SetOption(option Option) bool {
 
 // New creates a vector part of the future vector. This function is used by public functions which create
 // typed vectors
-func New(payload Payload, options ...Option) Vector {
+func New(payload Payload, options ...option.Option) Vector {
 	vec := vector{
 		length:  payload.Len(),
 		payload: payload,
@@ -879,12 +880,12 @@ func New(payload Payload, options ...Option) Vector {
 		},
 	}
 
-	for _, option := range options {
-		if option == nil {
+	for _, opt := range options {
+		if opt == nil {
 			continue
 		}
 
-		vec.SetOption(option)
+		vec.SetOption(opt)
 	}
 
 	return &vec

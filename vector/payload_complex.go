@@ -2,6 +2,7 @@ package vector
 
 import (
 	"logarithmotechnia/embed"
+	"logarithmotechnia/option"
 	"math"
 	"math/cmplx"
 	"strconv"
@@ -27,33 +28,33 @@ func (p *complexPayload) Len() int {
 }
 
 func (p *complexPayload) Pick(idx int) any {
-	return pickValueWithNA(idx, p.data, p.NA, p.length)
+	return PickValueWithNA(idx, p.data, p.NA, p.length)
 }
 
 func (p *complexPayload) Data() []any {
-	return dataWithNAToInterfaceArray(p.data, p.NA)
+	return DataWithNAToInterfaceArray(p.data, p.NA)
 }
 
 func (p *complexPayload) ByIndices(indices []int) Payload {
-	data, na := byIndicesWithNA(indices, p.data, p.NA, cmplx.NaN())
+	data, na := ByIndicesWithNA(indices, p.data, p.NA, cmplx.NaN())
 
 	return ComplexPayload(data, na, p.Options()...)
 }
 
 func (p *complexPayload) SupportsWhicher(whicher any) bool {
-	return supportsWhicherWithNA[complex128](whicher)
+	return SupportsWhicherWithNA[complex128](whicher)
 }
 
 func (p *complexPayload) Which(whicher any) []bool {
-	return whichWithNA(p.data, p.NA, whicher)
+	return WhichWithNA(p.data, p.NA, whicher)
 }
 
 func (p *complexPayload) Apply(applier any) Payload {
-	return applyWithNA(p.data, p.NA, applier, p.Options())
+	return ApplyWithNA(p.data, p.NA, applier, p.Options())
 }
 
 func (p *complexPayload) ApplyTo(indices []int, applier any) Payload {
-	data, na := applyToWithNA(indices, p.data, p.NA, applier, cmplx.NaN())
+	data, na := ApplyToWithNA(indices, p.data, p.NA, applier, cmplx.NaN())
 
 	if data == nil {
 		return NAPayload(p.length)
@@ -63,15 +64,15 @@ func (p *complexPayload) ApplyTo(indices []int, applier any) Payload {
 }
 
 func (p *complexPayload) Traverse(traverser any) {
-	traverseWithNA(p.data, p.NA, traverser)
+	TraverseWithNA(p.data, p.NA, traverser)
 }
 
 func (p *complexPayload) SupportsSummarizer(summarizer any) bool {
-	return supportsSummarizer[complex128](summarizer)
+	return SupportsSummarizer[complex128](summarizer)
 }
 
 func (p *complexPayload) Summarize(summarizer any) Payload {
-	val, na := summarize(p.data, p.NA, summarizer, 0+0i, cmplx.NaN())
+	val, na := Summarize(p.data, p.NA, summarizer, 0+0i, cmplx.NaN())
 
 	return ComplexPayload([]complex128{val}, []bool{na}, p.Options()...)
 }
@@ -225,19 +226,19 @@ func (p *complexPayload) Adjust(size int) Payload {
 }
 
 func (p *complexPayload) adjustToLesserSize(size int) Payload {
-	data, na := adjustToLesserSizeWithNA(p.data, p.NA, size)
+	data, na := AdjustToLesserSizeWithNA(p.data, p.NA, size)
 
 	return ComplexPayload(data, na, p.Options()...)
 }
 
 func (p *complexPayload) adjustToBiggerSize(size int) Payload {
-	data, na := adjustToBiggerSizeWithNA(p.data, p.NA, p.length, size)
+	data, na := AdjustToBiggerSizeWithNA(p.data, p.NA, p.length, size)
 
 	return ComplexPayload(data, na, p.Options()...)
 }
 
-func (p *complexPayload) Options() []Option {
-	return []Option{
+func (p *complexPayload) Options() []option.Option {
+	return []option.Option{
 		ConfOption{keyOptionPrecision, p.printer.Precision},
 	}
 }
@@ -254,7 +255,7 @@ func (p *complexPayload) SetOption(name string, val any) bool {
 }
 
 func (p *complexPayload) Groups() ([][]int, []any) {
-	groups, values := groupsForData(p.data, p.NA)
+	groups, values := GroupsForData(p.data, p.NA)
 
 	return groups, values
 }
@@ -280,21 +281,21 @@ func (p *complexPayload) StrForElem(idx int) string {
 /* Finder interface */
 
 func (p *complexPayload) Find(needle any) int {
-	return find(needle, p.data, p.NA, p.convertComparator)
+	return Find(needle, p.data, p.NA, p.convertComparator)
 }
 
 func (p *complexPayload) FindAll(needle any) []int {
-	return findAll(needle, p.data, p.NA, p.convertComparator)
+	return FindAll(needle, p.data, p.NA, p.convertComparator)
 }
 
 /* Ordered interface */
 
 func (p *complexPayload) Eq(val any) []bool {
-	return eq(val, p.data, p.NA, p.convertComparator)
+	return Eq(val, p.data, p.NA, p.convertComparator)
 }
 
 func (p *complexPayload) Neq(val any) []bool {
-	return neq(val, p.data, p.NA, p.convertComparator)
+	return Neq(val, p.data, p.NA, p.convertComparator)
 }
 
 func (p *complexPayload) convertComparator(val any) (complex128, bool) {
@@ -401,7 +402,7 @@ func (p *complexPayload) IsUnique() []bool {
 //
 // Available options are:
 //   - OptionPrecision(precision int) - sets precision for printing payload's values.
-func ComplexPayload(data []complex128, na []bool, options ...Option) Payload {
+func ComplexPayload(data []complex128, na []bool, options ...option.Option) Payload {
 	length := len(data)
 	conf := MergeOptions(options)
 
@@ -442,11 +443,11 @@ func ComplexPayload(data []complex128, na []bool, options ...Option) Payload {
 }
 
 // ComplexWithNA creates a vector with ComplexPayload and allows to set NA-values.
-func ComplexWithNA(data []complex128, na []bool, options ...Option) Vector {
+func ComplexWithNA(data []complex128, na []bool, options ...option.Option) Vector {
 	return New(ComplexPayload(data, na, options...), options...)
 }
 
 // Complex creates a vector with ComplexPayload.
-func Complex(data []complex128, options ...Option) Vector {
+func Complex(data []complex128, options ...option.Option) Vector {
 	return ComplexWithNA(data, nil, options...)
 }

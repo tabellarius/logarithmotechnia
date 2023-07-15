@@ -1,6 +1,7 @@
 package vector
 
 import (
+	"logarithmotechnia/option"
 	"math"
 	"math/cmplx"
 	"time"
@@ -204,8 +205,8 @@ func (p *naPayload) Coalesce(payload Payload) Payload {
 	return payload
 }
 
-func (p *naPayload) Options() []Option {
-	return []Option{}
+func (p *naPayload) Options() []option.Option {
+	return []option.Option{}
 }
 
 func (p *naPayload) SetOption(string, any) bool {
@@ -213,7 +214,7 @@ func (p *naPayload) SetOption(string, any) bool {
 }
 
 // NAPayload creates a payload with NA-values.
-func NAPayload(length int, _ ...Option) Payload {
+func NAPayload(length int, _ ...option.Option) Payload {
 	if length < 0 {
 		length = 0
 	}
@@ -226,6 +227,6 @@ func NAPayload(length int, _ ...Option) Payload {
 }
 
 // NA creates a vector with NAPayload.
-func NA(length int, options ...Option) Vector {
+func NA(length int, options ...option.Option) Vector {
 	return New(NAPayload(length, options...), options...)
 }
